@@ -28,6 +28,8 @@ def main():
     ypoints = [x[1] for x in time_to_bw.items()]
     print(max(ypoints))
     plt.plot(xpoints, ypoints)
+    plt.xlabel("Time in ms")
+    plt.ylabel("Bandwidthin Mb/ms")
     plt.savefig("nm_mytest_bw.svg")
     plt.show()
 main()

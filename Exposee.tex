@@ -1,6 +1,7 @@
 \documentclass{article}
 \usepackage{color}
 \usepackage{listings}
+\usepackage{graphicx}
 \lstset{ %
 language=java,                % choose the language of the code
 basicstyle=\footnotesize,       % the size of the fonts that are used for the code
@@ -26,8 +27,8 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 \newpage
 \section{Einführung}
 Performanz spielt eine große Rolle in der Entwicklung von Software und Hardware.
-In meiner Arbeit werde ich mit dem fio Tool arbeiten, um solche Performanzänderungen zu berechnen.
-fio ist ein Programm mit der man die Hardware-Performanz testen kann, z.B die Brandweite beim Schreiben einer Datei, und die Performanz als log Daten ausgeben kann.
+In meiner Arbeit werde ich mit dem fio Tool arbeiten, um solche Performanzänderungen zu berechnen und zu analysieren.
+Fio ist ein Programm mit der man die Hardware-Performanz testen kann, z.B die Brandweite beim Schreiben einer Datei, und die Performanz als log Daten ausgeben kann.
 Mein Programm wird mit diesen Logs arbeiten, um sie besser darzustellen und arbeiten zu können. Ziel meines Tools soll es sein, dass man den stationären Zustand analysiert.
 
 
@@ -41,24 +42,37 @@ Wenn man ein Random Read testen möchte, kann die fio-Datei so aussehen.
     ; fio-rand-read.job for fiotest
 
     [global]
-    name=rand-read
-    rw=randread
-    runtime=2s
-    size=2m
-    write_bw_log=mytest
+    name=rand-read # Name des Jobs
+    rw=randread # Was soll der Job testen, randread = random read
+    runtime=2s # Wie lange soll der Job laufen
+    size=2m # Groesse der Datei, m fuer Megabyte
+    write_bw_log=mytest # Name der Log-Datei
 
 \end{lstlisting}
 In der Konsole gebt man sie als Parameter an, wenn es nur ein schneller Test sein soll. Zusätzlich können die Tests, 
 oder auch Jobs genannt, Logs ausgeben. Mit diesen Logs wird mein Tool arbeiten. Dieser Job oben testet das Random-Read mit einer
-runtime von 2 Sekunden 
+runtime von 2 Sekunden. Nun möchte man wissen wann der stationäre Zustand erreicht wurde, wenn man solche Tests länger durchlaufen lässt.
+Der stationäre Zustand ist der erreichte Zeitpunkt, wenn es keine starken Schwankungen mehr bei der Brandweite im Lesen und Schreiben gibt.
+Das Schreiben und Lesen verhält sich außerdem nicht deterministisch. Das bedeutet, auch wenn man die selbe Datei mit dem Selben Computer lesen/schreiben
+würde, wäre die Brandweitengeschwindigkeit immer im Durchschnitt unterschiedlich.
 
 \section{Konzept}
 Mein Tool soll mit den Logs von fio arbeiten. \newline
-Mit dem Parameter $write\_bw\_logs=dateiname$, kriege ich eine Datei mit jeweils 5 Spalten:
+Mit dem Parameter $write\_bw\_logs=[Dateiname]$, kriege ich eine Datei mit jeweils 5 Spalten:
 \begin{lstlisting}
-    Time,	Bandwidth,	data direction, Blocksize,	Offset?
+    Time,	Bandwidth,	data direction, Blocksize,	Offset
     0, 	    59782, 		0,		        4096,		0
 \end{lstlisting}
+Time für die Zeit in Millisekunden (ms) die verlaufen ist, Bandwidth für die Brandweite in Megabyte/ms
+für das random read, Date direction ob gelesen (= 0) oder geschrieben (= 1) wurde
+und ein Offset. Die Log Daten sind immens Lang und nicht schön lesbar. Deshalb wurde schon ein Tool in Python gebaut 
+was diese log Daten auswertet. Für Veranschaulichung habe die das fio Programm auf meinem Rechner laufen lassen mit dem
+Command die oben erwähnt wurde. Die log Datei wurde ausgewertet und als .svg Datei ausgegeben:
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=120mm]{./Code/nm_mytest_bw.jpg}
+    \caption{Plot tool Ausgabe mit Log Datei  \label{overflow}}
+    \end{figure}
 
 \section{Verwandte Arbeiten}
 \section{Zeitplan}
