@@ -24,8 +24,8 @@ def main(args):
     f.close()
     xpoints = [x for x in time_to_bw.keys()]
     ypoints = [x[1] for x in time_to_bw.items()]
-    for i in range(0, 100):
-        print(f"Time: {xpoints[i]} Bw: {ypoints[i]}")
+    # for i in range(0, 100):
+    #     print(f"Time: {xpoints[i]} Bw: {ypoints[i]}")
     plt.plot(xpoints, ypoints)
     plt.xlabel("Time in ms")
     plt.ylabel("Bandwidth Mb/ms")
