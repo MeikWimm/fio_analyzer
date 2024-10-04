@@ -27,6 +27,8 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 \newpage
 \section{Einführung}
 Performanz spielt eine große Rolle in der Entwicklung von Software und Hardware.
+Die größten Probleme in den Großkonzernen sind Performanzprobleme und nicht die funktionellen Probleme. Service Ausfälle kosten sind höchst kostspielig. 
+Deshalb werden in High Performance Computing viele Tests durchgeführt, um ihre Grenzen zu analysieren [1].
 In meiner Arbeit werde ich mit dem fio Tool arbeiten, um solche Performanzänderungen zu berechnen und zu analysieren.
 Fio ist ein Programm mit der man die Hardware-Performanz testen kann, z.B die Brandweite beim Schreiben einer Datei, und die Performanz als log Daten ausgeben kann.
 Mein Programm wird mit diesen Logs arbeiten, um sie besser darzustellen und arbeiten zu können. Ziel meines Tools soll es sein, dass man den stationären Zustand analysiert.
@@ -54,7 +56,8 @@ oder auch Jobs genannt, Logs ausgeben. Mit diesen Logs wird mein Tool arbeiten. 
 runtime von 2 Sekunden. Nun möchte man wissen wann der stationäre Zustand erreicht wurde, wenn man solche Tests länger durchlaufen lässt.
 Der stationäre Zustand ist der erreichte Zeitpunkt, wenn es keine starken Schwankungen mehr bei der Brandweite im Lesen und Schreiben gibt.
 Das Schreiben und Lesen verhält sich außerdem nicht deterministisch. Das bedeutet, auch wenn man die selbe Datei mit dem Selben Computer lesen/schreiben
-würde, wäre die Brandweitengeschwindigkeit immer im Durchschnitt unterschiedlich.
+würde, wäre die Brandweitengeschwindigkeit immer im Durchschnitt unterschiedlich. Weitere nicht deterministische Zustände könnte sogar CPU Temperatur sein,
+oder CPU Scaling, parallele Prozessierung. 
 
 \section{Konzept}
 Mein Tool soll mit den Logs von fio arbeiten. \newline
@@ -74,8 +77,11 @@ Command die oben erwähnt wurde. Die log Datei wurde ausgewertet und als .svg Da
     \caption{Plot tool Ausgabe mit Log Datei  \label{overflow}}
     \end{figure}
 
-Es wurde nur schnell ein kleines Tool geschrieben. Die eigentliche Arbeit wird es sein, das Tool weiter auszubauen das nicht nur veranschaulicht
+Es wurde ein kleines Tool geschrieben. Die eigentliche Arbeit wird es sein, das Tool weiter auszubauen das nicht nur veranschaulicht
 sondern auch den stationären Zustand berechnet. Das Programm wird in Java geschrieben. Grund dafür ist, da dort die bereits die meiste Erfahrung steckt.
+Eine Möglichkeit, den stationären Zustand zu ermitteln, wäre das man die Standardabweichung verwendet und errechnet, wann die Abweichung klein ist.  
 \section{Verwandte Arbeiten}
 \section{Zeitplan}
+\section{Referenz}
+- An Automated Approach for Recommending When to Stop Performance Tests [1]
 \end{document}
