@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.9.16)  4 OCT 2024 14:46
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.9.16)  7 OCT 2024 17:28
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -123,45 +123,65 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 [1
 
 {c:/texlive/2024/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (6.658pt too wide) in paragraph at lines 29--35
-\OT1/cmr/m/n/10 spielig. De-shalb wer-den in High Per-for-mance Com-put-ing viele Tests durchgef^^?uhrt,
+Overfull \hbox (14.58282pt too wide) in paragraph at lines 38--44
+\OT1/cmr/m/n/10 testen kann, z.B die Brandweite beim Schreiben einer Datei, und diesen Performanz-
  []
 
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 64.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 64.
+
+Underfull \hbox (badness 10000) in paragraph at lines 49--54
+
+ []
+
 
 
 [2{c:/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
-<./Code/nm_mytest_bw.jpg, id=15, 464.07492pt x 348.05618pt>
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 91.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 91.
+LaTeX Font Info:    Trying to load font information for OMS+cmr on input line 93.
+ (c:/texlive/2024/texmf-dist/tex/latex/base/omscmr.fd
+File: omscmr.fd 2023/04/13 v2.5m Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <8> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 93.
+
+
+[3]
+LaTeX Font Info:    Trying to load font information for OML+cmr on input line 109.
+ (c:/texlive/2024/texmf-dist/tex/latex/base/omlcmr.fd
+File: omlcmr.fd 2023/04/13 v2.5m Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OML/cmr/m/n' in size <8> not available
+(Font)              Font shape `OML/cmm/m/it' tried instead on input line 109.
+<./Code/nm_mytest_bw.jpg, id=21, 464.07492pt x 348.05618pt>
 File: ./Code/nm_mytest_bw.jpg Graphic file (type jpg)
 <use ./Code/nm_mytest_bw.jpg>
-Package pdftex.def Info: ./Code/nm_mytest_bw.jpg  used on input line 76.
+Package pdftex.def Info: ./Code/nm_mytest_bw.jpg  used on input line 119.
 (pdftex.def)             Requested size: 341.43306pt x 256.07579pt.
 
 
-[3 <./Code/nm_mytest_bw.jpg>]
+[4 <./Code/nm_mytest_bw.jpg>]
 
-[4] (./Exposee.aux)
+[5] (./Exposee.aux)
  ***********
 LaTeX2e <2024-06-01> patch level 2
 L3 programming layer <2024-08-30>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 3126 strings out of 473578
- 45837 string characters out of 5732242
- 688770 words of memory out of 5000000
- 26038 multiletter control sequences out of 15000+600000
- 559927 words of font info for 42 fonts, out of 8000000 for 9000
+ 3178 strings out of 473578
+ 46664 string characters out of 5732242
+ 710770 words of memory out of 5000000
+ 26080 multiletter control sequences out of 15000+600000
+ 561221 words of font info for 46 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 57i,7n,65p,225b,1169s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sfrm0800.pfb>
-Output written on Exposee.pdf (4 pages, 272099 bytes).
+ 57i,7n,65p,230b,1326s stack positions out of 10000i,1000n,20000p,200000b,200000s
+<c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sfrm0800.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb>
+Output written on Exposee.pdf (5 pages, 320180 bytes).
 PDF statistics:
- 54 PDF objects out of 1000 (max. 8388607)
- 32 compressed objects within 1 object stream
+ 77 PDF objects out of 1000 (max. 8388607)
+ 46 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  6 words of extra memory for PDF output out of 10000 (max. 10000000)
 
