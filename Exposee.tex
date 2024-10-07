@@ -113,7 +113,7 @@ Wenn man die Logdaten anschaut, sieht man, dass die Brandbreitengeschwindigkeit 
 Da man die Daten nicht verwerfen möchte, wurden Wiederholungen linear getrennt. 
 Für Veranschaulichung wurde das fio Tool auf meinem Rechner getestet mit dem
 Command die oben erwähnt wurde. Die logdatei wurde ausgewertet und hier als .svg Datei dargestellt:
-\\
+
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=120mm]{./Code/nm_mytest_bw.jpg}
@@ -123,15 +123,22 @@ Der Computer hat ein 11th Gen Intel(R) Core(TM) i5-11400 @ 2.60GHz und eine ADAT
 Es wurde ein kleines Tool geschrieben. Die eigentliche Arbeit wird es sein, das Tool weiter auszubauen das nicht nur veranschaulicht
 sondern auch den stationären Zustand berechnet. Das Programm wird in Java geschrieben. Grund dafür ist, da dort die bereits die meiste Erfahrung steckt.
 Eine Möglichkeit, den stationären Zustand zu ermitteln, wäre das man die Standardabweichung verwendet und errechnet, wann die Abweichung klein ist.
+\newpage
 \textit{With improvements in storage device technology, the once negligible cost of I/O stack time has become more relevant (Foong et al. 2010; Caulfield et al. 2010). A number
 of studies have provided proof of the I/O software stack being the major performance bottleneck in future storage systems.}
 \section{Verwandte Arbeiten}
+Es wird auch auf nicht Determinismus von Computer, oder auch VMs, eingegangen [5]. Sie versucht man so gering wie möglich zu halten, da sonst beim Auswertung nicht akkurate Werte
+berechnet werden können. Um solche Fehler zu minimieren versucht man erst die VMs erst mal warmzulaufen [1]. Man wird mit Werten rechnen wie F1-Score oder relativen Standardabweichung.
+Das Tool soll noch mehr Funktion besitzen und umfangreicher mit den Logdaten arbeiten. Die Methodiken die genommen werden, stammen aus verschieden Arbeiten. Wann wird ein warmup erfolgt sein [5]
+oder wann der stationären Zustand erreicht wurde [5]. Dabei soll das Tool, was in java gebaut wird, nicht für spezifische Hardware dienen und wird zur Analyse von fio dienen. Dies ist von dem fio [6] Tool abhängig  
 \section{Zeitplan}
 \section{Referenz}
 \begin{itemize}
-    \item An Automated Approach for Recommending When to Stop Performance Tests [1]
+    \item -- An Automated Approach for Recommending When to Stop Performance Tests [1] --
     \item Virtual Machine Performance Analysis and Prediction [2]
     \item A Comparative Study of High-Performance Computing on the Cloud [3]
     \item A Case for High Performance Computing with Virtual Machines [4]
+    \item Virtual Machine Warmup Blows Hot and Cold [5]
+    \item aleks/fio auf git [6]
 \end{itemize}
 \end{document}
