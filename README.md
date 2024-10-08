@@ -1,7 +1,14 @@
 [TODO für den XX.10.2024]
+[Geschrieben am 08.10.2024]
+
+- [ ] Text neu schreiben/roten faden bilden
+- [ ] Grundlagen HPC (mit Benchmark)
+- [ ] papers durchgehen
+
+[TODO für den 08.10.2024]
 [Geschrieben am 07.10.2024]
 
-- [ ] langsam Text neu schreiben
+- [x] langsam Text neu schreiben
 - [ ] Grundlagen HPC (mit Benchmark)
 - [ ] papers durchgehen
 
