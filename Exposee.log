@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.9.16)  8 OCT 2024 14:58
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.9.16)  8 OCT 2024 16:30
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -71,41 +71,64 @@ Package graphics Info: Driver file: pdftex.def on input line 106.
 )
 \Gin@req@height=\dimen146
 \Gin@req@width=\dimen147
+) (c:/texlive/2024/texmf-dist/tex/latex/caption/caption.sty
+Package: caption 2023/08/05 v3.6o Customizing captions (AR)
+ (c:/texlive/2024/texmf-dist/tex/latex/caption/caption3.sty
+Package: caption3 2023/07/31 v2.4d caption3 kernel (AR)
+\caption@tempdima=\dimen148
+\captionmargin=\dimen149
+\caption@leftmargin=\dimen150
+\caption@rightmargin=\dimen151
+\caption@width=\dimen152
+\caption@indent=\dimen153
+\caption@parindent=\dimen154
+\caption@hangindent=\dimen155
+Package caption Info: Standard document class detected.
+)
+\c@caption@flags=\count276
+\c@continuedfloat=\count277
+Package caption Info: listings package is loaded.
+) (c:/texlive/2024/texmf-dist/tex/latex/caption/subcaption.sty
+Package: subcaption 2023/07/28 v1.6b Sub-captions (AR)
+Package caption Info: New subtype `subfigure' on input line 238.
+\c@subfigure=\count278
+Package caption Info: New subtype `subtable' on input line 238.
+\c@subtable=\count279
 ) (c:/texlive/2024/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2024/05/25 1.10b listings language file
 ) (c:/texlive/2024/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2024-05-08 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count276
+\l__color_backend_stack_int=\count280
 \l__pdf_internal_box=\box54
 ) (./Exposee.aux)
 \openout1 = `Exposee.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 23.
-LaTeX Font Info:    ... okay on input line 23.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 23.
-LaTeX Font Info:    ... okay on input line 23.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 23.
-LaTeX Font Info:    ... okay on input line 23.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 23.
-LaTeX Font Info:    ... okay on input line 23.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 23.
-LaTeX Font Info:    ... okay on input line 23.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 23.
-LaTeX Font Info:    ... okay on input line 23.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 23.
-LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 26.
+LaTeX Font Info:    ... okay on input line 26.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 26.
+LaTeX Font Info:    ... okay on input line 26.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 26.
+LaTeX Font Info:    ... okay on input line 26.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 26.
+LaTeX Font Info:    ... okay on input line 26.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 26.
+LaTeX Font Info:    ... okay on input line 26.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 26.
+LaTeX Font Info:    ... okay on input line 26.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 26.
+LaTeX Font Info:    ... okay on input line 26.
  (c:/texlive/2024/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count277
-\scratchdimen=\dimen148
+\scratchcounter=\count281
+\scratchdimen=\dimen156
 \scratchbox=\box55
-\nofMPsegments=\count278
-\nofMParguments=\count279
+\nofMPsegments=\count282
+\nofMParguments=\count283
 \everyMPshowfont=\toks19
-\MPscratchCnt=\count280
-\MPscratchDim=\dimen149
-\MPnumerator=\count281
-\makeMPintoPDFobject=\count282
+\MPscratchCnt=\count284
+\MPscratchDim=\dimen157
+\MPnumerator=\count285
+\makeMPintoPDFobject=\count286
 \everyMPtoPDFconversion=\toks20
 ) (c:/texlive/2024/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
@@ -113,7 +136,9 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 48
  (c:/texlive/2024/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
-\c@lstlisting=\count283
+\c@lstlisting=\count287
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: End \AtBeginDocument code.
  (./Exposee.toc)
 \tf@toc=\write3
 \openout3 = `Exposee.toc'.
@@ -123,12 +148,17 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 [1
 
 {c:/texlive/2024/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (14.58282pt too wide) in paragraph at lines 38--44
-\OT1/cmr/m/n/10 testen kann, z.B die Brandweite beim Schreiben einer Datei, und diesen Performanz-
+Overfull \hbox (3.07007pt too wide) in paragraph at lines 41--48
+[]\OT1/cmr/m/n/10 In Gro^^Ykonz-er-nen sind Per-for-manzprob-leme und nicht die funk-tionellen Prob-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 49--54
+Overfull \hbox (0.28185pt too wide) in paragraph at lines 51--58
+\OT1/cmr/m/n/10 einer bes-timmten Hard-ware testen. Die I/O Geschwindigkeit wird hier in KiByte
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 51--58
 
  []
 
@@ -136,52 +166,77 @@ Underfull \hbox (badness 10000) in paragraph at lines 49--54
 
 [2{c:/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 91.
+(Font)              <7> on input line 96.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 91.
-LaTeX Font Info:    Trying to load font information for OMS+cmr on input line 93.
- (c:/texlive/2024/texmf-dist/tex/latex/base/omscmr.fd
+(Font)              <5> on input line 96.
+
+Underfull \hbox (badness 10000) in paragraph at lines 91--98
+
+ []
+
+LaTeX Font Info:    Trying to load font information for OMS+cmr on input line 99.
+(c:/texlive/2024/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <8> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 93.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 99.
 
 
 [3]
-LaTeX Font Info:    Trying to load font information for OML+cmr on input line 109.
- (c:/texlive/2024/texmf-dist/tex/latex/base/omlcmr.fd
+Underfull \hbox (badness 10000) in paragraph at lines 103--110
+
+ []
+
+LaTeX Font Info:    Trying to load font information for OML+cmr on input line 117.
+(c:/texlive/2024/texmf-dist/tex/latex/base/omlcmr.fd
 File: omlcmr.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OML/cmr/m/n' in size <8> not available
-(Font)              Font shape `OML/cmm/m/it' tried instead on input line 109.
+(Font)              Font shape `OML/cmm/m/it' tried instead on input line 117.
 <./Code/nm_mytest_bw.jpg, id=21, 464.07492pt x 348.05618pt>
 File: ./Code/nm_mytest_bw.jpg Graphic file (type jpg)
 <use ./Code/nm_mytest_bw.jpg>
-Package pdftex.def Info: ./Code/nm_mytest_bw.jpg  used on input line 119.
-(pdftex.def)             Requested size: 341.43306pt x 256.07579pt.
+Package pdftex.def Info: ./Code/nm_mytest_bw.jpg  used on input line 131.
+(pdftex.def)             Requested size: 224.25052pt x 168.19098pt.
+
+Overfull \hbox (51.75052pt too wide) in paragraph at lines 131--132
+ [][] 
+ []
+
+File: ./Code/nm_mytest_bw.jpg Graphic file (type jpg)
+<use ./Code/nm_mytest_bw.jpg>
+Package pdftex.def Info: ./Code/nm_mytest_bw.jpg  used on input line 137.
+(pdftex.def)             Requested size: 224.25052pt x 168.19098pt.
+
+Overfull \hbox (51.75052pt too wide) in paragraph at lines 137--138
+ [][] 
+ []
+
 
 
 [4 <./Code/nm_mytest_bw.jpg>]
 
-[5] (./Exposee.aux)
+[5]
+
+[6] (./Exposee.aux)
  ***********
 LaTeX2e <2024-06-01> patch level 2
 L3 programming layer <2024-08-30>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 3178 strings out of 473578
- 46664 string characters out of 5732242
- 710770 words of memory out of 5000000
- 26080 multiletter control sequences out of 15000+600000
- 561221 words of font info for 46 fonts, out of 8000000 for 9000
+ 4651 strings out of 473578
+ 74873 string characters out of 5732242
+ 750880 words of memory out of 5000000
+ 27544 multiletter control sequences out of 15000+600000
+ 561520 words of font info for 47 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 57i,6n,65p,263b,1326s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sfrm0800.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb>
-Output written on Exposee.pdf (5 pages, 321635 bytes).
+ 57i,8n,65p,267b,1329s stack positions out of 10000i,1000n,20000p,200000b,200000s
+<c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sfrm0800.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb>
+Output written on Exposee.pdf (6 pages, 334584 bytes).
 PDF statistics:
- 77 PDF objects out of 1000 (max. 8388607)
- 46 compressed objects within 1 object stream
+ 85 PDF objects out of 1000 (max. 8388607)
+ 51 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  6 words of extra memory for PDF output out of 10000 (max. 10000000)
 

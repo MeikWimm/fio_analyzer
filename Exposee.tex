@@ -2,6 +2,9 @@
 \usepackage{color}
 \usepackage{listings}
 \usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
 \lstset{ %
 language=java,                % choose the language of the code
 basicstyle=\footnotesize,       % the size of the fonts that are used for the code
@@ -18,7 +21,7 @@ tabsize=2,          % sets default tabsize to 2 spaces
 captionpos=b,           % sets the caption-position to bottom
 breaklines=true,        % sets automatic line breaking
 breakatwhitespace=false,    % sets if automatic breaks should only happen at whitespace
-escapeinside={\%*}{*)}          % if you want to add a comment within your code
+escapeinside={\%*}{*}          % if you want to add a comment within your code
 }
 \begin{document}
 \tableofcontents{}
@@ -26,30 +29,31 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 
 \newpage
 \section{Einführung}
-Performanz spielt eine große Rolle in der Entwicklung von Hardware. Um herauszufinden ob die Hardware performant genug ist, werden Workloads
-verwendet um die Grenzen der Hardware zu testen. Aber auch nicht nur Hardware, sondern Virtuelle Maschinen können getestet werden, 
-wo virtuelle CPUs oder der Hypervisor getestet werden. [2]
-Sowie in Cloud Computing können solche Tests durchgeführt werden [3]. Somit gibt es ein weites Spektrum an Auswahl, wo solche Tests wichtig sind.
-\textit{Die Performanz eines Systems kann dabei sowohl durch Probleme in der Soft-
-ware, CPU-Zeit oder andere Hardwareressourcen begrenzt werden. Durch die standar-
-disierten Benchmarks wird es möglich, die Performanz verschiedener Hardware- und
+Performanz spielt eine große Rolle in der Entwicklung von Hardware und Software. Um herauszufinden ob gewisse Computer performant genug sind, werden ihre Performanz mit sogenannten 
+Benchmarks getestet.
+Mit ihnen kann man die Grenzen der Hardware testen. Aber auch nicht nur Hardware, sondern auch Virtuelle Maschinen können getestet werden, 
+wo man die Grenzen der virtuelle CPUs oder des Hypervisor herausfinden will. [2]
+Sowie in Cloud Computing können solche Tests durchgeführt werden [3]. Somit gibt es ein weites Spektrum an Auswahl, wo solche Benchmarks verwendet werden.
+Die Grenzen könnte die Hardware (z.B CPU-Taktrate oder Brandbreitengeschwindigkeit beim Lesen oder Schreiben) oder Software (Komplexität von Algorithmen) sein. 
+\textit{Es werden daher standardisierten Benchmarks verwendet. Mit denen ist es möglich die Performanz verschiedener Hardware- und
 Softwareanbieter zu vergleichen.}
 
-Die größten Probleme in den Großkonzernen sind Performanzprobleme und nicht die funktionellen Probleme. Service Ausfälle kosten sind höchst kostspielig. 
-Deshalb werden in High Performance Computing viele Tests durchgeführt, um ihre Grenzen zu analysieren [1].
+In Großkonzernen sind Performanzprobleme und nicht die funktionellen Probleme die größten Hindernisse. Service Ausfälle sind höchst kostspielig. 
+Deshalb werden diese Benchmarks in High Performance Computing durchgeführt, um ihre Grenzen zu herauszufinden [1].
+Ein Beispiel Programm für so ein Benchmark Tool ist das fio (flexible I/O Generator) von aleks.
 In meiner Arbeit werde ich mit dem fio Tool arbeiten, um solche Performanzänderungen zu berechnen und zu analysieren.
-Fio (flexible I/O Generator) ist ein Tool mit der man die Hardware-Performanz testen kann, z.B die Brandweite beim Schreiben einer Datei, und diesen Performanz-Test als log Daten ausgeben kann.
-Mein Programm wird mit diesen Logs arbeiten, um mit ihnen besser arbeiten zu können oder auch besser darzustellen.
+Fio ist ein Tool mit der man die Brandbreitengeschwindigkeit testen kann, z.B auf eine Datei Schreiben. Solche Tests lassen sich noch als Logdatei ausgeben.
+Mein Programm wird mit diesen Logs arbeiten, um mit ihnen besser arbeiten zu können oder auch besser darzustellen. Da diese zehntausende von Zeilen besitzen kann.
 Ziel meines Tools soll es sein, dass man den stationären Zustand analysiert. 
 
 
 \section{Grundlagen}
-Mit dem Fio , kann man die Performanz auf einer bestimmten Hardware testen. I/O Geschwindigkeit wird in hier KiByte/Sekunde angegeben. 
-
-fio besitzt kein GUI sondern arbeitet nur in der Konsole. Man kann für das Programm fio-Dateien schreiben oder auch in der Konsole arbeiten,
-um seine gewünschten Task zu testen,
-wie random read/write auf einer Datei.
-Wenn man ein Random Read testen möchte, kann die fio-Datei so aussehen.
+Mit dem Fio , kann man die Performanz der Brandbreitengeschwindigkeit auf einer bestimmten Hardware testen. 
+Die I/O Geschwindigkeit wird hier in KiByte pro Sekunde angegeben. 
+Fio selbst besitzt kein GUI sondern arbeitet nur in der Konsole. Man kann für das Programm sogenannte .fio Dateien schreiben oder auch nur in der Konsole arbeiten,
+um seine gewünschten Tests durchzuführen,
+wie z.B. random read/write auf einer Datei.
+Wenn man nun ein Random Read testen möchte, kann die .fio Datei so aussehen.
 \newline
 \begin{lstlisting}
     ; fio-rand-read.job for fiotest
@@ -61,14 +65,16 @@ Wenn man ein Random Read testen möchte, kann die fio-Datei so aussehen.
     size=2m # Groesse der Datei, m fuer Megabyte
     write_bw_log=mytest # Name der Log-Datei
 \end{lstlisting}
-\bigskip
-In der Konsole gebt man sie als Parameter an, wenn es nur ein schneller Test sein soll. Zusätzlich können die Tests, 
-oder auch Jobs genannt, Logs ausgeben. Mit diesen Logs wird mein Tool arbeiten. Dieser Job oben testet das Random-Read mit einer
-runtime von 2 Sekunden. Nun möchte man wissen, wann der stationäre Zustand erreicht wurde, wenn man solche Tests länger durchlaufen lässt.
-Der stationäre Zustand ist der Zeitpunkt, wenn es keine starken Schwankungen mehr bei der Brandweite im Lesen und Schreiben gibt.
-Das Schreiben und Lesen verhält sich außerdem nicht deterministisch. Das bedeutet, auch wenn man die selbe Datei mit dem Selben Computer lesen/schreiben
+
+In der Konsole kann man sie auch als Parameter angeben (z.B für rw: "--rw=randread"). Wenn es nur ein schneller Test sein soll, würde die Konsole schon ausreichen.
+Zusätzlich können die Tests, 
+oder auch Jobs genannt, Logs ausgeben, mit denen mein Tool arbeiten wird. Dieser Job oben testet das Random-Read mit einer
+Runtime von 2 Sekunden. Nun möchte man wissen, wann der stationäre Zustand erreicht wurde, wenn man solche Tests länger durchlaufen lässt.
+Der stationäre Zustand ist der Zeitpunkt, wenn es keine starken Schwankungen mehr bei der Brandbreitengeschwindigkeit im Lesen \textbf{und oder} Schreiben gibt.
+Das Schreiben und Lesen verhält sich außerdem nicht deterministisch. Das bedeutet, auch wenn man die selbe Datei mit dem selben Computer lesen/schreiben
 würde, wäre die Brandbreitengeschwindigkeit immer im Durchschnitt unterschiedlich. Weitere nicht deterministische Zustände könnte sogar CPU Temperatur sein,
-oder CPU Scaling, parallele Prozessierung [SOURCE]. In Zukunft soll das Programm diese mit der Standardabweichung selber ausrechnen. 
+oder CPU Scaling, parallele Prozessierung [SOURCE]. Da die Geschwindigkeit sich nie konstant einem Wert näher, soll da Programm in Zukunft die Standardabweichung errechnen,
+wo man selber festlegt, wie groß die Abweichung sein kann. 
 
 Die Geschwindigkeit der Brandbreite ist abhängig von der CPU und des Speichermediums, wie SATA HDD, SATA SSD oder NVMe.
 The main data created by our experiment is the time taken by each in-process iteration to run.
@@ -82,59 +88,81 @@ cute all applicable just-in-time compilations).
 
 
 \section{Konzept}
-Mein Tool soll mit den Logs vom fio Tool arbeiten. \newline
-fio besitzt ein extra Parameter, um solche Workloads als log ausgeben zukönnen.
+fio besitzt ein extra Parameter, um solche Workloads als log ausgeben zu können.
 Workloads oder auch Jobs, sind die Performanz Tests die mit dem fio gemacht werden.
-Für diese Workload möchte man noch gerne was eigentlich für Werte Zustande kamen.
+Für diese Workloads möchte man noch gerne wissen was eigentlich für Werte Zustande kamen.
 Die Logdatei besitzt die Information. Sie besitzt die Information vom verlauf des Jobs in Millisekunden.
 Die jeweils 5 Werte besitzen und mit Kommas getrennt sind.
-Mit dem Parameter $write\_bw\_logs=[Dateiname]$, kriege ich diese Logdatei:
+Mit dem Parameter $write\_bw\_logs=[Dateiname]$, kriege ich diese Logdatei: 
+\\
 \begin{lstlisting}
     \[Time,	Bandwidth,	data direction, Blocksize,	Offset\]
     0, 	    59782, 		0,		        4096,		0
 \end{lstlisting}
+\newpage
 Time für die Zeit in Millisekunden (ms) die verlaufen ist, Bandwidth für die Brandweite in KiByte/s
 Dritter Wert für die Date direction ob gelesen (= 0) oder geschrieben (= 1) wurde ein Blocksize
 und ein Offset. Die Logdaten selbst sind immens lang und nicht schön lesbar. Deshalb wurde schon ein kleines Tool in Python gebaut 
 was diese Logdaten zu einem Graph umwandelt. 
 Die Y-Achse ist die Brandbreitengeschwindigkeit und X-Achse ist die vergangene Zeit des jeweiligen Jobs.
 Wenn man die Logdaten anschaut, sieht man, dass die Brandbreitengeschwindigkeit sich schneller innerhalb einer 1 ms ändert.
-\newpage
+\\
 \begin{lstlisting}
-    \[Time,	Bandwidth,	data direction, Blocksize,	Offset\]
+    Drei Zeilen aus der Logdatei
+    [Time,	Bandwidth,	data direction, Blocksize,	Offset]
     23, 	    59782, 		0,		        4096,		0
     23, 	    43534, 		0,		        4096,		0
     23, 	    54364, 		0,		        4096,		0
 
-    X: 23       Y: 59782   ->        X: 23.0     Y: 59782
-    X: 23       Y: 43534   ->        X: 23.3     Y: 59782
-    X: 23       Y: 54364   ->        X: 23.6     Y: 59782
+    Erste beide Spalten     ->          X-Y-Koordinaten
+    X: 23       Y: 59782    ->        X: 23.0     Y: 59782
+    X: 23       Y: 43534    ->        X: 23.3     Y: 59782
+    X: 23       Y: 54364    ->        X: 23.6     Y: 59782
 \end{lstlisting}
+\bigskip
 Da man die Daten nicht verwerfen möchte, wurden Wiederholungen linear getrennt. 
-Für Veranschaulichung wurde das fio Tool auf meinem Rechner getestet mit dem
+Diese Veranschaulichung wurde auf meinem Rechner getestet mit dem
 Command die oben erwähnt wurde. Die logdatei wurde ausgewertet und hier als .svg Datei dargestellt:
 
-\begin{figure}[ht!]
+\begin{figure}
     \centering
-    \includegraphics[width=120mm]{./Code/nm_mytest_bw.jpg}
-    \caption{Plot tool Ausgabe mit Log Datei  \label{overflow}}
+    \begin{subfigure}{.5\textwidth}
+      \centering
+      \includegraphics[width=1.3\linewidth]{./Code/nm_mytest_bw.jpg}
+      \caption{A subfigure}
+      \label{fig:sub1}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+      \centering
+      \includegraphics[width=1.3\linewidth]{./Code/nm_mytest_bw.jpg}
+      \caption{A subfigure}
+      \label{fig:sub2}
+    \end{subfigure}
+    \caption{A figure with two subfigures}
+    \label{fig:test}
 \end{figure}
+\newpage
 Der Computer hat ein 11th Gen Intel(R) Core(TM) i5-11400 @ 2.60GHz und eine ADATA SWORDFISH SSD als Datenträger.
 Es wurde ein kleines Tool geschrieben. Die eigentliche Arbeit wird es sein, das Tool weiter auszubauen das nicht nur veranschaulicht
 sondern auch den stationären Zustand berechnet.
-Nun erkennt aber im Graph, dass diese Spikes zu sehen sind. Diese Spikes entstehen durch nicht deterministische Faktoren.
-Das fio arbeitet nicht nur mit einem Thread, sondern es arbeitet Multithreaded. Dadurch 
+Nun erkennt man aber im Graph, dass diese Spikes zu sehen sind. Diese Spikes entstehen durch nicht deterministische Faktoren.
+Das fio arbeitet nicht nur mit einem Thread, sondern es arbeitet Multithreaded, was zu nicht Determinismus führt. 
 Das Programm wird in Java geschrieben. Grund dafür ist, da dort die bereits die meiste Erfahrung steckt.
 Eine Möglichkeit, den stationären Zustand zu ermitteln, wäre das man die Standardabweichung verwendet und errechnet, wann die Abweichung klein ist.
 \textit{With improvements in storage device technology, the once negligible cost of I/O stack time has become more relevant (Foong et al. 2010; Caulfield et al. 2010). A number
 of studies have provided proof of the I/O software stack being the major performance bottleneck in future storage systems.}
+Im nächsten Graph werden die Häufigkeiten genommen für die Brandbreitengeschwindigkeit. X-Achse sind die Anzahl an Wiedeholungen und Y-Achse die Geschwindigkeit.
 \section{Verwandte Arbeiten}
-Es wird auch auf nicht Determinismus von Computer, oder auch VMs, eingegangen [5]. Sie versucht man so gering wie möglich zu halten, da sonst beim Auswertung nicht akkurate Werte
-berechnet werden können. Um solche Fehler zu minimieren versucht man erst die VMs erst mal warmzulaufen [1]. Man wird mit Werten rechnen wie F1-Score oder relativen Standardabweichung.
-Das Tool soll noch mehr Funktion besitzen und umfangreicher mit den Logdaten arbeiten. Die Methodiken die genommen werden, stammen aus verschieden Arbeiten. Wann wird ein warmup erfolgt sein [5]
-oder wann der stationären Zustand erreicht wurde [5]. Dabei soll das Tool, was in java gebaut wird, nicht für spezifische Hardware dienen und wird zur Analyse von fio dienen. Dies ist von dem fio [6] Tool abhängig.
+Es wird auch auf nicht Determinismus von Computer, oder auch VMs, eingegangen [5]. Sie versucht man so gering wie möglich zu halten, da sonst bei der Auswertung nicht akkurate Werte
+berechnet werden können. Nun lässt sich multithreading schlecht minimieren, da es dort meist Random verläuft, aber einige Methoden gibt es. Man kann, bei VMs,
+erst sie erst mal warm laufen  lassen [1]. Oder man versucht statistisch Methoden und arbeitet mit der Standardabweichung oder Konfident-werten
+Das Tool, was entwickelt werden soll, wird mit solchen Methoden arbeiten. Die Methodiken oder statistischen Herangehensweisen die genommen werden,
+stammen aus verschieden Arbeiten. Wann wird ein warmup erfolgt sein [5]
+oder wann der stationären Zustand erreicht wurde [5]. Dabei soll das Tool nicht für spezifische Hardware dienen und wird zur reinen Analyse von fio Daten dienen. 
+Dies ist von dem fio [6] Tool abhängig.
 Another source of non-determinism comes from thread scheduling in time-shared and multiprocessor systems. Running multithreaded
 workloads, as is the case for most Java programs, requires thread scheduling in the operating system and/or virtual machine.  
+\newpage
 \section{Zeitplan}
 \section{Referenz}
 \begin{itemize}
