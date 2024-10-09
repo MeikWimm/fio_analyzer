@@ -2,14 +2,39 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
-def main(args):
-    time_to_bw = dict()
+time_to_bw = dict()
+bw_list = []
+
+def plot_bw_per_time():
+    xpoints = [x for x in time_to_bw.keys()]
+    ypoints = [x[1] for x in time_to_bw.items()]
+
+    plt.plot(xpoints, ypoints)
+    plt.xlabel("Time in msec")
+    plt.ylabel("Bandwidth KiB/s")
+    plt.savefig("log_graph.svg")
+    plt.show()
+
+def plot_bw_frequency():
+    bw_setlist = list(set(bw_list))
+    my_dict = {i:bw_list.count(i) for i in bw_setlist}
+
+    xpoints = [x for x in my_dict.keys()]
+    ypoints = [x[1] for x in my_dict.items()]
+
+    fig, ax = plt.subplots()
+
+    ax.stem(xpoints,ypoints) 
+    plt.xlabel("Time in msec")
+    plt.ylabel("Bandwidth KiB/s")
+    plt.savefig("log_graph.svg")
+    plt.show()
+
+def get_date():
+    f = open(args[1], "r")
     old_time = 0 # Da im log die Zeit in Millisekunden gleich ist
     new_time = 0 # wollte ich nichts verwerfen und habe sie mit der np.linspace Funktion aufgeteilt 
     bw_with_same_time = [] # bw = bandwidth
-
-    f = open(args[1], "r")
-
     for line in f:
         splitted_line = line.split(",")
         new_time = int(splitted_line[0])
@@ -25,25 +50,21 @@ def main(args):
                 bw_with_same_time.append(line) # Füge die Zeile mit der neuen Zeit hinzu.
 
         old_time = int(splitted_line[0])
-    
+        bw_list.append(int(splitted_line[1]))
     f.close()
-    xpoints = [x for x in time_to_bw.keys()]
-    ypoints = [x[1] for x in time_to_bw.items()]
-    
-    # For loop diente zum Vergleichen mit der Log Datei. 
-    # Nur die ersten 20 Zeilen werden ausgegeben.
-    for i in range(0, 20): 
-        print(f"Time: {xpoints[i]} Bw: {ypoints[i]}")
-    
-    plt.plot(xpoints, ypoints)
-    plt.xlabel("Time in msec")
-    plt.ylabel("Bandwidth KiB/s")
-    plt.savefig("log_graph.svg")
-    plt.show()
+
+
+def main(args):
+    get_date()
+
+    if(args[2] == 'freq'):
+        plot_bw_frequency()
+    else:
+        plot_bw_per_time()
 
 if __name__ == "__main__":
     args = sys.argv # args[1] = Dateipfad des Logs
-    if(len(args) != 2):
-        print("Dateipfad fehlt!") 
+    if(len(args) != 3):
+        print("Dateipfad fehlt!")         
     else:
         main(args)
