@@ -3,4 +3,8 @@
 \contentsline {section}{\numberline {3}Konzept}{3}{}%
 \contentsline {section}{\numberline {4}Verwandte Arbeiten}{5}{}%
 \contentsline {section}{\numberline {5}Zeitplan}{6}{}%
-\contentsline {section}{\numberline {6}Referenz}{6}{}%
+\contentsline {subsection}{\numberline {5.1}Einführung}{6}{}%
+\contentsline {subsection}{\numberline {5.2}Grundlagen}{6}{}%
+\contentsline {section}{\numberline {6}Exposee Notiz}{6}{}%
+\contentsline {subsection}{\numberline {6.1}Konzept}{6}{}%
+\contentsline {section}{\numberline {7}Referenz}{7}{}%

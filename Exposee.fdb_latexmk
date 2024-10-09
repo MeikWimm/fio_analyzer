@@ -1,9 +1,9 @@
 # Fdb version 4
-["pdflatex"] 1728397842.57916 "d:/UNI/WISE 24 25/BA/Exposee.tex" "Exposee.pdf" "Exposee" 1728397843.43251 0
+["pdflatex"] 1728486421.99464 "d:/UNI/WISE 24 25/BA/Exposee.tex" "Exposee.pdf" "Exposee" 1728486422.89504 0
   "Code/nm_mytest_bw.jpg" 1727958418 173406 906e8d3f7339f99ed599d9165887a1ac ""
-  "Exposee.aux" 1728397843 997 42d8ae9d28fb1ec830d53ca862ba6f3f "pdflatex"
-  "Exposee.tex" 1728397840 11417 ac03ac479296032f0aad4f186303804b ""
-  "Exposee.toc" 1728397843 344 89b949e4b164d33b201f1ee19caa8e15 "pdflatex"
+  "Exposee.aux" 1728486422 1405 fbd788f41986357963ed82ec1d1d82e3 "pdflatex"
+  "Exposee.tex" 1728486420 12666 a5b826a31a1453b65b201c1321c7161d ""
+  "Exposee.toc" 1728486422 588 b792c71e4aa202960a2fc8d7dd335561 "pdflatex"
   "c:/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1726488569 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "c:/texlive/2024/texmf-dist/fonts/map/fontname/texfonts.map" 1726489064 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "c:/texlive/2024/texmf-dist/fonts/tfm/jknappen/ec/tcrm0800.tfm" 1726488850 1536 05df9db6aeccc4eea94fec15c9024f79 ""
@@ -58,7 +58,7 @@
   "c:/texlive/2024/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1726491126 5543950 2aa73a438b7054b2327b796fbe5f4275 ""
   "c:/texlive/2024/texmf-var/web2c/pdftex/pdflatex.fmt" 1726491242 3326173 107a8018349a659c7b722efd58f05b59 ""
   "c:/texlive/2024/texmf.cnf" 1726491104 713 e69b156964470283e0530f5060668171 ""
-  "d:/UNI/WISE 24 25/BA/Exposee.tex" 1728397840 11417 ac03ac479296032f0aad4f186303804b ""
+  "d:/UNI/WISE 24 25/BA/Exposee.tex" 1728486420 12666 a5b826a31a1453b65b201c1321c7161d ""
   (generated)
   "Exposee.aux"
   "Exposee.log"

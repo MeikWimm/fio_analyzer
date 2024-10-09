@@ -149,6 +149,11 @@ Nun erkennt man aber im Graph, dass diese Spikes zu sehen sind. Diese Spikes ent
 Das fio arbeitet nicht nur mit einem Thread, sondern es arbeitet Multithreaded, was zu nicht Determinismus führt. 
 Das Programm wird in Java geschrieben. Grund dafür ist, da dort die bereits die meiste Erfahrung steckt.
 Eine Möglichkeit, den stationären Zustand zu ermitteln, wäre das man die Standardabweichung verwendet und errechnet, wann die Abweichung klein ist.
+Wann wurde der stationäre Zustand nun erreicht oder wann ist der Warmup fertig ? F-test,
+which is used to test whether two variances are significantly different. Tukey HSD. Analysis of Variance (ANOVA). 
+Mein Tool soll am Ende den stationären Zustand (z.B Warmup von VMs) berechnen können,
+verschiedene Logs vergleichen können mit Hilfe der Standardabweichung, Varianz oder Tukey HSD
+
 \textit{With improvements in storage device technology, the once negligible cost of I/O stack time has become more relevant (Foong et al. 2010; Caulfield et al. 2010). A number
 of studies have provided proof of the I/O software stack being the major performance bottleneck in future storage systems.}
 Im nächsten Graph werden die Häufigkeiten genommen für die Brandbreitengeschwindigkeit. X-Achse sind die Anzahl an Wiedeholungen und Y-Achse die Geschwindigkeit.
@@ -164,6 +169,40 @@ Another source of non-determinism comes from thread scheduling in time-shared an
 workloads, as is the case for most Java programs, requires thread scheduling in the operating system and/or virtual machine.  
 \newpage
 \section{Zeitplan}
+\subsection{Einführung}
+ \begin{itemize}
+    \item Software und Performanz Bedeutung
+    \item Benchmarks
+    \item VMs, Cloud Computing
+    \item Brandbreitengeschwindigkeit
+    \item Probleme schlechter Performanz
+    \item fio von aleks
+    \item Mein Tool
+    \item Allgemeines Ziel
+ \end{itemize}
+\subsection{Grundlagen}
+\begin{itemize}
+    \item Erklärung fio
+    \item Ausführung fio
+    \item .fio Datei
+    \item fio in der Konsole
+    \item Logs und Jobs
+    \item Non-determinism
+    \item stationärer Zustand
+    \item Standardabweichung
+\end{itemize}
+\section{Exposee Notiz}
+\subsection{Konzept}
+\begin{itemize}
+    \item Tool mit den Eigenschaften:
+    \item Non-determinism
+    \item stationärer Zustand
+    \item Standardabweichung
+    \item Varianz
+    \item (Tukey HSD)
+    \item Warmup VMs
+    \item Sums of Squares (SSA)
+\end{itemize}
 \section{Referenz}
 \begin{itemize}
     \item -- An Automated Approach for Recommending When to Stop Performance Tests [1] --

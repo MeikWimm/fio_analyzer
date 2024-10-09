@@ -1,7 +1,11 @@
 {
     "cSpell.language": "de,de-DE,en",
     "cSpell.words": [
+        "ANOVA",
+        "basefmt",
+        "markerfmt",
         "mytest",
+        "Tukey",
         "xlabel",
         "xpoints",
         "ylabel",

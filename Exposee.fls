@@ -98,6 +98,8 @@ INPUT ./Code/nm_mytest_bw.jpg
 INPUT ./Code/nm_mytest_bw.jpg
 INPUT ./Code/nm_mytest_bw.jpg
 INPUT ./Code/nm_mytest_bw.jpg
+INPUT c:/texlive/2024/texmf-dist/fonts/tfm/public/cm/cmr12.tfm
+INPUT c:/texlive/2024/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
 INPUT c:/texlive/2024/texmf-dist/fonts/tfm/jknappen/ec/tcrm1000.tfm
 INPUT Exposee.aux
 INPUT c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb

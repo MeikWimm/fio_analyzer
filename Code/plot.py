@@ -9,7 +9,9 @@ def plot_bw_per_time():
     xpoints = [x for x in time_to_bw.keys()]
     ypoints = [x[1] for x in time_to_bw.items()]
 
-    plt.plot(xpoints, ypoints)
+    fig, ax = plt.subplots()
+
+    ax.stem(xpoints, ypoints, markerfmt=' ')
     plt.xlabel("Time in msec")
     plt.ylabel("Bandwidth KiB/s")
     plt.savefig("log_graph.svg")
@@ -24,7 +26,7 @@ def plot_bw_frequency():
 
     fig, ax = plt.subplots()
 
-    ax.stem(xpoints,ypoints) 
+    ax.stem(xpoints,ypoints, markerfmt=' ', basefmt='C2-') 
     plt.xlabel("Time in msec")
     plt.ylabel("Bandwidth KiB/s")
     plt.savefig("log_graph.svg")
