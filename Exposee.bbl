@@ -1,0 +1,33 @@
+\begin{thebibliography}{1}
+
+\bibitem{whenStopPerformanceTest}
+Hammam~M. Alghmadi, Mark~D. Syer, Weiyi Shang, and Ahmed~E. Hassan.
+\newblock An automated approach for recommending when to stop performance tests.
+\newblock In {\em 2016 IEEE International Conference on Software Maintenance and Evolution (ICSME)}, pages 279--289, 2016.
+
+\bibitem{axboe2021github}
+Jens Axboe.
+\newblock Github—axboe/fio: Flexible i/o tester.
+\newblock {\em Retrieved Nov}, 10:2022, 2021.
+
+\bibitem{vmsHotandCold}
+Edd Barrett, Carl~Friedrich Bolz-Tereick, Rebecca Killick, Sarah Mount, and Laurence Tratt.
+\newblock Virtual machine warmup blows hot and cold.
+\newblock {\em Proc. ACM Program. Lang.}, 1(OOPSLA), October 2017.
+
+\bibitem{9256518}
+Yuegang Li, Dongyang Ou, Congfeng Jiang, Jing Shen, Shuangshuang Guo, Yin Liu, and Linlin Tang.
+\newblock Virtual machine performance analysis and prediction.
+\newblock In {\em 2020 International Conference on Communications, Computing, Cybersecurity, and Informatics (CCCI)}, pages 1--5, 2020.
+
+\bibitem{10.1145/2493123.2462919}
+Aniruddha Marathe, Rachel Harris, David~K. Lowenthal, Bronis~R. de~Supinski, Barry Rountree, Martin Schulz, and Xin Yuan.
+\newblock A comparative study of high-performance computing on the cloud.
+\newblock In {\em Proceedings of the 22nd International Symposium on High-Performance Parallel and Distributed Computing}, HPDC '13, page 239–250, New York, NY, USA, 2013. Association for Computing Machinery.
+
+\bibitem{baseline}
+David~Georg Reichelt, Stefan Kühne, and Wilhelm Hasselbring.
+\newblock Automated identification of performance changes at code level.
+\newblock In {\em 2022 IEEE 22nd International Conference on Software Quality, Reliability and Security (QRS)}, pages 916--925, 2022.
+
+\end{thebibliography}

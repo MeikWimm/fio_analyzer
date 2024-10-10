@@ -1,25 +1,31 @@
-[TODO für den XX.10.2024]
+[Changelog für den XX.10.2024]
+[Geschrieben am 08.10.2024]
+
+- Kapitel Einführung und Grundlagen ordentlich geschrieben
+- Zitate hinzugefügt
+
+[Changelog für den XX.10.2024]
 [Geschrieben am 08.10.2024]
 
 - [ ] Text neu schreiben/roten faden bilden
 - [ ] Grundlagen HPC (mit Benchmark)
 - [ ] papers durchgehen
 
-[TODO für den 08.10.2024]
+[Changelog für den 08.10.2024]
 [Geschrieben am 07.10.2024]
 
 - [x] langsam Text neu schreiben
 - [ ] Grundlagen HPC (mit Benchmark)
 - [ ] papers durchgehen
 
-[TODO für den 07.10.2024]
+[Changelog für den 07.10.2024]
 [Geschrieben am 04.10.2024]
 
 - [ ] paper durchgehen
 - [ ] Grundlagen HPC (mit Benchmark)
 - [x] was soll das tool alles können
 
-[TODO für den 04.10.2024]
+[Changelog für den 04.10.2024]
 [Geschrieben am 03.10.2024]
 
 - [x] python code schicken 
