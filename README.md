@@ -1,4 +1,8 @@
-[Changelog für den XX.10.2024]
+[Geschrieben am 10.11.2024]
+
+- Exposee V1 aus overleaf
+- Erste Seite überarbeitet mithilfe der Prof. Kommentaren aus der PDF
+
 [Geschrieben am 08.10.2024]
 
 - Kapitel Einführung und Grundlagen ordentlich geschrieben

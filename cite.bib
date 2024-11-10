@@ -74,3 +74,75 @@
   keywords={Codes;Software quality;Software performance;Benchmark testing;Reliability engineering;Software reliability;Software measurement;software performance engineering;performance measurement;benchmarking},
   doi={10.1109/QRS57517.2022.00096}
 }
+@inproceedings{10.1145/1297027.1297033,
+author = {Georges, Andy and Buytaert, Dries and Eeckhout, Lieven},
+title = {Statistically rigorous java performance evaluation},
+year = {2007},
+isbn = {9781595937865},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1297027.1297033},
+doi = {10.1145/1297027.1297033},
+abstract = {Java performance is far from being trivial to benchmark because it is affected by various factors such as the Java application, its input, the virtual machine, the garbage collector, the heap size, etc. In addition, non-determinism at run-time causes the execution time of a Java program to differ from run to run. There are a number of sources of non-determinism such as Just-In-Time (JIT) compilation and optimization in the virtual machine (VM) driven by timer-based method sampling, thread scheduling, garbage collection, and various.There exist a wide variety of Java performance evaluation methodologies usedby researchers and benchmarkers. These methodologies differ from each other in a number of ways. Some report average performance over a number of runs of the same experiment; others report the best or second best performance observed; yet others report the worst. Some iterate the benchmark multiple times within a single VM invocation; others consider multiple VM invocations and iterate a single benchmark execution; yet others consider multiple VM invocations and iterate the benchmark multiple times.This paper shows that prevalent methodologies can be misleading, and can even lead to incorrect conclusions. The reason is that the data analysis is not statistically rigorous. In this paper, we present a survey of existing Java performance evaluation methodologies and discuss the importance of statistically rigorous data analysis for dealing with non-determinism. We advocate approaches to quantify startup as well as steady-state performance, and, in addition, we provide the JavaStats software to automatically obtain performance numbers in a rigorous manner. Although this paper focuses on Java performance evaluation, many of the issues addressed in this paper also apply to other programming languages and systems that build on a managed runtime system.},
+booktitle = {Proceedings of the 22nd Annual ACM SIGPLAN Conference on Object-Oriented Programming Systems, Languages and Applications},
+pages = {57–76},
+numpages = {20},
+keywords = {statistics, methodology, java, data analysis, benchmarking},
+location = {Montreal, Quebec, Canada},
+series = {OOPSLA '07}
+}
+@article{stasticsInPerformance,
+author = {Georges, Andy and Buytaert, Dries and Eeckhout, Lieven},
+title = {Statistically rigorous java performance evaluation},
+year = {2007},
+issue_date = {October 2007},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {42},
+number = {10},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/1297105.1297033},
+doi = {10.1145/1297105.1297033},
+abstract = {Java performance is far from being trivial to benchmark because it is affected by various factors such as the Java application, its input, the virtual machine, the garbage collector, the heap size, etc. In addition, non-determinism at run-time causes the execution time of a Java program to differ from run to run. There are a number of sources of non-determinism such as Just-In-Time (JIT) compilation and optimization in the virtual machine (VM) driven by timer-based method sampling, thread scheduling, garbage collection, and various.There exist a wide variety of Java performance evaluation methodologies usedby researchers and benchmarkers. These methodologies differ from each other in a number of ways. Some report average performance over a number of runs of the same experiment; others report the best or second best performance observed; yet others report the worst. Some iterate the benchmark multiple times within a single VM invocation; others consider multiple VM invocations and iterate a single benchmark execution; yet others consider multiple VM invocations and iterate the benchmark multiple times.This paper shows that prevalent methodologies can be misleading, and can even lead to incorrect conclusions. The reason is that the data analysis is not statistically rigorous. In this paper, we present a survey of existing Java performance evaluation methodologies and discuss the importance of statistically rigorous data analysis for dealing with non-determinism. We advocate approaches to quantify startup as well as steady-state performance, and, in addition, we provide the JavaStats software to automatically obtain performance numbers in a rigorous manner. Although this paper focuses on Java performance evaluation, many of the issues addressed in this paper also apply to other programming languages and systems that build on a managed runtime system.},
+journal = {SIGPLAN Not.},
+month = oct,
+pages = {57–76},
+numpages = {20},
+keywords = {statistics, methodology, java, data analysis, benchmarking}
+}
+@inproceedings{analysisNVMeSSD,
+author = {Xu, Qiumin and Siyamwala, Huzefa and Ghosh, Mrinmoy and Suri, Tameesh and Awasthi, Manu and Guz, Zvika and Shayesteh, Anahita and Balakrishnan, Vijay},
+title = {Performance analysis of NVMe SSDs and their implication on real world databases},
+year = {2015},
+isbn = {9781450336079},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2757667.2757684},
+doi = {10.1145/2757667.2757684},
+abstract = {The storage subsystem has undergone tremendous innovation in order to keep up with the ever-increasing demand for throughput. Non Volatile Memory Express (NVMe) based solid state devices are the latest development in this domain, delivering unprecedented performance in terms of latency and peak bandwidth. NVMe drives are expected to be particularly beneficial for I/O intensive applications, with databases being one of the prominent use-cases.This paper provides the first, in-depth performance analysis of NVMe drives. Combining driver instrumentation with system monitoring tools, we present a breakdown of access times for I/O requests throughout the entire system. Furthermore, we present a detailed, quantitative analysis of all the factors contributing to the low-latency, high-throughput characteristics of NVMe drives, including the system software stack. Lastly, we characterize the performance of multiple cloud databases (both relational and NoSQL) on state-of-the-art NVMe drives, and compare that to their performance on enterprise-class SATA-based SSDs. We show that NVMe-backed database applications deliver up to 8\texttimes{} superior client-side performance over enterprise-class, SATA-based SSDs.},
+booktitle = {Proceedings of the 8th ACM International Systems and Storage Conference},
+articleno = {6},
+numpages = {11},
+keywords = {performance characterization, hyperscale applications, SSD, NoSQL databases, NVMe},
+location = {Haifa, Israel},
+series = {SYSTOR '15}
+}
+@Inbook{benchmarkingBruno2014,
+author="Bruno, Isabelle",
+editor="Michalos, Alex C.",
+title="Benchmarking",
+bookTitle="Encyclopedia of Quality of Life and Well-Being Research",
+year="2014",
+publisher="Springer Netherlands",
+address="Dordrecht",
+pages="363--368",
+isbn="978-94-007-0753-5",
+doi="10.1007/978-94-007-0753-5_170",
+url="https://doi.org/10.1007/978-94-007-0753-5_170"
+}
+
+
+
+
+
+
