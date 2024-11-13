@@ -1,17 +1,17 @@
 # Fdb version 4
-["bibtex Exposee"] 1731264756.46539 "Exposee.aux" "Exposee.bbl" "Exposee" 1731264758.53327 0
-  "./cite.bib" 1731264705 13279 d83467ae182f2e68c1f8ab26bf49e174 ""
-  "Exposee.aux" 1731264757 2214 78d6ec9338e928159ff760ee50a61893 "pdflatex"
+["bibtex Exposee"] 1731505470.83815 "Exposee.aux" "Exposee.bbl" "Exposee" 1731505473.00715 0
+  "./cite.bib" 1731505467 14208 bbd4f4ffca63b8bb2c4eaeee2a31c49b ""
+  "Exposee.aux" 1731505472 2658 c0a0ffba5d49fa7129d1ddc2861133ef "pdflatex"
   "c:/texlive/2024/texmf-dist/bibtex/bst/base/plain.bst" 1726488403 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
   (generated)
   "Exposee.bbl"
   "Exposee.blg"
   (rewritten before read)
-["pdflatex"] 1731264756.85227 "d:/UNI/WISE 24 25/BA/Exposee.tex" "Exposee.pdf" "Exposee" 1731264758.53377 0
-  "Exposee.aux" 1731264757 2214 78d6ec9338e928159ff760ee50a61893 "pdflatex"
-  "Exposee.bbl" 1731264756 2329 6b954d052f2ce6c86465f009297d9a4a "bibtex Exposee"
-  "Exposee.tex" 1731264754 14981 a1c09a07f9bd9318ec700ad1cdb10ea2 ""
-  "Exposee.toc" 1731264757 289 cf321c7b6606345d65054084ff8bfe85 "pdflatex"
+["pdflatex"] 1731505471.24058 "d:/UNI/WISE 24 25/BA/Exposee.tex" "Exposee.pdf" "Exposee" 1731505473.00776 0
+  "Exposee.aux" 1731505472 2658 c0a0ffba5d49fa7129d1ddc2861133ef "pdflatex"
+  "Exposee.bbl" 1731505471 3449 7fa1c108d97fd56d03ab794f0dfcfc3d "bibtex Exposee"
+  "Exposee.tex" 1731505371 17175 366670cae8512079e6e63f22276e2b9c ""
+  "Exposee.toc" 1731505472 289 2a9e5a164d6f8a9533590daf7fcbe7f0 "pdflatex"
   "c:/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1726488569 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "c:/texlive/2024/texmf-dist/fonts/map/fontname/texfonts.map" 1726489064 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "c:/texlive/2024/texmf-dist/fonts/tfm/jknappen/ec/tcrm0800.tfm" 1726488850 1536 05df9db6aeccc4eea94fec15c9024f79 ""
@@ -26,6 +26,7 @@
   "c:/texlive/2024/texmf-dist/fonts/tfm/public/cm/cmr8.tfm" 1726488562 1292 21c1c5bfeaebccffdb478fd231a0997d ""
   "c:/texlive/2024/texmf-dist/fonts/tfm/public/cm/cmr9.tfm" 1726488562 1292 6b21b9c2c7bebb38aa2273f7ca0fb3af ""
   "c:/texlive/2024/texmf-dist/fonts/tfm/public/cm/cmti10.tfm" 1726488562 1480 aa8e34af0eb6a2941b776984cf1dfdc4 ""
+  "c:/texlive/2024/texmf-dist/fonts/tfm/public/cm/cmtt10.tfm" 1726488562 768 1321e9409b4137d6fb428ac9dc956269 ""
   "c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb" 1726488186 34811 78b52f49e893bcba91bd7581cdc144c0 ""
   "c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb" 1726488186 32080 340ef9bf63678554ee606688e7b5339d ""
   "c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb" 1726488186 32166 b0c356b15f19587482a9217ce1d8fa67 ""
@@ -36,6 +37,7 @@
   "c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb" 1726488186 32726 39f0f9e62e84beb801509898a605dbd5 ""
   "c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb" 1726488186 33993 9b89b85fd2d9df0482bd47194d1d3bf3 ""
   "c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb" 1726488186 37944 359e864bd06cde3b1cf57bb20757fb06 ""
+  "c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb" 1726488186 31099 342ef5a582aacbd3346f3cf4579679fa ""
   "c:/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sfrm0800.pfb" 1726488569 164227 41439fae96b3b30186924e9dd2fcff30 ""
   "c:/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb" 1726488569 138258 6525c253f16cededa14c7fd0da7f67b2 ""
   "c:/texlive/2024/texmf-dist/tex/context/base/mkii/supp-pdf.mkii" 1726489840 71627 94eb9990bed73c364d7f53f960cc8c5b ""
@@ -74,11 +76,12 @@
   "c:/texlive/2024/texmf-dist/tex/latex/listings/lstpatch.sty" 1726489591 353 9024412f43e92cd5b21fe9ded82d0610 ""
   "c:/texlive/2024/texmf-dist/tex/latex/setspace/setspace.sty" 1726490444 22490 8cac309b79a4c53a4ffce4b1b07aead0 ""
   "c:/texlive/2024/texmf-dist/tex/latex/subfig/subfig.sty" 1726490567 21369 9ef165ca6df8815c92e693146a376c92 ""
+  "c:/texlive/2024/texmf-dist/tex/latex/url/url.sty" 1726490922 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "c:/texlive/2024/texmf-dist/web2c/texmf.cnf" 1726488130 42007 0b741a3c21a5ca32b40e3846e75b3548 ""
   "c:/texlive/2024/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1726491126 5543950 2aa73a438b7054b2327b796fbe5f4275 ""
   "c:/texlive/2024/texmf-var/web2c/pdftex/pdflatex.fmt" 1726491242 3326173 107a8018349a659c7b722efd58f05b59 ""
   "c:/texlive/2024/texmf.cnf" 1726491104 713 e69b156964470283e0530f5060668171 ""
-  "d:/UNI/WISE 24 25/BA/Exposee.tex" 1731264754 14981 a1c09a07f9bd9318ec700ad1cdb10ea2 ""
+  "d:/UNI/WISE 24 25/BA/Exposee.tex" 1731505371 17175 366670cae8512079e6e63f22276e2b9c ""
   "log_graph_bw_freq.jpg" 1731264742 86501 10191ba1481d4be0309e44d41bbd73e4 ""
   "log_graph_time_to_bw.jpg" 1731264733 200381 47d26ea0646f8d93f2f8b35766668a0c ""
   (generated)

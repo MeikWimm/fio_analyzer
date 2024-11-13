@@ -1,3 +1,8 @@
+[Geschrieben am 13.11.2024]
+
+- Exposee V2 aus overleaf
+- Alle Kommentare abgearbeitet
+
 [Geschrieben am 10.11.2024]
 
 - Exposee V1 aus overleaf
