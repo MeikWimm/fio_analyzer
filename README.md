@@ -1,5 +1,11 @@
 [Geschrieben am 13.11.2024]
 
+- Anfang Exposee V3 aus overleaf
+- Abstract und Einführung bearbeitet
+- Einführung noch nicht komplett fertig
+
+[Geschrieben am 13.11.2024]
+
 - Exposee V2 aus overleaf
 - Alle Kommentare abgearbeitet
 

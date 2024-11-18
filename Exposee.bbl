@@ -30,15 +30,21 @@ Isabelle Bruno.
 \newblock {\em Benchmarking}, pages 363--368.
 \newblock Springer Netherlands, Dordrecht, 2014.
 
-\bibitem{stasticsInPerformance}
-Andy Georges, Dries Buytaert, and Lieven Eeckhout.
-\newblock Statistically rigorous java performance evaluation.
-\newblock {\em SIGPLAN Not.}, 42(10):57–76, October 2007.
+\bibitem{Delst}
+Delst.
+\newblock Definition performance.
+\newblock \url{https://www.delst.de/de/lexikon/performance/}.
+\newblock Zugriff am 12. November 2024.
 
 \bibitem{10.1145/1297027.1297033}
 Andy Georges, Dries Buytaert, and Lieven Eeckhout.
 \newblock Statistically rigorous java performance evaluation.
 \newblock In {\em Proceedings of the 22nd Annual ACM SIGPLAN Conference on Object-Oriented Programming Systems, Languages and Applications}, OOPSLA '07, page 57–76, New York, NY, USA, 2007. Association for Computing Machinery.
+
+\bibitem{stasticsInPerformance}
+Andy Georges, Dries Buytaert, and Lieven Eeckhout.
+\newblock Statistically rigorous java performance evaluation.
+\newblock {\em SIGPLAN Not.}, 42(10):57–76, October 2007.
 
 \bibitem{9256518}
 Yuegang Li, Dongyang Ou, Congfeng Jiang, Jing Shen, Shuangshuang Guo, Yin Liu, and Linlin Tang.
@@ -50,16 +56,22 @@ Aniruddha Marathe, Rachel Harris, David~K. Lowenthal, Bronis~R. de~Supinski, Bar
 \newblock A comparative study of high-performance computing on the cloud.
 \newblock In {\em Proceedings of the 22nd International Symposium on High-Performance Parallel and Distributed Computing}, HPDC '13, page 239–250, New York, NY, USA, 2013. Association for Computing Machinery.
 
+\bibitem{schmidtPaul}
+Novustat.
+\newblock Mittelwertvergleich nach anova.
+\newblock \url{https://schmidtpaul.github.io/crashcouRse/appendix_posthoc.html}.
+\newblock Zugriff am 12. November 2024.
+
 \bibitem{posthoc}
 Novustat.
 \newblock Post hoc test: Signifikante unterschiede finden und erklären.
 \newblock \url{https://novustat.com/statistik-blog/post-hoc-test-signifikante-unterschiede-finden-und-erklaeren.html}.
 \newblock Zugriff am 11. November 2024.
 
-\bibitem{schmidtPaul}
-Paul Schmidt.
-\newblock Mittelwertvergleich nach anova.
-\newblock \url{https://schmidtpaul.github.io/crashcouRse/appendix_posthoc.html}.
+\bibitem{takevalue}
+takevalue Consulting~GmbH.
+\newblock Definition benchmarking.
+\newblock \url{https://www.takevalue.de/glossar/benchmark/}.
 \newblock Zugriff am 12. November 2024.
 
 \bibitem{analysisNVMeSSD}

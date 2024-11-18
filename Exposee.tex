@@ -33,7 +33,7 @@ escapeinside={\%*}{*}          % if you want to add a comment within your code
 % 	Definition von globalen Parametern, die im gesamten Dokument verwendet
 % 	werden können (z.B auf dem Deckblatt etc.).
 % --------------------------------------------------------------------------
-\newcommand{\titel}{Entwicklung eines Analysetools, das den stationären Zustand aus den Logs des Fio-Benchmark-Tools ermittelt}
+\newcommand{\titel}{Ermittlung des stationären Zustands beim Festplattenbenchmarking}
 \newcommand{\art}{Exposé} %Bachelorarbeit
 \newcommand{\ort}{Leipzig}
 \newcommand{\hochschule}{Universität Leipzig}
@@ -128,26 +128,25 @@ Betreuer:\\
 \newpage
 
 \begin{abstract}
-Mit Benchmarks kann man die Performance von Computersystemen, wie etwa die Rechenleistung und die I/O-Geschwindigkeit, messen. Diese Messungen können stark oder schwach schwanken, je nachdem, ob der Rechner gerade erst mit den Messungen begonnen hat oder schon länger läuft. In dieser Arbeit wird mit dem Benchmark-Tool Fio gearbeitet, und es wird ein Analysetool entwickelt, das den Zustand ermittelt, in dem die Schwankungen der Messungen am geringsten sind. Dabei wird statistische Analyse angewendet, um diesen Zustand zu bestimmen. Das Progarmm wird in Java geschrieben.
+Mit Benchmarks kann man die Performanz von Computersystemen, wie etwa die Rechenleistung und die I/O-Geschwindigkeit messen. Diese Messungen können stark oder schwach schwanken, je nachdem, ob ein Warm-Up erfolgte. Für die Ermittlung des stationären Zustandes sind geringe Schwankungen bei den Messungen notwendig. In dieser Arbeit wird mit dem Benchmark-Tool Fio gearbeitet, und es wird ein Analysetool entwickelt, das diesen Zustand ermittelt. Dabei wird statistische Analyse angewendet, um diesen stationären Zustand zu bestimmen. Das Programm wird in Java geschrieben.
 
 \end{abstract}
 
 \newpage
 \section{Einführung}
-Die Performanz eines Rechners ist die Leistungsfähigkeit und Effizienz bei der Ausführung von Aufgaben. Um herauszufinden, welche ausgewählten Systeme die beste Performanz liefert, werden Benchmarks verwendet.  
-Mit ihnen kann man die Rechenleistung oder auch Lese-/Schreibgeschwingkeit der Hardware oder auch Software mit standardisierten Tests messen \cite{benchmarkingBruno2014}. Ein Beispiel, bei dem Software getestet wird, sind virtuelle Maschinen.
-Hier werden die Grenzen von virtuellen CPUs oder des Hypervisor analysiert \cite{9256518}.
-Auch im Cloudcomputing Bereich wird Benchmarking betrieben, um auch Performanz zwischen verschieden Cloudplatformen vergleichen zu können. Eine Metrik wäre hier die Turnaround-Zeit, also die Zeit, die ein Prozess benötigt, um vollständig durchzulaufen. \cite{10.1145/2493123.2462919}.  Somit gibt es ein weites Spektrum an Auswahl von Systemen, wo solche Benchmarks verwendet werden können, um Grenzen zu testen und zu vergleichen.
-Solche Grenzen könnten die Hardware (z. B. CPU-Taktrate oder Brandbreitengeschwindigkeit beim Lesen oder Schreiben), aber auch Software (Virtuelle Maschinen) sein.
+Die Performanz eines Rechners ist die Leistungsfähigkeit und Effizienz bei der Ausführung von Aufgaben \cite{Delst}. Um herauszufinden welche Rechner die beste Performanz liefert, sind Messungen und notwendig, um sie vergleichen zu können. Diese Messungen und Vergleiche werden mit Benchmarks durchgeführt \cite{takevalue}.
+Mit ihnen wird die Rechenleistung oder auch Lese-/Schreibgeschwingkeit der Hardware oder auch Software mit standardisierten Tests gemessen \cite{benchmarkingBruno2014}. Ein Beispiel, bei dem Software getestet wird, sind virtuelle Maschinen wie die Java Virtual Machine \cite{10.1145/1297027.1297033} oder virtuelle Maschinen die auf reale Rechner basieren.
+Hier wird die Performanz von virtuellen CPUs oder des Hypervisor analysiert \cite{9256518}.
+Auch für Cloud Computing Platformen wird Benchmarking betrieben, um auch Performanz zwischen verschieden Cloudplatformen vergleichen zu können. Diese Benchmarks verwenden z.B die Turnaround-Zeit als Metrik, also die Zeit, die ein Prozess benötigt, um vollständig durchzulaufen \cite{10.1145/2493123.2462919}.  Somit gibt es ein weites Spektrum an Auswahl von Systemen, wo  Benchmarking betrieben wird.
+Solche Grenzen könnten die Hardware (z. B. CPU-Taktrate oder Bandbreitengeschwindigkeit beim Lesen oder Schreiben), aber auch Software (Virtuelle Maschinen) sein.
 Und mit der Verbesserung von solchen Speichermedien, wie HDD zu SSD, und CPU-Leistung wird die I/O Geschwindigkeit immer relevanter. Studien haben schon bewiesen, dass dies eine Ursache für Bottlenecks in der Performanz ist \cite{analysisNVMeSSD}.
 
-In Großkonzernen sind oft Performanzprobleme die eigentlichen Hindernisse, und nicht die funktionellen Probleme. Serviceausfälle sind höchst kostspielig und sollten minimiert werden. \cite{whenStopPerformanceTest}. 
-Aus diesem Grund wird Benchmarking in Hochleistungsrechner (High Performance Computing - HPC) betrieben, um ihre Performanz zu ermitteln.
-Ein Beispielprogramm für so ein Benchmark Tool ist das Fio (flexible I/O tester) \cite{axboe2021github}.
-Fio ist ein Tool, mit dem man die Brandbreitengeschwindigkeit vom Lesen/Schreiben testen kann. Diese Tests lassen sich als eine Logdatei ausgeben.
-Mein Programm wird mit diesen Logs arbeiten, um sie darstellen und analysieren zu können. Da diese Dateien oft aus zehntausenden von Zeilen bestehen.
-In meiner Arbeit werde ich mit dem fio Tool arbeiten, um solche Performanceänderungen zu analysieren und den stationären Zustand zu ermitteln. Ein Zustand, wo die Rechenleistung oder Lese-/Schreibgeschwindigkeit sich nicht mehr beim Messen stark ändert \cite{vmsHotandCold}.
+In Großkonzernen sind oft Performanzprobleme die eigentlichen Hindernisse, und nicht die funktionalen Probleme. Serviceausfälle sind höchst kostspielig und sollten minimiert werden \cite{whenStopPerformanceTest}. 
 
+Ein Beispielprogramm für so ein Benchmark Tool ist das Fio (flexible I/O tester) \cite{axboe2021github}.
+Fio ist ein Tool, mit dem man die Bandbreitengeschwindigkeit vom Lesen/Schreiben testet und sie als eine Textdatei (von fio Logdatei genannt) ausgeben kann. Diese Geschwindigkeit kann stärker oder schwächer vom eigentlichen WERT schwanken. Das Ziel meines Tools ist es, den stationären Zustand zu ermitteln.
+Ein Zustand, wo die Rechenleistung oder Lese-/Schreibgeschwindigkeit sich nicht mehr beim Messen stark ändert \cite{vmsHotandCold}. 
+Um den stationären Zustand zu ermitteln, werden verschiedene Methodiken aus der Varianzanalyse verwendet. Der Tukey-HSD-Test, t-Test und Mann-Whitney-Test werdem zusammen mit den Werten aus den Logdateien des fios genutzt. 
 
 \section{Grundlagen}
 Das Fio Tool ermöglicht das Testen auf bestimmter Hardware oder Software. Die I/O-Geschwindigkeit wird hier in Mebibyte pro Sekunde angegeben. Das Fio bietet auch die Möglichkeit diese Einheit zu ändern.
