@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.9.16)  18 NOV 2024 14:16
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.9.16)  19 NOV 2024 20:46
 entering extended mode
  \write18 enabled.
  file:line:error style messages enabled.
@@ -261,91 +261,108 @@ Overfull \hbox (2.9496pt too wide) in paragraph at lines 146--150
 [3]
 
 [4]
-LaTeX Font Info:    Trying to load font information for OML+cmr on input line 214.
- (c:/texlive/2024/texmf-dist/tex/latex/base/omlcmr.fd
-File: omlcmr.fd 2023/04/13 v2.5m Standard LaTeX font definitions
-)
-LaTeX Font Info:    Font shape `OML/cmr/m/n' in size <8> not available
-(Font)              Font shape `OML/cmm/m/it' tried instead on input line 214.
-
-Overfull \hbox (6.44508pt too wide) in paragraph at lines 220--222
-\OT1/cmr/m/n/10 In Fig-ure 1[] ist ein-mal die Band-bre-it-engeschwindigkeit pro Mil-lisekunde dargestellt
+Overfull \hbox (1.7135pt too wide) in paragraph at lines 196--197
+[]\OT1/cmr/m/n/10 Dabei sind Falsch-Positive-Annahmen (Typ-I-Fehler) zu ber^^?ucksichtigen. Die
  []
 
-<log_graph_bw_freq.jpg, id=27, 402.68167pt x 312.76715pt>
-File: log_graph_bw_freq.jpg Graphic file (type jpg)
-<use log_graph_bw_freq.jpg>
-Package pdftex.def Info: log_graph_bw_freq.jpg  used on input line 225.
-(pdftex.def)             Requested size: 156.49014pt x 121.54918pt.
-<log_graph_time_to_bw.jpg, id=28, 402.68167pt x 312.76715pt>
-File: log_graph_time_to_bw.jpg Graphic file (type jpg)
-<use log_graph_time_to_bw.jpg>
-Package pdftex.def Info: log_graph_time_to_bw.jpg  used on input line 227.
-(pdftex.def)             Requested size: 156.49014pt x 121.54918pt.
 
-Overfull \hbox (6.83397pt too wide) in paragraph at lines 233--238
-\OT1/cmr/m/n/10 und zus^^?atzlich Kon-fi-den-z-in-ter-valle be-nutzt, um nicht de-ter-mis-mus mitzubeachten. 
+Overfull \hbox (4.25044pt too wide) in paragraph at lines 198--204
+[]\OT1/cmr/m/n/10 In der Ar-beit wer-den der t-Test, der Tukey-HSD-Test und der Mann-Whitney-
  []
 
 
 
 [5]
+LaTeX Font Info:    Trying to load font information for OML+cmr on input line 232.
+ (c:/texlive/2024/texmf-dist/tex/latex/base/omlcmr.fd
+File: omlcmr.fd 2023/04/13 v2.5m Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OML/cmr/m/n' in size <8> not available
+(Font)              Font shape `OML/cmm/m/it' tried instead on input line 232.
+
+Overfull \hbox (6.44508pt too wide) in paragraph at lines 238--240
+\OT1/cmr/m/n/10 In Fig-ure 1[] ist ein-mal die Band-bre-it-engeschwindigkeit pro Mil-lisekunde dargestellt
+ []
+
+<log_graph_bw_freq.jpg, id=32, 402.68167pt x 312.76715pt>
+File: log_graph_bw_freq.jpg Graphic file (type jpg)
+<use log_graph_bw_freq.jpg>
+Package pdftex.def Info: log_graph_bw_freq.jpg  used on input line 243.
+(pdftex.def)             Requested size: 156.49014pt x 121.54918pt.
+<log_graph_time_to_bw.jpg, id=33, 402.68167pt x 312.76715pt>
+File: log_graph_time_to_bw.jpg Graphic file (type jpg)
+<use log_graph_time_to_bw.jpg>
+Package pdftex.def Info: log_graph_time_to_bw.jpg  used on input line 245.
+(pdftex.def)             Requested size: 156.49014pt x 121.54918pt.
+
 
 [6 <./log_graph_bw_freq.jpg> <./log_graph_time_to_bw.jpg>]
 
-[7] (./Exposee.bbl
-Underfull \hbox (badness 3471) in paragraph at lines 9--12
+[7]
+
+[8] (./Exposee.bbl
+Underfull \hbox (badness 3471) in paragraph at lines 4--7
 []\OT1/cmr/m/n/10 Tukey's range test.  $\OT1/cmtt/m/n/10 https : / / en . wikipedia . org / wiki / Tukey % 27s _
  []
 
 
+Underfull \hbox (badness 10000) in paragraph at lines 45--49
+[]\OT1/cmr/m/n/10 IBM.  The jit com-piler.  $\OT1/cmtt/m/n/10 https : / / www . ibm . com / docs / en /
+ []
 
-[8]
-Underfull \hbox (badness 1048) in paragraph at lines 60--64
+
+Underfull \hbox (badness 10000) in paragraph at lines 45--49
+\OT1/cmtt/m/n/10 sdk-[]java-[]technology / 8 ? topic = reference-[]jit-[]compiler$\OT1/cmr/m/n/10 .  Zu-griff
+ []
+
+
+Underfull \hbox (badness 1048) in paragraph at lines 61--65
 []\OT1/cmr/m/n/10 Novustat.  Mit-tel-w-ertver-gle-ich nach anova.  $\OT1/cmtt/m/n/10 https : / / schmidtpaul .
  []
 
 
-Underfull \hbox (badness 4492) in paragraph at lines 60--64
+Underfull \hbox (badness 4492) in paragraph at lines 61--65
 \OT1/cmtt/m/n/10 github . io / crashcouRse / appendix _ posthoc . html$\OT1/cmr/m/n/10 .  Zu-griff am 12.
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 66--70
+Underfull \hbox (badness 10000) in paragraph at lines 67--71
 []\OT1/cmr/m/n/10 Novustat.  Post hoc test: Sig-nifikante un-ter-schiede finden
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 66--70
+Underfull \hbox (badness 10000) in paragraph at lines 67--71
 \OT1/cmr/m/n/10 und erkl^^?aren.  $\OT1/cmtt/m/n/10 https : / / novustat . com / statistik-[]blog /
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 66--70
+Underfull \hbox (badness 10000) in paragraph at lines 67--71
 \OT1/cmtt/m/n/10 post-[]hoc-[]test-[]signifikante-[]unterschiede-[]finden-[]und-[]erklaeren .
  []
 
-)
 
-[9] (./Exposee.aux)
+
+[9])
+
+[10] (./Exposee.aux)
  ***********
 LaTeX2e <2024-06-01> patch level 2
 L3 programming layer <2024-08-30>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 6174 strings out of 473578
- 100280 string characters out of 5732242
- 916363 words of memory out of 5000000
- 29020 multiletter control sequences out of 15000+600000
- 562501 words of font info for 51 fonts, out of 8000000 for 9000
+ 6176 strings out of 473578
+ 100295 string characters out of 5732242
+ 870363 words of memory out of 5000000
+ 29022 multiletter control sequences out of 15000+600000
+ 562799 words of font info for 52 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  79i,10n,93p,632b,1345s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sfrm0800.pfb><c:/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb>
-Output written on Exposee.pdf (10 pages, 478628 bytes).
+Output written on Exposee.pdf (11 pages, 482054 bytes).
 PDF statistics:
- 105 PDF objects out of 1000 (max. 8388607)
- 64 compressed objects within 1 object stream
+ 108 PDF objects out of 1000 (max. 8388607)
+ 66 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  11 words of extra memory for PDF output out of 10000 (max. 10000000)
 

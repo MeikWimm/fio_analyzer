@@ -1,10 +1,5 @@
 \begin{thebibliography}{10}
 
-\bibitem{fastcapital_TukeysHSD}
-Tukeys hsd post hoc analyse nach anova.
-\newblock \url{https://fastercapital.com/de/inhalt/Tukey-s-HSD--Post-Hoc-Analyse-nach-ANOVA.html}.
-\newblock Zugriff am 11. November 2024.
-
 \bibitem{tukeyhsdwiki}
 Tukey's range test.
 \newblock \url{https://en.wikipedia.org/wiki/Tukey%27s_range_test}.
@@ -46,6 +41,12 @@ Andy Georges, Dries Buytaert, and Lieven Eeckhout.
 \newblock Statistically rigorous java performance evaluation.
 \newblock {\em SIGPLAN Not.}, 42(10):57–76, October 2007.
 
+\bibitem{jit}
+IBM.
+\newblock The jit compiler.
+\newblock \url{https://www.ibm.com/docs/en/sdk-java-technology/8?topic=reference-jit-compiler}.
+\newblock Zugriff am 19. November 2024.
+
 \bibitem{9256518}
 Yuegang Li, Dongyang Ou, Congfeng Jiang, Jing Shen, Shuangshuang Guo, Yin Liu, and Linlin Tang.
 \newblock Virtual machine performance analysis and prediction.
@@ -73,6 +74,12 @@ takevalue Consulting~GmbH.
 \newblock Definition benchmarking.
 \newblock \url{https://www.takevalue.de/glossar/benchmark/}.
 \newblock Zugriff am 12. November 2024.
+
+\bibitem{statistischeSigni}
+wikipedia.
+\newblock Statistische signifikanz.
+\newblock \url{https://de.wikipedia.org/wiki/Statistische_Signifikanz}.
+\newblock Zugriff am 19. November 2024.
 
 \bibitem{analysisNVMeSSD}
 Qiumin Xu, Huzefa Siyamwala, Mrinmoy Ghosh, Tameesh Suri, Manu Awasthi, Zvika Guz, Anahita Shayesteh, and Vijay Balakrishnan.

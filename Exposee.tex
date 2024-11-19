@@ -134,7 +134,7 @@ Mit Benchmarks kann man die Performanz von Computersystemen, wie etwa die Rechen
 
 \newpage
 \section{Einführung}
-Die Performanz eines Rechners ist die Leistungsfähigkeit und Effizienz bei der Ausführung von Aufgaben \cite{Delst}. Um herauszufinden welche Rechner die beste Performanz liefert, sind Messungen und notwendig, um sie vergleichen zu können. Diese Messungen und Vergleiche werden mit Benchmarks durchgeführt \cite{takevalue}.
+Die Performanz eines Rechners ist die Leistungsfähigkeit und Effizienz bei der Ausführung von Aufgaben \cite{Delst}. Um herauszufinden welche Rechner die beste Performanz liefert, sind Messungen notwendig, um sie vergleichen zu können. Diese Messungen und Vergleiche werden mit Benchmarks durchgeführt \cite{takevalue}.
 Mit ihnen wird die Rechenleistung oder auch Lese-/Schreibgeschwingkeit der Hardware oder auch Software mit standardisierten Tests gemessen \cite{benchmarkingBruno2014}. Ein Beispiel, bei dem Software getestet wird, sind virtuelle Maschinen wie die Java Virtual Machine \cite{10.1145/1297027.1297033} oder virtuelle Maschinen die auf reale Rechner basieren.
 Hier wird die Performanz von virtuellen CPUs oder des Hypervisor analysiert \cite{9256518}.
 Auch für Cloud Computing Platformen wird Benchmarking betrieben, um auch Performanz zwischen verschieden Cloudplatformen vergleichen zu können. Diese Benchmarks verwenden z.B die Turnaround-Zeit als Metrik, also die Zeit, die ein Prozess benötigt, um vollständig durchzulaufen \cite{10.1145/2493123.2462919}.  Somit gibt es ein weites Spektrum an Auswahl von Systemen, wo  Benchmarking betrieben wird.
@@ -149,12 +149,13 @@ Ein Zustand, wo die Rechenleistung oder Lese-/Schreibgeschwindigkeit sich nicht 
 Um den stationären Zustand zu ermitteln, werden verschiedene Methodiken aus der Varianzanalyse verwendet. Der Tukey-HSD-Test, t-Test und Mann-Whitney-Test werdem zusammen mit den Werten aus den Logdateien des fios genutzt. 
 
 \section{Grundlagen}
+\subsection{Festplattenbenchmarking}
 Das Fio Tool ermöglicht das Testen auf bestimmter Hardware oder Software. Die I/O-Geschwindigkeit wird hier in Mebibyte pro Sekunde angegeben. Das Fio bietet auch die Möglichkeit diese Einheit zu ändern.
 Das Programm selbst besitzt kein GUI, sondern arbeitet nur in der Konsole. Man kann für das Programm sogenannte .fio Dateien schreiben. Oder man arbeitet direkt in der Konsole,
 um seine gewünschten Tests durchzuführen.
 Wenn man nun ein Random Read testen möchte, kann die .fio Datei wie folgt aussehen (Listing \ref{lst:log_line_example}):
-\newpage
-\begin{lstlisting}[caption=Beispiel für eine .fio Datei,label={lst:fio_file_example}]
+
+\begin{lstlisting}[caption=Beispiel für eine .fio Datei (\# heißt Kommentar),label={lst:fio_file_example}]
     ; fio-rand-read.job for fio Test
 
     [global]
@@ -168,22 +169,39 @@ Wenn man nun ein Random Read testen möchte, kann die .fio Datei wie folgt ausse
 \bigskip
 In der Konsole kann man sie auch einzeln als Parameter angeben, wenn es nur ein Test sein soll.
 Diese Tests, oder auch Jobs genannt, geben Logs aus, mit denen mein Tool arbeiten wird. Dieser Job oben testet das Random Read mit einer
-Laufzeit (Runtime) von 2 Sekunden und liest eine Datei mit einer Größe von 128 Mebibyte. Mit größeren Tests ist es möglich, den stationären Zustand zu analysieren. 
-Der stationäre Zustand ist der Zeitpunkt, wenn es keine starken Schwankungen mehr bei der Brandbreitengeschwindigkeit im Lesen oder im Schreiben gibt \cite{vmsHotandCold}.
-Der Nichtdeterminismus wird dabei eine Hindernis sein.
-Auch wenn man das Lesen/Schreiben auf demselben System mit derselben Datei testet, ist die Brandbreitengeschwindigkeit im Durchschnitt nie die gleiche. Sie wird immer abweichen.
-Ursachen dafür könnten schon verschiedene CPU-Temperaturen sein, aber auch CPU-Scaling oder parallele Prozessierung.\cite{stasticsInPerformance}.
-Das fio selbst arbeitet nicht nur mit einem Thread. Sondern es arbeitet mit Multithreads, was nicht deterministische Zustände hervorrufen kann.
-Da sich die Geschwindigkeit nie konstant einem Wert nähert, sondern stets abweicht, soll mein Programm in Zukunft mithilfe der Standardabweichung den stationären Zustand ermitteln und dabei den Nichtdeterminismus berücksichtigen.
-Solche Abweichung könnte in wenigen Prozentbereichen liegen. 
+Laufzeit (Runtime) von 2 Sekunden und liest eine Datei mit einer Größe von 128 Mebibyte.
 
+\subsection{Stationärer Zustand}
+
+Bei Hardware oder Software ist anfangs wiederholtes testen notwendig, um sie analysieren zu können. Erst nach diesen \textit{Warm-ups} wird der "steady state of peak performance" erreicht. Ein Beispiel, wo solche Warmups erforderlich sind, ist die JIT (Just-In-Time) Kompilierung in Java. Der Bytecode wird während der Laufzeit des Programms kompiliert. Damit verbessert man die Performanz von Java-Anwendungen \cite{jit}. Doch erst nach diesen Warm-Ups ist es möglich den stationären Zustand zu ermitteln, da die Performanz weniger schwankt \cite{vmsHotandCold}.
+Der stationäre Zustand ist der Zeitpunkt, wenn es keine starken Schwankungen mehr bei der Bandbreitengeschwindigkeit im Lesen oder im Schreiben gibt. Auch wenn der Warm-up erfolgt ist, wird
+Der Nichtdeterminismus dabei ein Hindernis sein.
+Auch wenn man das Lesen/Schreiben auf demselben System mit derselben Datei testet, ist die Bandbreitengeschwindigkeit im Durchschnitt nie die gleiche. Sie wird immer abweichen.
+Ursachen dafür könnten schon verschiedene CPU-Temperaturen sein, aber auch CPU-Scaling oder parallele Prozessierung.\cite{stasticsInPerformance}.
+Das fio selbst arbeitet nicht nur mit einem Thread, sondern es arbeitet mit Multithreads, was nicht-deterministische Zustände hervorrufen kann.
+Da sich die Geschwindigkeit nie konstant einem Wert nähert, sondern stets abweicht, soll mein Programm in Zukunft mit statistischen Tests den stationären Zustand ermitteln und dabei den Nichtdeterminismus berücksichtigen.
+Solche Abweichungen können in wenigen Prozentbereichen liegen. 
 Es wird aber nicht ausreichen, ein paar Tests durchzuführen und danach die Logs davon auszuwerten. Diese Logs wären nämlich nicht akkurat genug.
-Man muss erst einige Warm-up-Iterationen durchführen. Erst dann werden die Werte am Ende präziser \cite{vmsHotandCold}. Somit hängt der stationäre Zustand, der errechnet werden soll, 
-mit diesen Warmups zusammen. Dieses Problem wird aber nur ein Hindernis sein. Ein größeres Problem wird es sein - wenn der Warmup durchgelaufen ist -
+ Ein größeres Problem wird es sein - wenn der Warmup durchgelaufen ist -
 welche Logs die besten Informationen besitzen. 
 Die Auswahl der Logs und deren Auswertung könnten signifikante Unterschiede beinhalten, die die Evaluierung verändern könnten \cite{whenStopPerformanceTest}.
 
-\newpage
+\subsection{Statistische Tests}
+
+Eine Möglichkeit, den stationären Zustand zu ermitteln, ist, dass man die Standardabweichung verwendet und errechnet, wann die Abweichung klein genug ist. Zusätzlich werden Konfidenzintervalle benutzt, um den Nichtdeterminismus mitzubeachten. Eine weitere Methode, die durchgeführt wird, ist die Verwendung der Varianzanalyse - \textit{Analysis of Variance} (ANOVA) \cite{stasticsInPerformance}.
+Da der stationare Zustand nicht eindeutig bestimmt werden kann, sollen diese statistischen Methoden dabei helfen.
+Mit ANOVA wird untersucht, ob die berechneten Mittelwerten aus den verschiedenen Logdaten statistisch signifikant sind.
+Mit statistisch signifikant ist hier gemeint, ob zwischen den durchgelaufenen Tests/Jobs des Fios eine Abhängigkeit besteht \cite{statistischeSigni}. Wenn das nicht der Fall ist, sind die Jobs nicht statistisch signifikant \cite{posthoc}. Dies kann mit einem Signifikanzniveau festgelegt werden, das die maximale Wahrscheinlichkeit angibt, mit der die statistische Signifikanz fälschlicherweise angenommen wurde.
+
+Dabei sind Falsch-Positive-Annahmen (Typ-I-Fehler) zu berücksichtigen. Die Analysen liefern nicht immer eine verlässliche Aussage darüber, ob der stationäre Zustand tatsächlich erreicht wurde oder ob es sich um eine falsche Annahme handelt.
+
+In der Arbeit werden der t-Test, der Tukey-HSD-Test und der Mann-Whitney-Test genutzt.
+Der Tukey-HSD-Test verwendet die Differenz zwischen zwei Mittelwerten, um ihre statistische Signifkanz zu ermitteln.
+Der HSD-Wert wird mittels mittlere quadratische Abweichung (MSE) berechnet und mit der Anzahl der Gruppen die getestet wurden.
+Die minimalste Differenz wird als HSD bezeichnet. Wenn aber die Differenz der Mittelwerte aus den Tests größer als der HSD-Wert ist, sind diese Werte statistisch signifikant. Zusätzlich versucht der Tukey HSD Test die Fehlerrate von Falsch-Positiven-Annahmen zu korrigieren. 
+Die t-Tests arbeiten ähnlich wie die Tukey HSD Tests. Der Unterschied besteht darin, dass sie die Fehlerrate nicht anpassen \cite{schmidtPaul} \cite{tukeyhsdwiki}. 
+Beim Mann-Whitney-Test die werden zubestimmenden Werte einem Rang zugeordnet und einer Gruppe zugeordnet. Danach wird statistische Signifilanz nach den Rängen getestet und nicht nach Mittelwerrten.  
+
 \section{Konzept}
 Das fio Tool bekommt den Parameter $\text{--} write\_bw\_logs = [Dateiname]$ dazu, um die Logs als Datei auszugeben.
 Diese Logs geben den kompletten Verlauf des Jobs wieder. Die ersten Zeilen des Logs könnten so aussehen, wie in Listing \ref{lst:log_line_example}:
@@ -195,12 +213,12 @@ Diese Logs geben den kompletten Verlauf des Jobs wieder. Die ersten Zeilen des L
     1, 	  45545,        0,		          4096,		   0
 \end{lstlisting}
 \bigskip
-Time für die Zeit in Millisekunden (ms) die verlaufen ist, Bandwidth für die Brandbreitengeschwindigkeit in Kibibyte/s, 
+Time für die Zeit in Millisekunden (ms) die verlaufen ist, Bandwidth für die Bandbreitengeschwindigkeit in Kibibyte/s, 
 der dritte Wert für die data direction, ob gelesen (= 0) oder geschrieben (= 1) wurde und ein Blocksize
 und ein Offset. Die Logdaten selbst sind immens lang und nicht schön lesbar. Deshalb wurde schon ein kleines Tool in Python programmiert,
 was diese Logdaten zu einem Graph umwandelt. 
-Das Tool nimmt die Zeit als X-Achse und die Brandbreitengeschwindigkeit als Y-Achse.
-Wenn man sich die Logdaten als Text nochmal anschaut, sieht man, dass die Brandbreitengeschwindigkeit sich schneller innerhalb einer 1 ms ändert.
+Das Tool nimmt die Zeit als X-Achse und die Bandbreitengeschwindigkeit als Y-Achse.
+Wenn man sich die Logdaten als Text nochmal anschaut, sieht man, dass die Bandbreitengeschwindigkeit sich schneller innerhalb einer 1 ms ändert.
 Das Python-Tool umgeht das Problem so, dass die Werte, die mehrfach doppelt vorkommen, linear auftrennt.
 Unten wird es nochmal veranschaulicht (Listing \ref{lst:log_timesplit_example}), wenn die Zeit sich dreimal wiederholt, mit 23ms.
 \bigskip
@@ -218,7 +236,7 @@ Unten wird es nochmal veranschaulicht (Listing \ref{lst:log_timesplit_example}),
 \end{lstlisting}
 \bigskip
 In Figure \ref{fig:log_graphs}  ist einmal die Bandbreitengeschwindigkeit pro Millisekunde dargestellt (a) und in der anderen Abbildung (b) zeigt es die Häufigkeiten, 
-wie oft diese Brandbreitengeschwindigkeit erreicht wurde. Das fio wurde wie oben in Listing \ref{lst:fio_file_example} ausgeführt.
+wie oft diese Baandbreitengeschwindigkeit erreicht wurde. Das fio wurde wie oben in Listing \ref{lst:fio_file_example} ausgeführt.
 
 \begin{figure}%
     \centering
@@ -233,31 +251,28 @@ wie oft diese Brandbreitengeschwindigkeit erreicht wurde. Das fio wurde wie oben
 Der Computer, der verwendet wurde, hat ein 11th Gen Intel(R) Core(TM) i5-11400 @ 2.60GHz Prozessor und eine ADATA SWORDFISH 1TB SSD  als Datenträger.
 Das kleine Tool diente mehr zum Einstieg. Die eigentliche Arbeit wird es sein, das Tool weiter auszubauen, das nicht nur veranschaulicht,
 sondern auch den stationären Zustand berechnet.
-Das Programm wird in Java geschrieben. Grund dafür ist, da dort bereits die meiste Erfahrung steckt.
-Eine Möglichkeit, den stationären Zustand zu ermitteln, wäre, dass man die Standardabweichung verwendet und errechnet, wann die Abweichung klein genug ist und zusätzlich Konfidenzintervalle benutzt, um nicht determismus mitzubeachten.
-
-Eine weitere Berechnung, die durchgeführt wird, ist die Verwendung der Varianz oder auch Varianzanalyse - \textit{Analysis of Variance} (ANOVA) \cite{stasticsInPerformance}.
-Da der stationare Zustand nicht eindeutig bestimmt werden kann, sollen diese statistischen Methoden dabei helfen.
-Mit ANOVA wird untersucht, ob die berechneten Mittelwerten aus den verschiedenen Logdaten sich statistisch signifikant unterscheiden. \cite{posthoc}
-Mit statistisch signifikant ist hier gemeint, ob zwischen den durchgelaufenen Tests ein Zusammenhang besteht. 
-Um aber zwischen einzelnen Tests unterscheiden zu können, lässt sich ANOVA mit Tukey HSD (Honestly Significant Difference) und dem multiplen t-Test erweitern, um signifikante Unterschiede bei paarweisen Messungen zu analysieren. 
-
-Der Tukey-HSD-Test verwendet die Differenz zwischen zwei Mittelwerten, um ihre statistische Signifkanz zu ermitteln.
-Der HSD-Wert wird mittels mittlere quadratische Abweichung (MSE) berechnet und mit der Anzahl der Gruppen die getestet wurden.
-Die minimalste Differenz wird als HSD bezeichnet. Wenn aber die Differenz der Mittelwerten aus den Tests größer als der HSD-Wert ist, sind diese Werte statistisch signifikant. Zusätzlich versucht der Tukey HSD Test die Fehlerrate von Falsch-Positiven-Annahmen, oder auch Typ-I-Fehler, zu korrigieren. Diese Annahmen, die aussagen, dass die statististische Signifikanz vorhanden ist, obwohl das nicht der Fall ist \cite{fastcapital_TukeysHSD}.
-Die t-Tests arbeiten ähnlich wie die Tukey HSD Tests. Der Unterschied besteht darin, dass sie die Fehlerrate nicht anpassen \cite{schmidtPaul} \cite{tukeyhsdwiki}.
+Das Programm wird in Java geschrieben, da bereits entsprechende Vorkenntnisse vorhanden sind.
 So soll mein Tool mit den Logdateien statistisch arbeiten.
 
+\newpage
 \section{Verwandte Arbeiten}
 In der Arbeit von Barrett et al \cite{vmsHotandCold}. wurde tiefer auf Nichtdeterminismus von VMs eingegangen.
-Dort wurde versucht, nicht determinisitschen Faktoren so gering wie möglich zu halten, da sonst der stationäre Zustand nicht erfolgen kann, auch wenn gleiche Workloads wiederholt durchlaufen werden. Und etwas andere Hardware und Operationssysteme haben wenig Einfluss auf die Zeit von Warmups. Li et al. \cite{9256518} arbeiteten ebenfalls mit VMs und testen die Performanz von diesen Maschinen mit verschiedener Anzahl an virtuellen CPUs. Und eine große Anzahl an VCPUs erhöht nicht zwingend die Performanz.
+Dort wurde versucht, nicht-determinisitsche Faktoren so gering wie möglich zu halten, da sonst der stationäre Zustand nicht eintreten kann, auch wenn gleiche Workloads wiederholt durchlaufen werden. Auch  andere Hardware und Betriebssysteme haben wenig Einfluss auf die Zeit von Warmups. Li et al. \cite{9256518} arbeiteten ebenfalls mit VMs und testen die Performanz von diesen Maschinen mit verschiedener Anzahl an virtuellen CPUs. Und eine große Anzahl an VCPUs verbessert nicht zwingend die Performanz.
 Georges et al \cite{10.1145/1297027.1297033}. verwendet statistische Methoden, wie Varianzanalyse und Tukey HSD, um eine akkurate Auswertung von den Experimenten berechnen zu können. Sie arbeiten ebenfalls mit VMs und VM Warmups.
-Gründe für nicht deterministisches Verhalten in VMs könnte Garbage Collection, Thread Scheduling oder auch Just-in-Time Compilation/Optimization sein \cite{stasticsInPerformance}.
+Gründe für nicht-deterministisches Verhalten in VMs könnte Garbage Collection, Thread Scheduling oder auch Just-in-Time Compilation/Optimization sein \cite{stasticsInPerformance}.
 AlGhmadi et al. erarbeiteten, wann Performanztests nach langem Testen redundant werden und wie viele Tests genug sind.
- 
-\newpage
+
 \section{Zeitplan}
-- - 
+Im ersten Teil der eigentlichen Arbeit werden die Grundlagen behandelt.
+ Zuerst werden auf die Begrifflichkeiten wie Benchmarking, Warm-Up,
+stationärer Zustand und fio-Tool erklärt. Nach den Erklärungen werden die Methodiken
+der statististischen Analyse definiert, die das  Analysetool verwenden wird.
+Im nächsten Kapitel werden die verwandten Arbeit beschrieben, die in
+der Arbeit verwendet wurden. Im dritten Kapitel wird der Aufbau sowie die
+Verwendung des Analystools eingegangen. Nach dem Analysetool, werden die
+Experimente durchgeführt. Diese werden im vierten Kapitel für die Evaluierung
+verwendet. Das letzte Kapitel ist die Zusammenfassung und Ausblick.
+\newpage
 \bibliography{cite}{}
 \bibliographystyle{plain}
 \end{document}

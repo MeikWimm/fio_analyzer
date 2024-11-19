@@ -1,17 +1,17 @@
 # Fdb version 4
-["bibtex Exposee"] 1731935766.77809 "Exposee.aux" "Exposee.bbl" "Exposee" 1731935769.93197 0
-  "./cite.bib" 1731935763 14592 19c904641fe327dc59beb9497ade2e92 ""
-  "Exposee.aux" 1731935768 2775 f835ade2ea747b8f6bce34331bf8d5b0 "pdflatex"
+["bibtex Exposee"] 1732045594.4132 "Exposee.aux" "Exposee.bbl" "Exposee" 1732045596.87171 0
+  "./cite.bib" 1732041275 15018 42276e8f85a492e5e4e9394ff05fe57b ""
+  "Exposee.aux" 1732045595 3137 b988ed3b491e21f579a21f332f780827 "pdflatex"
   "c:/texlive/2024/texmf-dist/bibtex/bst/base/plain.bst" 1726488403 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
   (generated)
   "Exposee.bbl"
   "Exposee.blg"
   (rewritten before read)
-["pdflatex"] 1731935767.35063 "d:/UNI/WISE 24 25/BA/Exposee.tex" "Exposee.pdf" "Exposee" 1731935769.93266 0
-  "Exposee.aux" 1731935768 2775 f835ade2ea747b8f6bce34331bf8d5b0 "pdflatex"
-  "Exposee.bbl" 1731935767 3789 127fc01a381fa94f000ec2f35439d911 "bibtex Exposee"
-  "Exposee.tex" 1731935748 17280 98b816ad18aa0e7de83fcabcf2cf0da8 ""
-  "Exposee.toc" 1731935768 289 2a9e5a164d6f8a9533590daf7fcbe7f0 "pdflatex"
+["pdflatex"] 1732045594.93481 "d:/UNI/WISE 24 25/BA/Exposee.tex" "Exposee.pdf" "Exposee" 1732045596.87242 0
+  "Exposee.aux" 1732045595 3137 b988ed3b491e21f579a21f332f780827 "pdflatex"
+  "Exposee.bbl" 1732045594 3949 7493d1d6edde3a4ca8b39e595dd7d319 "bibtex Exposee"
+  "Exposee.tex" 1732045589 18686 2eb01c171bb2bcbaae76701b267eeb7d ""
+  "Exposee.toc" 1732045595 506 c32e697236a9e48ef85cf393d2711b52 "pdflatex"
   "c:/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1726488569 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "c:/texlive/2024/texmf-dist/fonts/map/fontname/texfonts.map" 1726489064 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "c:/texlive/2024/texmf-dist/fonts/tfm/jknappen/ec/tcrm0800.tfm" 1726488850 1536 05df9db6aeccc4eea94fec15c9024f79 ""
@@ -81,7 +81,7 @@
   "c:/texlive/2024/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1726491126 5543950 2aa73a438b7054b2327b796fbe5f4275 ""
   "c:/texlive/2024/texmf-var/web2c/pdftex/pdflatex.fmt" 1726491242 3326173 107a8018349a659c7b722efd58f05b59 ""
   "c:/texlive/2024/texmf.cnf" 1726491104 713 e69b156964470283e0530f5060668171 ""
-  "d:/UNI/WISE 24 25/BA/Exposee.tex" 1731935748 17280 98b816ad18aa0e7de83fcabcf2cf0da8 ""
+  "d:/UNI/WISE 24 25/BA/Exposee.tex" 1732045589 18686 2eb01c171bb2bcbaae76701b267eeb7d ""
   "log_graph_bw_freq.jpg" 1731264742 86501 10191ba1481d4be0309e44d41bbd73e4 ""
   "log_graph_time_to_bw.jpg" 1731264733 200381 47d26ea0646f8d93f2f8b35766668a0c ""
   (generated)
