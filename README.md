@@ -1,6 +1,14 @@
 [Geschrieben am 19.11.2024]
 
 - Exposee V3 aus overleaf
+- Abstract überarbeitet
+- Grundlagen überarbeitet
+- Einführung überarbeitet
+- Konzept überarbeitet
+
+[Geschrieben am 19.11.2024]
+
+- Exposee V3 aus overleaf
 - Grundlagen überarbeitet
 - Einführung noch nicht komplett fertig
 - Mann-Whitney-Test eventuell genauer beschreiben

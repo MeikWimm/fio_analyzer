@@ -69,11 +69,10 @@ Novustat.
 \newblock \url{https://novustat.com/statistik-blog/post-hoc-test-signifikante-unterschiede-finden-und-erklaeren.html}.
 \newblock Zugriff am 11. November 2024.
 
-\bibitem{takevalue}
-takevalue Consulting~GmbH.
-\newblock Definition benchmarking.
-\newblock \url{https://www.takevalue.de/glossar/benchmark/}.
-\newblock Zugriff am 12. November 2024.
+\bibitem{Sabetta2008}
+Antonino Sabetta and Heiko Koziolek.
+\newblock {\em Measuring Performance Metrics: Techniques and Tools}, pages 226--232.
+\newblock Springer Berlin Heidelberg, Berlin, Heidelberg, 2008.
 
 \bibitem{statistischeSigni}
 wikipedia.
