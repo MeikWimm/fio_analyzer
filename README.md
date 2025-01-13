@@ -1,66 +1,9 @@
-[Geschrieben am 19.11.2024]
+[Geschrieben am 13.01.2024]
 
-- Exposee V3 aus overleaf
-- Abstract überarbeitet
-- Grundlagen überarbeitet
-- Einführung überarbeitet
-- Konzept überarbeitet
+- Definition Benchmarking
+- Definition Warmup
+- stationärer Zustand
+- Fio Tool
+- Methodiken Analyse
+- Konzept Analysetool
 
-[Geschrieben am 19.11.2024]
-
-- Exposee V3 aus overleaf
-- Grundlagen überarbeitet
-- Einführung noch nicht komplett fertig
-- Mann-Whitney-Test eventuell genauer beschreiben
-- Rechtschreibfehler und Grammatik noch checken
-
-[Geschrieben am 18.11.2024]
-
-- Anfang Exposee V3 aus overleaf
-- Abstract und Einführung bearbeitet
-- Einführung noch nicht komplett fertig
-
-[Geschrieben am 13.11.2024]
-
-- Exposee V2 aus overleaf
-- Alle Kommentare abgearbeitet
-
-[Geschrieben am 10.11.2024]
-
-- Exposee V1 aus overleaf
-- Erste Seite überarbeitet mithilfe der Prof. Kommentaren aus der PDF
-
-[Geschrieben am 08.10.2024]
-
-- Kapitel Einführung und Grundlagen ordentlich geschrieben
-- Zitate hinzugefügt
-
-[Changelog für den XX.10.2024]
-[Geschrieben am 08.10.2024]
-
-- [ ] Text neu schreiben/roten faden bilden
-- [ ] Grundlagen HPC (mit Benchmark)
-- [ ] papers durchgehen
-
-[Changelog für den 08.10.2024]
-[Geschrieben am 07.10.2024]
-
-- [x] langsam Text neu schreiben
-- [ ] Grundlagen HPC (mit Benchmark)
-- [ ] papers durchgehen
-
-[Changelog für den 07.10.2024]
-[Geschrieben am 04.10.2024]
-
-- [ ] paper durchgehen
-- [ ] Grundlagen HPC (mit Benchmark)
-- [x] was soll das tool alles können
-
-[Changelog für den 04.10.2024]
-[Geschrieben am 03.10.2024]
-
-- [x] python code schicken 
-- [ ] paper durchgehen
-- [x] unter Vm laufen lassen
-- [ ] Grundlagen HPC (mit Benchmark)
-- [ ] was soll das tool alles können

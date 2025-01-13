@@ -1,6 +1,4 @@
-fio/*
-!fio/logs/
-books
+Quellen/*
 *.bak
 *.aux
 *.log

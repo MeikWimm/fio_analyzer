@@ -1,9 +1,0 @@
-\contentsline {section}{\numberline {1}Einführung}{3}{}%
-\contentsline {section}{\numberline {2}Grundlagen}{4}{}%
-\contentsline {subsection}{\numberline {2.1}Festplattenbenchmarking}{4}{}%
-\contentsline {subsection}{\numberline {2.2}Stationärer Zustand}{4}{}%
-\contentsline {subsection}{\numberline {2.3}Statistische Tests}{5}{}%
-\contentsline {section}{\numberline {3}Konzept}{6}{}%
-\contentsline {subsection}{\numberline {3.1}Erste Experimente}{7}{}%
-\contentsline {section}{\numberline {4}Verwandte Arbeiten}{7}{}%
-\contentsline {section}{\numberline {5}Zeitplan}{8}{}%
