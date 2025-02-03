@@ -1,0 +1,148 @@
+\chapter{Grundlagen}
+\label{cha:Grundlagen}
+Benchmarking spielt eine wichtige Rolle zum Testen von Hardware und Software.
+Um die Performanz von Hardware [Q] oder auch [Q] zu untersuchen werden, standardisierte Tests verwendet
+um Performanz wie I/O-Geschwindigkeit oder CPU-Geschwindigkeit zu testen [Q].
+-- Solche Software oder Hardware benötigen einen WARMUP um den Zustand erreicht wo die geringste Schwankung
+besteht in der Performanz. Dieser Zustand wird als stationärer Zustand bezeichnet [Q]. --
+Sowie die Wahrscheinlichkeiten die verwendet werden wie zum Beispiel Tukey-HSD und Varianztests.
+
+\section{Benchmarking}
+\textit{Benchmarks dienen dazu, die Performanz von verschiedenen Systemen zu vergleichen
+[SK08]. Die Performanz eines Systems kann dabei sowohl durch Probleme in der Soft-
+ware, CPU-Zeit oder andere Hardwareressourcen begrenzt werden. Durch die standar-
+disierten Benchmarks wird es möglich, die Performanz verschiedener Hardware- und
+Softwareanbieter zu vergleichen.}
+
+\subsection{Warmup und stationärer Zustand}
+Bei Hardware oder Software ist anfangs wiederholtes testen notwendig, um
+sie analysieren zu k¨onnen. Erst nach diesen sogenannten Warm-ups wird der
+station¨are Zustand der Performanz (engl. steady state of peak performance)
+erreicht [3]. Ein Beispiel, wo solche Warmups erforderlich sind, ist die JIT
+(Just-In-Time) Kompilierung in Java. Der Bytecode wird w¨ahrend der Laufzeit
+des Programms kompiliert. Damit verbessert man die Performanz von Java-
+Anwendungen [8]. Ein station¨arer Zustand im Festplattenbenchmarking ist er-
+reicht, wenn die I/O-Geschwindigkeit wiederholte Muster aufweist, sodass die
+Geschwindigkeiten zu verschiedenen Zeitpunkten nach diesem Zustand gleich
+sind.2 Vor dem station¨aren Zustand erfolgt der Warm-Up, wo die Caches des
+Rechners bef¨ullt werden [15]. Dieser Zeitraum wird auch als transienten Zustand
+bezeichnet [11]. Auch wenn der Warm-up erfolgt ist, ist der Nichtdeterminismus
+dabei ein Hindernis.
+2”A steady-state pattern is one that is repetitive with time and in which the behavior in
+one time period is of the same nature as any other period.” [11]
+4
+Wenn man das Lesen/Schreiben auf demselben System mit derselben Datei
+testet, ist die Bandbreitengeschwindigkeit im Durchschnitt nie die gleiche. Sie
+wird immer abweichen. Ursachen daf¨ur k¨onnten schon verschiedene CPU-Tempe-
+raturen sein, aber auch CPU-Scaling oder parallele Prozessierung [7]. Das Fio
+selbst arbeitet nicht nur mit einem Thread, sondern es arbeitet mit Multi-
+threads, was nicht-deterministische Zust¨ande hervorrufen kann. Weitere nicht-
+deterministische Faktoren sind die Caches die beim Lesen oder Schreiben ver-
+wendet werden, je nach dem ob sie leer sind oder schon beschrieben wurden.
+Auch nicht essentielle Prozesse (oder auch essentielle Prozesse wie Daemons3),
+die immer Hintergrund laufen, k¨onnen die Geschwindigkeit beeinflussen [15].
+Da sich die Geschwindigkeit nie konstant einem Wert n¨ahert, sondern stets
+abweicht, soll das Analysetool in Zukunft mit statistischen Tests den station¨aren
+Zustand ermitteln und dabei den Nichtdeterminismus ber¨ucksichtigen. Solche
+Abweichungen k¨onnen im niedrigen Prozentbereich liegen. Es wird jedoch nicht
+ausreichen, ein paar Tests durchzuf¨uhren und anschließend die Logs auszuw-
+erten. Denn nach dem Warm-up wird ein gr¨oßeres Problem darin bestehen,
+welche Logs die Informationen beinhalten, wo auch der Warm-Up stattfand und
+der transiente Zustand abgeschlossen wurde. Die Auswahl der Logs und deren
+Auswertung k¨onnen signifikante Unterschiede aufweisen, die die Evaluierung
+ver¨andern w¨urden [1].
+
+\subsection{Fio-Tool}
+Das Fio-Tool [Q] ist Benchmarking Tool für I/O-Geschwindigkeit der Festplatte.
+Das Programm selbst arbeitet nur in der Konsole, z.B in Cygwin, und es gibt keine UI.
+Um das Programm auszuführen werden Parameter verwendet. Es werden hier nur bestimmte Parameter 
+für die späteren Experimente verwendet.
+Die Parameter sind runtime, rw, write bw log, name, und size.
+
+
+\begin{center}
+\begin{tabularx}{\textwidth}{|X|X|}
+  \hline
+    Parameter& Defintion \\ 
+  \hline
+  runtime & TESTNIEN NIFNEN NIFNEIFN  \\ 
+  \hline
+  name &  TESTNIEN NIFNEN NIFNEIFN   \\ 
+  \hline
+  size &  TESTNIEN NIFNEN NIFNEIFN   \\ 
+  \hline
+  write bw log &  TESTNIEN NIFNEN NIFNEIFN   \\ 
+  \hline
+\end{tabularx}
+\end{center}
+[Tableappendix]
+
+Fio was originally written to save me the hassle of writing special test case programs when I wanted to test a specific workload, 
+either for performance reasons or to find/reproduce a bug. The process of writing such a test app can be tiresome, especially
+ if you have to do it often. Hence I needed a tool that would be able to simulate a given 
+I/O workload without resorting to writing a tailored test case again and again.
+A test work load is difficult to define, though. There can be any number of processes or threads involved, 
+and they can each be using their own way of generating I/O. You could have someone dirtying large amounts of memory in a memory mapped file,
+ or maybe several threads issuing reads using asynchronous I/O. fio needed to be flexible enough to simulate both of these cases, and many more.
+
+\section{Statistische Analyse/Tests}
+Um zu entscheiden, ob eine Performanzänderung vorliegt, müssen durch die Messung
+ermittelte Stichproben von Zufallsvariablen verglichen werden. Hierfür werden verschie-
+dene statistische Tests eingesetzt [GBE07]. Im Folgenden werden statistische Tests im
+Allgemeinen, der T-Test, der Konfidenzintervallvergleich und weitere statistische Tests
+vorgestellt.
+
+\textit{Eine Möglichkeit, den stationären Zustand zu ermitteln, ist, dass man die Stan-
+dardabweichung verwendet und mit Hilfe eines Konfidenzintervalls abschätzt ob
+der Zustand erreicht wurde. Die Konfidenzintervalle helfen dabei, den Nicht-
+determinismus in Betracht zu ziehen. Eine weitere Methode, die durchgeführt
+wird, ist die Verwendung der Varianzanalyse - Analysis of Variance (ANOVA)
+[7]. Da der station¨are Zustand nicht eindeutig bestimmt werden kann, sollen
+diese statistischen Methoden dabei helfen.}
+
+\textit{Dies kann mit einem Signifikanzniveau erweitert werden,
+das die maximale Wahrscheinlichkeit angibt, ob die Signifikanz zwischen den
+Stichproben falsch angenommen wurde. Solche falsche Annahmen werde Typ-
+I-Fehler genannt.
+In der Arbeit werden der t-Test, der Tukey-HSD-Test und der Mann-Whitney-
+Test genutzt. Der Tukey-HSD-Test verwendet die Differenz zwischen zwei Mit-
+telwerten, um ihre statistische Signifikanz zu ermitteln.}
+- Typ 1 Fehler \\
+- Varianz
+\subsection{T-Test}
+Der Begriff T-Test wird genutzt, um verschiedene Tests zu bezeichnen, die
+u. a. die Verteilung der Grundgesamtheit von normalverteilten und unabhängigen Stich-
+proben miteinander vergleichen [JP15, Seite 41]. Im Kontext dieser Arbeit bezeichnet
+der T-Test den unabhängigen T-Test, bei dem die Erwartungswerte zweier voneinander
+unabhängiger Stichproben miteinander verglichen werden.
+Der T-Test vergleicht die Stärke der Unterschiede zwischen den Stichproben mit der
+Abweichung innerhalb der Stichproben. Die Prüfgröße t, die ein Maß dafür ist, wie un-
+wahrscheinlich die Nullhypothese H0 ist, d. h. dass die Grundgesamtheiten der beiden
+Stichproben den gleichen Erwartungswert aufweisen. Diese wird folgendermaßen berech-
+net:
+\subsection{Tukey-HSD}
+Der Tukey-HSD-Test verwendet die Differenz zwischen zwei Mit-
+telwerten, um ihre statistische Signifikanz zu ermitteln.
+Der HSD-Wert wird mittels mittlere quadratische Abweichung (MSE) berech-
+net und mit der Anzahl der Gruppen die getestet wurden. Die minimale Dif-
+ferenz wird als HSD bezeichnet. Wenn aber die Differenz der Mittelwerte aus
+den Tests gr¨oßer als der HSD-Wert ist, sind diese Werte statistisch signifikant.
+Zus¨atzlich versucht der Tukey-HSD-Test5 die Fehlerrate von Falsch-Positiven-
+Annahmen zu korrigieren. Dieser Test setzt aber voraus, dass die Stichproben
+normalverteilt sind. Die t-Tests arbeiten ¨ahnlich wie die Tukey HSD Tests. Der
+Unterschied besteht darin, dass sie die Fehlerrate nicht anpassen [12]. 
+\subsection{Mann-Whitney-
+Test}
+Für die Performanzanalyse werden in der Literatur weitere Tests ein-
+gesetzt. Der Mann-Whitney-Wilcoxon-Rangsummentest [BBH+16; CGT+14; JHHF09]
+[Fie13, Seiten 541ff] kann ebenfalls eingesetzt werden, um zu entscheiden, ob sich zwei
+Stichproben signifikant unterscheiden. Der Mann-Whitney-Wilcoxon-Rangsummentest
+hat keine Anforderungen über die Unabhängigkeit der Messwerte hinaus, fordert al-
+so keine Normalverteilung der Grundgesamtheiten
+
+\section{Konzept Analysetool}
+Das Analysetool wird mit den Logs des Fio-Tools analysieren.
+Das Fio-Too durchläuft 5 - 10 mal die gleichen Tests, wo dann der stationäre Zustand, des Analysetools,
+bestimmt werden soll. Das Tool wird in der Lage mit den drei Tests die eingeführt zu arbeiten.
+Da die Anzahl nicht festgelegt werden kann, da die dieser Zustand an einem unbestimmten Zeitpunkt und Iteration erreicht wird,
+werden verschiedene Anläufe getestet mit einer verschieden Anzahl and Fio-Tool Testanzahl.

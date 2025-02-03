@@ -1,3 +1,42 @@
 \chapter{Einleitung}
 \label{cha:Einleitung}
-\lipsum \autocite{DBLP:books/sp/HarderR01}
+1 Einf¨uhrung
+Die Performanz eines Rechners ist die Leistungsf¨ahigkeit und Effizienz bei der
+Ausf¨uhrung von Aufgaben [5]. Um herauszufinden welche Systeme die beste
+Performanz liefert, sind Messungen notwendig, um sie vergleichen zu k¨onnen.
+Solche Messungen und Vergleiche werden mit Benchmarks durchgef¨uhrt [14].
+Mit ihnen wird die Rechenleistung oder auch Lese-/Schreibgeschwindigkeit der
+Hardware oder auch Software mit standardisierten Tests gemessen [4]. Ein
+Beispiel f¨ur getestete Software, sind virtuelle Maschinen wie die Java Virtual
+Machine (JVM) [6] oder virtuelle Maschinen die reale Rechnern simulieren [9].
+Durch Benchmarks wird die Performanz von virtuellen CPUs oder des Hyper-
+visor analysiert. Auch f¨ur Cloud Computing Plattformen wird Benchmarking
+betrieben, um auch Performanz zwischen verschieden Cloud-Plattformen ver-
+gleichen zu k¨onnen. Diese Benchmarks verwenden z.B die Turnaround-Zeit
+als Metrik, also die Zeit, die ein Prozess ben¨otigt, um vollst¨andig durchzu-
+laufen [10]. Somit gibt es ein weites Spektrum an Auswahl von Systemen, wo
+Benchmarking betrieben wird. Ein Beispielprogramm f¨ur so ein Benchmark Tool
+ist das Fio1. Fio ist ein Tool, mit dem man die Bandbreitengeschwindigkeit vom
+Lesen/Schreiben testet und sie als eine Textdatei (von Fio Logdatei genannt)
+ausgeben kann. Diese Tests werden in Fio Jobs genannt.
+Die I/O-Geschwindigkeit kann st¨arker oder schw¨acher vom tats¨achlich er-
+reichbaren Maximalwert abweichen. Das Ziel des geplanten Tools ist es, den
+station¨aren Zustand zu ermitteln. Ein Zustand, wo die Rechenleistung oder
+Lese-/Schreibge-schwindigkeit sich nicht mehr beim Messen stark ¨andert und
+sich einem konstanten Wert ann¨ahert, aber durch den Nichtdeterminismus nie
+erreicht wird [3]. Um den station¨aren Zustand zu ermitteln, werden verschiedene
+Methodiken aus der Varianzanalyse verwendet. Der Tukey-HSD-Test, t-Test
+und Mann-Whitney-Test sind statistische Tests die im Analysetool genutzt wer-
+den. Zusammen mit den Logs aus den Jobs des Fio’s wird die Standabweichung
+sowie die Varianz berechnet. Dabei werden mit den Tests die statistische Sig-
+nifikanz als auch den Zusammenhang zwischen den Jobs analysiert.
+Im Expos´e werden zuerst die Grundlagen behandelt. Es werden das Fio-Tool
+sowie die Definitionen des station¨aren Zustands und die verwendeten statistis-
+chen Tests beschrieben. Im zweiten Teil wird das Konzept beschrieben, wie
+das entwickelte Programm mit dem Fio-Tool arbeiten wird und es werden erste
+Experimente durchgef¨uhrt. Im vorletzten und letzten Kapitel werden auf ver-
+wandte Arbeiten eingegangen und es wird der Zeitplan beschrieben, wie viele
+Wochen jeweils die Kapitel f¨ur die Bachelor Arbeit genutzt werden.
+\section{Motivation}
+\section{Ansatz}
+\section{Aufbau der Arbeit}
