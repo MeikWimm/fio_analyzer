@@ -1,3 +1,4 @@
+# coding=utf-8
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
@@ -27,8 +28,8 @@ def plot_bw_frequency():
     fig, ax = plt.subplots()
 
     ax.stem(xpoints,ypoints, markerfmt=' ', basefmt='C2-') 
-    plt.xlabel("Time in msec")
-    plt.ylabel("Bandwidth KiB/s")
+    plt.xlabel("I/O Speed in KiB/s")
+    plt.ylabel("Frequency")
     plt.savefig("log_graph.svg")
     plt.show()
 
@@ -36,6 +37,8 @@ def get_date():
     f = open(args[1], "r")
     old_time = 0 # Da im log die Zeit in Millisekunden gleich ist
     new_time = 0 # wollte ich nichts verwerfen und habe sie mit der np.linspace Funktion aufgeteilt 
+    sum_time = 0
+    counter = 0
     bw_with_same_time = [] # bw = bandwidth
     for line in f:
         splitted_line = line.split(",")
@@ -52,8 +55,12 @@ def get_date():
                 bw_with_same_time.append(line) # Füge die Zeile mit der neuen Zeit hinzu.
 
         old_time = int(splitted_line[0])
+        sum_time += old_time
+        counter += 1
         bw_list.append(int(splitted_line[1]))
     f.close()
+    mean_speed = sum_time / counter
+    print("Average Speed: " + str(mean_speed) + " KiB/s")
 
 
 def main(args):
@@ -67,6 +74,7 @@ def main(args):
 if __name__ == "__main__":
     args = sys.argv # args[1] = Dateipfad des Logs
     if(len(args) != 3):
+        print(args)
         print("Dateipfad fehlt!")         
     else:
         main(args)
