@@ -32,3 +32,4 @@ books
 *.auxlock
 *.dpth
 *.dep
+/Analysetool/Atool/target/

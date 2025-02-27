@@ -1,7 +1,7 @@
 \chapter{Grundlagen}
 \label{cha:Grundlagen}
 Benchmarking spielt eine wichtige Rolle zum Testen von Hardware und Software.
-Um die Performanz von Hardware [Q] oder auch [Q] zu untersuchen werden, standardisierte Tests verwendet
+Um die Performanz von Hardware [Q] oder auch Software [Q] zu untersuchen werden, standardisierte Tests verwendet
 um Performanz wie I/O-Geschwindigkeit oder CPU-Geschwindigkeit zu testen [Q].
 -- Solche Software oder Hardware benötigen einen WARMUP um den Zustand erreicht wo die geringste Schwankung
 besteht in der Performanz. Dieser Zustand wird als stationärer Zustand bezeichnet [Q]. --
@@ -15,6 +15,17 @@ disierten Benchmarks wird es möglich, die Performanz verschiedener Hardware- un
 Softwareanbieter zu vergleichen.}
 
 \subsection{Warmup und stationärer Zustand}
+Ein stationärer Zustand ist ein Muster, das sich mit der Zeit wiederholt und bei dem das Verhalten in einem Zeitraum von der 
+gleichen Natur ist wie in jedem anderen Zeitraum. Um zu ermitteln,
+wann der stationäre Zustand eingetreten ist, sind stabile Messwerte mit minimalen Schwankungen erforderlich.
+Diese minimale Schwankung werden mit einer selbst gewählt Fehlerrate innerhalb des Analysetools ausgewählt.
+\textit{Der Standardwert wird $\alpha$ = 0.05 sein.}. Die Fehlerrate dient für die Ermittlung des stationäre Zustandes und
+für den Nichtdeterminismus. Nicht-deterministische Faktoren sind, z.B., CPU-Temp und Caches und "weitere" [QUELLE].
+
+
+Bevor der stationäre Zustand erreicht wird, ist ein Warmup erforderlich.
+Dieser Warmup oder auch transiente Zustand
+
 Bei Hardware oder Software ist anfangs wiederholtes testen notwendig, um
 sie analysieren zu k¨onnen. Erst nach diesen sogenannten Warm-ups wird der
 station¨are Zustand der Performanz (engl. steady state of peak performance)
@@ -55,7 +66,7 @@ ver¨andern w¨urden [1].
 \subsection{Fio-Tool}
 Das Fio-Tool [Q] ist Benchmarking Tool für I/O-Geschwindigkeit der Festplatte.
 Das Programm selbst arbeitet nur in der Konsole, z.B in Cygwin, und es gibt keine UI.
-Um das Programm auszuführen werden Parameter verwendet. Es werden hier nur bestimmte Parameter 
+Um das Programm auszuführen werden zusätzlich Parameter verwendet. Es werden hier nur bestimmte Parameter 
 für die späteren Experimente verwendet.
 Die Parameter sind runtime, rw, write bw log, name, und size.
 
@@ -114,6 +125,21 @@ telwerten, um ihre statistische Signifikanz zu ermitteln.}
 - Typ 1 Fehler \\
 - Varianz
 \subsection{T-Test}
+Mit dem T-Test werden jeweils zwei unabhängige Stichprobe miteinander verglichen, 
+unter der Annahme das die Grundgesamtheit normalverteilt ist.
+
+\begin{center}
+  $t = \dfrac{\mu_1-\mu_2}{\sqrt{\frac{s_p^2}{n_1} + \frac{s_p^2}{n_2}}}$
+\end{center}
+
+\begin{center}
+  $s^2_p = \dfrac{(n_1 - 1)s^2_1 + (n_2 - 1)s^2_2}{n_1 + n_2 - 2}$
+\end{center}
+
+\begin{center}
+  $|t| > t(1 - \dfrac{1}{2}\alpha, n + m - 2)$
+\end{center}
+
 Der Begriff T-Test wird genutzt, um verschiedene Tests zu bezeichnen, die
 u. a. die Verteilung der Grundgesamtheit von normalverteilten und unabhängigen Stich-
 proben miteinander vergleichen [JP15, Seite 41]. Im Kontext dieser Arbeit bezeichnet
@@ -201,3 +227,12 @@ distribution for calculating confidence intervals. This is because the central l
 no longer holds with a small sample size. Instead, one must use the Student’s t-distribution.
 This distribution may also be used for experiments with at least 30 runs, since in this case
 it is similar to the normal distribution.
+
+Vorstellung Programm:
+
+- Signifikanzniveau selbst entscheidbar 0.01 bis 0.05 \\
+- Wenn ein Zusammenhang zwischen den Stichproben nicht der Fall ist, sollte der p Wert aus den Proben kleiner als der HSD-Wert sein.\\
+- So sollte der p Wert innerhalb des Signifikanzniveau sein und der stationäre Zustand sollte erreicht sein\\
+- Die Werte sollen nicht signifikant Unterscheidbar sein, dann wäre der stationäre Zustand erreicht\\
+- Wie soll ich die Logs mit den Tests abarbeiten ?\\
+- Welche Logs sollen genommen werden ? 
