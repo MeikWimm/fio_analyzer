@@ -102,7 +102,22 @@ verändern würden [1].
 \section{Statistische Analyse/Tests}
 Um zu entscheiden, ob eine Performanzänderung vorliegt, müssen durch die Messung
 ermittelte Stichproben von Zufallsvariablen verglichen werden. Hierfür werden verschie-
-dene statistische Tests eingesetzt [GBE07]. Im Folgenden werden statistische Tests im
+dene statistische Tests eingesetzt [GBE07]. 
+Die Grundgesamtheit werden alle Logs sein und daraus werden paarweise die Stichproben entnommen die für die Tests verwendet.
+Diese statistische Tests wird ausgesagt, ob eine statistische Signifikanz zwischen den Stichproben vorhanden ist.
+Wenn die statistisch Signifikanz erfüllt ist, wird die Nullhypothese abgelehnt.
+Die Nullhypothese ist hier, zwischen den Logs keine Abhängigkeit besteht.
+Somit ist die Alternativhypothese, dass zwischen den ausgewählten Stichproben ein Zusammenhang besteht.
+Um die Nullhypothese zu überprüfen wird ein p-wert (Signifikanz Wahrscheinlichkeit) berechnet und mit einem selbst
+festgelegtem Signifikanzniveau $\alpha$ verglichen.
+Dieser p-Wert sagt aus wie die Wahrscheinlichkeit ist eine Nullhypothese falsch anzunehmen. 
+Ein p-Wert von 0.5 sagt aus, dass es eine 5\%-ige Wahrscheinlichkeit gibt das die Nullhypothese inkorrekt abgelehnt wurde, obwohl sie erfüllt ist.
+Somit ist die Wahrscheinlichkeit für die Alternativhypothese (1 - p) also 95\% \cite{statistics}.
+Wenn $\alpha > p$ mit $\alpha = 0.05$ ist eine statistische Signifikanz vorhanden ist, wird die Nullhypothese abgelehnt. 
+Ein weiterer Messwert in den Tests ist der z-Wert. Dieser Wert gibt an viele Standardabweichungen ein ROHwert unter
+bzw. über dem Mittelwert liegt.
+
+Im Folgenden werden statistische Tests im
 Allgemeinen, der T-Test, der Konfidenzintervallvergleich und weitere statistische Tests
 vorgestellt.
 
@@ -164,14 +179,24 @@ Zus¨atzlich versucht der Tukey-HSD-Test5 die Fehlerrate von Falsch-Positiven-
 Annahmen zu korrigieren. Dieser Test setzt aber voraus, dass die Stichproben
 normalverteilt sind. Die t-Tests arbeiten ¨ahnlich wie die Tukey HSD Tests. Der
 Unterschied besteht darin, dass sie die Fehlerrate nicht anpassen [12]. 
+
 \subsection{Mann-Whitney-
 Test}
-Für die Performanzanalyse werden in der Literatur weitere Tests ein-
-gesetzt. Der Mann-Whitney-Wilcoxon-Rangsummentest [BBH+16; CGT+14; JHHF09]
+Der Mann-Whitney-Wilcoxon-Rangsummentest [BBH+16; CGT+14; JHHF09]
 [Fie13, Seiten 541ff] kann ebenfalls eingesetzt werden, um zu entscheiden, ob sich zwei
-Stichproben signifikant unterscheiden. Der Mann-Whitney-Wilcoxon-Rangsummentest
-hat keine Anforderungen über die Unabhängigkeit der Messwerte hinaus, fordert al-
-so keine Normalverteilung der Grundgesamtheiten
+Stichproben sich signifikant unterscheiden in dem die Werte einen Rang gesetzt wird. 
+Alle Werte aus den Stichproben bekommen einen Rang aufsteigend vom Kleinsten zum Größten Wert.
+Die gesamte Rangsumme lässt mit der Formel berechnen:
+\begin{center}
+  $T_1 + T_2 = \dfrac{n * (n + 1)}{2}, (n = n_1 + n_2)$
+\end{center}  
+
+Dabei sind $T_1$ und $T_2$ die Rangsummen aus den jeweiligen Stichproben.
+Für den Test folgt ein Prüfgröße $U$  
+Dieser Test
+hat keine Anforderungen über die Verteilung der Stichproben.
+Somit ist keine Normalverteilung der Stichproben notwendig.
+
 
 \section{Konzept Analysetool}
 Das Analysetool wird mit den Logs des Fio-Tools analysieren.
