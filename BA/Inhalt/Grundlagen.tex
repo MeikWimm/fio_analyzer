@@ -121,27 +121,64 @@ Im Folgenden werden statistische Tests im
 Allgemeinen, der T-Test, der Konfidenzintervallvergleich und weitere statistische Tests
 vorgestellt.
 
+\section{Varianzanalyse - Analysis of Variance (ANOVA)}
+
+Die ANOVA dient als statistische Analyse für Mittelwert/Daten.
+Es wird die ein-faktorielle Anova verwendet, da laut oopsla mehrere Benchmarks zu mehrfach faktorielle Anova führt.
+Da aber nur fio verwendet reicht die einfache aus.
+
+\begin{table}
+  \centering
+  \begin{tabularx}{\linewidth}{|XX|XXXX|XX}
+  \toprule
+  \textbf{Measurements} & & \multicolumn{4}{c|}{\textbf{Alternatives}} & \textbf{Overall mean} \\
+  \cmidrule(lr){3-6}
+  & & 1 & 2 & $\dots$ & $k$ & \\
+  \midrule
+  1 & & $y_{11}$ & $y_{12}$ & $\dots$ & $y_{1k}$ & \\
+  2 & & $y_{21}$ & $y_{22}$ & $\dots$ & $y_{2k}$ & \\
+  $\vdots$ & & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ & \\
+  $i$ & & $y_{i1}$ & $y_{i2}$ & $\dots$ & $y_{ik}$ & \\
+  $\vdots$ & & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ & \\
+  $n$ & & $y_{n1}$ & $y_{n2}$ & $\dots$ & $y_{nk}$ & \\
+  \midrule
+  \textbf{Column means} & & $\bar{y}_{\cdot 1}$ & $\bar{y}_{\cdot 2}$ & $\dots$ & $\bar{y}_{\cdot k}$ & $\bar{y}_{\cdot \cdot}$ \\
+  \bottomrule
+  \end{tabularx}
+  \caption{Example table in LaTeX.}
+\end{table}
+
 \section{Konfidenzintervalle}
+Es wird angenommen das die Grundgesamtheit normalverteilt sind [QUELLE].
+Die Stichprobenverteilung wird in eine Standnormalverteilung überführt, mit:
+
+\begin{center}
+  $z = \dfrac{\overline{x} - \mu}{\sigma_{\overline{x}}}$
+\end{center}
+
 Die Standardabweichung sagt nicht aus ob der Wert kein "ausreißer" ist. Dafür wird die Konfidenzintervalle verwendet
 um akkurater zu sein.
+Die Wahrscheinlichkeit dafür, dass der z-Wert
+größer ist als das $z_{\alpha/2}$ und kleiner
+als das $z_{1-\alpha/2}$ Perzentil ist, beträgt $1 - \alpha$:
 
-\textit{Eine Möglichkeit, den stationären Zustand zu ermitteln, ist, dass man die Stan-
-dardabweichung verwendet und mit Hilfe eines Konfidenzintervalls abschätzt ob
-der Zustand erreicht wurde. Die Konfidenzintervalle helfen dabei, den Nicht-
-determinismus in Betracht zu ziehen. Eine weitere Methode, die durchgeführt
-wird, ist die Verwendung der Varianzanalyse - Analysis of Variance (ANOVA)
-[7]. Da der station¨are Zustand nicht eindeutig bestimmt werden kann, sollen
-diese statistischen Methoden dabei helfen.}
+\begin{center}
+  $P(z_{\alpha/2} \leq z \leq z_{1-\alpha/2}) = 1 - \alpha$
+\end{center}
 
-\textit{Dies kann mit einem Signifikanzniveau erweitert werden,
-das die maximale Wahrscheinlichkeit angibt, ob die Signifikanz zwischen den
-Stichproben falsch angenommen wurde. Solche falsche Annahmen werde Typ-
-I-Fehler genannt.
-In der Arbeit werden der t-Test, der Tukey-HSD-Test und der Mann-Whitney-
-Test genutzt. Der Tukey-HSD-Test verwendet die Differenz zwischen zwei Mit-
-telwerten, um ihre statistische Signifikanz zu ermitteln.}
-- Typ 1 Fehler \\
-- Varianz
+Mit hilfe der obigen Formel lässt sich diese Formel wie folgt umformen:
+
+\begin{center}
+  $P(\overline{x} - z_{1-\alpha/2} * \sigma_{\overline{x}} \leq \mu \leq \overline{x} + z_{1-\alpha/2} * \sigma_{\overline{x}}) = 1 - \alpha$
+\end{center}
+
+Diese Wahrscheinlichkeitsformel gibt an, wie der $\mu$-Wert sich in einem Konfidenzintervall mit $(1 - \alpha)$ befindet.
+Der Bereich lässt sich wie folgt berechnen:
+
+\begin{center}
+  Konfidenzintervall $= [\overline{x} - z_{1-\alpha / 2} \cdot \sigma_{\overline{x}}, \overline{x} + z_{1-\alpha / 2} \cdot \sigma_{\overline{x}}]$
+\end{center}
+
 \subsection{T-Test}
 Mit dem T-Test werden jeweils zwei unabhängige Stichprobe miteinander verglichen, 
 unter der Annahme das die Grundgesamtheit normalverteilt ist.
