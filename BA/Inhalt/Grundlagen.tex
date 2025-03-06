@@ -123,29 +123,34 @@ vorgestellt.
 
 \section{Varianzanalyse - Analysis of Variance (ANOVA)}
 
-Die ANOVA dient als statistische Analyse für Mittelwert/Daten.
-Es wird die ein-faktorielle Anova verwendet, da laut oopsla mehrere Benchmarks zu mehrfach faktorielle Anova führt.
-Da aber nur fio verwendet reicht die einfache aus.
+Die ANOVA dient als statistische Analyse der Varianz und Mittelwert mit mehreren Auswahl von Stichproben.
 
-\begin{table}
+
+
+
+\begin{table}[h!]
   \centering
-  \begin{tabularx}{\linewidth}{|XX|XXXX|XX}
-  \toprule
-  \textbf{Measurements} & & \multicolumn{4}{c|}{\textbf{Alternatives}} & \textbf{Overall mean} \\
-  \cmidrule(lr){3-6}
-  & & 1 & 2 & $\dots$ & $k$ & \\
-  \midrule
-  1 & & $y_{11}$ & $y_{12}$ & $\dots$ & $y_{1k}$ & \\
-  2 & & $y_{21}$ & $y_{22}$ & $\dots$ & $y_{2k}$ & \\
-  $\vdots$ & & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ & \\
-  $i$ & & $y_{i1}$ & $y_{i2}$ & $\dots$ & $y_{ik}$ & \\
-  $\vdots$ & & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ & \\
-  $n$ & & $y_{n1}$ & $y_{n2}$ & $\dots$ & $y_{nk}$ & \\
-  \midrule
-  \textbf{Column means} & & $\bar{y}_{\cdot 1}$ & $\bar{y}_{\cdot 2}$ & $\dots$ & $\bar{y}_{\cdot k}$ & $\bar{y}_{\cdot \cdot}$ \\
-  \bottomrule
-  \end{tabularx}
-  \caption{Example table in LaTeX.}
+  %\resizebox{\textwidth}{!}{
+  \begin{tabular}{|c|*{5}{c}|c|}
+  \hline
+  \textbf{Messwerte} & \multicolumn{5}{c|}{\textbf{Iterationen}} & \textbf{Overall mean} \\
+  \cline{2-6}
+   & 1 & 2 & $\cdots$ & $j$ & $k$ & \\
+  \hline
+  1 & $y_{11}$ & $y_{12}$ & $\cdots$ & $y_{1j}$ & $\cdots$ & $y_{1k}$ \\
+  2 & $y_{21}$ & $y_{22}$ & $\cdots$ & $y_{2j}$ & $\cdots$ & $y_{2k}$ \\
+  $\vdots$ & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ & $\ddots$ & $\vdots$ \\
+  $i$ & $y_{i1}$ & $y_{i2}$ & $\cdots$ & $y_{ij}$ & $\cdots$ & $y_{ik}$ \\
+  $\vdots$ & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ & $\ddots$ & $\vdots$ \\
+  $n$ & $y_{n1}$ & $y_{n2}$ & $\cdots$ & $y_{nj}$ & $\cdots$ & $y_{nk}$ \\
+  \hline
+  Column means & $\bar{y}_{\cdot1}$ & $\bar{y}_{\cdot2}$ & $\cdots$ & $\bar{y}_{\cdot j}$ & $\cdots$ & $\bar{y}_{\cdot k}$ \\
+  Effects & $\alpha_1$ & $\alpha_2$ & $\cdots$ & $\alpha_j$ & $\cdots$ & $\alpha_k$ \\
+  \hline
+  \end{tabular}
+  %}
+  \caption{Tabelle für einen fio-Run mit k-Iterationen}
+  \label{tab:measurements}
 \end{table}
 
 \section{Konfidenzintervalle}
