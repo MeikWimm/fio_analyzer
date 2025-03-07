@@ -123,35 +123,98 @@ vorgestellt.
 
 \section{Varianzanalyse - Analysis of Variance (ANOVA)}
 
-Die ANOVA dient als statistische Analyse der Varianz und Mittelwert mit mehreren Auswahl von Stichproben.
-
-
-
+Dieses Kapitel führt eine allgemeine statistische Analysetechnik ein, die als Varianzanalyse (ANOVA) bezeichnet wird. 
+ANOVA unterteilt die gesamte beobachtete Variation in einer Reihe von Messungen in mehrere Komponenten.
+Diese Komponenten werden SSA und SSE sein.
+Die SSA (Sum of Squared errors of All treatment) ist die quadratische Abweichung der Mittelwerte vom Gesamtmittelwert und die SSE 
+(Sum of Squared Errors of all observation) ist die gesamte Abweichung von den Mittelwerten in den Gruppen.
+Das Ziel der Komponenten ist, festzustellen, ob die beobachteten Unterschiede zwischen den Mittelwerten der einzelnen Alternativen auf tatsächliche 
+Unterschiede zwischen den Alternativen zurückzuführen sind oder ob sie lediglich Messfehler sind.
+Die Alternativen hier werden die Iterationen eines fio-runs sein.
+Die Varianzanalyse geht davon aus, dass die Fehler in den Messungen für die verschiedenen Alternativen
+unabhängig voneinander und normalverteilt sind.
+Es geht weiter davon aus, dass die Varianz der Messfehler bei allen Alternativen gleicher Art sind.
+Die Tabelle \ref{tab:measurements} zeigt die Vorbereitung einer Varianzanalyse für einen fio-run.
 
 \begin{table}[h!]
   \centering
   %\resizebox{\textwidth}{!}{
   \begin{tabular}{|c|*{5}{c}|c|}
   \hline
-  \textbf{Messwerte} & \multicolumn{5}{c|}{\textbf{Iterationen}} & \textbf{Overall mean} \\
+  \textbf{Messwerte} & \multicolumn{5}{c|}{\textbf{Iterationen/Alternativen}} & \textbf{Gesamtmittelwert} \\
   \cline{2-6}
-   & 1 & 2 & $\cdots$ & $j$ & $k$ & \\
+   & 1 & 2 & $\cdots$ & $k-1$ & $k$ & \\
   \hline
-  1 & $y_{11}$ & $y_{12}$ & $\cdots$ & $y_{1j}$ & $\cdots$ & $y_{1k}$ \\
-  2 & $y_{21}$ & $y_{22}$ & $\cdots$ & $y_{2j}$ & $\cdots$ & $y_{2k}$ \\
-  $\vdots$ & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ & $\ddots$ & $\vdots$ \\
-  $i$ & $y_{i1}$ & $y_{i2}$ & $\cdots$ & $y_{ij}$ & $\cdots$ & $y_{ik}$ \\
-  $\vdots$ & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ & $\ddots$ & $\vdots$ \\
-  $n$ & $y_{n1}$ & $y_{n2}$ & $\cdots$ & $y_{nj}$ & $\cdots$ & $y_{nk}$ \\
+  1 & $y_{11}$ & $y_{12}$ & $\cdots$ & $y_{1j}$ & $y_{1k}$ & \\
+  2 & $y_{21}$ & $y_{22}$ & $\cdots$ & $y_{2j}$ & $y_{2k}$ & \\
+  $\vdots$ & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ & $\vdots$ & \\
+  $i$ & $y_{i1}$ & $y_{i2}$ & $\cdots$ & $y_{ij}$ & $y_{ik}$ & \\
+  $\vdots$ & $\vdots$ & $\vdots$ & $\ddots$ & $\vdots$ & $\vdots$ & \\
+  $n$ & $y_{n1}$ & $y_{n2}$ & $\cdots$ & $y_{nj}$ & $y_{nk}$ &  \\
   \hline
-  Column means & $\bar{y}_{\cdot1}$ & $\bar{y}_{\cdot2}$ & $\cdots$ & $\bar{y}_{\cdot j}$ & $\cdots$ & $\bar{y}_{\cdot k}$ \\
-  Effects & $\alpha_1$ & $\alpha_2$ & $\cdots$ & $\alpha_j$ & $\cdots$ & $\alpha_k$ \\
+  Spaltenmittelwert & $\bar{y}_{\cdot1}$ & $\bar{y}_{\cdot2}$ & $\cdots$ & $\bar{y}_{\cdot j}$ & $\bar{y}_{\cdot k}$ & $\bar{y}_{\cdot \cdot}$ \\
+  %Effekte & $\alpha_{\cdot 1}$ & $\alpha_{\cdot 2}$ & $\cdots$ & $\alpha_{\cdot k-1}$ & $\cdots$ & $\alpha_{\cdot k}$ \\
   \hline
   \end{tabular}
   %}
-  \caption{Tabelle für einen fio-Run mit k-Iterationen}
+  \caption{Tabelle mit einem fio-Run mit k-Iterationen und n-Messwerte für die Varianzanalyse}
   \label{tab:measurements}
 \end{table}
+
+Die Messwerte werden die I/O-Geschwindigkeiten sein. Genauer ist die ANOVA, die hier verwendet wird, eine einfaktor ANOVA.
+Der Faktor ist hier die I/O-Geschwindigkeit. Wenn mehr als ein Faktor verwendet wird, wird die ANOVA auch als mehrfaktor ANOVA bezeichnet.
+Da aber nur ein fio-run mit mehren Iteration verglichen werden soll, wird die einfaktor ANOVA verwendet.
+Für die Analyse werden folgende Formel verwendet:
+
+\begin{center}
+  \begin{table}[h!]
+    \begin{tabularx}{\textwidth}{|X|X|}
+      \hline
+        Formel & Definition \\ 
+      \hline
+      $\overline{y}_{\cdot j} = \dfrac{\sum_{i=1}^{n} y_{ij}}{n}$ & Das fio Executable  \\ 
+      rw & Auswahl von read oder write des Tests  \\ 
+      \hline
+      runtime & Maximale Dauer eines Tests  \\ 
+      \hline
+      write bw log &  Name des Logs die ausgeben werden soll   \\ 
+      \hline
+      name &  Name des Tests   \\ 
+      \hline
+      size & Größe der Datei für den read/write Test    \\ 
+      \hline
+    \end{tabularx}
+    \caption{Beispiel Command zur Ausführung des Fio-Tools}
+    \label{tab:formel_mittelwerte}
+  \end{table}
+\end{center}
+
+Aus den beiden Komponenten SSA und SSE ergibt sich SST.
+Sie ist die Summe der Quadrate der Differenzen zwischen jeder Messung und dem Gesamtmittelwert.
+Mit der Berechnung des Verhältnisses von SSA und SST, wird ausgesagt, wie viel Unterschied zwischen den Alternativen war.
+und mit dem Verhältnis von SSE unt SST, wie viel Variation durch Messfehler entstanden sind.  
+
+\subsection{F-Test}
+Um die statistische Signifikanz zu testen wird für ANOVA der F-Test genutzt.
+Dieser auf der F-Verteilung basierende Test wird verwendet, um zu prüfen, ob sich zwei Varianzen signifikant unterscheiden.
+Der lässt mit den Verhältnissen von SSA und SSE berechnen.
+Da es sich bei dieser F-Statistik um das Verhältnis zweier Varianzen handelt, sind tatsächlich zwei Werte für die Freiheitsgrade erforderlich, 
+einer aus dem Zähler und einer aus dem Nenner.
+Wenn dieses Verhältnis, der berechnete F-Wert, größer ist als der kritische F-Wert, der bei einem bestimmten Signifikanzniveau $\alpha$ aus der F-Verteilung erhalten wird, 
+schließen wir, dass der Unterschied in den Varianzen statistisch signifikant ist. Daraus ergibt sich, 
+dass es einen statistisch signifikanten Unterschied zwischen den Alternativen gibt, der über die Unterschiede aufgrund experimenteller Fehler hinausgeht.
+
+\begin{center}
+  \begin{table}[h!]
+    \begin{tabularx}{\textwidth}{|X|X|X|}
+      \hline
+       $s_a = SSA ( k -1)$ & $s_a = SSA ( k -1)$ & $F = s/s$\\ 
+      \hline
+    \end{tabularx}
+    \caption{Berechnung des F-Wertes mit mean-square SSA und SSE}
+    \label{tab:f_computing}
+  \end{table}
+\end{center}
 
 \section{Konfidenzintervalle}
 Es wird angenommen das die Grundgesamtheit normalverteilt sind [QUELLE].
