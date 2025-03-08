@@ -103,31 +103,31 @@ verändern würden [1].
 Um zu entscheiden, ob eine Performanzänderung vorliegt, müssen durch die Messung
 ermittelte Stichproben von Zufallsvariablen verglichen werden. Hierfür werden verschie-
 dene statistische Tests eingesetzt [GBE07]. 
-Die Grundgesamtheit werden alle Logs sein und daraus werden paarweise die Stichproben entnommen die für die Tests verwendet.
-Diese statistische Tests wird ausgesagt, ob eine statistische Signifikanz zwischen den Stichproben vorhanden ist.
+Die Grundgesamtheit wird ein fio-Run sein und die Stichproben werden die Iteration sein die für die tESTS entnommen werden.
+Diese statistische Tests werden genutzt, um zu ermitteln ob eine statistische Signifikanz zwischen den Stichproben vorhanden ist.
 Wenn die statistisch Signifikanz erfüllt ist, wird die Nullhypothese abgelehnt.
-Die Nullhypothese ist hier, zwischen den Logs keine Abhängigkeit besteht.
-Somit ist die Alternativhypothese, dass zwischen den ausgewählten Stichproben ein Zusammenhang besteht.
+Die Nullhypothese ist hier die Annahme, dass es zwischen den Logs keine Abhängigkeit besteht und zufällig sind.
+Somit ist die Alternativhypothese, dass zwischen den ausgewählten Stichproben ein Zusammenhang/Abhängigkeit besteht.
 Um die Nullhypothese zu überprüfen wird ein p-wert (Signifikanz Wahrscheinlichkeit) berechnet und mit einem selbst
 festgelegtem Signifikanzniveau $\alpha$ verglichen.
 Dieser p-Wert sagt aus wie die Wahrscheinlichkeit ist eine Nullhypothese falsch anzunehmen. 
-Ein p-Wert von 0.5 sagt aus, dass es eine 5\%-ige Wahrscheinlichkeit gibt das die Nullhypothese inkorrekt abgelehnt wurde, obwohl sie erfüllt ist.
+Ein p-Wert von 0.05 sagt aus, dass es eine 5\%-ige Wahrscheinlichkeit gibt das die Nullhypothese inkorrekt abgelehnt wurde, obwohl sie erfüllt ist.
 Somit ist die Wahrscheinlichkeit für die Alternativhypothese (1 - p) also 95\% \cite{statistics}.
 Wenn $\alpha > p$ mit $\alpha = 0.05$ ist eine statistische Signifikanz vorhanden ist, wird die Nullhypothese abgelehnt. 
-Ein weiterer Messwert in den Tests ist der z-Wert. Dieser Wert gibt an viele Standardabweichungen ein ROHwert unter
-bzw. über dem Mittelwert liegt.
+
 
 Im Folgenden werden statistische Tests im
-Allgemeinen, der T-Test, der Konfidenzintervallvergleich und weitere statistische Tests
+Allgemeinen, der T-Test, der Konfidenzintervall und weitere statistische Tests
 vorgestellt.
 
 \section{Varianzanalyse - Analysis of Variance (ANOVA)}
 
 Dieses Kapitel führt eine allgemeine statistische Analysetechnik ein, die als Varianzanalyse (ANOVA) bezeichnet wird. 
 ANOVA unterteilt die gesamte beobachtete Variation in einer Reihe von Messungen in mehrere Komponenten.
-Diese Komponenten werden SSA und SSE sein.
-Die SSA (Sum of Squared errors of All treatment) ist die quadratische Abweichung der Mittelwerte vom Gesamtmittelwert und die SSE 
-(Sum of Squared Errors of all observation) ist die gesamte Abweichung von den Mittelwerten in den Gruppen.
+Diese Komponenten werden SSA\footnote{SSA - Sum of Squared errors of All treatment} (auch SSB \footnote{SSB}) und SSE\footnote{SSE - Sum of Squared Errors of all observation}
+ (auch SSW\footnote{SSW}) sein.
+Die SSA  ist die quadratische Abweichung der Mittelwerte vom Gesamtmittelwert und die SSE
+ist die gesamte Abweichung von den Mittelwerten in den Gruppen.
 Das Ziel der Komponenten ist, festzustellen, ob die beobachteten Unterschiede zwischen den Mittelwerten der einzelnen Alternativen auf tatsächliche 
 Unterschiede zwischen den Alternativen zurückzuführen sind oder ob sie lediglich Messfehler sind.
 Die Alternativen hier werden die Iterationen eines fio-runs sein.
@@ -163,8 +163,8 @@ Die Tabelle \ref{tab:measurements} zeigt die Vorbereitung einer Varianzanalyse f
 
 Die Messwerte werden die I/O-Geschwindigkeiten sein. Genauer ist die ANOVA, die hier verwendet wird, eine einfaktor ANOVA.
 Der Faktor ist hier die I/O-Geschwindigkeit. Wenn mehr als ein Faktor verwendet wird, wird die ANOVA auch als mehrfaktor ANOVA bezeichnet.
-Da aber nur ein fio-run mit mehren Iteration verglichen werden soll, wird die einfaktor ANOVA verwendet.
-Für die Analyse werden folgende Formel verwendet:
+Da aber nur ein fio-run mit mehren Iteration verglichen werden soll, wird die einfaktor ANOVA genutzt.
+Für die ANOVA werden folgende Formel verwendet:
 
 \begin{center}
   \begin{table}[h!]
@@ -193,12 +193,26 @@ Aus den beiden Komponenten SSA und SSE ergibt sich SST.
 Sie ist die Summe der Quadrate der Differenzen zwischen jeder Messung und dem Gesamtmittelwert.
 Mit der Berechnung des Verhältnisses von SSA und SST, wird ausgesagt, wie viel Unterschied zwischen den Alternativen war.
 und mit dem Verhältnis von SSE unt SST, wie viel Variation durch Messfehler entstanden sind.  
+Hier ein Beispiel für die Berechnung der Verhältnissen:
+
+\begin{center}
+  $\dfrac{SSA}{SST} = \dfrac{0.7585}{0.8270} = 0.917$
+\end{center}
+
+\begin{center}
+  $\dfrac{SSE}{SST} = \dfrac{0.0685}{0.8270} = 0.083$
+\end{center}
+
+Das bedeutet 91\% der gesamte Variationen in den Messwerten entstammen durch den Unterschied der Performanz und
+8\% entstammten aus Ungenauigkeiten der Messwerte. 
+
+
 
 \subsection{F-Test}
-Um die statistische Signifikanz zu testen wird für ANOVA der F-Test genutzt.
+Um die statistische Signifikanz in ANOVA testen wird der F-Test genutzt.
 Dieser auf der F-Verteilung basierende Test wird verwendet, um zu prüfen, ob sich zwei Varianzen signifikant unterscheiden.
-Der lässt mit den Verhältnissen von SSA und SSE berechnen.
-Da es sich bei dieser F-Statistik um das Verhältnis zweier Varianzen handelt, sind tatsächlich zwei Werte für die Freiheitsgrade erforderlich, 
+Der Test lässt sich mit den Verhältnissen von SSA und SSE berechnen.
+Da es sich bei dieser F-Statistik um das Verhältnis zweier Varianzen handelt, sind zwei Werte für die Freiheitsgrade erforderlich, 
 einer aus dem Zähler und einer aus dem Nenner.
 Wenn dieses Verhältnis, der berechnete F-Wert, größer ist als der kritische F-Wert, der bei einem bestimmten Signifikanzniveau $\alpha$ aus der F-Verteilung erhalten wird, 
 schließen wir, dass der Unterschied in den Varianzen statistisch signifikant ist. Daraus ergibt sich, 
@@ -208,13 +222,44 @@ dass es einen statistisch signifikanten Unterschied zwischen den Alternativen gi
   \begin{table}[h!]
     \begin{tabularx}{\textwidth}{|X|X|X|}
       \hline
-       $s_a = SSA ( k -1)$ & $s_a = SSA ( k -1)$ & $F = s/s$\\ 
+       $s_a = SSA ( k -1)$ & $s_a = SSE ( k -1)$ & $F = s/s$\\ 
       \hline
     \end{tabularx}
     \caption{Berechnung des F-Wertes mit mean-square SSA und SSE}
     \label{tab:f_computing}
   \end{table}
 \end{center}
+
+
+\section{Tukey-HSD}
+Der Tukey-HSD (Honestly Significant Difference) Test analysiert paarweise
+zwischen den Mittelwerten. 
+Der Test ist eine post-hoc Test was zusätzlich nach der ANOVA verwendet wird.
+
+Zur Messung oder Analyse wurde der HSD für jedes
+Mittelwertpaar mithilfe der folgenden Formel berechnet:
+
+\begin{center}
+  $HSD = \dfrac{M_i - M_j}{\sqrt{MS_w / n}}$
+\end{center}
+
+$M_i - M_j$ ist die Differenz des Mittelwertes zweier Stichproben $i$ und $j$.
+Dabei gilt das der Mittelwert $M_i$ größer ist als $M_j$.
+Für $MS_w$ gilt $MS_w = s^2_{e}$ ist der quadratische Mittelwert innerhalb und n ist die Anzahl
+der Alternativen oder hier der Iterationen.
+Um diesen Test durchzuführen werden folgende Schritte angewendet:
+
+\begin{center}
+  \begin{enumerate}
+    \item Führe ANOVA durch. Wenn der F wert signifikant ist führe den post-hoc Test durchzuführen
+    \item Wähle Iteration aus mit ihren Mittelwerten
+    \item Verwende die oben erwähnte HSD-Formel
+    \item Wähle den Tukey HSD kritischen Wert aus der Tabelle
+    \item Wenn der berechnen Werte größer ist als der kritische Wert, ist das Ergebnis signifikant unterschiedlich 
+  \end{enumerate}
+\end{center}
+
+
 
 \section{Konfidenzintervalle}
 Es wird angenommen das die Grundgesamtheit normalverteilt sind [QUELLE].
@@ -247,7 +292,7 @@ Der Bereich lässt sich wie folgt berechnen:
   Konfidenzintervall $= [\overline{x} - z_{1-\alpha / 2} \cdot \sigma_{\overline{x}}, \overline{x} + z_{1-\alpha / 2} \cdot \sigma_{\overline{x}}]$
 \end{center}
 
-\subsection{T-Test}
+\section{T-Test}
 Mit dem T-Test werden jeweils zwei unabhängige Stichprobe miteinander verglichen, 
 unter der Annahme das die Grundgesamtheit normalverteilt ist.
 
@@ -273,23 +318,11 @@ Abweichung innerhalb der Stichproben. Die Prüfgröße t, die ein Maß dafür is
 wahrscheinlich die Nullhypothese H0 ist, d. h. dass die Grundgesamtheiten der beiden
 Stichproben den gleichen Erwartungswert aufweisen. Diese wird folgendermaßen berech-
 net:
-\subsection{Tukey-HSD}
-Der Tukey-HSD-Test verwendet die Differenz zwischen zwei Mit-
-telwerten, um ihre statistische Signifikanz zu ermitteln.
-Der HSD-Wert wird mittels mittlere quadratische Abweichung (MSE) berech-
-net und mit der Anzahl der Gruppen die getestet wurden. Die minimale Dif-
-ferenz wird als HSD bezeichnet. Wenn aber die Differenz der Mittelwerte aus
-den Tests gr¨oßer als der HSD-Wert ist, sind diese Werte statistisch signifikant.
-Zus¨atzlich versucht der Tukey-HSD-Test5 die Fehlerrate von Falsch-Positiven-
-Annahmen zu korrigieren. Dieser Test setzt aber voraus, dass die Stichproben
-normalverteilt sind. Die t-Tests arbeiten ¨ahnlich wie die Tukey HSD Tests. Der
-Unterschied besteht darin, dass sie die Fehlerrate nicht anpassen [12]. 
 
-\subsection{Mann-Whitney-
-Test}
+\section{Mann-Whitney-Test}
 Der Mann-Whitney-Wilcoxon-Rangsummentest [BBH+16; CGT+14; JHHF09]
-[Fie13, Seiten 541ff] kann ebenfalls eingesetzt werden, um zu entscheiden, ob sich zwei
-Stichproben sich signifikant unterscheiden in dem die Werte einen Rang gesetzt wird. 
+[Fie13, Seiten 541ff] wird eingesetzt, um zu entscheiden, ob sich zwei
+Stichproben sich signifikant unterscheiden in dem die Werte einen Rang festgelegt wird. 
 Alle Werte aus den Stichproben bekommen einen Rang aufsteigend vom Kleinsten zum Größten Wert.
 Die gesamte Rangsumme lässt mit der Formel berechnen:
 \begin{center}
@@ -310,62 +343,3 @@ bestimmt werden soll. Das Tool wird in der Lage mit den drei Tests die eingefüh
 Da die Anzahl nicht festgelegt werden kann, da die dieser Zustand an einem unbestimmten Zeitpunkt und Iteration erreicht wird,
 werden verschiedene Anläufe getestet mit einer verschieden Anzahl and Fio-Tool Testanzahl.
 
-\section{Notes}
-
-- Analysetool mit logs aus einem HPC
-- Steady State und Warm Up
-
-----------------------------------------------------------------------
-
-T-Test Beispiel:
-
-Insgesamt Logs: 25
-
-Aufgeilt in 	| Durschnitt I/O | Standardabweichung | Konfidenzintervall
-Gruppe A | 13	| 43435.3	 | 3435
-
-Gruppe B | 12	| 35254.6	 | 5456	
-
-----------------------------------------------------------------------
-
-Konfidenzintervall:
-
-Beispiel es gibt insgesamt 55 logs (Das ist die Grundgesamtheit):
-Stichprobe genommen sind 34
-
-Verteilung -> normal Verteilt
-
-Doch,
-
-Beispiel es gibt insgesamt 55 logs (Das ist die Grundgesamtheit):
-Stichprobe genommen sind 22
-
-Verteilung -> Studentisch t Verteilt
-
-Daraus wird der Mittelwert berechnet.
-
-Varianz und Standardabweichung wird hier benötigt
-
-Paper: oopsla07-georges.pdf
-
-fsbench-tr.pdf Seite 8:
-
-The standard deviation is a measure of how much variation there is between the
-runs. The half-width of the confidence interval describes how far the true value may be
-from the captured mean with a given degree of confidence (e.g., 95%). This provides a
-better sense of the true mean. In addition, as more benchmark runs are performed, the
-standard deviation may not decrease, but the width of the confidence interval will.
-For experiments with less than 30 runs, one should be careful not to use the normal
-distribution for calculating confidence intervals. This is because the central limit theorem
-no longer holds with a small sample size. Instead, one must use the Student’s t-distribution.
-This distribution may also be used for experiments with at least 30 runs, since in this case
-it is similar to the normal distribution.
-
-Vorstellung Programm:
-
-- Signifikanzniveau selbst entscheidbar 0.01 bis 0.05 \\
-- Wenn ein Zusammenhang zwischen den Stichproben nicht der Fall ist, sollte der p Wert aus den Proben kleiner als der HSD-Wert sein.\\
-- So sollte der p Wert innerhalb des Signifikanzniveau sein und der stationäre Zustand sollte erreicht sein\\
-- Die Werte sollen nicht signifikant Unterscheidbar sein, dann wäre der stationäre Zustand erreicht\\
-- Wie soll ich die Logs mit den Tests abarbeiten ?\\
-- Welche Logs sollen genommen werden ? 
