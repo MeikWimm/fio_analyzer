@@ -193,13 +193,13 @@ Für die ANOVA werden folgende Formel verwendet:
         Formel & Definition \\ 
       \hline
       $\overline{y}_{\cdot j} = \dfrac{\sum_{i=1}^{n} y_{ij}}{n}$ & Das fio Executable  \\ 
-      rw & Auswahl von read oder write des Tests  \\ 
+      $SSE =  \sum_{i=1}^{n} (x_i - M_X)^2$ & Auswahl von read oder write des Tests  \\ 
       \hline
-      runtime & Maximale Dauer eines Tests  \\ 
+      $SSA$ & Maximale Dauer eines Tests  \\ 
       \hline
-      write bw log &  Name des Logs die ausgeben werden soll   \\ 
+      $SST = SSA + SSE$ &  Name des Logs die ausgeben werden soll   \\ 
       \hline
-      name &  Name des Tests   \\ 
+      ggg &  Name des Tests   \\ 
       \hline
       size & Größe der Datei für den read/write Test    \\ 
       \hline
@@ -266,8 +266,8 @@ Mittelwertpaar mithilfe der folgenden Formel berechnet:
 
 \begin{center}
   $q_{\alpha}(r, df){\sqrt{\dfrac{MS_w}{n}}} = q_{HSD}$ \\
-  $\overline{M_i} - M_j > q_{HSD} \iff$ \text{Nullhypothese wird abgelehnt} \\
-  $M_i - M_j \leq q_{HSD} \iff$ \text{Nullhypothese wird angenommen} 
+  $\overline{M_i} - M_j \geq q_{HSD} \iff$ \text{Nullhypothese wird abgelehnt} \\
+  $M_i - M_j < q_{HSD} \iff$ \text{Nullhypothese wird angenommen} 
 \end{center}
 
 $M_i - M_j$ ist die Differenz des Mittelwertes zweier Stichproben $i$ und $j$.
@@ -358,15 +358,17 @@ Mit dem T-Test werden jeweils zwei unabhängige Stichprobe miteinander vergliche
 unter der Annahme das die Grundgesamtheit normalverteilt ist.
 
 \begin{center}
-  $t = \dfrac{\mu_1-\mu_2}{\sqrt{\frac{s_p^2}{n_1} + \frac{s_p^2}{n_2}}}$
+  $t = \dfrac{M_A-M_B}{\sqrt{\frac{\hat{S}_A^2}{n_A} + \frac{\hat{S}_B^2}{n_B}}}$
+\end{center}
+
+wobei,
+
+\begin{center}
+  $\hat{S}_X^2 = \dfrac{n}{n-1} S_X^2 = \dfrac{n}{n-1} \cdot \dfrac{1}{n} \sum_{i=1}^n (x_i - M_X)^2 = \dfrac{1}{n-1} \sum_{i=1}^n (x_i - M_X)^2$
 \end{center}
 
 \begin{center}
-  $s^2_p = \dfrac{(n_1 - 1)s^2_1 + (n_2 - 1)s^2_2}{n_1 + n_2 - 2}$
-\end{center}
-
-\begin{center}
-  $|t| > t(1 - \dfrac{1}{2}\alpha, n + m - 2)$
+  $|t| > t_{n_A + n_B - 2; \frac{\alpha}{2}}$
 \end{center}
 
 Der Begriff T-Test wird genutzt, um verschiedene Tests zu bezeichnen, die
