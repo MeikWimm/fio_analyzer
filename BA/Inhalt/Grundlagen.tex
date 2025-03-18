@@ -1,29 +1,23 @@
 \chapter{Grundlagen}
 \label{cha:Grundlagen}
-Benchmarking spielt eine wichtige Rolle zum Testen von Hardware und Software.
-Um die Performanz von Hardware [Q] oder auch Software [Q] zu untersuchen Tests verwendet
-um Performanz wie I/O-Geschwindigkeit oder CPU-Geschwindigkeit zu messen [Q].
 
 
 \section{Benchmarking}
 
-Benchmarks sind Tests, die die Performanz von Hardware oder Software misst. Diese Messungen werden evaluiert
-um verschiedene Hardware zu vergleichen [https://www.sciencedirect.com/topics/computer-science/performance-benchmark].
-Das verwendete Benchmarking-Tool fio misst die Performanz der I/O-Geschwindigkeit einer Festplatte oder auch eines Dateisystems. [fio]
-Probleme die bei den Messungen begrenzen sind nicht-deterministische Faktoren wie buffer caches, disk caches oder auch kernel daemons [A Nine Year Study].
+
 
 \subsection{Fio-Tool}
-Das Benchmarking-Tool arbeitet in der Konsole, z.B in Cygwin, und es gibt keine UI.
+Das Benchmarking-Tool arbeitet in der Konsole, z.B in Cygwin, und es gibt kein UI.
 Um das Programm auszuführen werden zusätzlich Parameter verwendet.
 Um einen Festplattenbenchmark-Test selber durchzuführen, sieht der Command wie folgt aus:
 
 $./fio --rw=write --runtime=2s --write_bw_log=mytest --name=test --size=1024m$
 
 \begin{center}
-  \begin{table}
+  \begin{table}[h!]
     \begin{tabularx}{\textwidth}{|X|X|}
       \hline
-        Parameter& Defintion \\ 
+        \textbf{Parameter}& \textbf{Definition} \\ 
       \hline
       fio & Das fio Executable  \\ 
       \hline
@@ -43,22 +37,29 @@ $./fio --rw=write --runtime=2s --write_bw_log=mytest --name=test --size=1024m$
   \end{table}
 \end{center}
 
-Die Commands können auch als eine .fio geschrieben werden. In dieser Arbeit so eine Ausführung als einen \textit{run/job} bezeichnet.
-Der Job oben testet das Random Read mit einer Laufzeit (Runtime) von 2 Sekunden und liest eine Datei mit einer Größe von 128 Mebibyte.
+Solche Command kann auch in eine Datei geschrieben, was die .fio Datei sind. In dieser Arbeit so eine Ausführung als einen \textit{run/job} bezeichnet.
+Der Job oben testet das Random Read mit einer Laufzeit (Runtime) von 2 Sekunden und liest eine Datei mit einer Größe von 128 Mebibyte. Dieser Job wird nur einmal durchlaufen. Für einen wiederholten Lauf gibt es den Parameter loop, wo zusätzlich die Anzahl angegeben wird.
 
 \subsection{Warmup und stationärer Zustand}
+Der stationärer Zustand ist ein Muster, das sich mit der Zeit wiederholt und bei dem das Verhalten in einem Zeitraum von der 
+gleichen Natur ist wie in jedem anderen Zeitraum \cite{transient_state_definition}. Um zu ermitteln,
+wann der stationäre Zustand eingetreten ist, sind stabile Messwerte erforderlich.
 
-Bevor der stationäre Zustand erfolgt, ist ein Warmup erforderlich.
+Bevor aber der stationäre Zustand erfolgt, ist ein Warmup erforderlich.
 Dieser Warmup wird auch als transiente Zustand bezeichnet.
+Ein transientes Verhalten beschreibt jene Veränderungen, bei denen sich der Charakter des Systems im Laufe der Zeit verändert \cite{transient_state_definition}.
 
 Bei Hardware oder Software ist anfangs wiederholtes testen notwendig, um
-sie analysieren zu können. Erst nach diesen sogenannten Warm-ups wird der
-station¨are Zustand der Performanz (engl. steady state of peak performance)
-erreicht [3].
+sie analysieren zu können. 
+Ein Beispiel wo die Hardware einen Warmup braucht sind die Caches beim Festplattenbenchmarking \cite{nine-year-of-bench}
+% Seite 6 "warm" "cold" caches
+Erst nach diesen Warm-ups wird der
+stationäre Zustand der Performanz (engl. steady state of peak performance)
+erreicht.
 
-Wenn man das Lesen/Schreiben auf demselben System mit derselben Datei
-testet, ist die Bandbreitengeschwindigkeit im Durchschnitt nie die gleiche. Sie
-wird immer abweichen. Ursachen daf¨ur könnten schon verschiedene CPU-Temperaturen sein, 
+Hindernisse bei den Messungen in Benchmarking sind nicht-deterministische Faktoren.
+Als Beispiel, ein wiederholtes Lesen/Schreiben auf demselben System mit derselben Datei, erreicht im Durchschnitt nicht ein konstante Bandbreitengeschwindigkeit. 
+Sie wird immer abweichen. Ursachen dafür könnten schon verschiedene CPU-Temperaturen sein, 
 aber auch CPU-Scaling oder parallele Prozessierung [7]. Das Fio
 selbst arbeitet nicht nur mit einem Thread, sondern es arbeitet mit Multi-
 threads, was nicht-deterministische Zustände hervorrufen kann. Weitere nicht-
@@ -66,85 +67,45 @@ deterministische Faktoren sind die Caches die beim Lesen oder Schreiben ver-
 wendet werden, je nach dem ob sie leer sind oder schon beschrieben wurden.
 Auch nicht essentielle Prozesse (oder auch essentielle Prozesse wie Daemons3),
 die immer Hintergrund laufen, können die Geschwindigkeit beeinflussen [15].
-
-Der stationärer Zustand ist ein Muster, das sich mit der Zeit wiederholt und bei dem das Verhalten in einem Zeitraum von der 
-gleichen Natur ist wie in jedem anderen Zeitraum. Um zu ermitteln,
-wann der stationäre Zustand eingetreten ist, sind stabile Messwerte erforderlich.
 Da der Nichtdeterminismus Schwankungen in den Messungen verursacht, müssen dies in Betracht gezogen werden.
-Diese Schwankung die bei den Messungen entstehen werden mit einer selbst gewählt Fehlerrate innerhalb des Analysetools ausgewählt.
 
-\textit{Der Standardwert wird $\alpha$ = 0.05 sein.}. Die Fehlerrate dient für die Ermittlung des stationäre Zustandes.
 Da sich die Geschwindigkeit nie konstant einem Wert nähert, sondern stets
 abweicht, soll das Analysetool in Zukunft mit statistischen Tests mit der zusätzlichen Fehlerrate den stationären
 Zustand ermitteln und dabei den Nichtdeterminismus berücksichtigen.
 
- Ein Beispiel, wo solche Warmups erforderlich sind, ist die JIT
-(Just-In-Time) Kompilierung in Java. Der Bytecode wird während der Laufzeit
-des Programms kompiliert. Damit verbessert man die Performanz von Java-
-Anwendungen [8]. Ein stationärer Zustand im Festplattenbenchmarking ist er-
-reicht, wenn die I/O-Geschwindigkeit wiederholte Muster aufweist, sodass die
-Geschwindigkeiten zu verschiedenen Zeitpunkten nach diesem Zustand gleich
-sind.2 Vor dem stationären Zustand erfolgt der Warm-Up, wo die Caches des
-Rechners befüllt werden [15]. Dieser Zeitraum wird auch als transienten Zustand
-bezeichnet [11]. Auch wenn der Warm-up erfolgt ist, ist der Nichtdeterminismus
-dabei ein Hindernis.
-
-Die Abweichungen können im niedrigen Prozentbereich liegen. Es wird jedoch nicht
-ausreichen, ein paar Tests durchzuführen und anschließend die Logs auszuwerten. 
-Denn nach dem Warm-up wird ein größeres Problem darin bestehen,
-welche Logs die Informationen beinhalten, wo auch der Warm-Up stattfand und
-der transiente Zustand abgeschlossen wurde. Die Auswahl der Logs und deren
-Auswertung können signifikante Unterschiede aufweisen, die die Evaluierung
+Doch die Auswahl der Runs aus den Tests für die Bestimmung des stationäre Zustand hat ein Auswahl
+auf die Entscheidung, ob der transiente Zustand abgeschlossen ist.
+Die Auswahl der Logs und deren Diese Auswertung können signifikante Unterschiede aufweisen, die die Evaluierung
 verändern würden [1].
 
 
 
 \section{Statistische Analyse/Tests}
-Um zu entscheiden, ob eine Performanzänderung vorliegt, müssen durch die Messung
-ermittelte Stichproben von Zufallsvariablen verglichen werden. Hierfür werden verschie-
-dene statistische Tests eingesetzt [GBE07]. 
+Es werden verschiedene Tests verwendet um herauszufinden ob eine Performanzänderung vorliegt \cite{statistically_rigorous}
 Die Grundgesamtheit wird ein fio-Run sein und die Stichproben werden die Iteration sein die für die Tests entnommen werden.
 Diese statistische Tests werden genutzt, um zu ermitteln ob eine statistische Signifikanz zwischen den Stichproben vorhanden ist.
-Wenn die statistisch Signifikanz erfüllt ist, wird die Nullhypothese abgelehnt.
+
+Wenn die statistisch Signifikanz erfüllt ist, wird die Nullhypothese abgelehnt \cite{inferenzstatistik}.
 Die Nullhypothese ist hier die Annahme, dass es zwischen den Logs keine Abhängigkeit besteht und zufällig sind.
 Somit ist die Alternativhypothese, dass zwischen den ausgewählten Stichproben ein Zusammenhang/Abhängigkeit besteht.
-Tests wie der t-Test und Tests mit Konfidenzintervallen haben die Bedingung, dass die Stichprobe einer Normalverteilung\footnote{auch Gaußverteilung} unterliegen.
+Tests wie der t-Test und Tests mit Konfidenzintervallen haben die Bedingung, dass die Stichprobe einer Normalverteilung\footnote{auch Gaußverteilung} unterliegen \cite{inferenzstatistik}. 
 Da die Stichproben $n > 30$ Messwerte besitzen, ist der Zentrale Grenzwert erfüllt, denn dieser Satz sagt aus, 
 Setzt sich eine Zufallsvariable additiv aus einer großen Zahl beliebig verteilter, stochastisch unabhängiger
-Zufallsvariablen zusammen, so ist sie selbst näherungsweise normalverteilt.
+Zufallsvariablen zusammen, so ist sie selbst näherungsweise normalverteilt \cite{statistically_rigorous}.
 
-Die P-Werte werden beim Nullhypothese-Signifikanztest (NHST) verwendet, um zu entscheiden, ob a akzeptiert oder abgelehnt wird
-Nullhypothese (die normalerweise besagt, dass zwischen zwei Variablen keine zugrunde liegende Beziehung besteht) \cite{Vidgen_2016}.
-Wenn die Nullhypothese abgelehnt wird, gibt dies Anlass zur Annahme der Alternativhypothese (dass eine Beziehung besteht).
-existiert zwischen zwei Variablen. Der p-Wert quantifiziert zumindest die Wahrscheinlichkeit, Ergebnisse zu beobachten
-so extrem wie die beobachteten, vorausgesetzt, die Nullhypothese ist wahr. Es wird dann mit a verglichen
-vorgegebenes Signifikanzniveau  $\alpha$. Wenn der gemeldete p-Wert kleiner als $\alpha$ ist, wird das Ergebnis berücksichtigt
-statistisch signifikant. Typischerweise wird $\alpha$ in den Sozialwissenschaften auf 0,05 festgelegt. Andere häufig verwendete Bedeutungen
-Die Werte betragen 0,01 und 0,001.
+Das Ablehnen der Nullhypothese, obwohl die Hypothese erfüllt ist, wird als Typ-1-Fehler bezeichnet.
+Die Wahrscheinlichkeit dafür wird auch als $\alpha$ genannt. Zusammen mit dem Wahrscheinlichkeitswert $p$ und den Tests,  die Wahrscheinlichkeit für das Eintreten des beobachteten 
+extremeren Stichprobenergebnisses unter der Annahme, dass die Nullhypothese gilt, wird statistische Signifikanz überprüft \cite{kurt2020stochastik}.
 
-Whenever a researcher has more than two comparisons to test,
-control of the Type I error rate becomes a concern. The
-analysis of variance (ANOVA) certainly helps the researcher
-to identify existence of significant effect however it was
-created problem to control the type I error while dealing with
-multiple t-tests with multiple groups.
-To reduce
-the higher error rate, Tukey's method calculate and adjusts the
-confidence level for all individual comparisons that produces
-the family error rate so that the resulting simultaneous
-confidence level is equal to the specified value
 
 Um die Nullhypothese zu überprüfen, werden die jeweiligen Tests verwendet die in den folgenden Sektion erläutert werden. 
-Im Folgenden werden statistische Tests im
-Allgemeinen, der T-Test, der Konfidenzintervall und weitere statistische Tests
-vorgestellt.
 
 \section{Varianzanalyse - Analysis of Variance (ANOVA)}
  
-Dieses Kapitel führt eine allgemeine statistische Analysetechnik ein, die als Varianzanalyse (ANOVA) bezeichnet wird. 
+Dieses Kapitel führt eine allgemeine statistische Analysetechnik ein, die als Varianzanalyse (ANOVA) bezeichnet wird \cite{Lilja_2000}. 
 ANOVA unterteilt die gesamte beobachtete Variation in einer Reihe von Messungen in mehrere Komponenten.
-Diese Komponenten sind SSA\footnote{SSA - Sum of Squared errors of All treatment} (auch SSB \footnote{SSB}) und SSE\footnote{SSE - Sum of Squared Errors of all observation}
- (auch SSW\footnote{SSW}).
+Diese Komponenten sind SSA\footnote{SSA - Sum of Squared errors of All treatment} (auch SSB \footnote{SSB - Sum of squares between}) und SSE\footnote{SSE - Sum of Squared Errors of all observation}
+ (auch SSW\footnote{SSW - Sum of squares within}).
 Die SSA  ist die quadratische Abweichung der Mittelwerte vom Gesamtmittelwert und die SSE
 ist die gesamte Abweichung von den Mittelwerten in den Gruppen.
 Das Ziel der Komponenten ist, festzustellen, ob die beobachteten Unterschiede zwischen den Mittelwerten der einzelnen Alternativen auf tatsächliche 
@@ -163,7 +124,7 @@ Die Tabelle \ref{tab:measurements} zeigt die Vorbereitung einer Varianzanalyse f
   \hline
   \textbf{Messwerte} & \multicolumn{5}{c|}{\textbf{Iterationen/Alternativen}} & \textbf{Gesamtmittelwert} \\
   \cline{2-6}
-   & 1 & 2 & $\cdots$ & $k-1$ & $k$ & \\
+   & 1 & 2 & $\cdots$ & $j$ & $k$ & \\
   \hline
   1 & $y_{11}$ & $y_{12}$ & $\cdots$ & $y_{1j}$ & $y_{1k}$ & \\
   2 & $y_{21}$ & $y_{22}$ & $\cdots$ & $y_{2j}$ & $y_{2k}$ & \\
@@ -183,35 +144,21 @@ Die Tabelle \ref{tab:measurements} zeigt die Vorbereitung einer Varianzanalyse f
 
 Genauer ist die ANOVA, die hier verwendet wird, eine einfaktorielle ANOVA.
 Der Faktor ist hier die I/O-Geschwindigkeit. Wenn mehr als ein Faktor verwendet wird, wird die ANOVA auch als mehrfaktorielle ANOVA bezeichnet.
-Da aber nur ein fio-run mit mehren Iteration verglichen wird, wird die einfaktor ANOVA ausreichen.
+Da aber nur ein fio-run mit mehren Iteration verglichen wird, wird die einfaktorielle ANOVA benötigt.
 Für die ANOVA werden folgende Formel verwendet:
 
-\begin{center}
-  \begin{table}[h!]
-    \begin{tabularx}{\textwidth}{|X|X|}
-      \hline
-        Formel & Definition \\ 
-      \hline
-      $\overline{y}_{\cdot j} = \dfrac{\sum_{i=1}^{n} y_{ij}}{n}$ & Das fio Executable  \\ 
-      $SSE =  \sum_{i=1}^{n} (x_i - M_X)^2$ & Auswahl von read oder write des Tests  \\ 
-      \hline
-      $SSA$ & Maximale Dauer eines Tests  \\ 
-      \hline
-      $SST = SSA + SSE$ &  Name des Logs die ausgeben werden soll   \\ 
-      \hline
-      ggg &  Name des Tests   \\ 
-      \hline
-      size & Größe der Datei für den read/write Test    \\ 
-      \hline
-    \end{tabularx}
-    \caption{Beispiel Command zur Ausführung des Fio-Tools}
-    \label{tab:formel_mittelwerte}
-  \end{table}
-\end{center}
+\begin{itemize}
+  \item $\overline{y}_{\cdot j} = \dfrac{\sum_{i=1}^{n} y_{ij}}{n}$
+  \item $\overline{y}_{\cdot \cdot} = \dfrac{\sum_{j=1}^{n} \sum_{i=1}^{n} y_{ij}}{kn}$
+  \item $SSE =  \sum_{i=1}^{n} (x_i - M_X)^2$
+  \item $SSA = n \sum_{j=1}^{k} (\overline{y}_{\cdot j} - \overline{y}_{\cdot \cdot})^2$
+  \item $SST = SSA + SSE$
+\end{itemize}
+
 
 Aus den beiden Komponenten SSA und SSE ergibt sich SST.
 Sie ist die Summe der Quadrate der Differenzen zwischen jeder Messung und dem Gesamtmittelwert.
-Mit der Berechnung des Verhältnisses von SSA und SST, wird ausgesagt, wie viel Unterschied zwischen den Alternativen war.
+Mit der Berechnung des Verhältnisses von SSA und SST, wird ausgesagt, wie viel Unterschied zwischen den Alternativen sind.
 und mit dem Verhältnis von SSE und SST, wie viel Variation durch Messfehler entstanden sind.  
 Hier ein Beispiel für die Berechnung der Verhältnissen:
 
@@ -229,7 +176,7 @@ Das bedeutet 91\% der gesamte Variationen in den Messwerten entstammen durch den
 
 
 \subsection{F-Test}
-Um die statistische Signifikanz in ANOVA zu testen wird zusätzlich der F-Test genutzt.
+Um die statistische Signifikanz in ANOVA zu testen wird zusätzlich der F-Test genutzt \cite{Lilja_2000}.
 Dieser auf der F-Verteilung\footnote{Fisher-Verteilung} basierende Test wird verwendet, um zu prüfen, ob sich zwei Varianzen signifikant unterscheiden.
 Der Test lässt sich mit den Verhältnissen von SSA und SSE berechnen.
 Da es sich bei dieser F-Statistik um das Verhältnis zweier Varianzen handelt, sind zwei Werte für die Freiheitsgrade erforderlich, 
@@ -242,7 +189,7 @@ dass es einen statistisch signifikanten Unterschied zwischen den Alternativen gi
   \begin{table}[h!]
     \begin{tabularx}{\textwidth}{|X|X|X|}
       \hline
-       $s_a = SSA ( k -1)$ & $s_a = SSE ( k -1)$ & $F = s/s$\\ 
+       $s^2_a = \dfrac{SSA}{k - 1}$ & $s^2_e = \dfrac{SSE}{k(n-1)}$ & $F = \dfrac{s^2_a}{s^2_e}$\\ 
       \hline
     \end{tabularx}
     \caption{Berechnung des F-Wertes mit mean-square SSA und SSE}
@@ -250,24 +197,112 @@ dass es einen statistisch signifikanten Unterschied zwischen den Alternativen gi
   \end{table}
 \end{center}
 
+Den F-Wert aus einer vorgerechneten Tabelle wird mit $F_{[1-\alpha;(k-1);k(n-1)]}$ entnommen.
+
+\section{Konfidenzintervalle}
+
+Ein Konfidenzintervall für den Mittelwert, abgeleitet aus diesen Stichproben, quantifiziert den Wertebereich, 
+der mit einer bestimmten Wahrscheinlichkeit den tatsächlichen Populationsmittelwert einschließt \cite{statistically_rigorous}.
+Das Konfidenzintervall besitzt die Bedingung, dass die Messwerte aus den Stichproben normalverteilt sind.
+
+Um ein Konfidenzintervall zu quantifizieren werden die Messwerte verwendet um den Mittelwert zu bilden.
+Der Populationsmittelwert $\mu$ wird durch den Mittelwert $\overline{x}$ von den Messungen abgeschätzt
+und es wird ein Bereich $[c_1,c_2]$ mittels dem Mittelwert berechnet.
+Das Konfidenzintervall $[c_1, c_2]$ ist so definiert, dass die Wahrscheinlichkeit
+wenn $\mu$ zwischen c1 und c2 liegt, gleich $1 - \alpha$ ist. $\alpha$ heißt das
+Signifikanzniveau und $(1 - \alpha)$ wird als Konfidenzniveau bezeichnet.
+Das Signifikanzniveau wird so festgelegt, dass die Gleichung $Pr[c_1 < \mu < c_2] = 1 -\alpha$ erfüllt ist. 
+Große $\alpha$ Werte erhöhen die Wahrscheinlichkeit auf falsche Annahme der Nullhypothese. 
+
+Um $c_1$ und $c_2$ zu berechnet werden die Formel verwendet:
+
+\begin{center}
+         $c_1 = \overline{x} - z_{1-\alpha/2} \dfrac{s}{\sqrt{n}}$ \\
+         $c_2 = \overline{x} + z_{1-\alpha/2} \dfrac{s}{\sqrt{n}}$ 
+
+\end{center}
+
+Wobei es die berechnete Standardabweichung ist:
+
+\begin{center}
+         $s = \sqrt{\dfrac{\sum_{i=1}^{n} (x_i - \overline{x})^2}{n-1}}$ 
+\end{center}
+
+\subsection{Paarweise Konfidenzintervall-Vergleich}
+
+Um die verschieden Iterationen eines fio-Runs vergleichen zu können, werden die deren Konfidenzintervalle miteinander verglichen \cite{statistically_rigorous}.
+Ein Methode ist, zu untersuchen, ob sich die Konfidenzintervalle überlappen. Wenn dies der Fall ist, dann kann nicht
+geschlussfolgert werden, dass die in den Mittelwerten beobachteten Unterschiede
+nicht auf zufällige Schwankungen der Messungen zurückzuführen sind.
+Wenn sich die Konfidenzintervalle nicht überschneiden, gibt es keine Anhaltspunkte dafür
+dass es keinen statistisch signifikanten Unterschied gibt. Die Methode ist jedoch nicht auschlaggebend genug für so ein Signifikanz Test.
+Eine andere Methode ist die Bildung eines neuen Konfidenzintervall aus den Beiden zuvergleichenden Alternativen.
+Die Berechnung des neuen Konfidenzintervall ist wie folgt:
+
+\begin{center}
+  \begin{table}[h!]
+    \begin{tabularx}{\textwidth}{|X|X|}
+      \hline
+       $s_x =  \sqrt{\dfrac{s^2_1}{n_1} + \dfrac{s^2_2}{n_2}}$ & Berechne den neuen Mittelwert aus den beiden Alternativen  \\ 
+      \hline
+      $c_1 = \overline{x} - z_{1-\alpha/2} s_x$ \\
+      $c_2 = \overline{x} + z_{1-\alpha/2} s_x$ 
+    \end{tabularx}
+    \caption{Berechnung des F-Wertes mit mean-square SSA und SSE}
+    \label{tab:two_Iteration_Konfidenzintervall}
+  \end{table}
+\end{center}
+
+Wenn das neue Konfidenzintervall Null enthält, wird beschlossen,
+dass bei dem gewählten Konfidenzniveau $\alpha$ statistisch keine
+deutlicher Unterschied zwischen den beiden Alternativen.
+
+\section{T-Test}
+Der Begriff T-Test wird genutzt, um verschiedene Tests zu bezeichnen, die
+u. a. die Verteilung der Grundgesamtheit von normalverteilten und unabhängigen Stich-
+proben miteinander vergleichen [JP15, Seite 41]. Im Kontext dieser Arbeit bezeichnet
+der T-Test den unabhängigen T-Test, bei dem die Erwartungswerte zweier voneinander
+unabhängiger Stichproben miteinander verglichen werden.
+Der T-Test vergleicht die Stärke der Unterschiede zwischen den Stichproben mit der
+Abweichung innerhalb der Stichproben. Die Prüfgröße t, die ein Maß dafür ist, wie un-
+wahrscheinlich die Nullhypothese H0 ist, d. h. dass die Grundgesamtheiten der beiden
+Stichproben den gleichen Erwartungswert aufweisen. Diese wird folgendermaßen berech-
+net.
+Mit dem T-Test werden jeweils zwei unabhängige Stichprobe miteinander verglichen, 
+unter der Annahme das die Grundgesamtheit normalverteilt ist.
+
+\begin{center}
+  $t = \dfrac{M_A-M_B}{\sqrt{\frac{\hat{S}_A^2}{n_A} + \frac{\hat{S}_B^2}{n_B}}}$
+\end{center}
+
+wobei,
+
+\begin{center}
+  $\hat{S}_X^2 = \dfrac{n}{n-1} S_X^2 = \dfrac{n}{n-1} \cdot \dfrac{1}{n} \sum_{i=1}^n (x_i - M_X)^2 = \dfrac{1}{n-1} \sum_{i=1}^n (x_i - M_X)^2$
+\end{center}
+
+\begin{center}
+  $|t| > t_{n_A + n_B - 2; \frac{\alpha}{2}}$
+\end{center}
+
+
 
 \section{Tukey-HSD}
+Wenn mehr als zwei Vergleiche getestet werden, wird die Kontrolle der Typ-I-Fehlerquote zu einem wichtigen Anliegen. 
+Die ANOVA hilft zwar dabei, das Vorhandensein eines signifikanten Effekts zu identifizieren, 
+führt jedoch zu Problemen bei der Kontrolle des Typ-I-Fehlers, wenn man mit mehreren t-Tests und mehreren Gruppen arbeitet.
+Um die erhöhte Fehlerquote zu reduzieren, berechnet und passt die Methode von Tukey das Konfidenzniveau für alle einzelnen Vergleiche an, 
+sodass die Familienfehlerquote entsteht und das resultierende simultane Konfidenzniveau dem vorgegebenen Wert entspricht.
 Der Tukey-HSD\footnote{Honestly Significant Difference} Test analysiert paarweise
 zwischen den Mittelwerten \cite{tukey_HSD}.
-Der Test uses the Studentized q statistic for its comparisons, except that is always taken as the
-maximum value of .
-Der Test ist ein post-hoc Test was zusätzlich nach der ANOVA verwendet wird.
-The effect is to fix the familywise error rate at a against all pos-
-sible null hypotheses, not just the complete null hypothesis, although with a loss of power.
-The Tukey HSD is the favorite pairwise test for many people because of the control it exer-
-cises over $\alpha$.
-Zur Messung oder Analyse wurde der HSD für jedes
-Mittelwertpaar mithilfe der folgenden Formel berechnet:
+Der Tukey-Test vergleicht die Differenzen zwischen den Mittelwerten von Werten, anstatt einzelne Wertepaare direkt zu vergleichen. 
+Der Wert des Tukey-Tests wird ermittelt, indem der Absolutwert der Differenz zwischen den Mittelwerten von Paaren genommen und 
+durch den Standardfehler des Mittelwerts (SE), wie er durch einen einseitigen ANOVA-Test bestimmt wird, geteilt wird.
 
 \begin{center}
   $q_{\alpha}(r, df){\sqrt{\dfrac{MS_w}{n}}} = q_{HSD}$ \\
-  $\overline{M_i} - M_j \geq q_{HSD} \iff$ \text{Nullhypothese wird abgelehnt} \\
-  $M_i - M_j < q_{HSD} \iff$ \text{Nullhypothese wird angenommen} 
+  $\overline{M}_i - \overline{M}_j \geq q_{HSD} \iff$ \text{Nullhypothese wird abgelehnt} \\
+  $\overline{M}_i - \overline{M}_j < q_{HSD} \iff$ \text{Nullhypothese wird angenommen} 
 \end{center}
 
 $M_i - M_j$ ist die Differenz des Mittelwertes zweier Stichproben $i$ und $j$.
@@ -287,116 +322,45 @@ Um diesen Test durchzuführen werden folgende Schritte angewendet:
 \end{center}
 
 
-
-\section{Konfidenzintervalle}
-
-A confidence interval for the mean
-derived from samples then quantifies the range of values that have a given probability of including the actual population mean.
-Das Konfidenzintervall besitzt die Bedingung, dass die Messwerte aus den Stichproben normalverteilt sind.
-The central limit theory states that, for large
-values of n (typically $n \geq 30$, $\overline{x}$ is approximately Gaussian
-distributed with mean $\mu$ and standard deviation $\sigma / \sqrt{n}$, provided that the samples $x_i$, $1 \leq i \leq n$, are independent and
-come from the same population with mean $\mu$ and finite
-standard deviation $\sigma$.
-Um ein Konfidenzintervall zu "erzeugen" werden die Messwerte verwendet um den Mittelwert zu bilden:
-
-\begin{center}
-    $\overline{x} = x$
-\end{center}
-
-Der Erwartungswert $\mu$ wird durch den Mittelwert $\overline{x}$ von den Messungen abgeschätzt
-und es wird ein Bereich $[c_1,c_2]$ mittels dem Mittelwert berechnet.
-Das Konfidenzintervall $[c_1, c_2]$ ist so definiert, dass die Wahrscheinlichkeit
-wenn $\mu$ zwischen c1 und c2 liegt, gleich $1 - \alpha$ ist. $\alpha$ heißt das
-Signifikanzniveau und $(1 - \alpha)$ wird als Konfidenzniveau bezeichnet.
-Das Signifikanzniveau wird so festgelegt, dass die Gleichung $Pr[c_1 < \mu < c_2] = 1 -\alpha$ erfüllt ist. 
-Große $\alpha$ Werte erlauben erhöhte chancen auf flasche Annahmen der Hypothese. 
-
-Um $c_1$ und $c_2$ zu berechnet werden die Formel verwendet:
-
-\begin{center}
-         $c_1 = 0$ \\
-         $c_2 = 0$
-
-\end{center}
-
-Wobei es die berechnete Standardabweichung ist:
-
-\begin{center}
-         $s = 0$ 
-\end{center}
-
-\subsection{Paarweise Konfidenzintervall-Vergleich}
-
-Um die verschieden Iterationen eines fio-Runs vergleichen zu können, werden die deren Konfidenzintervalle miteinander verglichen.
-Ein Methode ist, zu schauen, ob sich die Konfidenzintervalle überlappen. Wenn dies der Fall ist, dann kann nicht
-geschlussfolgert werden, dass die in den Mittelwerten beobachteten Unterschiede
-nicht auf zufällige Schwankungen der Messungen zurückzuführen sind.
-Wenn sich die Konfidenzintervalle nicht überschneiden, gibt es keine Anhaltspunkte dafür
-dass es keinen statistisch signifikanten Unterschied gibt. Die Methode ist jedoch nicht auschlaggebend genug für so ein Signifikanz Test.
-Ein genauere Methode ist die Bildung eines neuen Konfidenzintervall aus den Beiden zuvergleichenden Alternativen.
-Die Berechnung des neuen Konfidenzintervall ist wie folgt:
-
-\begin{center}
-  \begin{table}[h!]
-    \begin{tabularx}{\textwidth}{|X|X|X|}
-      \hline
-       $s_a = SSA ( k -1)$ & $s_a = SSE ( k -1)$ & $F = s/s$\\ 
-      \hline
-    \end{tabularx}
-    \caption{Berechnung des F-Wertes mit mean-square SSA und SSE}
-    \label{tab:two_Iteration_Konfidenzintervall}
-  \end{table}
-\end{center}
-
-Wenn das neue Konfidenzintervall Null enthält, können wir schließen:
-Bei dem gewählten Konfidenzniveau $\alpha$ gibt es statistisch gesehen keine
-deutlicher Unterschied zwischen den beiden Alternativen.
-
-\section{T-Test}
-Mit dem T-Test werden jeweils zwei unabhängige Stichprobe miteinander verglichen, 
-unter der Annahme das die Grundgesamtheit normalverteilt ist.
-
-\begin{center}
-  $t = \dfrac{M_A-M_B}{\sqrt{\frac{\hat{S}_A^2}{n_A} + \frac{\hat{S}_B^2}{n_B}}}$
-\end{center}
-
-wobei,
-
-\begin{center}
-  $\hat{S}_X^2 = \dfrac{n}{n-1} S_X^2 = \dfrac{n}{n-1} \cdot \dfrac{1}{n} \sum_{i=1}^n (x_i - M_X)^2 = \dfrac{1}{n-1} \sum_{i=1}^n (x_i - M_X)^2$
-\end{center}
-
-\begin{center}
-  $|t| > t_{n_A + n_B - 2; \frac{\alpha}{2}}$
-\end{center}
-
-Der Begriff T-Test wird genutzt, um verschiedene Tests zu bezeichnen, die
-u. a. die Verteilung der Grundgesamtheit von normalverteilten und unabhängigen Stich-
-proben miteinander vergleichen [JP15, Seite 41]. Im Kontext dieser Arbeit bezeichnet
-der T-Test den unabhängigen T-Test, bei dem die Erwartungswerte zweier voneinander
-unabhängiger Stichproben miteinander verglichen werden.
-Der T-Test vergleicht die Stärke der Unterschiede zwischen den Stichproben mit der
-Abweichung innerhalb der Stichproben. Die Prüfgröße t, die ein Maß dafür ist, wie un-
-wahrscheinlich die Nullhypothese H0 ist, d. h. dass die Grundgesamtheiten der beiden
-Stichproben den gleichen Erwartungswert aufweisen. Diese wird folgendermaßen berech-
-net:
-
 \section{Mann-Whitney-Test}
-Der Mann-Whitney-Wilcoxon-Rangsummentest [BBH+16; CGT+14; JHHF09]
-[Fie13, Seiten 541ff] wird eingesetzt, um zu entscheiden, ob sich zwei
+Der Mann-Whitney-Wilcoxon-Rangsummentest \cite{statistik_sozialwissenschaften} \cite{u_test}
+wird eingesetzt, um zu entscheiden, ob sich zwei
 Stichproben sich signifikant unterscheiden in dem die Werte einen Rang festgelegt wird. 
 Alle Werte aus den Stichproben bekommen einen Rang aufsteigend vom Kleinsten zum Größten Wert.
 Die gesamte Rangsumme lässt mit der Formel berechnen:
 \begin{center}
-  $T_1 + T_2 = \dfrac{n * (n + 1)}{2}, (n = n_1 + n_2)$
+  $R_a + R_b = \dfrac{n(n + 1)}{2}, (n = n_1 + n_2)$
 \end{center}  
 
-Dabei sind $T_1$ und $T_2$ die Rangsummen aus den jeweiligen Stichproben.
+Dabei sind $R_a$ und $R_b$ die Rangsummen aus den jeweiligen Stichproben:
 Für den Test folgt ein Prüfgröße $U$  
 Dieser Test
 hat keine Anforderungen über die Verteilung der Stichproben.
 Somit ist keine Normalverteilung der Stichproben notwendig.
+Als Nächstes wird eine
+Prüfgröße U bestimmt, bzw. $U'$ da es zwei Gruppen gibt die einen Rang besitzt , indem wir aus-
+zählen, wie häufig ein Rangplatz in der einen
+Gruppe größer ist als die Rangplätze in der an-
+deren Gruppe.
+
+\begin{center}
+  $U = n_1 \cdot n_2 + \dfrac{n_1 (n_1 + 1)}{2} - T_1$ bzw. $U' = n_1 \cdot n_2 + \dfrac{n_2 (n_2 + 1)}{2} - T_2$, dabei gilt $U = n_1 \cdot n_2 - U'$
+\end{center}
+
+Mit Zusatz des Grenzwert satzes und Rangröße $n > 12$, wird mit den Z-Werten weiter berechnet um die statistische Signifikanz zu testen:
+
+\begin{center}
+  \[
+    z_{a} = \frac{R_{a} - \frac{1}{2}m(2m+1)}{\sqrt{\frac{1}{12}m^2(2m+1)}} \text{, }
+    z_{b} = \frac{R_{b} - \frac{1}{2}m(2m+1)}{\sqrt{\frac{1}{12}m^2(2m+1)}}
+  \]
+\end{center}
+
+"Unter der Nullhypothese folgen \( z_{a,\tau} \) und \( z_{b,\tau} \) ungefähr der Standardnormalverteilung \(\mathcal{N}(0, 1)\). 
+Wenn die alternative Hypothese des SHT \( H_{\tau,1} \) lautet, verwerfen wir die Nullhypothese und akzeptieren \( H_{\tau,1} \), 
+falls \( z_{a,\tau} \) nicht kleiner als der kritische Wert (rechte Verteilungsschranke, Standardnormalverteilung) bei einem Signifikanzniveau \(\alpha\) ist.
+Wenn die alternative Hypothese des SHT \( H_{\tau,2} \) lautet, verwerfen wir die Nullhypothese und akzeptieren \( H_{\tau,2} \), 
+falls \( z_{b,\tau} \) nicht kleiner als der kritische Wert bei einem Signifikanzniveau \(\alpha\) ist."
 
 
 \section{Konzept Analysetool}
