@@ -4,14 +4,20 @@
 
 \section{Benchmarking}
 
-
+Das Vergleichen der Performanz verschiedener Systeme anhand von Messungen wird als \textit{Benchmarking} bezeichnet. 
+Die in diesen Messungen verwendeten Workloads sind standardisiert und werden \textit{Benchmarks} genannt \cite{defi_benchmarking}.
+Mit Systeme ist hier gemeint, dass es die Hardware wie CPU/GPU \cite{wang2019benchmarkingtpugpucpu} oder Harddrives \cite{ssd_benchmark} getestet werden oder auch Software 
+wie VMs \cite{statistically_rigorous}.
 
 \subsection{Fio-Tool}
-Das Benchmarking-Tool arbeitet in der Konsole, z.B in Cygwin, und es gibt kein UI.
+Das fio\footnote{flexible Input Output} \cite{axboe} Benchmarking-Tool arbeitet in der Konsole und es gibt kein UI.
 Um das Programm auszuführen werden zusätzlich Parameter verwendet.
 Um einen Festplattenbenchmark-Test selber durchzuführen, sieht der Command wie folgt aus:
 
-$./fio --rw=write --runtime=2s --write_bw_log=mytest --name=test --size=1024m$
+\begin{lstlisting}[caption=Beispiel für eine Ausführung eines fio-jobs, label={lst:job}]
+  ./fio --rw=write --runtime=2s --write_bw_log=mytest --name=test --size=1024m
+\end{lstlisting}
+
 
 \begin{center}
   \begin{table}[h!]
@@ -21,15 +27,15 @@ $./fio --rw=write --runtime=2s --write_bw_log=mytest --name=test --size=1024m$
       \hline
       fio & Das fio Executable  \\ 
       \hline
-      rw & Auswahl von read oder write des Tests  \\ 
+      rw=write & Auswahl von read oder write des Tests  \\ 
       \hline
-      runtime & Maximale Dauer eines Tests  \\ 
+      runtime=2s & Maximale Dauer eines Tests  \\ 
       \hline
-      write bw log &  Name des Logs die ausgeben werden soll   \\ 
+      write\_bw\_log=mytest &  Name des Logs die ausgeben werden soll   \\ 
       \hline
-      name &  Name des Tests   \\ 
+      name=test &  Name des Tests   \\ 
       \hline
-      size & Größe der Datei für den read/write Test    \\ 
+      size=1024m & Größe der Datei für den read/write Test    \\ 
       \hline
     \end{tabularx}
     \caption{Beispiel Command zur Ausführung des Fio-Tools}
@@ -37,8 +43,24 @@ $./fio --rw=write --runtime=2s --write_bw_log=mytest --name=test --size=1024m$
   \end{table}
 \end{center}
 
-Solche Command kann auch in eine Datei geschrieben, was die .fio Datei sind. In dieser Arbeit so eine Ausführung als einen \textit{run/job} bezeichnet.
-Der Job oben testet das Random Read mit einer Laufzeit (Runtime) von 2 Sekunden und liest eine Datei mit einer Größe von 128 Mebibyte. Dieser Job wird nur einmal durchlaufen. Für einen wiederholten Lauf gibt es den Parameter loop, wo zusätzlich die Anzahl angegeben wird.
+Solche Command kann auch in eine Datei geschrieben, was die .fio Datei sind. In dieser Arbeit wird so eine Ausführung als einen \textit{Job} bezeichnet.
+Der Job oben testet das Random Read mit einer Laufzeit (Runtime) von 2 Sekunden und liest eine Datei mit einer Größe von 128 Mebibyte. Dieser Job wird nur einmal durchlaufen. 
+Für einen wiederholten Lauf gibt es den Parameter loop, wo zusätzlich die Anzahl angegeben wird, wie oft dieser run wiederholt werden soll.
+So ist ein Job ein abgeschlossener Durchlauf von allen \textit{runs}.
+Wenn der Job abgeschlossen ist und der Parameter write\_bw\_log verwendet wurde, gibt das fio-Tool ein log Datei von dem ausgeführten Job.
+
+\begin{lstlisting}[caption=Erste Zeilen des Logs (Bezeichnungen sind nicht im Log enthalten),label={lst:log_line_example}]
+  [Time,	Bandwidth,    data direction, Blocksize,	Offset]
+  0, 	    59782,        0,		            4096,		    0
+  0, 	    54353,        0,		            4096,		    0
+  1, 	    45545,        0,		            4096,		    0
+\end{lstlisting}
+
+Time für die Zeit in Millisekunden (ms) die verlaufen ist, Bandwidth für die
+Bandbreitengeschwindigkeit in Kibibyte/s, der dritte Wert für die data direction,
+ ob gelesen (= 0) oder geschrieben (= 1) wurde und ein Blocksize und
+ein Offset. Die Logdaten selbst könne über 10.000 Zeilen umfassen und sind
+daher schwer lesbar
 
 \subsection{Warmup und stationärer Zustand}
 Der stationärer Zustand ist ein Muster, das sich mit der Zeit wiederholt und bei dem das Verhalten in einem Zeitraum von der 
@@ -73,10 +95,10 @@ Da sich die Geschwindigkeit nie konstant einem Wert nähert, sondern stets
 abweicht, soll das Analysetool in Zukunft mit statistischen Tests mit der zusätzlichen Fehlerrate den stationären
 Zustand ermitteln und dabei den Nichtdeterminismus berücksichtigen.
 
-Doch die Auswahl der Runs aus den Tests für die Bestimmung des stationäre Zustand hat ein Auswahl
-auf die Entscheidung, ob der transiente Zustand abgeschlossen ist.
+Doch die Auswahl der Runs aus den Tests für die Bestimmung des stationäre Zustand trägt zu einer signifikante Entscheidung bei,
+ ob der transiente Zustand abgeschlossen ist.
 Die Auswahl der Logs und deren Diese Auswertung können signifikante Unterschiede aufweisen, die die Evaluierung
-verändern würden [1].
+verändern würden \cite{when_stop_tests}.
 
 
 
@@ -88,13 +110,15 @@ Diese statistische Tests werden genutzt, um zu ermitteln ob eine statistische Si
 Wenn die statistisch Signifikanz erfüllt ist, wird die Nullhypothese abgelehnt \cite{inferenzstatistik}.
 Die Nullhypothese ist hier die Annahme, dass es zwischen den Logs keine Abhängigkeit besteht und zufällig sind.
 Somit ist die Alternativhypothese, dass zwischen den ausgewählten Stichproben ein Zusammenhang/Abhängigkeit besteht.
-Tests wie der t-Test und Tests mit Konfidenzintervallen haben die Bedingung, dass die Stichprobe einer Normalverteilung\footnote{auch Gaußverteilung} unterliegen \cite{inferenzstatistik}. 
+Tests wie der t-Test und Tests mit Konfidenzintervallen haben die Bedingung, 
+dass die Stichprobe einer Normalverteilung\footnote{auch Gaußverteilung} unterliegen \cite{inferenzstatistik}. 
 Da die Stichproben $n > 30$ Messwerte besitzen, ist der Zentrale Grenzwert erfüllt, denn dieser Satz sagt aus, 
 Setzt sich eine Zufallsvariable additiv aus einer großen Zahl beliebig verteilter, stochastisch unabhängiger
 Zufallsvariablen zusammen, so ist sie selbst näherungsweise normalverteilt \cite{statistically_rigorous}.
 
 Das Ablehnen der Nullhypothese, obwohl die Hypothese erfüllt ist, wird als Typ-1-Fehler bezeichnet.
-Die Wahrscheinlichkeit dafür wird auch als $\alpha$ genannt. Zusammen mit dem Wahrscheinlichkeitswert $p$ und den Tests,  die Wahrscheinlichkeit für das Eintreten des beobachteten 
+Die Wahrscheinlichkeit dafür wird auch als $\alpha$ genannt. Zusammen mit dem Wahrscheinlichkeitswert $p$ und den Tests, 
+ die Wahrscheinlichkeit für das Eintreten des beobachteten 
 extremeren Stichprobenergebnisses unter der Annahme, dass die Nullhypothese gilt, wird statistische Signifikanz überprüft \cite{kurt2020stochastik}.
 
 
@@ -347,7 +371,7 @@ deren Gruppe.
   $U = n_1 \cdot n_2 + \dfrac{n_1 (n_1 + 1)}{2} - T_1$ bzw. $U' = n_1 \cdot n_2 + \dfrac{n_2 (n_2 + 1)}{2} - T_2$, dabei gilt $U = n_1 \cdot n_2 - U'$
 \end{center}
 
-Mit Zusatz des Grenzwert satzes und Rangröße $n > 12$, wird mit den Z-Werten weiter berechnet um die statistische Signifikanz zu testen:
+Mit Zusatz des Grenzwertsatzes und Rangröße $n > 12$, wird mit den Z-Werten weiter berechnet um die statistische Signifikanz zu testen:
 
 \begin{center}
   \[

@@ -180,3 +180,91 @@ year = {2020},
   pages={1-12},
   keywords={Computers;Benchmark testing;Gaussian distribution;Size measurement;Data structures},
   doi={10.1109/HPCA.2012.6169043}}
+
+@inproceedings{when_stop_tests,
+author = {Alghmadi, Hammam and Syer, Mark and Shang, Weiyi and Hassan, Ahmed E.},
+year = {2016},
+month = {10},
+pages = {279-289},
+title = {An Automated Approach for Recommending When to Stop Performance Tests},
+doi = {10.1109/ICSME.2016.46}
+}
+
+@article{defi_benchmarking,
+  title={Measuring performance metrics: Techniques and tools},
+  author={Sabetta, Antonino and Koziolek, Heiko},
+  journal={Dependability Metrics: Advanced Lectures},
+  pages={226--232},
+  year={2008},
+  publisher={Springer}
+}
+
+@inproceedings{ssd_benchmark,
+author = {Xu, Qiumin and Siyamwala, Huzefa and Ghosh, Mrinmoy and Suri, Tameesh and Awasthi, Manu and Guz, Zvika and Shayesteh, Anahita and Balakrishnan, Vijay},
+title = {Performance analysis of NVMe SSDs and their implication on real world databases},
+year = {2015},
+isbn = {9781450336079},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2757667.2757684},
+doi = {10.1145/2757667.2757684},
+abstract = {The storage subsystem has undergone tremendous innovation in order to keep up with the ever-increasing demand for throughput. Non Volatile Memory Express (NVMe) based solid state devices are the latest development in this domain, delivering unprecedented performance in terms of latency and peak bandwidth. NVMe drives are expected to be particularly beneficial for I/O intensive applications, with databases being one of the prominent use-cases.This paper provides the first, in-depth performance analysis of NVMe drives. Combining driver instrumentation with system monitoring tools, we present a breakdown of access times for I/O requests throughout the entire system. Furthermore, we present a detailed, quantitative analysis of all the factors contributing to the low-latency, high-throughput characteristics of NVMe drives, including the system software stack. Lastly, we characterize the performance of multiple cloud databases (both relational and NoSQL) on state-of-the-art NVMe drives, and compare that to their performance on enterprise-class SATA-based SSDs. We show that NVMe-backed database applications deliver up to 8\texttimes{} superior client-side performance over enterprise-class, SATA-based SSDs.},
+booktitle = {Proceedings of the 8th ACM International Systems and Storage Conference},
+articleno = {6},
+numpages = {11},
+keywords = {performance characterization, hyperscale applications, SSD, NoSQL databases, NVMe},
+location = {Haifa, Israel},
+series = {SYSTOR '15}
+}
+
+@misc{wang2019benchmarkingtpugpucpu,
+      title={Benchmarking TPU, GPU, and CPU Platforms for Deep Learning}, 
+      author={Yu Emma Wang and Gu-Yeon Wei and David Brooks},
+      year={2019},
+      eprint={1907.10701},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/1907.10701}, 
+}
+
+@article{warmAndCold,
+author = {Barrett, Edd and Bolz-Tereick, Carl Friedrich and Killick, Rebecca and Mount, Sarah and Tratt, Laurence},
+title = {Virtual machine warmup blows hot and cold},
+year = {2017},
+issue_date = {October 2017},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {1},
+number = {OOPSLA},
+url = {https://doi.org/10.1145/3133876},
+doi = {10.1145/3133876},
+abstract = {Virtual Machines (VMs) with Just-In-Time (JIT) compilers are traditionally thought to execute programs in two phases: the initial warmup phase determines which parts of a program would most benefit from dynamic compilation, before JIT compiling those parts into machine code; subsequently the program is said to be at a steady state of peak performance. Measurement methodologies almost always discard data collected during the warmup phase such that reported measurements focus entirely on peak performance. We introduce a fully automated statistical approach, based on changepoint analysis, which allows us to determine if a program has reached a steady state and, if so, whether that represents peak performance or not. Using this, we show that even when run in the most controlled of circumstances, small, deterministic, widely studied microbenchmarks often fail to reach a steady state of peak performance on a variety of common VMs. Repeating our experiment on 3 different machines, we found that at most 43.5\% of <VM, Benchmark> pairs consistently reach a steady state of peak performance.},
+journal = {Proc. ACM Program. Lang.},
+month = oct,
+articleno = {52},
+numpages = {27},
+keywords = {JIT, Virtual machine, benchmarking, performance}
+}
+
+@inproceedings{baseline_paper,
+   title={Automated Identification of Performance Changes at Code Level},
+   url={http://dx.doi.org/10.1109/QRS57517.2022.00096},
+   DOI={10.1109/qrs57517.2022.00096},
+   booktitle={2022 IEEE 22nd International Conference on Software Quality, Reliability and Security (QRS)},
+   publisher={IEEE},
+   author={Reichelt, David Georg and Kühne, Stefan and Hasselbring, Wilhelm},
+   year={2022},
+   month=dec, pages={916–925} 
+   }
+
+   @INPROCEEDINGS{statistical_performance_pc,
+  author={Chen, Tianshi and Chen, Yunji and Guo, Qi and Temam, Olivier and Wu, Yue and Hu, Weiwu},
+  booktitle={IEEE International Symposium on High-Performance Comp Architecture}, 
+  title={Statistical performance comparisons of computers}, 
+  year={2012},
+  volume={},
+  number={},
+  pages={1-12},
+  keywords={Computers;Benchmark testing;Gaussian distribution;Size measurement;Data structures},
+  doi={10.1109/HPCA.2012.6169043}}
+

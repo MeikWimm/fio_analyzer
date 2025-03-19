@@ -1,2 +1,40 @@
 \chapter{Verwandte Arbeiten}
 \label{cha:Verwandte_Arbeiten}
+
+Es wird in den Paper Georges et. al \cite{statistically_rigorous} mehrere Benchmarktools verwendet. 
+Dies wird auch von Traeger et. al \cite{nine-year-of-bench} empfohlen um faire Tests und vergleiche machen zu können.
+Festplattenbenchmarking wurde auch von Xu et. al \cite{ssd_benchmark} mit fio getesten.
+Dabei wurde auf die I/O-Engine geachtet und die \textit{libaio} asynchrone I/O-Engine genutzt.
+um die page cache zu bypassen und die rohe Perforamnz der Festplatten zu testen.
+Dabei wird zu ein Flag für das fio gesetzt.
+Der \textit{direct} Flag wurde in dieser Arbeit unverändert gelassen.
+Zusätzlich wurde in Xu et. al \cite{ssd_benchmark} noch extra das Blktrace Tool (von Axboe and Brunelle 2007) genutzt. 
+Für die Perforamnzanalyse wurden zwei weitere Statistiken verwendet. Die slat (submission latency) und clat (completion latency).
+Für die Evaluierung wurden verschiedene Datenbanken verwendet um realitätsnahe Tests durchzuführen,
+da Datenbankmanagementsysteme (DBMS) ein Beispiel für I/O-intensive Anwendungen in Rechenzentren sind.
+Dabei wurden SATA HDD, SATA SSD und NVMe mit den beiden oben erwähnten Metriken der Latenz verglichen.
+
+Das Paper Barrett et. al \cite{warmAndCold} verwendet kein Festplattenbenchmarking, aber geht auf das Benchmarking und stationären Zustand für VMs ein.
+Dabei ist mit Virtuelle Maschine hier eine JIT\footnote{Just-In-Time}-Kompilierung gemeint.
+Das Paper Reichelt et. al \cite{baseline_paper} verwenden ebenfalls solche VMs um diesen stationären Zustand zu ermitteln,
+dabei werden ebenso statistische Tests wie der T-Test, Mann-Whitney-Test verwendet und ebenso vergleiche von Konfidenzintervallen durchgeführt. 
+Wobei dort die Frage gestellt wird, wann der steady state of peak performance erreicht innerhalb einer JIT-Kompilierung.
+Auch dieses Paper verwendet Methoden die in Georges et. al \cite{statistically_rigorous} empfohlen werden.
+
+In dem Paper Chen et. al \cite{statistical_performance_pc} wird ein Beispiel Szenario vorgestellt wo die Normalverteilung nicht vorhanden ist.
+Dabei werden statistische Techniken verwendet wie Normality Fitting (NNF) and Kernel Parzen Window (KPW).
+Um die Normalverteilung der Leistung zu überprüfen, wird empirisch untersucht, 
+ob die durch die Annahme der Normalverteilung der Ausführungszeit erhaltene Wahrscheinlichkeitsdichtefunktion
+mit der tatsächlichen Wahrscheinlichkeitsdichtefunktion der Ausführungszeit übereinstimmt.
+Doch in Georges et. al \cite{statistically_rigorous} im Kontext der Leistungsbewertung von Java stellt fest, dass die Leistung einzelner Benchmarks (SPECjvm98) 
+auf mehreren Single-Core-Computern im Allgemeinen durch Normalverteilungen charakterisiert werden kann.
+Weiterhin in Chen et. al wird der Grenzwertsatz bei solchen Messungen überprüft.
+Es wird geschaut ob für welche Anzahl an Messwerten notwendig ist damit der Zentralegrenzwertsatz erfüllt.
+
+In Alghmadi et. al \cite{when_stop_tests} wird untersucht wann ein Stop von Tests ausreicht.
+Um zu wissen wann Messungen zu stoppen sind, verwendet Alghmadi et. al \cite{when_stop_tests} den mann-Whitney-rang-Test um heruaszufinden, 
+wann solche Tests gestoppt werden können. Durch repetitive Muster bei der Perforamnzanalyse soll der Test dabei helfen diese zu erkennen.
+
+
+
+
