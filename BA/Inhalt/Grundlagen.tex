@@ -7,7 +7,8 @@
 Das Vergleichen der Performanz verschiedener Systeme anhand von Messungen wird als \textit{Benchmarking} bezeichnet. 
 Die in diesen Messungen verwendeten Workloads sind standardisiert und werden \textit{Benchmarks} genannt \cite{defi_benchmarking}.
 Mit Systeme ist hier gemeint, dass es die Hardware wie CPU/GPU \cite{wang2019benchmarkingtpugpucpu} oder Harddrives \cite{ssd_benchmark} getestet werden oder auch Software 
-wie VMs \cite{statistically_rigorous}.
+wie VMs \cite{statistically_rigorous}. Um solche Benchmarks durchzuführen werden Benchmarkingtools verwendet, um Messungen und am Ende Vergleiche stellen zu können.
+Das Tool was in dieser Arbeit verwendet ist das Fio-Tool.
 
 \subsection{Fio-Tool}
 Das fio\footnote{flexible Input Output} \cite{axboe} Benchmarking-Tool arbeitet in der Konsole und es gibt kein UI.
@@ -45,7 +46,7 @@ Um einen Festplattenbenchmark-Test selber durchzuführen, sieht der Command wie 
 
 Solche Command kann auch in eine Datei geschrieben, was die .fio Datei sind. In dieser Arbeit wird so eine Ausführung als einen \textit{Job} bezeichnet.
 Der Job oben testet das Random Read mit einer Laufzeit (Runtime) von 2 Sekunden und liest eine Datei mit einer Größe von 128 Mebibyte. Dieser Job wird nur einmal durchlaufen. 
-Für einen wiederholten Lauf gibt es den Parameter loop, wo zusätzlich die Anzahl angegeben wird, wie oft dieser run wiederholt werden soll.
+Für einen wiederholten Lauf gibt es den Parameter loop, wo zusätzlich die Anzahl angegeben wird, wie oft dieser \textit{run} wiederholt werden soll.
 So ist ein Job ein abgeschlossener Durchlauf von allen \textit{runs}.
 Wenn der Job abgeschlossen ist und der Parameter write\_bw\_log verwendet wurde, gibt das fio-Tool ein log Datei von dem ausgeführten Job.
 
@@ -104,20 +105,20 @@ verändern würden \cite{when_stop_tests}.
 
 \section{Statistische Analyse/Tests}
 Es werden verschiedene Tests verwendet um herauszufinden ob eine Performanzänderung vorliegt \cite{statistically_rigorous}
-Die Grundgesamtheit wird ein fio-Run sein und die Stichproben werden die Iteration sein die für die Tests entnommen werden.
+Die Grundgesamtheit wird ein fio-Job sein und die Stichproben werden die Iteration/Runs sein die für die Tests entnommen werden.
 Diese statistische Tests werden genutzt, um zu ermitteln ob eine statistische Signifikanz zwischen den Stichproben vorhanden ist.
 
 Wenn die statistisch Signifikanz erfüllt ist, wird die Nullhypothese abgelehnt \cite{inferenzstatistik}.
-Die Nullhypothese ist hier die Annahme, dass es zwischen den Logs keine Abhängigkeit besteht und zufällig sind.
+Die Nullhypothese ist hier die Annahme, dass es zwischen den Logs keine Abhängigkeit besteht und zufällig entstanden sind.
 Somit ist die Alternativhypothese, dass zwischen den ausgewählten Stichproben ein Zusammenhang/Abhängigkeit besteht.
-Tests wie der t-Test und Tests mit Konfidenzintervallen haben die Bedingung, 
+Die verwendeten Tests wie der t-Test und Tests mit Konfidenzintervallen haben die Bedingung, 
 dass die Stichprobe einer Normalverteilung\footnote{auch Gaußverteilung} unterliegen \cite{inferenzstatistik}. 
 Da die Stichproben $n > 30$ Messwerte besitzen, ist der Zentrale Grenzwert erfüllt, denn dieser Satz sagt aus, 
 Setzt sich eine Zufallsvariable additiv aus einer großen Zahl beliebig verteilter, stochastisch unabhängiger
 Zufallsvariablen zusammen, so ist sie selbst näherungsweise normalverteilt \cite{statistically_rigorous}.
 
 Das Ablehnen der Nullhypothese, obwohl die Hypothese erfüllt ist, wird als Typ-1-Fehler bezeichnet.
-Die Wahrscheinlichkeit dafür wird auch als $\alpha$ genannt. Zusammen mit dem Wahrscheinlichkeitswert $p$ und den Tests, 
+Die Wahrscheinlichkeit dafür wird als $\alpha$ und als Signifikanzniveau bezeichnet. Zusammen mit dem Wahrscheinlichkeitswert $p$ und den Tests, 
  die Wahrscheinlichkeit für das Eintreten des beobachteten 
 extremeren Stichprobenergebnisses unter der Annahme, dass die Nullhypothese gilt, wird statistische Signifikanz überprüft \cite{kurt2020stochastik}.
 
@@ -134,12 +135,12 @@ Die SSA  ist die quadratische Abweichung der Mittelwerte vom Gesamtmittelwert un
 ist die gesamte Abweichung von den Mittelwerten in den Gruppen.
 Das Ziel der Komponenten ist, festzustellen, ob die beobachteten Unterschiede zwischen den Mittelwerten der einzelnen Alternativen auf tatsächliche 
 Unterschiede zwischen den Alternativen zurückzuführen sind oder ob sie lediglich Messfehler sind.
-Die Alternativen hier werden die Iterationen eines fio-runs sein.
+Die Alternativen hier werden die Iterationen eines fio-jobs sein.
 Die Varianzanalyse geht davon aus, dass die Fehler in den Messungen für die verschiedenen Alternativen
 unabhängig voneinander und normalverteilt sind, was mit dem Zentralen Grenzwertsatz erfüllt ist.
 Die Messwerte für das Analysetool sind I/O-Geschwindigkeiten.
 Es geht weiter davon aus, dass die Varianz der Messfehler bei allen Alternativen gleicher Art sind.
-Die Tabelle \ref{tab:measurements} zeigt die Vorbereitung einer Varianzanalyse für einen fio-run.
+Die Tabelle \ref{tab:measurements} zeigt die Vorbereitung einer Varianzanalyse für einen fio-job.
 
 \begin{table}[h!]
   \centering
@@ -162,13 +163,13 @@ Die Tabelle \ref{tab:measurements} zeigt die Vorbereitung einer Varianzanalyse f
   \hline
   \end{tabular}
   %}
-  \caption{Tabelle mit einem fio-Run mit k-Iterationen und n-Messwerte für die Varianzanalyse}
+  \caption{Tabelle mit einem fio-job mit k-Iterationen und n-Messwerte für die Varianzanalyse}
   \label{tab:measurements}
 \end{table}
 
 Genauer ist die ANOVA, die hier verwendet wird, eine einfaktorielle ANOVA.
 Der Faktor ist hier die I/O-Geschwindigkeit. Wenn mehr als ein Faktor verwendet wird, wird die ANOVA auch als mehrfaktorielle ANOVA bezeichnet.
-Da aber nur ein fio-run mit mehren Iteration verglichen wird, wird die einfaktorielle ANOVA benötigt.
+Da aber nur ein fio-job mit mehren Iteration verglichen wird, wird die einfaktorielle ANOVA benötigt.
 Für die ANOVA werden folgende Formel verwendet:
 
 \begin{itemize}
@@ -246,7 +247,6 @@ Um $c_1$ und $c_2$ zu berechnet werden die Formel verwendet:
 
 \end{center}
 
-Wobei es die berechnete Standardabweichung ist:
 
 \begin{center}
          $s = \sqrt{\dfrac{\sum_{i=1}^{n} (x_i - \overline{x})^2}{n-1}}$ 
@@ -254,7 +254,7 @@ Wobei es die berechnete Standardabweichung ist:
 
 \subsection{Paarweise Konfidenzintervall-Vergleich}
 
-Um die verschieden Iterationen eines fio-Runs vergleichen zu können, werden die deren Konfidenzintervalle miteinander verglichen \cite{statistically_rigorous}.
+Um die verschieden Iterationen eines fio-jobs vergleichen zu können, werden die Konfidenzintervalle miteinander verglichen \cite{statistically_rigorous}.
 Ein Methode ist, zu untersuchen, ob sich die Konfidenzintervalle überlappen. Wenn dies der Fall ist, dann kann nicht
 geschlussfolgert werden, dass die in den Mittelwerten beobachteten Unterschiede
 nicht auf zufällige Schwankungen der Messungen zurückzuführen sind.
@@ -269,8 +269,9 @@ Die Berechnung des neuen Konfidenzintervall ist wie folgt:
       \hline
        $s_x =  \sqrt{\dfrac{s^2_1}{n_1} + \dfrac{s^2_2}{n_2}}$ & Berechne den neuen Mittelwert aus den beiden Alternativen  \\ 
       \hline
-      $c_1 = \overline{x} - z_{1-\alpha/2} s_x$ \\
-      $c_2 = \overline{x} + z_{1-\alpha/2} s_x$ 
+      $c_1 = \overline{x} - z_{1-\alpha/2} s_x$ & Berechne den neuen Konfidenzintervall \\
+      $c_2 = \overline{x} + z_{1-\alpha/2} s_x$ & \\
+      \hline
     \end{tabularx}
     \caption{Berechnung des F-Wertes mit mean-square SSA und SSE}
     \label{tab:two_Iteration_Konfidenzintervall}
@@ -284,9 +285,9 @@ deutlicher Unterschied zwischen den beiden Alternativen.
 \section{T-Test}
 Der Begriff T-Test wird genutzt, um verschiedene Tests zu bezeichnen, die
 u. a. die Verteilung der Grundgesamtheit von normalverteilten und unabhängigen Stich-
-proben miteinander vergleichen [JP15, Seite 41]. Im Kontext dieser Arbeit bezeichnet
+proben miteinander vergleichen \cite{inferenzstatistik}. Im Kontext dieser Arbeit bezeichnet
 der T-Test den unabhängigen T-Test, bei dem die Erwartungswerte zweier voneinander
-unabhängiger Stichproben miteinander verglichen werden.
+unabhängiger Stichproben miteinander verglichen werden, sowieso ein ungerichteter T-test.
 Der T-Test vergleicht die Stärke der Unterschiede zwischen den Stichproben mit der
 Abweichung innerhalb der Stichproben. Die Prüfgröße t, die ein Maß dafür ist, wie un-
 wahrscheinlich die Nullhypothese H0 ist, d. h. dass die Grundgesamtheiten der beiden
@@ -299,26 +300,33 @@ unter der Annahme das die Grundgesamtheit normalverteilt ist.
   $t = \dfrac{M_A-M_B}{\sqrt{\frac{\hat{S}_A^2}{n_A} + \frac{\hat{S}_B^2}{n_B}}}$
 \end{center}
 
-wobei,
+Wobei die Varianz wie folgt berechnet wird:,
 
 \begin{center}
   $\hat{S}_X^2 = \dfrac{n}{n-1} S_X^2 = \dfrac{n}{n-1} \cdot \dfrac{1}{n} \sum_{i=1}^n (x_i - M_X)^2 = \dfrac{1}{n-1} \sum_{i=1}^n (x_i - M_X)^2$
 \end{center}
 
+Die Nullhypothese, also die Annahme, dass die Grundgesamtheiten der beiden Stich-
+proben den gleichen Erwartungswert haben, wird mit einer Irrtumswahrscheinlichkeit
+(auch: Signifikanzniveau) $\alpha$ abgelehnt, wenn
+
 \begin{center}
   $|t| > t_{n_A + n_B - 2; \frac{\alpha}{2}}$
 \end{center}
 
+d. h. wenn der ermittelte t-Wert betragsmäßig größer als der Wert der t-Verteilung
+mit den Freiheitsgraden $n + m - 2$ von $1 - \frac{1}{2}\alpha$ ist.
+
 
 
 \section{Tukey-HSD}
-Wenn mehr als zwei Vergleiche getestet werden, wird die Kontrolle der Typ-I-Fehlerquote zu einem wichtigen Anliegen. 
+Wenn mehr als zwei Vergleiche getestet werden, wird die Kontrolle der Typ-I-Fehlerquote zu einem wichtigen Anliegen \cite{tukey_HSD} \cite{tukey_hsd_book}. 
 Die ANOVA hilft zwar dabei, das Vorhandensein eines signifikanten Effekts zu identifizieren, 
 führt jedoch zu Problemen bei der Kontrolle des Typ-I-Fehlers, wenn man mit mehreren t-Tests und mehreren Gruppen arbeitet.
 Um die erhöhte Fehlerquote zu reduzieren, berechnet und passt die Methode von Tukey das Konfidenzniveau für alle einzelnen Vergleiche an, 
 sodass die Familienfehlerquote entsteht und das resultierende simultane Konfidenzniveau dem vorgegebenen Wert entspricht.
-Der Tukey-HSD\footnote{Honestly Significant Difference} Test analysiert paarweise
-zwischen den Mittelwerten \cite{tukey_HSD}.
+Der Tukey-HSD\footnote{HSD - Honestly Significant Difference} Test analysiert paarweise
+zwischen den Mittelwerten.
 Der Tukey-Test vergleicht die Differenzen zwischen den Mittelwerten von Werten, anstatt einzelne Wertepaare direkt zu vergleichen. 
 Der Wert des Tukey-Tests wird ermittelt, indem der Absolutwert der Differenz zwischen den Mittelwerten von Paaren genommen und 
 durch den Standardfehler des Mittelwerts (SE), wie er durch einen einseitigen ANOVA-Test bestimmt wird, geteilt wird.
@@ -361,16 +369,6 @@ Für den Test folgt ein Prüfgröße $U$
 Dieser Test
 hat keine Anforderungen über die Verteilung der Stichproben.
 Somit ist keine Normalverteilung der Stichproben notwendig.
-Als Nächstes wird eine
-Prüfgröße U bestimmt, bzw. $U'$ da es zwei Gruppen gibt die einen Rang besitzt , indem wir aus-
-zählen, wie häufig ein Rangplatz in der einen
-Gruppe größer ist als die Rangplätze in der an-
-deren Gruppe.
-
-\begin{center}
-  $U = n_1 \cdot n_2 + \dfrac{n_1 (n_1 + 1)}{2} - T_1$ bzw. $U' = n_1 \cdot n_2 + \dfrac{n_2 (n_2 + 1)}{2} - T_2$, dabei gilt $U = n_1 \cdot n_2 - U'$
-\end{center}
-
 Mit Zusatz des Grenzwertsatzes und Rangröße $n > 12$, wird mit den Z-Werten weiter berechnet um die statistische Signifikanz zu testen:
 
 \begin{center}

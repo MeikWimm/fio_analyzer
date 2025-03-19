@@ -1,4 +1,13 @@
 \section*{Zusammenfassung}
 \label{sec:Zusammenfassung}
 
-Zusammenfassung meiner Arbeit hier....
+Mit Benchmarks kann man die Performanz von Hardware oder Software, wie etwa die Rechenleistung und die I/O Geschwindigkeit messen. 
+Diese Messungen können stark oder schwach schwanken. Dies hängt unter anderem davon ab, ob die Tests gerade erst begonnen haben oder über einen längeren Zeitraum ausgeführt wurden.
+Ein stationärer Zustand ist ein Muster, das sich mit der Zeit wiederholt und bei dem das Verhalten in einem Zeitraum von der gleichen Natur ist wie in jedem anderen Zeitraum.
+Um zu ermitteln, wann der stationäre Zustand eingetreten ist, sind stabile Messwerte mit minimalen Schwankungen erforderlich.
+Das Problem ist besonders bei der Netzwerkübertragung relevant, da zusätzlich die Netzwerkübertragung die Schwankung beeinflusst.
+Diese Messungen der I/O-Geschwindigkeit werden mit dem Benchmark-Tool Fio durchgeführt, und es wird ein Programm entwickelt, das diesen Zustand analysiert. 
+
+In dieser Arbeit wird die statistische Analyse durchgeführt, um zu ermitteln, ab wann sich Messzeiträume nicht mehr statistisch signifikant unterscheiden. Die Tests, die dafür verwendet werden, sind der t-Test, Tukey-HSD-Test und der Mann-Whitney-Test. 
+Basierend auf der Analyse kann eine Aussage darüber getroffen werden, wie oft die fio-Messungen wiederholt werden müssen, um den stationären Zustand beim Festplattenbenchmarking zu erreichen.
+Das Programm wird in Java implementiert.
