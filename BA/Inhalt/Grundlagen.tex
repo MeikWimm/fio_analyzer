@@ -113,17 +113,40 @@ Die Nullhypothese ist hier die Annahme, dass es zwischen den Logs keine Abhängi
 Somit ist die Alternativhypothese, dass zwischen den ausgewählten Stichproben ein Zusammenhang/Abhängigkeit besteht.
 Die verwendeten Tests wie der t-Test und Tests mit Konfidenzintervallen haben die Bedingung, 
 dass die Stichprobe einer Normalverteilung\footnote{auch Gaußverteilung} unterliegen \cite{inferenzstatistik}. 
-Da die Stichproben $n > 30$ Messwerte besitzen, ist der Zentrale Grenzwert erfüllt, denn dieser Satz sagt aus, 
-Setzt sich eine Zufallsvariable additiv aus einer großen Zahl beliebig verteilter, stochastisch unabhängiger
-Zufallsvariablen zusammen, so ist sie selbst näherungsweise normalverteilt \cite{statistically_rigorous}.
 
 Das Ablehnen der Nullhypothese, obwohl die Hypothese erfüllt ist, wird als Typ-1-Fehler bezeichnet.
-Die Wahrscheinlichkeit dafür wird als $\alpha$ und als Signifikanzniveau bezeichnet. Zusammen mit dem Wahrscheinlichkeitswert $p$ und den Tests, 
- die Wahrscheinlichkeit für das Eintreten des beobachteten 
-extremeren Stichprobenergebnisses unter der Annahme, dass die Nullhypothese gilt, wird statistische Signifikanz überprüft \cite{kurt2020stochastik}.
+Die Wahrscheinlichkeit dafür wird als $\alpha$ und als Signifikanzniveau bezeichnet. 
+Zusätzlich mit den p-Werten (Signifikanzwahrscheinlichkeit) aus den statistischen Tests, wird die Statistische Signifikanz überprüft.
+Dabei ist Der Wert p ist also nichts anderes als die (bedingte) Wahrscheinlichkeit der erhobenen oder
+noch extremerer Daten, wenn die H0 als gültig angenommen wird \cite{inferenzstatistik}
 
+\section{Normalverteilung/Gaußverteilung}
 
-Um die Nullhypothese zu überprüfen, werden die jeweiligen Tests verwendet die in den folgenden Sektion erläutert werden. 
+Die hier verwendet Tests, wie der T-Test und das quantifizieren eines Konfidenzintervalls, 
+haben die Bedingung, dass sie einer Normalverteilung unterliegen müssen \cite{inferenzstatistik}.
+Die Normalverteilung ist ein Dichtefunktion die einer Glockenform entspricht.
+Die Funktion wird aus zwei Parametern zusammen. Die Varianz $\sigma^2$ und der Erwartungswert $\mu$.
+Ist eine Zufallsvariable $X$ normalverteilt, kann sie mit der folgenden Formel beschrieben werden:
+
+\begin{center}
+  $X \sim N(\mu,\sigma^2)$
+\end{center}
+
+Dabei bedeutet hier "$\sim$" das Symbol, dass die Zufallsvariable $X$ normalverteilt ist.
+Die Funktion $N$ verwendet die eigentliche Dichtefunktion:
+
+\begin{center}
+  $f(x) = \dfrac{1}{\sqrt{2\pi\sigma^2}} \cdot e^{-\frac{(x-\mu)^2}{2\sigma^2}}$
+\end{center}
+
+Die ausgewählten Stichproben werden die Runs aus einem fio-Job sein.
+Damit spätere Tests auch durchgeführt werden können, wird der Zentralegrenzwertsatz genutzt, um diese Bediungen der Normalverteilung zu erfüllen.
+Die Stichproben $n > 30$ Messwerte besitzen, somit ist der Zentrale Grenzwert erfüllt, denn dieser Satz sagt aus, 
+Setzt sich eine Zufallsvariable additiv aus einer großen Zahl beliebig verteilter, stochastisch unabhängiger
+Zufallsvariablen zusammen, so ist sie selbst näherungsweise normalverteilt \cite{statistically_rigorous}.
+Eine spezielle Form für die Normalverteilung ist die Standardnormalverteilung.
+Für diese Verteilung gilt das der Erwartungswert $\mu = 0$ und die Standardabweichung $\sigma^2 = 1$ ist.
+
 
 \section{Varianzanalyse - Analysis of Variance (ANOVA)}
  
@@ -201,11 +224,14 @@ Das bedeutet 91\% der gesamte Variationen in den Messwerten entstammen durch den
 
 
 \subsection{F-Test}
-Um die statistische Signifikanz in ANOVA zu testen wird zusätzlich der F-Test genutzt \cite{Lilja_2000}.
+Um die statistische Signifikanz in ANOVA zu testen wird zusätzlich der F-Test genutzt \cite[S. ff 71]{Lilja_2000}.
 Dieser auf der F-Verteilung\footnote{Fisher-Verteilung} basierende Test wird verwendet, um zu prüfen, ob sich zwei Varianzen signifikant unterscheiden.
 Der Test lässt sich mit den Verhältnissen von SSA und SSE berechnen.
 Da es sich bei dieser F-Statistik um das Verhältnis zweier Varianzen handelt, sind zwei Werte für die Freiheitsgrade erforderlich, 
 einer aus dem Zähler und einer aus dem Nenner.
+\textit{Freiheitsgrade kompensieren so (teilweise)
+die größere Messungenauigkeit bei der Verwendung kleiner Stichproben, wenn aus
+diesen Stichproben bestimmte Populationsparameter geschätzt werden sollen.} \cite[S. 49]{inferenzstatistik}
 Wenn dieses Verhältnis, der berechnete F-Wert, größer ist als der kritische F-Wert, der bei einem bestimmten Signifikanzniveau $\alpha$ aus der F-Verteilung erhalten wird, 
 schließen wir, dass der Unterschied in den Varianzen statistisch signifikant ist. Daraus ergibt sich, 
 dass es einen statistisch signifikanten Unterschied zwischen den Alternativen gibt, der über die Unterschiede aufgrund experimenteller Fehler hinausgeht.
@@ -316,6 +342,7 @@ proben den gleichen Erwartungswert haben, wird mit einer Irrtumswahrscheinlichke
 
 d. h. wenn der ermittelte t-Wert betragsmäßig größer als der Wert der t-Verteilung
 mit den Freiheitsgraden $n + m - 2$ von $1 - \frac{1}{2}\alpha$ ist.
+Die t-Verteilung ähnelt der normalverteiltung. Der utnerschied ist da die t-Verteilung für kleine Stichproben Bezug genommen werden.
 
 
 
@@ -369,7 +396,7 @@ Für den Test folgt ein Prüfgröße $U$
 Dieser Test
 hat keine Anforderungen über die Verteilung der Stichproben.
 Somit ist keine Normalverteilung der Stichproben notwendig.
-Mit Zusatz des Grenzwertsatzes und Rangröße $n > 12$, wird mit den Z-Werten weiter berechnet um die statistische Signifikanz zu testen:
+Für Rangröße $n > 12$ wird mit eine neue statistik Z eingeführt , die wie folgt berechnet wird:
 
 \begin{center}
   \[
@@ -378,11 +405,22 @@ Mit Zusatz des Grenzwertsatzes und Rangröße $n > 12$, wird mit den Z-Werten we
   \]
 \end{center}
 
-"Unter der Nullhypothese folgen \( z_{a,\tau} \) und \( z_{b,\tau} \) ungefähr der Standardnormalverteilung \(\mathcal{N}(0, 1)\). 
-Wenn die alternative Hypothese des SHT \( H_{\tau,1} \) lautet, verwerfen wir die Nullhypothese und akzeptieren \( H_{\tau,1} \), 
-falls \( z_{a,\tau} \) nicht kleiner als der kritische Wert (rechte Verteilungsschranke, Standardnormalverteilung) bei einem Signifikanzniveau \(\alpha\) ist.
-Wenn die alternative Hypothese des SHT \( H_{\tau,2} \) lautet, verwerfen wir die Nullhypothese und akzeptieren \( H_{\tau,2} \), 
-falls \( z_{b,\tau} \) nicht kleiner als der kritische Wert bei einem Signifikanzniveau \(\alpha\) ist."
+Die Nullhypothese ist, dass es keine Performanzänderung vorliegt.
+Die beiden Alternativehypothesen lauten, die Hypothese $H_1$ Run A hatte eine höhere Durchschnittliche IO-Geschwindigkeit als Run B.
+Die andere Alternativhypothese $H_2$ sagt aus, dass Run B im Durchschnitt schneller ist.
+"Unter der Nullhypothese folgen \( z_{a} \) und \( z_{b} \) ungefähr der Standardnormalverteilung \(\mathcal{N}(0, 1)\). 
+Wenn die alternative Hypothese des SHT \( H_{1} \) lautet, verwerfen wir die Nullhypothese und akzeptieren \( H_{1} \), 
+falls \( z_{a} \) nicht kleiner als der kritische Wert (rechte Verteilungsschranke, Standardnormalverteilung) bei einem Signifikanzniveau \(\alpha\) ist.
+Wenn die alternative Hypothese des SHT \( H_{2} \) lautet, verwerfen wir die Nullhypothese und akzeptieren \( H_{2} \), 
+falls \( z_{b} \) nicht kleiner als der kritische Wert bei einem Signifikanzniveau \(\alpha\) ist."
+Für veranschauchlichung für die beiden Verteilungsschranke wird in Abbildung 1 nochmal dargestteltt:
+
+\begin{figure}[h]
+  \caption{Standardnormalverteilung wobei 5\% für beide Schranken frei sind. https://www.geogebra.org/m/xzRbVpKL}
+  \label{fig:Standardnormalverteilung}
+  \includegraphics[width=8cm]{Bilder/geogebra-export.png}
+  \centering
+\end{figure}
 
 
 \section{Konzept Analysetool}
