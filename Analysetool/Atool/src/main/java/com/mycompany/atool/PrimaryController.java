@@ -2,12 +2,42 @@ package com.mycompany.atool;
 
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 
 
-public class PrimaryController {
-    InputModule inputModule = new InputModule();
+public class PrimaryController implements Initializable{
+    InputModule inputModule;
+    OutputModule outputModule;
+    
+    @FXML public TableView<Job> table;
+    @FXML public TableColumn<Job,String> fileNameColumn;
+    @FXML public TableColumn<Job,String> runsColumn;
+    
+    @Override
+    public void initialize(URL arg0, ResourceBundle arg1) {
+        inputModule = new InputModule();
+        outputModule = new OutputModule();
+        
+        fileNameColumn.setCellValueFactory(new PropertyValueFactory<>("File"));
+        runsColumn.setCellValueFactory(new PropertyValueFactory<>("Runs"));
+        
+    }
+    
+    private ObservableList<Job> getCharacters(){
+        ObservableList<Job> characters = FXCollections.observableArrayList();
+        
+        characters.add(inputModule.getJob());
 
+        return characters;
+    }
     
     @FXML
     private void switchToSecondary() throws IOException {
@@ -17,5 +47,7 @@ public class PrimaryController {
     @FXML
     private void openLogfile() {
         inputModule.loadFile();
+        table.setItems(getCharacters());
     }
+    
 }

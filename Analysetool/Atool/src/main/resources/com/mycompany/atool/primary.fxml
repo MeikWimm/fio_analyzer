@@ -4,6 +4,8 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
 
@@ -30,10 +32,18 @@
         </menus>
       </MenuBar>
    </top>
-   <left>
-      <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER" />
-   </left>
    <bottom>
       <Button fx:id="primaryButton" mnemonicParsing="false" onAction="#switchToSecondary" text="Button" BorderPane.alignment="CENTER" />
    </bottom>
+   <center>
+      <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+         <children>
+            <TableView id="table" fx:id="table" prefHeight="200.0" prefWidth="200.0">
+              <columns>
+                <TableColumn id="fileNameColumn" fx:id="fileNameColumn" prefWidth="75.0" text="File" />
+                <TableColumn id="runsColumn" fx:id="runsColumn" prefWidth="75.0" text="Runs" />
+              </columns>
+            </TableView>
+         </children></VBox>
+   </center>
 </BorderPane>
