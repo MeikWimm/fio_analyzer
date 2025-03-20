@@ -4,8 +4,6 @@ package com.mycompany.atool;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
@@ -30,15 +28,7 @@ public class PrimaryController implements Initializable{
         runsColumn.setCellValueFactory(new PropertyValueFactory<>("Runs"));
         
     }
-    
-    private ObservableList<Job> getCharacters(){
-        ObservableList<Job> characters = FXCollections.observableArrayList();
-        
-        characters.add(inputModule.getJob());
 
-        return characters;
-    }
-    
     @FXML
     private void switchToSecondary() throws IOException {
         App.setRoot("secondary");
@@ -47,7 +37,10 @@ public class PrimaryController implements Initializable{
     @FXML
     private void openLogfile() {
         inputModule.loadFile();
-        table.setItems(getCharacters());
+        table.setItems(inputModule.getJobs());
+        for (Job job : inputModule.getJobs()) {
+            System.out.println(job.toString());
+        }
     }
     
 }

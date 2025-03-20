@@ -14,18 +14,18 @@ import java.util.List;
  */
 public class Job {
     File file;
-    List<Integer> data;
+    List<Double> data;
     int runs = 1;
     
     public Job(){
         data = new ArrayList<>();
     }
     
-    public List<Integer> getData(){
+    public List<Double> getData(){
         return this.data;
     }
     
-    public void setData(List<Integer> data){
+    public void setData(List<Double> data){
         this.data = data;
     }
     
@@ -40,14 +40,14 @@ public class Job {
     public int getRuns(){
         return this.runs;
     }
-    
-    public int getRunCount(){
-        return runs;
-    }
-    
+
     public void setRuns(int runs){
         this.runs = runs;
     }
     
+    @Override
+    public String toString(){
+        return data.toString();
+    }
     
 }
