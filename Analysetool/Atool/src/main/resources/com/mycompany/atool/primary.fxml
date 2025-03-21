@@ -11,7 +11,7 @@
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.atool.PrimaryController">
    <top>
-      <MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
+      <MenuBar fx:id="menuBar" prefHeight="22.0" prefWidth="666.0" BorderPane.alignment="CENTER">
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
@@ -29,6 +29,7 @@
           </Menu>
           <Menu mnemonicParsing="false" text="Help">
             <items>
+                  <MenuItem fx:id="menuItem_Info" mnemonicParsing="false" onAction="#openInfoWindow" text="Info" />
               <MenuItem mnemonicParsing="false" text="About" />
             </items>
           </Menu>
@@ -49,6 +50,7 @@
                   <TableColumn id="timeColumn" fx:id="timeColumn" prefWidth="90.0" text="Time (in millisec)" />
                   <TableColumn id="lastModifiedColumn" fx:id="lastModifiedColumn" prefWidth="130.0" text="Last Modified" />
                   <TableColumn id="fileCreatedColumn" fx:id="fileCreatedColumn" prefWidth="128.0" text="File Created" />
+                  <TableColumn id="fileCreatedColumn" fx:id="epsilonColumn" prefWidth="128.0" text="Epsilon for RDP" />
               </columns>
             </TableView>
          </children></VBox>

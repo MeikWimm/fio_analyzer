@@ -9,18 +9,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
+import javafx.geometry.Point2D;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
@@ -30,6 +27,7 @@ import javafx.stage.Stage;
 public class InputModule {
     //FileChooser chooser = new FileChooser();
     DirectoryChooser directoryChooser;
+    RamerDouglasPeucker ramer;
     ObservableList<Job> jobs = FXCollections.observableArrayList();
     
 
@@ -81,7 +79,8 @@ public class InputModule {
     }
 
     private void readData(File file, Job job) {
-        Map<Integer, Double> data = new HashMap<>();
+        List<Point2D> data = new ArrayList<>();
+        Map<Integer, Integer> freq = new TreeMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line = br.readLine();
             if(line == null){
@@ -94,17 +93,23 @@ public class InputModule {
             int counter = 1;
             String[] s = line.split(", ");
             int old_time = Integer.parseInt(s[0]);
+            int speed = Integer.parseInt(s[1]);
             current_speed_sum += Long.parseLong(s[1]);
- 
+            freq.put((int) speed, 1);
             
             
             while ((line = br.readLine()) != null) {
                 s = line.split(", ");
                 int new_time = Integer.parseInt(s[0]);
-                
+                speed = Integer.parseInt(s[1]);
+                if(freq.containsKey((int) speed)){
+                        freq.put(speed, freq.get(speed) + 1);
+                    } else {
+                        freq.put((int) speed, 1);
+                    }
                 if(old_time != new_time){
                     average_speed_per_milli = (double) current_speed_sum/counter;
-                    data.put(new_time, average_speed_per_milli);
+                    data.add(new Point2D(new_time, average_speed_per_milli));
                     sum_speed += average_speed_per_milli;
                     old_time = new_time;
                     current_speed_sum = Long.parseLong(s[1]);
@@ -121,7 +126,8 @@ public class InputModule {
             sum_speed += average_speed_per_milli;
             double average_speed = (double) sum_speed / data.size();
             job.setAverageSpeed(average_speed);
-            data.put(time, average_speed_per_milli);
+            data.add(new Point2D(time, average_speed_per_milli));
+            job.setFrequency(freq);
 
         job.setData(data);
         } catch (IOException ex) {

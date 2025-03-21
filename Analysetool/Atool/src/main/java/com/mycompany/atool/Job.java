@@ -10,9 +10,10 @@ import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import javafx.geometry.Point2D;
 
 /**
  *
@@ -20,21 +21,25 @@ import java.util.Map;
  */
 public class Job {
     private File file;
-    private Map<Integer, Double> data;
+    private List<Point2D> data;
+    private Map<Integer, Integer> frequency;
     private int runs = 1;
     private int time;
     private double averageSpeed;
     private BasicFileAttributes attr;
+    private double epsilon = 1;
     
     public Job(){
-        data = new HashMap<>();
+        data = new ArrayList<>();
+        frequency = new TreeMap<>();
     }
     
-    public Map<Integer, Double> getData(){
+    public List<Point2D> getData(){
         return this.data;
     }
     
-    public void setData(Map<Integer, Double> data){
+    public void setData(List<Point2D> data){
+        this.epsilon = data.size() / 1000;
         this.data = data;
     }
     
@@ -88,9 +93,24 @@ public class Job {
     public double getAverageSpeed(){
         return this.averageSpeed;
     }
-
-    void setAverageSpeed(double average_speed) {
-        this.averageSpeed = average_speed;
+    
+    public void setFrequency(Map<Integer, Integer> freq){
+        this.frequency = freq;
     }
     
+    public Map<Integer, Integer> getFrequency(){
+        return this.frequency;
+    }
+
+    public void setAverageSpeed(double average_speed) {
+        this.averageSpeed = average_speed;
+    }
+
+    public double getEpsilon() {
+        return this.epsilon;
+    }
+
+    public void setEpsilon(double epsilon){
+        this.epsilon = epsilon;
+    }
 }

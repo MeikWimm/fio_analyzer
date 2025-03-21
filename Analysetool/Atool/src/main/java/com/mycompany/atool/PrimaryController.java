@@ -3,15 +3,16 @@ package com.mycompany.atool;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -27,7 +28,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 
 
 
@@ -37,6 +37,7 @@ public class PrimaryController implements Initializable{
     
     @FXML public MenuItem menuItem_open;
     @FXML public MenuItem menuItem_ANOVA;
+    @FXML public MenuItem menuItem_Info;
     
     @FXML public TableView<Job> table;
     @FXML public TableColumn<Job,String> fileNameColumn;
@@ -45,6 +46,7 @@ public class PrimaryController implements Initializable{
     @FXML public TableColumn<Job,String> timeColumn;
     @FXML public TableColumn<Job,String> lastModifiedColumn;
     @FXML public TableColumn<Job,String> fileCreatedColumn;
+    @FXML public TableColumn<Job,String> epsilonColumn;
     
     
     @Override
@@ -63,6 +65,7 @@ public class PrimaryController implements Initializable{
         
         speedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("TimeInSec"));
+        epsilonColumn.setCellValueFactory(new PropertyValueFactory<>("Epsilon"));
     }
     
     private void prepareTable(){
@@ -89,14 +92,22 @@ public class PrimaryController implements Initializable{
         table.setRowFactory((TableView<Job> tableView) -> {
             final TableRow<Job> row = new TableRow<>();
             final ContextMenu rowMenu = new ContextMenu();
-            MenuItem applyTestItem = new MenuItem("Draw Job");
+            MenuItem applyTestItem = new MenuItem("Draw job speed");
             applyTestItem.setOnAction((ActionEvent event) -> {
                 drawJob(row.getItem());
-            });            MenuItem removeItem = new MenuItem("Delete");
+            });            
+            
+            MenuItem removeItem = new MenuItem("Delete");
             removeItem.setOnAction((ActionEvent event) -> {
                 table.getItems().remove(row.getItem());
             });
-            rowMenu.getItems().addAll(applyTestItem, removeItem);
+            
+            MenuItem drawFrequencyItem = new MenuItem("Draw job frequency");
+            drawFrequencyItem.setOnAction((ActionEvent event) -> {
+                drawJobFreqeuncy(row.getItem());
+            });   
+            
+            rowMenu.getItems().addAll(applyTestItem, drawFrequencyItem, removeItem);
 
             // only display context menu for non-null items:
             row.contextMenuProperty().bind(
@@ -128,17 +139,64 @@ public class PrimaryController implements Initializable{
         tester.executeANOVA(table.getSelectionModel().getSelectedItem());
     }
 
+    @FXML
+    private void openInfoWindow(){
+            try {
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        fxmlLoader.setLocation(getClass().getResource("secondary.fxml"));
+        /* 
+         * if "fx:controller" is not set in fxml
+         * fxmlLoader.setController(NewWindowController);
+         */
+        Scene scene = new Scene(fxmlLoader.load(), 600, 400);
+        Stage stage = new Stage();
+        stage.setTitle("New Window");
+        stage.setScene(scene);
+        stage.show();
+    } catch (IOException e) {
+        
+    }
+    }
+
     private void drawJob(Job job) {
         Stage stage = new Stage();
         final NumberAxis xAxis = new NumberAxis();
         final NumberAxis yAxis = new NumberAxis();
+        xAxis.setLabel("Time in milliseconds");
+        yAxis.setLabel("I/O-Speed in Kibibytes");
         LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
+        lineChart.setHorizontalGridLinesVisible(false);
+        lineChart.setVerticalGridLinesVisible(false);
         XYChart.Series series = new XYChart.Series();
         lineChart.setTitle("Job");
-        Map<Integer, Double> data = job.getData();
-        for (Map.Entry<Integer, Double> entry : data.entrySet()) {
+        List<Point2D> data = job.getData();
+        List<Point2D> reduced_data = RamerDouglasPeucker.douglasPeucker(data, job.getEpsilon());
+
+        System.err.println(reduced_data.size() + "       | old size: " + data.size());
+        
+        for (Point2D p : reduced_data) {
+            series.getData().add(new XYChart.Data<>(p.getX(), p.getY()));
+        }
+        Scene scene  = new Scene(lineChart,800,600);
+        lineChart.getData().add(series);
+       
+        stage.setScene(scene);
+        stage.show();
+    }
+    
+    private void drawJobFreqeuncy(Job job){
+        Stage stage = new Stage();
+        final NumberAxis xAxis = new NumberAxis();
+        final NumberAxis yAxis = new NumberAxis();
+        xAxis.setLabel("I/O-Speed in Kibibytes");
+        yAxis.setLabel("Frequency");
+        LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
+        XYChart.Series series = new XYChart.Series();
+        lineChart.setTitle("Job Frequency");
+        Map<Integer, Integer> data = job.getFrequency();
+        for (Map.Entry<Integer, Integer> entry : data.entrySet()) {
             Integer key = entry.getKey();
-            Double value = entry.getValue();
+            Integer value = entry.getValue();
             series.getData().add(new XYChart.Data<>(key, value));
         }
         Scene scene  = new Scene(lineChart,800,600);
