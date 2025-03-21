@@ -16,12 +16,15 @@
           <Menu mnemonicParsing="false" text="File">
             <items>
               <MenuItem fx:id="menuItem_open" mnemonicParsing="false" onAction="#openLogfile" text="Open" />
-                  <MenuItem mnemonicParsing="false" text="Close" />
             </items>
           </Menu>
-          <Menu mnemonicParsing="false" text="Edit">
+          <Menu mnemonicParsing="false" text="Tests">
             <items>
-              <MenuItem mnemonicParsing="false" text="Delete" />
+              <MenuItem fx:id="menuItem_ANOVA" mnemonicParsing="false" onAction="#executeANOVA" text="ANOVA" />
+                  <MenuItem mnemonicParsing="false" text="Confidence Interval" />
+                  <MenuItem mnemonicParsing="false" text="T-Test" />
+                  <MenuItem mnemonicParsing="false" text="Tukey-HSD" />
+                  <MenuItem mnemonicParsing="false" text="U-Test" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help">
@@ -40,8 +43,12 @@
          <children>
             <TableView id="table" fx:id="table" editable="true" prefHeight="200.0" prefWidth="200.0">
               <columns>
-                <TableColumn id="fileNameColumn" fx:id="fileNameColumn" prefWidth="75.0" text="File" />
-                <TableColumn id="runsColumn" fx:id="runsColumn" prefWidth="75.0" text="Runs" />
+                <TableColumn id="fileNameColumn" fx:id="fileNameColumn" prefWidth="107.0" text="File" />
+                <TableColumn id="runsColumn" fx:id="runsColumn" prefWidth="43.0" text="Runs" />
+                  <TableColumn id="speedColumn" fx:id="speedColumn" prefWidth="101.0" text="Average Speed" />
+                  <TableColumn id="timeColumn" fx:id="timeColumn" prefWidth="90.0" text="Time (in millisec)" />
+                  <TableColumn id="lastModifiedColumn" fx:id="lastModifiedColumn" prefWidth="130.0" text="Last Modified" />
+                  <TableColumn id="fileCreatedColumn" fx:id="fileCreatedColumn" prefWidth="128.0" text="File Created" />
               </columns>
             </TableView>
          </children></VBox>

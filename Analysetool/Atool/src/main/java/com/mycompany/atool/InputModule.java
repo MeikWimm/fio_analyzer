@@ -7,19 +7,19 @@ package com.mycompany.atool;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -43,20 +43,6 @@ public class InputModule {
         //chooser.setTitle("Open File");
 
     }
-    
-    public void openSettings(){
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("secondary.fxml"));
-            Parent root1 = (Parent) fxmlLoader.load();
-            Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            //stage.initStyle(StageStyle.UNDECORATED);
-            stage.setTitle("ABC");
-            stage.setScene(new Scene(root1));
-            stage.show();
-        } catch (IOException ex) {
-        }
-    }
 
     public void loadFile(){
         File selectedDirectory = directoryChooser.showDialog(new Stage());
@@ -66,6 +52,9 @@ public class InputModule {
             files = selectedDirectory.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
             
             if(files == null || files.length == 0){
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setContentText("Keine Logs gefunden!");
+                alert.show();
                 System.err.println("No logs found!");
             } else {
                     for (File file1 : files) {
@@ -78,7 +67,6 @@ public class InputModule {
     }
 
     private void readFiles(File[] files) {
-        openSettings();
         for (File file : files) {
             Job job = new Job();
             job.setFile(file);
@@ -93,25 +81,48 @@ public class InputModule {
     }
 
     private void readData(File file, Job job) {
-        List<Double> data = new ArrayList<>();
+        Map<Integer, Double> data = new HashMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            long sum_speed = 0;
-            double average_speed_by_100;
-            int counter = 0;
-            while ((line = br.readLine()) != null) {
-                if(counter == 100){
-                    average_speed_by_100 = sum_speed / 100;
-                    data.add(average_speed_by_100);
-                    counter = 0;
-                    sum_speed = 0;
-                }
-                
-                String[] s = line.split(", ");
-                sum_speed += Long.valueOf(s[1]);
-
-                counter++;
+            String line = br.readLine();
+            if(line == null){
+                System.out.println("com.mycompany.atool.InputModule.readData() Couldn't read no data from file: " + file.toString());
+                return;
             }
+            long current_speed_sum = 0;
+            double average_speed_per_milli;
+            double sum_speed = 0;
+            int counter = 1;
+            String[] s = line.split(", ");
+            int old_time = Integer.parseInt(s[0]);
+            current_speed_sum += Long.parseLong(s[1]);
+ 
+            
+            
+            while ((line = br.readLine()) != null) {
+                s = line.split(", ");
+                int new_time = Integer.parseInt(s[0]);
+                
+                if(old_time != new_time){
+                    average_speed_per_milli = (double) current_speed_sum/counter;
+                    data.put(new_time, average_speed_per_milli);
+                    sum_speed += average_speed_per_milli;
+                    old_time = new_time;
+                    current_speed_sum = Long.parseLong(s[1]);
+                    counter = 1;
+                } else {
+                    current_speed_sum += Long.parseLong(s[1]);
+                    counter++;
+                }
+            }
+            
+            int time = Integer.parseInt(s[0]);
+            job.setTime(time);
+            average_speed_per_milli = (double) current_speed_sum/counter;
+            sum_speed += average_speed_per_milli;
+            double average_speed = (double) sum_speed / data.size();
+            job.setAverageSpeed(average_speed);
+            data.put(time, average_speed_per_milli);
+
         job.setData(data);
         } catch (IOException ex) {
             ex.toString();
