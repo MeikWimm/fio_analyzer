@@ -36,23 +36,23 @@
         </menus>
       </MenuBar>
    </top>
-   <bottom>
-      <Button fx:id="primaryButton" mnemonicParsing="false" onAction="#switchToSecondary" text="Button" BorderPane.alignment="CENTER" />
-   </bottom>
    <center>
-      <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+      <VBox prefHeight="200.0" prefWidth="744.0" BorderPane.alignment="CENTER">
          <children>
-            <TableView id="table" fx:id="table" editable="true" prefHeight="200.0" prefWidth="200.0">
+            <TableView id="table" fx:id="table" editable="true" prefHeight="271.0" prefWidth="600.0">
               <columns>
                 <TableColumn id="fileNameColumn" fx:id="fileNameColumn" prefWidth="107.0" text="File" />
                 <TableColumn id="runsColumn" fx:id="runsColumn" prefWidth="43.0" text="Runs" />
                   <TableColumn id="speedColumn" fx:id="speedColumn" prefWidth="101.0" text="Average Speed" />
                   <TableColumn id="timeColumn" fx:id="timeColumn" prefWidth="90.0" text="Time (in millisec)" />
-                  <TableColumn id="lastModifiedColumn" fx:id="lastModifiedColumn" prefWidth="130.0" text="Last Modified" />
-                  <TableColumn id="fileCreatedColumn" fx:id="fileCreatedColumn" prefWidth="128.0" text="File Created" />
-                  <TableColumn id="fileCreatedColumn" fx:id="epsilonColumn" prefWidth="128.0" text="Epsilon for RDP" />
+                  <TableColumn id="lastModifiedColumn" fx:id="lastModifiedColumn" prefWidth="113.0" text="Last Modified" />
+                  <TableColumn id="fileCreatedColumn" fx:id="fileCreatedColumn" prefWidth="87.00003051757812" text="File Created" />
+                  <TableColumn id="fileCreatedColumn" fx:id="epsilonColumn" prefWidth="187.0" text="Epsilon for RDP" />
+                  <TableColumn id="fileCreatedColumn" fx:id="alphaColumn" prefWidth="187.0" text="Alpha" />
               </columns>
             </TableView>
+            <Button fx:id="button_refreshTable" mnemonicParsing="false" onAction="#onActionRefreshTable" text="Refresh Table" />
+            <Button fx:id="primaryButton" mnemonicParsing="false" onAction="#switchToSecondary" text="Button" />
          </children></VBox>
    </center>
 </BorderPane>

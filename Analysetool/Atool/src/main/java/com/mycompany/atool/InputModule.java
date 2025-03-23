@@ -21,29 +21,23 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 /**
- *
+ *  A Class for loading a reading the log file of fio Jobs
  * @author meni1999
  */
 public class InputModule {
-    //FileChooser chooser = new FileChooser();
     DirectoryChooser directoryChooser;
-    RamerDouglasPeucker ramer;
+    public File selectedDirectory;
     ObservableList<Job> jobs = FXCollections.observableArrayList();
-    
 
-    
-    
     public InputModule(){
         directoryChooser = new DirectoryChooser();
-
-        
-        //chooser = new FileChooser();
-        //chooser.setTitle("Open File");
-
     }
 
+    /**
+     * DirectoryChooser gets all log files from a choosen directory.
+     */
     public void loadFile(){
-        File selectedDirectory = directoryChooser.showDialog(new Stage());
+        this.selectedDirectory = directoryChooser.showDialog(new Stage());
         File[] files;
                 
         if (selectedDirectory != null) {
@@ -61,30 +55,54 @@ public class InputModule {
                 readFiles(files);
             }
         }
-        //file = chooser.showOpenDialog(new Stage()); 
     }
 
-    private void readFiles(File[] files) {
-        for (File file : files) {
-            Job job = new Job();
-            job.setFile(file);
-            jobs.add(job);
-            readData(file, job);
+    /**
+     * Reads all files listed in directoryChooser with the extension type ".log".
+     * If a specific file is already loaded, it'll be ignored.
+     * @param files 
+     */
+    public void readFiles(File[] files) {
+        ArrayList<Job> temp = new ArrayList<>();
+        for (Job job : jobs) {
+            temp.add(job);
         }
 
-    }
-    
-    public ObservableList<Job> getJobs(){
-        return jobs;
+        for (File file : files) {
+            boolean is_file_already_added = false;
+            if(!temp.isEmpty()){
+               for (Job j : temp) {
+                if(file.toString().equals(j.getFile().toString())){
+                    is_file_already_added = true;
+               }
+            }    
+                if(!is_file_already_added){
+                    System.out.println(file.toString());
+                    Job job = new Job();
+                    job.setFile(file);
+                    jobs.add(job);
+                    readData(job);
+                }
+          } else {
+                    Job job = new Job();
+                    job.setFile(file);
+                    jobs.add(job);
+                    readData(job);
+            }
+        }
     }
 
-    private void readData(File file, Job job) {
+    /**
+     * Reads the data of a .log file and saves the data in a job instance.
+     * @param job 
+     */
+    private void readData(Job job) {
         List<Point2D> data = new ArrayList<>();
         Map<Integer, Integer> freq = new TreeMap<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(job.getFile()))) {
             String line = br.readLine();
             if(line == null){
-                System.out.println("com.mycompany.atool.InputModule.readData() Couldn't read no data from file: " + file.toString());
+                System.out.println("com.mycompany.atool.InputModule.readData() Couldn't read no data from file: " + job.getFile().toString());
                 return;
             }
             long current_speed_sum = 0;
@@ -134,4 +152,13 @@ public class InputModule {
             ex.toString();
         }
     }
+
+    public ObservableList<Job> getJobs(){
+        return jobs;
+    }
+
+    public File getSelectedDir() {
+        return this.selectedDirectory;
+    }
+    
 }

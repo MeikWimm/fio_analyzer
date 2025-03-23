@@ -28,6 +28,7 @@ public class Job {
     private double averageSpeed;
     private BasicFileAttributes attr;
     private double epsilon = 1;
+    private double alpha = 0.95;
     
     public Job(){
         data = new ArrayList<>();
@@ -43,9 +44,10 @@ public class Job {
         this.data = data;
     }
     
-    public String getFile(){
-        return this.file.getName();
+    public File getFile(){
+        return this.file;
     }
+    
     
     public void setFile(File file){
         try {
@@ -73,10 +75,18 @@ public class Job {
         this.runs = runs;
     }
     
+    public double getAlpha(){
+        return this.alpha;
+    }
+    
+    void setAlpha(Double alpha) {
+        this.alpha = alpha;
+    }
+    
     @Override
     public String toString(){
         
-        return String.format("Job: %s | Average Speed %s | Runs: %d", file.toString(), new DecimalFormat("#.##").format(this.averageSpeed), this.runs);
+        return String.format("Job: %s | Average Speed %s | Runs: %d | Alpha: %f", file.toString(), new DecimalFormat("#.##").format(this.averageSpeed), this.runs, this.alpha);
     }
 
     void setTime(int time) {
@@ -113,4 +123,6 @@ public class Job {
     public void setEpsilon(double epsilon){
         this.epsilon = epsilon;
     }
+
+
 }
