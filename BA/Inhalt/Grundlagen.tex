@@ -187,7 +187,7 @@ Die Tabelle \ref{tab:measurements} zeigt die Vorbereitung einer Varianzanalyse f
   \hline
   \end{tabular}
   %}
-  \caption{Tabelle mit einem fio-job mit k-Iterationen und n-Messwerte für die Varianzanalyse}
+  \caption{Tabelle mit einem fio-job mit k-Iterationen/Runs und n-Messwerte für die ANOVA}
   \label{tab:measurements}
 \end{table}
 
@@ -229,10 +229,11 @@ Der Test lässt sich mit den Verhältnissen von SSA und SSE berechnen.
 Da es sich bei dieser F-Statistik um das Verhältnis zweier Varianzen handelt, sind zwei Werte für die Freiheitsgrade erforderlich, 
 einer aus dem Zähler und einer aus dem Nenner.
 Die Freiheitsgrade tragen dazu bei, die erhöhte Messungenauigkeit, die bei der Analyse kleiner Stichproben auftritt, 
-teilweise auszugleichen, insbesondere wenn diese Stichproben zur Schätzung bestimmter Populationsparameter ($\mu$ und $\sigma^2$) herangezogen werden sollen. \cite[S. 49]{inferenzstatistik}
-Wenn dieses Verhältnis, der berechnete F-Wert, größer ist als der kritische F-Wert, der bei einem bestimmten Signifikanzniveau $\alpha$ aus der F-Verteilung erhalten wird, 
+teilweise auszugleichen, insbesondere wenn diese Stichproben zur Schätzung bestimmter Populationsparameter ($\mu$ und $\sigma^2$) herangezogen werden sollen \cite[S. 49]{inferenzstatistik}.
+Wenn dieses Verhältnis, der berechnete F-Wert (Tabelle \ref{tab:f_computing}), größer ist als der kritische F-Wert, der bei einem bestimmten Signifikanzniveau $\alpha$ aus der F-Verteilung erhalten wird, 
 schließen wir, dass der Unterschied in den Varianzen statistisch signifikant ist. Daraus ergibt sich, 
 dass es einen statistisch signifikanten Unterschied zwischen den Alternativen gibt, der über die Unterschiede aufgrund experimenteller Fehler hinausgeht.
+Der kritische F-Wert wird aus einer vorgerechneten Tabelle mit $F_{[1-\alpha;(k-1);k(n-1)]}$ entnommen.
 
 \begin{center}
   \begin{table}[h!]
@@ -246,7 +247,6 @@ dass es einen statistisch signifikanten Unterschied zwischen den Alternativen gi
   \end{table}
 \end{center}
 
-Den F-Wert aus einer vorgerechneten Tabelle wird mit $F_{[1-\alpha;(k-1);k(n-1)]}$ entnommen.
 
 \section{Konfidenzintervalle}
 
@@ -285,7 +285,9 @@ Ist dies der Fall, kann nicht mit Sicherheit geschlossen werden, dass die beobac
 dass kein statistisch signifikanter Unterschied vorliegt. 
 Diese Methode allein ist jedoch nicht ausreichend, um einen Signifikanztest durchzuführen. 
 Eine alternative Methode besteht darin, ein neues Konfidenzintervall zu bilden, das sich aus den beiden zu vergleichenden Alternativen ableitet.
- Die Berechnung dieses neuen Konfidenzintervalls erfolgt wie folgt:
+Die Berechnung dieses neuen Konfidenzintervalls wird in Tabelle \ref{tab:two_Iteration_Konfidenzintervall} vorgestellt.
+Wenn das neue Konfidenzintervall Null enthält, wird beschlossen, 
+dass bei dem gewählten Konfidenzniveau $\alpha$ kein statistisch signifikanter Unterschied zwischen den beiden Alternativen besteht.
 
 \begin{center}
   \begin{table}[h!]
@@ -302,18 +304,16 @@ Eine alternative Methode besteht darin, ein neues Konfidenzintervall zu bilden, 
   \end{table}
 \end{center}
 
-Wenn das neue Konfidenzintervall Null enthält, wird beschlossen, 
-dass bei dem gewählten Konfidenzniveau $\alpha$ kein statistisch signifikanter Unterschied zwischen den beiden Alternativen besteht.
+
 
 \section{T-Test}
-Der Begriff T-Test wird verwendet, um verschiedene Tests zu bezeichnen, die unter anderem die Verteilung der Grundgesamtheit von normalverteilten 
-und unabhängigen Stichproben miteinander vergleichen \cite{inferenzstatistik}. Im Kontext dieser Arbeit bezieht sich der T-Test auf den unabhängigen, ungerichteten T-Test, 
-bei dem die Erwartungswerte zweier voneinander unabhängiger Stichproben verglichen werden.
-Der T-Test vergleicht die Stärke der Unterschiede zwischen den Stichproben mit der Abweichung innerhalb der Stichproben. 
-Die Prüfgröße $t$ dient als Maß dafür, wie unwahrscheinlich die Nullhypothese $H_0$ ist, 
-d. h. dass die Grundgesamtheit der beiden Stichproben den gleichen Erwartungswert aufweisen. 
-Mit dem T-Test werden jeweils zwei unabhängige Stichproben miteinander verglichen, unter der Annahme, dass die Grundgesamtheit normalverteilt ist.
-Diese Prüfgröße wird wie folgt berechnet:
+Der Begriff T-Test bezeichnet eine Reihe von Tests, die dazu verwendet werden, die Verteilungen von normalverteilten und unabhängigen Stichproben miteinander zu vergleichen \cite[S. 45 ff.]{inferenzstatistik}. 
+Im Rahmen dieser Arbeit bezieht sich der T-Test auf den unabhängigen, ungerichteten T-Test, bei dem die Erwartungswerte zweier unabhängiger Stichproben verglichen werden.
+Der T-Test untersucht die Stärke der Unterschiede zwischen den Stichproben im Verhältnis zur Variation innerhalb der Stichproben. 
+Die Prüfgröße $t$ dient dabei als Maß für die Unwahrscheinlichkeit der Nullhypothese $H_0$, die besagt, 
+dass die Grundgesamtheit der beiden Stichproben denselben Erwartungswert aufweist. 
+Der T-Test vergleicht jeweils zwei unabhängige Stichproben, wobei die Annahme einer normalverteilten Grundgesamtheit zugrunde gelegt wird. 
+Die Berechnung der Prüfgröße erfolgt wie folgt:
 
 \begin{center}
   $t = \dfrac{M_A-M_B}{\sqrt{\frac{\hat{S}_A^2}{n_A} + \frac{\hat{S}_B^2}{n_B}}}$
@@ -332,12 +332,10 @@ den gleichen Erwartungswert haben, wird mit dem Signifikanzniveau $\alpha$ abgel
   $|t| > t_{n_A + n_B - 2; \frac{\alpha}{2}}$
 \end{center}
 
-Das bedeutet, dass der ermittelte t-Wert betragsmäßig größer sein muss als der Wert der t-Verteilung mit den Freiheitsgraden
- $n+m-2$ bei einem Signifikanzniveau von $1-\frac{1}{2}\alpha$.
-Die t-Verteilung ähnelt der Normalverteilung, jedoch wird die t-Verteilung besonders für kleine Stichproben herangezogen, 
-da sie in diesem Fall eine genauere Abschätzung der Wahrscheinlichkeiten ermöglicht.
+Dies bedeutet, dass der berechnete t-Wert in absoluten Beträgen größer sein muss als der Wert der t-Verteilung
+mit den Freiheitsgraden $n_A+n_B-2$ bei einem Signifikanzniveau von $\frac{\alpha}{2}$.
 
-
+\newpage
 
 \section{Tukey-HSD}
 Der Tukey-HSD\footnote{HSD - Honestly Significant Difference} Test wird nach der Durchführung der ANOVA angewendet und wird daher auch als Post-hoc-Test bezeichnet \cite[S. 391 ff.]{tukey_hsd_book}.
@@ -350,7 +348,7 @@ Dieser Test verwendet die studentisierte Statistik $q$ und sie ist wie folgt def
 Dabei stellen $\overline{X}_l$ und $\overline{X}_s$ den größten bzw. den kleinsten Wert aus einer Menge von Mittelwerten dar, 
 und $r$ ist die Anzahl der behandelten Mittelwerten.
 Wenn mehr als zwei Gruppen miteinander verglichen werden, gewinnt die Kontrolle der Typ-I-Fehlerquote an zentraler Bedeutung \cite{tukey_HSD}. 
-Während die Varianzanalyse (ANOVA) dabei unterstützt, das Vorliegen eines signifikanten Effekts zu identifizieren, 
+Während die Varianzanalyse dabei unterstützt, das Vorliegen eines signifikanten Effekts zu identifizieren, 
 stellt die Kontrolle der Typ-I-Fehlerquote insbesondere bei der Durchführung mehrerer t-Tests über mehrere Gruppen hinweg eine Herausforderung dar.
 Der Tukey-Test vergleicht die Unterschiede zwischen den Mittelwerten, 
 anstatt Paare von Werten direkt zu vergleichen. Der Wert des Tukey-Tests wird ermittelt, 
