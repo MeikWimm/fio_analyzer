@@ -7,18 +7,22 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import javafx.application.Platform;
 
 /**
  * JavaFX App
  */
 public class App extends Application {
+    
+
 
     private static Scene scene;
 
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("primary"), 640, 480);
+        scene = new Scene(loadFXML("primary"));
         stage.setScene(scene);
+        stage.setOnHidden(e -> Platform.exit());
         stage.show();
     }
 

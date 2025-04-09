@@ -2,8 +2,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.atool;
+package com.mycompany.atool.Analysis;
 
+import com.mycompany.atool.Job;
+import com.mycompany.atool.RamerDouglasPeucker;
+import com.mycompany.atool.Reporter;
 import java.util.List;
 import java.util.Map;
 import javafx.geometry.Point2D;
@@ -17,7 +20,7 @@ import javafx.stage.Stage;
  *
  * @author meni1999
  */
-class Tester {
+public class Charter {
     public void executeANOVA(Job job){
         System.out.println(job.toString());
     }

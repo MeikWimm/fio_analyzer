@@ -8,10 +8,16 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Supplier;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
@@ -25,9 +31,29 @@ import javafx.stage.Stage;
  * @author meni1999
  */
 public class InputModule {
+        private static final Logger LOGGER = Logger.getLogger( InputModule.class.getName() );
+
+
+    public enum STATUS {
+        SUCCESS,
+        NO_FILES_FOUND,
+        NO_DIR_SET,
+        ERROR_WHILE_READING_FILE,
+        FAILURE
+    }
+    
+    static {
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setLevel(Level.FINEST);
+        handler.setFormatter(new CustomFormatter());
+        LOGGER.setUseParentHandlers(false);
+        LOGGER.addHandler(handler);    
+    }
+    
     DirectoryChooser directoryChooser;
     public File selectedDirectory;
     ObservableList<Job> jobs = FXCollections.observableArrayList();
+    private File[] files;
 
     public InputModule(){
         directoryChooser = new DirectoryChooser();
@@ -35,11 +61,12 @@ public class InputModule {
 
     /**
      * DirectoryChooser gets all log files from a choosen directory.
+     * 
+     * @return 
      */
-    public void loadFile(){
+    public STATUS loadFile(){
         this.selectedDirectory = directoryChooser.showDialog(new Stage());
-        File[] files;
-                
+        
         if (selectedDirectory != null) {
             files = selectedDirectory.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
             
@@ -47,27 +74,34 @@ public class InputModule {
                 Alert alert = new Alert(AlertType.INFORMATION);
                 alert.setContentText("Keine Logs gefunden!");
                 alert.show();
-                System.err.println("No logs found!");
+                return STATUS.NO_FILES_FOUND;
             } else {
-                    for (File file1 : files) {
-                        System.out.println(file1);
-                }
-                readFiles(files);
+                readFiles();
             }
+        } else {
+            return STATUS.NO_DIR_SET;
         }
+        return STATUS.SUCCESS;
     }
 
     /**
      * Reads all files listed in directoryChooser with the extension type ".log".
      * If a specific file is already loaded, it'll be ignored.
-     * @param files 
+     * @return NO_DIR_SET, if directory of this object is not set. BUFER On success it return SUCCESS.
+     * 
      */
-    public void readFiles(File[] files) {
+    public STATUS readFiles(/*File[] files*/) {
+        if(selectedDirectory == null){
+            return STATUS.NO_DIR_SET;
+        }
+        
+        files = selectedDirectory.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
+        
         ArrayList<Job> temp = new ArrayList<>();
         for (Job job : jobs) {
             temp.add(job);
         }
-
+        boolean found_new_files = false;
         for (File file : files) {
             boolean is_file_already_added = false;
             if(!temp.isEmpty()){
@@ -77,34 +111,45 @@ public class InputModule {
                }
             }    
                 if(!is_file_already_added){
-                    System.out.println(file.toString());
+                    found_new_files = true;
                     Job job = new Job();
                     job.setFile(file);
+                    STATUS status = readData(job);
+                    if(status != STATUS.SUCCESS){
+                        return status;
+                    }
+                    LOGGER.log(Level.INFO, String.format("New job added -> %s", job.toString()));
                     jobs.add(job);
-                    readData(job);
                 }
           } else {
                     Job job = new Job();
                     job.setFile(file);
+                    STATUS status = readData(job);
+                    if(status != STATUS.SUCCESS){
+                        return status;
+                    }
                     jobs.add(job);
-                    readData(job);
             }
         }
+        
+        if(found_new_files == false && !temp.isEmpty()){
+            LOGGER.log(Level.INFO, "Nothing to refresh in Table.");
+        }
+        
+        return STATUS.SUCCESS;
     }
 
     /**
      * Reads the data of a .log file and saves the data in a job instance.
      * @param job 
      */
-    private void readData(Job job) {
-        List<Point2D> data = new ArrayList<>();
+    private STATUS readData(Job job) {
+        List<Point2D> data = new ArrayList<>(); // Point2D for x = time and y = speed
         Map<Integer, Integer> freq = new TreeMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader(job.getFile()))) {
+            BasicFileAttributes attr = Files.readAttributes(job.getFile().toPath(), BasicFileAttributes.class);
+            job.setFileAttributes(attr);
             String line = br.readLine();
-            if(line == null){
-                System.out.println("com.mycompany.atool.InputModule.readData() Couldn't read no data from file: " + job.getFile().toString());
-                return;
-            }
             long current_speed_sum = 0;
             double average_speed_per_milli;
             double sum_speed = 0;
@@ -149,8 +194,11 @@ public class InputModule {
 
         job.setData(data);
         } catch (IOException ex) {
-            ex.toString();
+            LOGGER.log(Level.SEVERE, (Supplier<String>) ex);
+            LOGGER.log(Level.SEVERE, String.format("Error occured while reading file: %s. App state: %s", job.getFile(), STATUS.ERROR_WHILE_READING_FILE));
+            return STATUS.ERROR_WHILE_READING_FILE;
         }
+        return STATUS.SUCCESS;
     }
 
     public ObservableList<Job> getJobs(){

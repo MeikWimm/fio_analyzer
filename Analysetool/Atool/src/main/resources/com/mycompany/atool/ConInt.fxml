@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+      <Label id="labelHeader" fx:id="labelHeader" text="Confidence Interval" BorderPane.alignment="CENTER" />
+   </top>
+   <center>
+      <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+         <children>
+            <TableView fx:id="conIntTable" prefHeight="384.0" prefWidth="600.0">
+              <columns>
+                <TableColumn id="runsColumn" fx:id="runsColumn" prefWidth="75.0" text="Runs" />
+                  <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="75.0" text="Average Speed" />
+                <TableColumn id="intervalFromColumn" fx:id="intervalFromColumn" prefWidth="117.0" text="Interval (From)" />
+                  <TableColumn id="intervalToColumn" fx:id="intervalToColumn" prefWidth="116.0" text="Interval (To)" />
+                  <TableColumn id="standardDeviationColumn" fx:id="standardDeviationColumn" prefWidth="116.0" text="Standard Deviation" />
+                  <TableColumn id="overlappingColumn" fx:id="overlappingColumn" prefWidth="116.0" text="Overlapping" />
+              </columns>
+            </TableView>
+         </children>
+      </VBox>
+   </center>
+</BorderPane>
