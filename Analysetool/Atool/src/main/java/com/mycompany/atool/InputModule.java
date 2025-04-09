@@ -72,7 +72,7 @@ public class InputModule {
             
             if(files == null || files.length == 0){
                 Alert alert = new Alert(AlertType.INFORMATION);
-                alert.setContentText("Keine Logs gefunden!");
+                alert.setContentText("No logs found!");
                 alert.show();
                 return STATUS.NO_FILES_FOUND;
             } else {

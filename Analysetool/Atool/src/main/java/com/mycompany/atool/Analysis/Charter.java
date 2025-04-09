@@ -6,7 +6,6 @@ package com.mycompany.atool.Analysis;
 
 import com.mycompany.atool.Job;
 import com.mycompany.atool.RamerDouglasPeucker;
-import com.mycompany.atool.Reporter;
 import java.util.List;
 import java.util.Map;
 import javafx.geometry.Point2D;
@@ -14,6 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
 /**
@@ -27,7 +27,7 @@ public class Charter {
     
     public void drawJob(Job job) {
         if(job.getData().size() > 10000){
-            Reporter.showInfoForGraph();
+            infoWindowLargeData();
         }
         Stage stage = new Stage();
         final NumberAxis xAxis = new NumberAxis();
@@ -56,7 +56,7 @@ public class Charter {
         
     public void drawJobFreqeuncy(Job job){
         if(job.getData().size() > 10000){
-            Reporter.showInfoForGraph();
+            infoWindowLargeData();
         }
         Stage stage = new Stage();
         final NumberAxis xAxis = new NumberAxis();
@@ -77,6 +77,14 @@ public class Charter {
        
         stage.setScene(scene);
         stage.show();
+    }
+    
+    /**
+     * Gets called when data point exceed 10000 to inform User.
+     */
+    private void infoWindowLargeData(){
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, "This could take a while because of more then 10000 data points from this job.");
+        alert.showAndWait();
     }
     
 }

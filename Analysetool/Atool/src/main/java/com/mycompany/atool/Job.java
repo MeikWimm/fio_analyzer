@@ -16,7 +16,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 
 /**
- *
+ * Log files of fio are here represented as Jobs.
  * @author meni1999
  */
 public class Job {
@@ -42,8 +42,8 @@ public class Job {
     private BasicFileAttributes attr;
     private double epsilon = 1;
     private double alpha = 0.95;
-    private static int d = 1;
-    private final int ID = d;
+    private static int counter = 1; // so that each Job has a unique ID
+    private final int ID = counter;
 
     public void setFileAttributes(BasicFileAttributes attr) {
         this.attr = attr;
@@ -57,7 +57,7 @@ public class Job {
     public Job(){
         data = new ArrayList<>();
         frequency = new TreeMap<>();
-        d++;
+        counter++;
     }
     
     public List<Point2D> getData(){
@@ -70,7 +70,7 @@ public class Job {
             this.epsilon = MAX_EPSILON;
         }
         this.data = data;
-        setRuns();
+        setupRuns();
     }
     
     public File getFile(){
@@ -151,12 +151,11 @@ public class Job {
         this.epsilon = epsilon;
     }
 
-    public void setRuns() {
+    public void setupRuns() {
         runs = new ArrayList<>();
         
         if(runsCounter <= 0){
             runsCounter = 1;
-            System.out.println("com.mycompany.atool.Job.setRuns() Runs Counter below 1!");
         }
         
         int run_size = (int) (data.size() / runsCounter);
@@ -169,7 +168,6 @@ public class Job {
                 Run run = new Run(j, run_data);
                 runs.add(run);
         }
-        System.out.println(runs);
     }
 
     public ObservableList<Run> getRuns() {
