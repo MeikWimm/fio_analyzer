@@ -41,8 +41,6 @@ public class Charter {
         lineChart.setTitle("Job");
         List<Point2D> data = job.getData();
         List<Point2D> reduced_data = RamerDouglasPeucker.douglasPeucker(data, job.getEpsilon());
-
-        //System.err.println(reduced_data.size() + "       | old size: " + data.size());
         
         for (Point2D p : reduced_data) {
             series.getData().add(new XYChart.Data<>(p.getX(), p.getY()));

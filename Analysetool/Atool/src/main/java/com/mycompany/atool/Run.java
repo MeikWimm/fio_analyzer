@@ -14,6 +14,7 @@ import javafx.geometry.Point2D;
  */
 public class Run {
     private List<Point2D> data;
+    private List<Double> new_data = new ArrayList<>();
     private final int runID;
     private double intervalFrom = 0;
     private double intervalTo = 0;
@@ -51,19 +52,50 @@ public class Run {
     }
     
     public double getAverageSpeed(){
-        return this.averageSpeed;
+        return  Math.floor(this.averageSpeed * 100) / 100;
     }
     
     public double getIntervalFrom(){
-        return intervalFrom;
+        return  Math.floor(this.intervalFrom * 100) / 100;
     }
     
     public double getIntervalTo(){
-        return intervalTo;
+        return  Math.floor(this.intervalTo * 100) / 100;
+    }
+
+     public void getIntervalFrom(double intervalFrom){
+        this.intervalFrom = intervalFrom;
+    }
+    
+    public void getIntervalTo(double intervalTo){
+        this.intervalTo = intervalTo;
+    }
+    
+    public double getPlusMinusValue(){
+        return Math.floor((this.intervalTo - this.intervalFrom) * 100) / 100;
+    }
+    
+    public List<Point2D> getData(){
+        return this.data;
+    }
+    
+    public List<Double> getNewData(){
+        for (Point2D point2D : data) {
+            new_data.add(point2D.getY());
+        }
+        return this.new_data;
     }
     
     public int getOverlapping(){
         return 0;
+    } 
+
+    public void setIntervalFrom(double d) {
+        this.intervalFrom = d;
+    }
+
+    public void setIntervalTo(double d) {
+        this.intervalTo = d;
     }
 
     

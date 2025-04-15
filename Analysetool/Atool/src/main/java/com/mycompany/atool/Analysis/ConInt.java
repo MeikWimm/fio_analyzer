@@ -23,6 +23,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import org.apache.commons.math3.distribution.NormalDistribution;
 
 /**
  * ConInt (Confidence Interval)
@@ -38,10 +39,11 @@ public class ConInt implements Initializable{
     @FXML public TableColumn<Run,Integer> averageSpeedColumn;
     @FXML public TableColumn<Run,Double> intervalFromColumn;
     @FXML public TableColumn<Run,Double> intervalToColumn;
+    @FXML public TableColumn<Run,Double> plusMinusValueColumn;
     @FXML public TableColumn<Run,Double> standardDeviationColumn;
     @FXML public TableColumn<Run,Integer> overlappingColumn;
-    
-    enum STATUS {
+
+    public enum STATUS {
         SUCCESS,
         IO_EXCEPTION
     }
@@ -57,21 +59,16 @@ public class ConInt implements Initializable{
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        System.out.println("com.mycompany.atool.Analysis.ConInt.initialize()");
         runsColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         intervalFromColumn.setCellValueFactory(new PropertyValueFactory<>("IntervalFrom"));
         intervalToColumn.setCellValueFactory(new PropertyValueFactory<>("IntervalTo"));
+        plusMinusValueColumn.setCellValueFactory(new PropertyValueFactory<>("PlusMinusValue"));
         standardDeviationColumn.setCellValueFactory(new PropertyValueFactory<>("StandardDeviation"));
         overlappingColumn.setCellValueFactory(new PropertyValueFactory<>("Overlapping"));
+
         labelHeader.setText(this.job.toString());
-        
-            System.err.println(this.job.getRuns());
-
-        
         conIntTable.setItems(this.job.getRuns());
-        
-
     }
     
     /**
@@ -81,12 +78,8 @@ public class ConInt implements Initializable{
     public void setJob(Job job){
         this.job = job;
     }
-    
-    public void printSelectedJob(){
-        System.out.println(this.job.toString());
-    }
         
-    public void openWindow(){
+    public STATUS openWindow(){
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/mycompany/atool/ConInt.fxml"));
             fxmlLoader.setController(this);
@@ -103,6 +96,27 @@ public class ConInt implements Initializable{
     } catch (IOException e) {
             LOGGER.log(Level.SEVERE, (Supplier<String>) e);
             LOGGER.log(Level.SEVERE, String.format("Couldn't open Window for ConInt! App state: %s", STATUS.IO_EXCEPTION));
+            return STATUS.IO_EXCEPTION;
+        }
+        return STATUS.SUCCESS;
+    }
+    
+    public static void calculateInterval(Job job){
+        NormalDistribution normDis = new NormalDistribution();
+        
+        for (Run run : job.getRuns()) {
+            System.err.println("-----------------------------------------------------");
+            System.err.println(run.toString());
+            System.err.println(run.getAverageSpeed());
+            System.err.println(normDis.inverseCumulativeProbability(job.getAlpha()));
+            System.err.println(run.getStandardDeviation());
+            System.err.println((run.getData().size()));
+                        System.err.println("-----------------------------------------------------");
+            double c1 = run.getAverageSpeed() - (normDis.inverseCumulativeProbability(job.getAlpha()) * (run.getStandardDeviation() / Math.sqrt(run.getData().size())));
+            run.setIntervalFrom(c1);
+
+            double c2 = run.getAverageSpeed() - (normDis.inverseCumulativeProbability(job.getAlpha()) * (run.getStandardDeviation() / run.getData().size()));
+            run.setIntervalTo(c2);   
         }
     }
 }

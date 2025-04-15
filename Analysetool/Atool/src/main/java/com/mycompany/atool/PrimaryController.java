@@ -1,6 +1,7 @@
 package com.mycompany.atool;
 
 
+import com.mycompany.atool.Analysis.Anova;
 import com.mycompany.atool.Analysis.Charter;
 import com.mycompany.atool.Analysis.ConInt;
 import java.io.IOException;
@@ -38,7 +39,6 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 
 public class PrimaryController implements Initializable{
     private static final Logger LOGGER = Logger.getLogger( PrimaryController.class.getName() );
-
     private Charter tester;
     private InputModule inputModule;
     private Settings settings;
@@ -110,8 +110,7 @@ public class PrimaryController implements Initializable{
     
     @FXML
     private void openLogfile() {
-        // Logic Block
-        labelLoadInfo.setText("trying to load files...");
+        labelLoadInfo.setText("trying to open files...");
         InputModule.STATUS state = inputModule.loadFile();
 
         switch (state) {
@@ -120,6 +119,9 @@ public class PrimaryController implements Initializable{
                 break;
             case NO_FILES_FOUND:
                 labelLoadInfo.setText("No files found!");
+                break;
+            case DIR_CHOOSER_ALREADY_OPEN:
+                labelLoadInfo.setText("Directory chooser already open!");
                 break;
             case SUCCESS:
                 labelLoadInfo.setText("All files loaded!");
@@ -156,8 +158,7 @@ public class PrimaryController implements Initializable{
             settings.openWindow();
         }
     }
-
-    
+ 
     @FXML
     private void executeANOVA(){
         if(table.getSelectionModel().getSelectedItem() != null){
@@ -169,23 +170,19 @@ public class PrimaryController implements Initializable{
 
     @FXML
     private void openInfoWindow(){
-        NormalDistribution norm = new NormalDistribution();
-        
-        System.err.println(norm.inverseCumulativeProbability(0.95)); // z_a/2 = 1 - alpha/2
-        
-            try {
-        FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(getClass().getResource("secondary.fxml"));
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            fxmlLoader.setLocation(getClass().getResource("secondary.fxml"));
 
 
-        Scene scene = new Scene(fxmlLoader.load(), 600, 400);
-        Stage stage = new Stage();
-        stage.setTitle("New Window");
-        stage.setScene(scene);
-        stage.show();
+            Scene scene = new Scene(fxmlLoader.load(), 600, 400);
+            Stage stage = new Stage();
+            stage.setTitle("New Window");
+            stage.setScene(scene);
+            stage.show();
     } catch (IOException e) {
-        LOGGER.log(Level.SEVERE, (Supplier<String>) e);
-        LOGGER.log(Level.SEVERE, String.format("Coudn't open Info Window! App state: %s", STATUS.IO_EXCEPTION));
+            LOGGER.log(Level.SEVERE, (Supplier<String>) e);
+            LOGGER.log(Level.SEVERE, String.format("Coudn't open Info Window! App state: %s", STATUS.IO_EXCEPTION));
         }
     }   
     
@@ -326,22 +323,30 @@ public class PrimaryController implements Initializable{
                 tester.drawJobFreqeuncy(row.getItem());
             });   
             
-            MenuItem removeItem = new MenuItem("Delete");
-            removeItem.setOnAction((ActionEvent event) -> {
-                table.getItems().remove(row.getItem());
-                 LOGGER.log(Level.INFO, String.format("Removed Job -> %s", row.getItem().toString()));
-            });
-
             MenuItem calculateConInt = new MenuItem("Calculate Confidence Interval");
             calculateConInt.setOnAction((ActionEvent event) -> {
                     ConInt conInt = new ConInt(row.getItem());
                     conInt.openWindow();
-                    conInt.printSelectedJob();
-                });
+            });
+            
+            MenuItem calculateANOVA = new MenuItem("Calculate ANOVA");
+            calculateANOVA.setOnAction((ActionEvent event) -> {
+                System.out.println("com.mycompany.atool.PrimaryController.prepareTable()");
+                    Anova anova = new Anova(row.getItem());
+                    anova.openWindow();
+            });
+            
+            MenuItem removeItem = new MenuItem("Delete");
+            removeItem.setOnAction((ActionEvent event) -> {
+                table.getItems().remove(row.getItem());
+                LOGGER.log(Level.INFO, String.format("Removed Job -> %s", row.getItem().toString()));
+            });
+
+
             
             
 
-            rowMenu.getItems().addAll(applyTestItem, drawFrequencyItem, calculateConInt, removeItem);
+            rowMenu.getItems().addAll(applyTestItem, drawFrequencyItem, calculateConInt, calculateANOVA, removeItem);
 
             row.contextMenuProperty().bind(
                     Bindings.when(Bindings.isNotNull(row.itemProperty()))

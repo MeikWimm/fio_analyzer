@@ -4,6 +4,7 @@
  */
 package com.mycompany.atool;
 
+import com.mycompany.atool.Analysis.ConInt;
 import java.io.File;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
@@ -47,11 +48,6 @@ public class Job {
 
     public void setFileAttributes(BasicFileAttributes attr) {
         this.attr = attr;
-    }
-    
-    private enum STATUS {
-        SUCCESS,
-        COULDNT_READ_FILE_ATTRIBUTE
     }
     
     public Job(){
@@ -111,8 +107,7 @@ public class Job {
     }
     
     @Override
-    public String toString(){
-        
+    public String toString(){ 
         return String.format("Job ID: %d | Average Speed %s | Runs: %d | Alpha: %f", this.ID, new DecimalFormat("#.##").format(this.averageSpeed), this.runsCounter, this.alpha);
     }
 
@@ -168,6 +163,8 @@ public class Job {
                 Run run = new Run(j, run_data);
                 runs.add(run);
         }
+        
+        ConInt.calculateInterval(this);
     }
 
     public ObservableList<Run> getRuns() {

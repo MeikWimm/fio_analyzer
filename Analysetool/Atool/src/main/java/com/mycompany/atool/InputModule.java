@@ -32,13 +32,13 @@ import javafx.stage.Stage;
  */
 public class InputModule {
         private static final Logger LOGGER = Logger.getLogger( InputModule.class.getName() );
-
-
+        private boolean isDirChooserOpen = false;
     public enum STATUS {
         SUCCESS,
         NO_FILES_FOUND,
         NO_DIR_SET,
         ERROR_WHILE_READING_FILE,
+        DIR_CHOOSER_ALREADY_OPEN,
         FAILURE
     }
     
@@ -65,7 +65,13 @@ public class InputModule {
      * @return 
      */
     public STATUS loadFile(){
-        this.selectedDirectory = directoryChooser.showDialog(new Stage());
+        if(!isDirChooserOpen){
+            isDirChooserOpen = true;
+            this.selectedDirectory = directoryChooser.showDialog(new Stage());
+            isDirChooserOpen = false;
+        } else {
+            return STATUS.DIR_CHOOSER_ALREADY_OPEN;
+        }
         
         if (selectedDirectory != null) {
             files = selectedDirectory.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));

@@ -19,6 +19,7 @@
                   <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="75.0" text="Average Speed" />
                 <TableColumn id="intervalFromColumn" fx:id="intervalFromColumn" prefWidth="117.0" text="Interval (From)" />
                   <TableColumn id="intervalToColumn" fx:id="intervalToColumn" prefWidth="116.0" text="Interval (To)" />
+                  <TableColumn id="plusMinusValue" fx:id="plusMinusValueColumn" prefWidth="116.0" text="±" />
                   <TableColumn id="standardDeviationColumn" fx:id="standardDeviationColumn" prefWidth="116.0" text="Standard Deviation" />
                   <TableColumn id="overlappingColumn" fx:id="overlappingColumn" prefWidth="116.0" text="Overlapping" />
               </columns>
