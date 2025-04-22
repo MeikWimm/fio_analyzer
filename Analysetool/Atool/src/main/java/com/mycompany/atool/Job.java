@@ -4,6 +4,7 @@
  */
 package com.mycompany.atool;
 
+import com.mycompany.atool.Analysis.Anova;
 import com.mycompany.atool.Analysis.ConInt;
 import java.io.File;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -45,6 +46,10 @@ public class Job {
     private double alpha = 0.95;
     private static int counter = 1; // so that each Job has a unique ID
     private final int ID = counter;
+    private double calculatedF;
+    private double ssa;
+    private double sse;
+    public double F;
 
     public void setFileAttributes(BasicFileAttributes attr) {
         this.attr = attr;
@@ -123,7 +128,7 @@ public class Job {
     }
     
     public double getAverageSpeed(){
-        return  Math.floor(this.averageSpeed * 100) / 100;
+        return  Math.floor((this.averageSpeed / 1) * Settings.NUMBER_AFTER_COMMA) / Settings.NUMBER_AFTER_COMMA;
     }
     
     public void setFrequency(Map<Integer, Integer> freq){
@@ -164,10 +169,46 @@ public class Job {
                 runs.add(run);
         }
         
+        
+        //Add runs to compare, i.e compare for ANOVA first run with the second run.
+        
+        for (int j = 0; j < runs.size()-1; j++) {
+            runs.get(j).addRunToCompareTo(runs.get(j+1));
+        }
+        
         ConInt.calculateInterval(this);
+        Anova.calculateANOVA(this);
     }
 
     public ObservableList<Run> getRuns() {
         return FXCollections.observableArrayList(this.runs);
+    }
+
+    public double getSSE() {
+        return sse;
+    }
+
+    public void setSSE(double sse) {
+        this.sse = sse;
+    }
+
+    public double getSSA() {
+        return ssa;
+    }
+    
+    public void setSSA(double ssa) {
+        this.ssa = ssa;
+    }
+
+    public double getSST() {
+        return sse + ssa;
+    }
+
+    public double getF() {
+        return (calculatedF * Settings.NUMBER_AFTER_COMMA) / Settings.NUMBER_AFTER_COMMA;
+    }
+    
+    public void setF(double f) {
+        this.calculatedF = f;
     }
 }

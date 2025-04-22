@@ -17,6 +17,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 /**
@@ -26,8 +27,13 @@ import javafx.stage.Stage;
 public class Settings implements Initializable{
     private static final Logger LOGGER = Logger.getLogger( Settings.class.getName() );
     private final Stage stage;
+    private boolean isFileAttr;
+    private boolean isSpeedPerSecSelected;
+
     
     @FXML public CheckBox checkboxFileAtt;
+    @FXML public CheckBox checkboxSpeedPerSec;
+    @FXML public TextField textboxSpeedPerSec;
     
     static {
         ConsoleHandler handler = new ConsoleHandler();
@@ -36,7 +42,9 @@ public class Settings implements Initializable{
         LOGGER.setUseParentHandlers(false);
         LOGGER.addHandler(handler);      
     }
-    private boolean isFileAttr;
+    
+    public static int NUMBER_AFTER_COMMA = 10000;
+    public static double CONVERT_SPEED_UNIT = InputModule.CONVERT.getConvertValue(InputModule.CONVERT.DEFAULT);
 
     public Settings(){
         stage = new Stage();
@@ -45,7 +53,11 @@ public class Settings implements Initializable{
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
+        if(checkboxSpeedPerSec.isSelected()){
+            textboxSpeedPerSec.setDisable(false);
+        } else {
+            textboxSpeedPerSec.setDisable(true);
+        }
     }
     
     private void init(){
@@ -78,4 +90,14 @@ public class Settings implements Initializable{
         LOGGER.log(Level.INFO, String.format("is FileAttr set to %b", this.isFileAttr));
     }
     
+    @FXML
+    public void onActionUseSpeedPerSec(){
+        this.isSpeedPerSecSelected = checkboxSpeedPerSec.isSelected();
+        LOGGER.log(Level.INFO, String.format("use Average Speed per Sec set to %b", this.isSpeedPerSecSelected));
+        if(this.isSpeedPerSecSelected){
+            textboxSpeedPerSec.setDisable(false);
+        } else {
+            textboxSpeedPerSec.setDisable(true);
+        }
+    }
 }

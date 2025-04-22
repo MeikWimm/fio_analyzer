@@ -13,17 +13,18 @@ import java.util.ResourceBundle;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Point2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import org.apache.commons.math3.distribution.FDistribution;
 
 /**
  *
@@ -34,41 +35,103 @@ public class Anova implements Initializable{
     
     private Job job;
     
+    @FXML public Label averageSpeedLabel;
+    @FXML public Label sseLabel;
+    @FXML public Label ssaLabel;
+    @FXML public Label sstLabel;
+    @FXML public Label ssaSstLabel;
+    @FXML public Label sseSstLabel;
+    @FXML public Label fCriticalLabel;
+    @FXML public Label fCalculatedLabel;
+    
     @FXML public TableView<Run> anovaTable;
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
+    @FXML public TableColumn<Run, Integer> compareToRunColumn;
+    @FXML public TableColumn<Run, Integer> FColumn;
 
+    boolean flag = false;
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
-        TableColumn<Run, Double> runColumn = new TableColumn<>();
-        runColumn.setText(String.format("General Average Speed"));
-        runColumn.setCellValueFactory(new PropertyValueFactory<>("StandardDeviation"));
-         anovaTable.getColumns().add(runColumn);
-        
-//        for (Run run : this.job.getRuns()) {
-//            int counter = 1;
-//            TableColumn<Run, Double> runColumn = new TableColumn<>();
-//            runColumn.setText(String.format("Run %d", counter));
-//            runColumn.setCellValueFactory(new PropertyValueFactory<>("StandardDeviation"));
-//            anovaTable.getColumns().add(runColumn);
-//            counter++;
-//        }
-            anovaTable.setItems(this.job.getRuns());
+        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
+        FColumn.setCellValueFactory(new PropertyValueFactory<>("F"));
 
-
+        anovaTable.setItems(this.job.getRuns());
+        setLabeling();
     }
     
     public Anova(Job job){
         this.job = job;
     }
     
-    public void calculateANOVA(Job job){
+    public static void calculateANOVA(Job job){
         
-        for (Run run : job.getRuns()) {
-            System.err.println("ANOVA: " + run.toString());
+        //calulcate ssa and sse for the whole job
+        double sse = 0.0;
+        double ssa = 0.0;
+        int num = job.getRuns().get(0).getMinimizedData(Run.SPEED_PER_SEC).size();
+        int denom = job.getRuns().get(0).getRunToCompareTo().size();
+        FDistribution F = new FDistribution(1, 8);
+
+//      calculate F value between runs
+//      SSA 
+        for (Run run : job.getRuns()) {      
+            for (Run runToCompare : run.getRunToCompareTo()) {
+                double averageSpeedOfRunMinimizedData = Run.calculateAverageSpeedOfData(runToCompare.getMinimizedData(Run.SPEED_PER_SEC));
+                double averageSpeedOfAllComparedRuns = Run.calculateAverageSpeedOfRuns(run.getRunToCompareTo());
+                System.err.println("converted ave speed: " + averageSpeedOfRunMinimizedData + "    average speed of all runs: " + averageSpeedOfAllComparedRuns);
+                ssa += Math.pow(averageSpeedOfRunMinimizedData - averageSpeedOfAllComparedRuns,2);
+            }
+            ssa *= run.getMinimizedData(Run.SPEED_PER_SEC).size();
+            run.setSSA(ssa);
+            ssa = 0;
         }
+        
+        //SSE
+        for (Run run : job.getRuns()) {
+            for (Run runToCompare : run.getRunToCompareTo()) {
+                for (Point2D data : runToCompare.getMinimizedData(Run.SPEED_PER_SEC)) {
+                    sse += (Math.pow((data.getY() - Run.calculateAverageSpeedOfData(runToCompare.getMinimizedData(Run.SPEED_PER_SEC))), 2));
+                }
+            }
+            run.setSSE(sse);
+            sse = 0;
+            for (Run run1 : job.getRuns()) {
+                System.err.println(String.format("----------------------------------------------- ID: %d", run1.getID()));
+                for (Point2D point2D : run1.getMinimizedData(Run.SPEED_PER_SEC)) {
+                    System.err.println(String.format("%f", point2D.getY()));
+                }
+            }
+        }
+        
+        double fValue = 1;
+        for (Run run : job.getRuns()) {
+            double s_2_a = run.getSSA() / (run.getRunToCompareTo().size() - 1); 
+            double s_2_e = run.getSSE() / (run.getRunToCompareTo().size()  * (run.getMinimizedData(Run.SPEED_PER_SEC).size() - 1));
+            fValue = s_2_a / s_2_e;
+            run.setF(s_2_a / s_2_e);
+            System.err.println(String.format("SSA: %f, SSE: %f", run.getSSA(), run.getSSE()));
+            System.err.println(F.inverseCumulativeProbability(0.95));
+            if(F.inverseCumulativeProbability(0.95) > fValue){
+                System.err.println("Run: " + run.getID() + " accepted");
+            } else {
+                System.err.println("Run: " + run.getID() + " rejected");
+            }
+        }
+    }
+
+    private void setLabeling(){
+        averageSpeedLabel.setText(String.format("%f", this.job.getAverageSpeed()));
+        sseLabel.setText(String.format("%f", this.job.getSSE()));
+        ssaLabel.setText(String.format("%f", this.job.getSSA()));
+        sstLabel.setText(String.format("%f", this.job.getSST()));
+        ssaSstLabel.setText(String.format("%f",(this.job.getSSA() / this.job.getSST())));
+        sseSstLabel.setText(String.format("%f",(this.job.getSSE() / this.job.getSST())));
+        fCriticalLabel.setText(String.format("%f", this.job.getF()));
+        fCalculatedLabel.setText(String.format("%f", this.job.F));
     }
 
     public ConInt.STATUS openWindow(){
@@ -92,4 +155,6 @@ public class Anova implements Initializable{
         }
         return ConInt.STATUS.SUCCESS;
     }
+
+
 }

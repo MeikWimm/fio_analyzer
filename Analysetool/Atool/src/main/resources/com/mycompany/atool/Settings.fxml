@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Pane?>
-
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <center>
@@ -11,6 +11,8 @@
          <children>
             <CheckBox id="checkboxFileAtt" fx:id="checkboxFileAtt" layoutX="14.0" layoutY="59.0" mnemonicParsing="false" onAction="#onActionFileAttributes" prefHeight="17.0" prefWidth="130.0" text="show file attributes" />
             <CheckBox layoutX="14.0" layoutY="97.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="195.0" text="consider first run for analysis" />
+            <CheckBox id="checkboxSpeedPerSec" fx:id="checkboxSpeedPerSec" layoutX="14.0" layoutY="133.0" mnemonicParsing="false" onAction="#onActionUseSpeedPerSec" prefHeight="17.0" prefWidth="220.0" text="use average Measurement per sec" />
+            <TextField id="textboxSpeedPerSec" fx:id="textboxSpeedPerSec" layoutX="234.0" layoutY="129.0" />
          </children>
       </Pane>
    </center>

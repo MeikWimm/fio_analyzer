@@ -33,6 +33,9 @@ import javafx.stage.Stage;
 public class InputModule {
         private static final Logger LOGGER = Logger.getLogger( InputModule.class.getName() );
         private boolean isDirChooserOpen = false;
+        private CONVERT convertTo;
+        private int conv = CONVERT.getConvertValue(CONVERT.DEFAULT);
+
     public enum STATUS {
         SUCCESS,
         NO_FILES_FOUND,
@@ -40,6 +43,23 @@ public class InputModule {
         ERROR_WHILE_READING_FILE,
         DIR_CHOOSER_ALREADY_OPEN,
         FAILURE
+    }
+
+    public enum CONVERT{
+          DEFAULT, // KIBI_BYTE
+          MEGA_BYTE,
+          MEBI_BYTE;
+
+          public static int getConvertValue(CONVERT hl) {
+              switch (hl) {
+            case MEGA_BYTE:
+                return 976;
+            case MEBI_BYTE:
+                return 1024;    
+            default: // KIBI_BYTE
+                return 1024;
+            }
+        }
     }
     
     static {
@@ -177,7 +197,7 @@ public class InputModule {
                         freq.put((int) speed, 1);
                     }
                 if(old_time != new_time){
-                    average_speed_per_milli = (double) current_speed_sum/counter;
+                    average_speed_per_milli = (double) current_speed_sum/counter/conv;
                     data.add(new Point2D(new_time, average_speed_per_milli));
                     sum_speed += average_speed_per_milli;
                     old_time = new_time;
@@ -191,7 +211,7 @@ public class InputModule {
             
             int time = Integer.parseInt(s[0]);
             job.setTime(time);
-            average_speed_per_milli = (double) current_speed_sum/counter;
+            average_speed_per_milli = (double) current_speed_sum/counter/conv;
             sum_speed += average_speed_per_milli;
             double average_speed = (double) sum_speed / data.size();
             job.setAverageSpeed(average_speed);

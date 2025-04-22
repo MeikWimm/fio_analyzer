@@ -105,13 +105,13 @@ public class ConInt implements Initializable{
         NormalDistribution normDis = new NormalDistribution();
         
         for (Run run : job.getRuns()) {
-            System.err.println("-----------------------------------------------------");
-            System.err.println(run.toString());
-            System.err.println(run.getAverageSpeed());
-            System.err.println(normDis.inverseCumulativeProbability(job.getAlpha()));
-            System.err.println(run.getStandardDeviation());
-            System.err.println((run.getData().size()));
-                        System.err.println("-----------------------------------------------------");
+//            System.err.println("-----------------------------------------------------");
+//            System.err.println(run.toString());
+//            System.err.println(run.getAverageSpeed());
+//            System.err.println(normDis.inverseCumulativeProbability(job.getAlpha()));
+//            System.err.println(run.getStandardDeviation());
+//            System.err.println((run.getData().size()));
+//                        System.err.println("-----------------------------------------------------");
             double c1 = run.getAverageSpeed() - (normDis.inverseCumulativeProbability(job.getAlpha()) * (run.getStandardDeviation() / Math.sqrt(run.getData().size())));
             run.setIntervalFrom(c1);
 
