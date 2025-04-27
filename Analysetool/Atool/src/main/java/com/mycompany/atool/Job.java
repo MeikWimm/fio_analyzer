@@ -6,6 +6,7 @@ package com.mycompany.atool;
 
 import com.mycompany.atool.Analysis.Anova;
 import com.mycompany.atool.Analysis.ConInt;
+import com.mycompany.atool.Analysis.MannWhitney;
 import java.io.File;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
@@ -35,7 +36,7 @@ public class Job {
     public final static Double MIN_EPSILON = 1.0;
     
     private File file;
-    private List<Point2D> data;
+    private List<DataPoint> data;
     private List<Run> runs;
     private Map<Integer, Integer> frequency;
     private int runsCounter = 1;
@@ -61,11 +62,11 @@ public class Job {
         counter++;
     }
     
-    public List<Point2D> getData(){
+    public List<DataPoint> getData(){
         return this.data;
     }
     
-    public void setData(List<Point2D> data){
+    public void setData(List<DataPoint> data){
         this.epsilon = data.size() / 1000;
         if(this.epsilon > MAX_EPSILON){
             this.epsilon = MAX_EPSILON;
@@ -161,11 +162,12 @@ public class Job {
         int run_size = (int) (data.size() / runsCounter);
         int i = 0;
         for (int j = 1; j <= runsCounter; j++) {
-                ArrayList<Point2D> run_data = new ArrayList<>();
+                ArrayList<DataPoint> run_data = new ArrayList<>();
             for (; i < run_size*j; i++) {
                 run_data.add(this.data.get(i));
             }
                 Run run = new Run(j, run_data);
+                run.addRunToCompareTo(run); // add to a list of all runs to compare to for the Tests even itself
                 runs.add(run);
         }
         
@@ -176,8 +178,9 @@ public class Job {
             runs.get(j).addRunToCompareTo(runs.get(j+1));
         }
         
-        ConInt.calculateInterval(this);
-        Anova.calculateANOVA(this);
+        //ConInt.calculateInterval(this);
+        //Anova.calculateANOVA(this);
+        MannWhitney.calculateMannWhitneyTest(this);
     }
 
     public ObservableList<Run> getRuns() {

@@ -13,7 +13,7 @@ import javafx.geometry.Point2D;
  * @author meni1999
  */
 public class Run {
-    private final List<Point2D> data;
+    private final List<DataPoint> data;
     private final List<Double> new_data = new ArrayList<>();
     private final List<Run> runToCompare = new ArrayList<>();
     private final int runID;
@@ -22,15 +22,20 @@ public class Run {
     private double averageSpeed;
     private double convetedAverageSpeed = 0;
     private double standardDeviation = 0;
-    public static final int SPEED_PER_SEC = 1000;
+    public static final int SPEED_PER_SEC = 10;
     private boolean flasg = true;
     private boolean runToCompareItself = false;
     private double ssa;
     private double sse;
-    public double F;
+    private boolean isNullhypothesisAccepted = false;
+    private double F;
+    public float rank = 0;
+    
+    
+    
 
     
-    public Run(final int runNumber, ArrayList<Point2D> run_data){
+    public Run(final int runNumber, ArrayList<DataPoint> run_data){
         this.runID = runNumber;
         this.data = run_data;
         calculateRun();
@@ -38,13 +43,13 @@ public class Run {
 
     private void calculateRun() {
         double ioSpeed = 0;
-        for (Point2D p : data) {
+        for (DataPoint p : data) {
             ioSpeed += p.getY();
         }
         this.averageSpeed = ioSpeed / data.size();
         
         double zaehler = 0;
-        for (Point2D p : data) {
+        for (DataPoint p : data) {
             zaehler += Math.pow(p.getY() - averageSpeed, 2);
         }
         
@@ -112,13 +117,17 @@ public class Run {
     public void getIntervalTo(double intervalTo){
         this.intervalTo = intervalTo;
     }
+    
+    public double getPlusMinusValue(){
+        return Math.abs(this.intervalTo - this.intervalFrom);
+    }
 
-    public List<Point2D> getData(){
+    public List<DataPoint> getData(){
         return this.data;
     }
     
     public List<Double> getNewData(){
-        for (Point2D point2D : data) {
+        for (DataPoint point2D : data) {
             new_data.add(point2D.getY());
         }
         return this.new_data;
@@ -133,10 +142,6 @@ public class Run {
     }
     
     public void addRunToCompareTo(Run run){
-        if(!runToCompareItself) {
-            runToCompare.add(this);
-            runToCompareItself = true;
-        }
         runToCompare.add(run);
     }
     
@@ -187,6 +192,14 @@ public class Run {
     
     public int getID(){
         return runID;
+    }
+    
+    public void setNullypothesis(boolean isNullhypothesisAccepted){
+        this.isNullhypothesisAccepted = isNullhypothesisAccepted;
+    }
+    
+    public boolean getNullhypothesis(){
+        return this.isNullhypothesisAccepted;
     }
     
     public static double calculateAverageSpeedOfData(List<Point2D> data){

@@ -5,7 +5,6 @@
 package com.mycompany.atool;
 import java.util.ArrayList;
 import java.util.List;
-import javafx.geometry.Point2D;
 
 public class RamerDouglasPeucker {
 
@@ -35,7 +34,7 @@ public class RamerDouglasPeucker {
         return Math.sqrt(distanceToSegmentSquared(px, py, vx, vy, wx, wy));
     }
 
-    private static void douglasPeucker(List<Point2D> list, int s, int e, double epsilon, List<Point2D> resultList) {
+    private static void douglasPeucker(List<DataPoint> list, int s, int e, double epsilon, List<DataPoint> resultList) {
         // Find the point with the maximum distance
         double dmax = 0;
         int index = 0;
@@ -80,8 +79,8 @@ public class RamerDouglasPeucker {
      * @param epsilon Distance dimension
      * @return Similar curve with fewer points
      */
-    public static final List<Point2D> douglasPeucker(List<Point2D> list, double epsilon) {
-        final List<Point2D> resultList = new ArrayList<>();
+    public static final List<DataPoint> douglasPeucker(List<DataPoint> list, double epsilon) {
+        final List<DataPoint> resultList = new ArrayList<>();
         douglasPeucker(list, 0, list.size(), epsilon, resultList);
         return resultList;
     }

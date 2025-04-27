@@ -8,7 +8,6 @@ import com.mycompany.atool.Job;
 import com.mycompany.atool.Run;
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -20,6 +19,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -49,8 +49,7 @@ public class Anova implements Initializable{
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, Integer> compareToRunColumn;
     @FXML public TableColumn<Run, Integer> FColumn;
-
-    boolean flag = false;
+    @FXML public TableColumn<Run, Boolean> hypothesisColumn;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -58,6 +57,26 @@ public class Anova implements Initializable{
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
         FColumn.setCellValueFactory(new PropertyValueFactory<>("F"));
+        hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
+        hypothesisColumn.setCellFactory(col -> {
+            TableCell<Run, Boolean> cell = new TableCell<Run, Boolean>() {
+                @Override
+                public void updateItem(Boolean item, boolean empty) {
+                    super.updateItem(item, empty) ;
+                    if (item == null) {
+                        setText("");
+                        setStyle("");
+                    } else if(item == false) {
+                        setStyle("-fx-background-color: tomato;");
+                        setText("Rejected");
+                    } else {
+                        setStyle("-fx-background-color: green;");
+                        setText("Accepted");
+                    }
+                }
+            };
+            return cell;
+        });
 
         anovaTable.setItems(this.job.getRuns());
         setLabeling();
@@ -74,7 +93,8 @@ public class Anova implements Initializable{
         double ssa = 0.0;
         int num = job.getRuns().get(0).getMinimizedData(Run.SPEED_PER_SEC).size();
         int denom = job.getRuns().get(0).getRunToCompareTo().size();
-        FDistribution F = new FDistribution(1, 8);
+        System.err.println(num + " denom: " + denom);
+        FDistribution F = new FDistribution(1, 2);
 
 //      calculate F value between runs
 //      SSA 
@@ -115,9 +135,12 @@ public class Anova implements Initializable{
             run.setF(s_2_a / s_2_e);
             System.err.println(String.format("SSA: %f, SSE: %f", run.getSSA(), run.getSSE()));
             System.err.println(F.inverseCumulativeProbability(0.95));
+         
             if(F.inverseCumulativeProbability(0.95) > fValue){
                 System.err.println("Run: " + run.getID() + " accepted");
+                run.setNullypothesis(true);
             } else {
+                run.setNullypothesis(false);
                 System.err.println("Run: " + run.getID() + " rejected");
             }
         }

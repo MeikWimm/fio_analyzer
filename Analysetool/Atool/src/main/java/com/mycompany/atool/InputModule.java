@@ -57,7 +57,7 @@ public class InputModule {
             case MEBI_BYTE:
                 return 1024;    
             default: // KIBI_BYTE
-                return 1024;
+                return 1;
             }
         }
     }
@@ -170,7 +170,7 @@ public class InputModule {
      * @param job 
      */
     private STATUS readData(Job job) {
-        List<Point2D> data = new ArrayList<>(); // Point2D for x = time and y = speed
+        List<DataPoint> data = new ArrayList<>(); // Point2D for x = time and y = speed
         Map<Integer, Integer> freq = new TreeMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader(job.getFile()))) {
             BasicFileAttributes attr = Files.readAttributes(job.getFile().toPath(), BasicFileAttributes.class);
@@ -198,7 +198,7 @@ public class InputModule {
                     }
                 if(old_time != new_time){
                     average_speed_per_milli = (double) current_speed_sum/counter/conv;
-                    data.add(new Point2D(new_time, average_speed_per_milli));
+                    data.add(new DataPoint(new_time, average_speed_per_milli));
                     sum_speed += average_speed_per_milli;
                     old_time = new_time;
                     current_speed_sum = Long.parseLong(s[1]);
@@ -215,7 +215,7 @@ public class InputModule {
             sum_speed += average_speed_per_milli;
             double average_speed = (double) sum_speed / data.size();
             job.setAverageSpeed(average_speed);
-            data.add(new Point2D(time, average_speed_per_milli));
+            data.add(new DataPoint(time, average_speed_per_milli));
             job.setFrequency(freq);
 
         job.setData(data);

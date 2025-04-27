@@ -4,6 +4,7 @@
  */
 package com.mycompany.atool.Analysis;
 
+import com.mycompany.atool.DataPoint;
 import com.mycompany.atool.Job;
 import com.mycompany.atool.RamerDouglasPeucker;
 import java.util.List;
@@ -39,10 +40,10 @@ public class Charter {
         lineChart.setVerticalGridLinesVisible(false);
         XYChart.Series series = new XYChart.Series();
         lineChart.setTitle("Job");
-        List<Point2D> data = job.getData();
-        List<Point2D> reduced_data = RamerDouglasPeucker.douglasPeucker(data, job.getEpsilon());
+        List<DataPoint> data = job.getData();
+        List<DataPoint> reduced_data = RamerDouglasPeucker.douglasPeucker(data, job.getEpsilon());
         
-        for (Point2D p : reduced_data) {
+        for (DataPoint p : reduced_data) {
             series.getData().add(new XYChart.Data<>(p.getX(), p.getY()));
         }
         Scene scene  = new Scene(lineChart,800,600);
