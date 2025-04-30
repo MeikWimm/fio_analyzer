@@ -20,7 +20,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.Point2D;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.DirectoryChooser;
@@ -197,8 +196,8 @@ public class InputModule {
                         freq.put((int) speed, 1);
                     }
                 if(old_time != new_time){
-                    average_speed_per_milli = (double) current_speed_sum/counter/conv;
-                    data.add(new DataPoint(new_time, average_speed_per_milli));
+                    average_speed_per_milli = Math.floor((double) current_speed_sum/counter/conv * 100.0) / 100.0;
+                    data.add(new DataPoint(average_speed_per_milli, new_time));
                     sum_speed += average_speed_per_milli;
                     old_time = new_time;
                     current_speed_sum = Long.parseLong(s[1]);
@@ -211,11 +210,11 @@ public class InputModule {
             
             int time = Integer.parseInt(s[0]);
             job.setTime(time);
-            average_speed_per_milli = (double) current_speed_sum/counter/conv;
+            average_speed_per_milli = Math.floor((double) current_speed_sum/counter/conv * 100.0) / 100.0;
             sum_speed += average_speed_per_milli;
             double average_speed = (double) sum_speed / data.size();
             job.setAverageSpeed(average_speed);
-            data.add(new DataPoint(time, average_speed_per_milli));
+            data.add(new DataPoint(average_speed_per_milli, time));
             job.setFrequency(freq);
 
         job.setData(data);

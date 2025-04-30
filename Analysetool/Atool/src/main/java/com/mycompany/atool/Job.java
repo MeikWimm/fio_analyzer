@@ -180,7 +180,7 @@ public class Job {
         
         //ConInt.calculateInterval(this);
         //Anova.calculateANOVA(this);
-        MannWhitney.calculateMannWhitneyTest(this);
+        //MannWhitney.calculateMannWhitneyTest(this);
     }
 
     public ObservableList<Run> getRuns() {

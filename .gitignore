@@ -18,7 +18,6 @@ books
 *.gz
 *.toc
 *.txt
-*.xml
 *.lot
 *.dvi
 *.ps

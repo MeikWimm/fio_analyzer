@@ -44,7 +44,7 @@ public class Charter {
         List<DataPoint> reduced_data = RamerDouglasPeucker.douglasPeucker(data, job.getEpsilon());
         
         for (DataPoint p : reduced_data) {
-            series.getData().add(new XYChart.Data<>(p.getX(), p.getY()));
+            series.getData().add(new XYChart.Data<>(p.getTime(), p.getSpeed()));
         }
         Scene scene  = new Scene(lineChart,800,600);
         lineChart.getData().add(series);

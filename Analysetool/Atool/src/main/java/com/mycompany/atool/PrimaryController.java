@@ -4,6 +4,7 @@ package com.mycompany.atool;
 import com.mycompany.atool.Analysis.Anova;
 import com.mycompany.atool.Analysis.Charter;
 import com.mycompany.atool.Analysis.ConInt;
+import com.mycompany.atool.Analysis.MannWhitney;
 import java.io.IOException;
 import java.util.logging.Logger;
 import java.net.URL;
@@ -13,6 +14,7 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -22,6 +24,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -94,6 +97,8 @@ public class PrimaryController implements Initializable{
         fileCreatedColumn.setCellValueFactory(new PropertyValueFactory<>("FileCreationDate"));
         epsilonColumn.setCellValueFactory(new PropertyValueFactory<>("Epsilon"));
         alphaColumn.setCellValueFactory(new PropertyValueFactory<>("Alpha"));
+        //table.setFocusTraversable(false);
+        
         setColumnTextField();
         prepareTable();
     }
@@ -104,7 +109,7 @@ public class PrimaryController implements Initializable{
     private void switchToSecondary() throws IOException {
         App.setRoot("secondary");
     }
-    
+
     @FXML
     private void openLogfile() {
         labelLoadInfo.setText("trying to open files...");
@@ -333,6 +338,15 @@ public class PrimaryController implements Initializable{
                     anova.openWindow();
             });
             
+            MenuItem calculateUTest = new MenuItem("Calculate U-Test");
+            calculateUTest.setOnAction((ActionEvent event) -> {
+                System.out.println("com.mycompany.atool.PrimaryController.prepareTable()");
+                    Job job = row.getItem();
+                    MannWhitney mw = new MannWhitney(job);
+                    mw.calculateMannWhitneyTest(job);
+                    mw.openWindow();
+            });
+            
             MenuItem removeItem = new MenuItem("Delete");
             removeItem.setOnAction((ActionEvent event) -> {
                 table.getItems().remove(row.getItem());
@@ -343,7 +357,7 @@ public class PrimaryController implements Initializable{
             
             
 
-            rowMenu.getItems().addAll(applyTestItem, drawFrequencyItem, calculateConInt, calculateANOVA, removeItem);
+            rowMenu.getItems().addAll(applyTestItem, drawFrequencyItem, calculateConInt, calculateANOVA, calculateUTest, removeItem);
 
             row.contextMenuProperty().bind(
                     Bindings.when(Bindings.isNotNull(row.itemProperty()))

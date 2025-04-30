@@ -11,13 +11,13 @@ import java.util.Comparator;
  * @author meni1999
  */
 public abstract class Utils {
-    public static class DataComparator implements Comparator<DataPoint>{
+    public static class SpeedComparator implements Comparator<DataPoint>{
 
         @Override
         public int compare(DataPoint lhs, DataPoint rhs) {
-            if(lhs.getY() > rhs.getY()){
+            if(lhs.getSpeed() > rhs.getSpeed()){
                 return 1;
-            } else if(lhs.getY() < rhs.getY()) {
+            } else if(lhs.getSpeed() < rhs.getSpeed()) {
                 return -1;
             } else {
                 return 0;

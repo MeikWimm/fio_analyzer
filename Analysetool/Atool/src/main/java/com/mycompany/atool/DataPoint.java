@@ -13,27 +13,45 @@ public class DataPoint {
     private double speed;
     private double time;
     private int flag; 
-    public double rank;
+    private double rank;
     
-    public DataPoint(double x, double y) {
-        this.x = x;
-        this.y = y;
+    public DataPoint(double speed, double time) {
+        this.speed = speed;
+        this.time = time;
+        this.rank = 0;
+        this.flag = 0;
     }
     
-    public void setX(double x){
-        this.x = x;
+    public void setSpeed(double speed){
+        this.speed = speed;
     }
 
-    public void setY(double y){
-        this.y = y;
-    }
-    
-    public double getX(){
-        return this.x;
+    public void setTime(double time){
+        this.time = time;
     }
 
-    public double getY(){
-        return this.y;
+    public void setFlag(int flag){
+        this.flag = flag;
+    }
+
+    public void setRank(double rank){
+        this.rank = rank;
+    }
+    
+    public double getSpeed(){
+        return this.speed;
+    }
+
+    public double getTime(){
+        return this.time;
+    }
+    
+    public double getFlag(){
+        return this.flag;
+    }
+
+    public double getRank(){
+        return this.rank;
     }
     
     

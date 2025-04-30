@@ -43,14 +43,14 @@ public class RamerDouglasPeucker {
         final int end = e-1;
         for (int i=start+1; i<end; i++) {
             // Point
-            final double px = list.get(i).getX();
-            final double py = list.get(i).getY();
+            final double px = list.get(i).getTime();
+            final double py = list.get(i).getSpeed();
             // Start
-            final double vx = list.get(start).getX();
-            final double vy = list.get(start).getY();
+            final double vx = list.get(start).getTime();
+            final double vy = list.get(start).getSpeed();
             // End
-            final double wx = list.get(end).getX();
-            final double wy = list.get(end).getY();
+            final double wx = list.get(end).getTime();
+            final double wy = list.get(end).getSpeed();
             final double d = perpendicularDistance(px, py, vx, vy, wx, wy); 
             if (d > dmax) {
                 index = i;

@@ -20,15 +20,13 @@ public class Run {
     private double intervalFrom = 0;
     private double intervalTo = 0;
     private double averageSpeed;
-    private double convetedAverageSpeed = 0;
     private double standardDeviation = 0;
     public static final int SPEED_PER_SEC = 10;
-    private boolean flasg = true;
-    private boolean runToCompareItself = false;
     private double ssa;
     private double sse;
     private boolean isNullhypothesisAccepted = false;
     private double F;
+    private double zVal = 0;
     public float rank = 0;
     
     
@@ -44,13 +42,13 @@ public class Run {
     private void calculateRun() {
         double ioSpeed = 0;
         for (DataPoint p : data) {
-            ioSpeed += p.getY();
+            ioSpeed += p.getSpeed();
         }
         this.averageSpeed = ioSpeed / data.size();
         
         double zaehler = 0;
         for (DataPoint p : data) {
-            zaehler += Math.pow(p.getY() - averageSpeed, 2);
+            zaehler += Math.pow(p.getSpeed() - averageSpeed, 2);
         }
         
         this.standardDeviation = Math.floor(Math.sqrt((double)(zaehler / data.size()))* Settings.NUMBER_AFTER_COMMA) / Settings.NUMBER_AFTER_COMMA;
@@ -70,7 +68,7 @@ public class Run {
                 counter = 0;
             } else {
                 flag = true;
-                speed += data.get(j).getY();
+                speed += data.get(j).getSpeed();
                 counter++;
             }
         }
@@ -83,9 +81,7 @@ public class Run {
         for (Point2D point2D : converted_data) {
             speed += point2D.getY();
         }
-        
-        convetedAverageSpeed = speed / converted_data.size();
-        
+                
         return converted_data;
     }
     
@@ -128,7 +124,7 @@ public class Run {
     
     public List<Double> getNewData(){
         for (DataPoint point2D : data) {
-            new_data.add(point2D.getY());
+            new_data.add(point2D.getSpeed());
         }
         return this.new_data;
     }
@@ -168,6 +164,14 @@ public class Run {
 
     public double getF(){
         return this.F;
+    }
+    
+    public void setZ(double zVal){
+        this.zVal = zVal;
+    }
+
+    public double getZ(){
+        return this.zVal;
     }
     
     public void setSSE(double sse) {
