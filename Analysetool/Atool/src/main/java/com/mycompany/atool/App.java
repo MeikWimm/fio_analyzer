@@ -1,5 +1,6 @@
 package com.mycompany.atool;
 
+import com.mycompany.atool.Analysis.Anova;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,12 +16,13 @@ import javafx.application.Platform;
 public class App extends Application {
     
 
-
     private static Scene scene;
 
     @Override
     public void start(Stage stage) throws IOException {
+        
         scene = new Scene(loadFXML("primary"));
+        
         stage.setScene(scene);
         stage.setMaxWidth(1200);      
         stage.setMaxHeight(800);

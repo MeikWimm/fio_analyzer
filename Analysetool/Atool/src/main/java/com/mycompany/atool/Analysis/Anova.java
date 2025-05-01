@@ -4,6 +4,7 @@
  */
 package com.mycompany.atool.Analysis;
 
+import com.mycompany.atool.DataPoint;
 import com.mycompany.atool.Job;
 import com.mycompany.atool.Run;
 import java.io.IOException;
@@ -15,7 +16,6 @@ import java.util.logging.Logger;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Point2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -51,6 +51,10 @@ public class Anova implements Initializable{
     @FXML public TableColumn<Run, Integer> FColumn;
     @FXML public TableColumn<Run, Boolean> hypothesisColumn;
     
+    private static int jobRunCounter = 0;
+    private boolean isWindowReady = false;
+    private Stage stage;
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
@@ -82,18 +86,23 @@ public class Anova implements Initializable{
         setLabeling();
     }
     
+    public Anova(){
+        this.job = new Job();
+    }
+    
     public Anova(Job job){
         this.job = job;
     }
-    
-    public static void calculateANOVA(Job job){
+
+    public void calculateANOVA(){
+        if(jobRunCounter == job.getRunsCounter()) return; // If run counter didn't change, than there is no need to calculate again.
         
         //calulcate ssa and sse for the whole job
         double sse = 0.0;
         double ssa = 0.0;
-        int num = job.getRuns().get(0).getMinimizedData(Run.SPEED_PER_SEC).size();
-        int denom = job.getRuns().get(0).getRunToCompareTo().size();
-        System.err.println(num + " denom: " + denom);
+        //int num = job.getRuns().get(0).getMinimizedData(Run.SPEED_PER_SEC).size();
+        //int denom = job.getRuns().get(0).getRunToCompareTo().size();
+        //System.err.println(num + " denom: " + denom);
         FDistribution F = new FDistribution(1, 2);
 
 //      calculate F value between runs
@@ -102,7 +111,7 @@ public class Anova implements Initializable{
             for (Run runToCompare : run.getRunToCompareTo()) {
                 double averageSpeedOfRunMinimizedData = Run.calculateAverageSpeedOfData(runToCompare.getMinimizedData(Run.SPEED_PER_SEC));
                 double averageSpeedOfAllComparedRuns = Run.calculateAverageSpeedOfRuns(run.getRunToCompareTo());
-                System.err.println("converted ave speed: " + averageSpeedOfRunMinimizedData + "    average speed of all runs: " + averageSpeedOfAllComparedRuns);
+                //System.err.println("converted ave speed: " + averageSpeedOfRunMinimizedData + "    average speed of all runs: " + averageSpeedOfAllComparedRuns);
                 ssa += Math.pow(averageSpeedOfRunMinimizedData - averageSpeedOfAllComparedRuns,2);
             }
             ssa *= run.getMinimizedData(Run.SPEED_PER_SEC).size();
@@ -113,18 +122,18 @@ public class Anova implements Initializable{
         //SSE
         for (Run run : job.getRuns()) {
             for (Run runToCompare : run.getRunToCompareTo()) {
-                for (Point2D data : runToCompare.getMinimizedData(Run.SPEED_PER_SEC)) {
-                    sse += (Math.pow((data.getY() - Run.calculateAverageSpeedOfData(runToCompare.getMinimizedData(Run.SPEED_PER_SEC))), 2));
+                for (DataPoint dp : runToCompare.getMinimizedData(Run.SPEED_PER_SEC)) {
+                    sse += (Math.pow((dp.getSpeed() - Run.calculateAverageSpeedOfData(runToCompare.getMinimizedData(Run.SPEED_PER_SEC))), 2));
                 }
             }
             run.setSSE(sse);
             sse = 0;
-            for (Run run1 : job.getRuns()) {
-                System.err.println(String.format("----------------------------------------------- ID: %d", run1.getID()));
-                for (Point2D point2D : run1.getMinimizedData(Run.SPEED_PER_SEC)) {
-                    System.err.println(String.format("%f", point2D.getY()));
-                }
-            }
+//            for (Run run1 : job.getRuns()) {
+//                System.err.println(String.format("----------------------------------------------- ID: %d", run1.getID()));
+//                for (DataPoint dp : run1.getMinimizedData(Run.SPEED_PER_SEC)) {
+//                    System.err.println(String.format("%f", dp.getSpeed()));
+//                }
+//            }
         }
         
         double fValue = 1;
@@ -133,17 +142,18 @@ public class Anova implements Initializable{
             double s_2_e = run.getSSE() / (run.getRunToCompareTo().size()  * (run.getMinimizedData(Run.SPEED_PER_SEC).size() - 1));
             fValue = s_2_a / s_2_e;
             run.setF(s_2_a / s_2_e);
-            System.err.println(String.format("SSA: %f, SSE: %f", run.getSSA(), run.getSSE()));
-            System.err.println(F.inverseCumulativeProbability(0.95));
+            //System.err.println(String.format("SSA: %f, SSE: %f", run.getSSA(), run.getSSE()));
+            //System.err.println(F.inverseCumulativeProbability(0.95));
          
             if(F.inverseCumulativeProbability(0.95) > fValue){
                 System.err.println("Run: " + run.getID() + " accepted");
-                run.setNullypothesis(true);
+                //run.setNullypothesis(true);
             } else {
                 run.setNullypothesis(false);
-                System.err.println("Run: " + run.getID() + " rejected");
+                //System.err.println("Run: " + run.getID() + " rejected");
             }
         }
+        jobRunCounter = job.getRunsCounter(); // remember counter if changed, to avoid multiple calculations with the same values.
     }
 
     private void setLabeling(){
@@ -156,28 +166,31 @@ public class Anova implements Initializable{
         fCriticalLabel.setText(String.format("%f", this.job.getF()));
         fCalculatedLabel.setText(String.format("%f", this.job.F));
     }
-
-    public ConInt.STATUS openWindow(){
+    
+    public void openWindow(){
+        initStage();
+        stage.show();
+    }
+    
+    public ConInt.STATUS initStage(){
         try {
+            
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/mycompany/atool/Anova.fxml"));
+            FXMLLoader.load(getClass().getResource("/com/mycompany/atool/Anova.fxml"));
             fxmlLoader.setController(this);
-            Parent root1 = (Parent) fxmlLoader.load();
+            Parent root1 = fxmlLoader.load();
             /* 
              * if "fx:controller" is not set in fxml
              * fxmlLoader.setController(NewWindowController);
              */
-            Stage stage = new Stage();
+            stage = new Stage();
             stage.setTitle("Calculated ANOVA");
-            stage.setScene(new Scene(root1));
-            stage.show();
-            
+            stage.setScene(new Scene(root1));            
     } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, (Supplier<String>) e);
-            LOGGER.log(Level.SEVERE, String.format("Couldn't open Window for Anova! App state: %s", ConInt.STATUS.IO_EXCEPTION));
+            //LOGGER.log(Level.SEVERE, (Supplier<String>) e);
+            LOGGER.log(Level.SEVERE, String.format("Couldn't open Window for ANOVA! App state: %s", ConInt.STATUS.IO_EXCEPTION));
             return ConInt.STATUS.IO_EXCEPTION;
         }
         return ConInt.STATUS.SUCCESS;
     }
-
-
 }

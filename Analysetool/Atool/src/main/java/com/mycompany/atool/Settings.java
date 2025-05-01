@@ -72,7 +72,7 @@ public class Settings implements Initializable{
         stage.setTitle("Settings");
         stage.setScene(new Scene(root1));
     } catch (IOException e) {
-        LOGGER.log(Level.SEVERE, (Supplier<String>) e);
+        //LOGGER.log(Level.SEVERE, (Supplier<String>) e);
         LOGGER.log(Level.SEVERE, String.format("Coudn't open Settings Window! App state: %s", PrimaryController.STATUS.IO_EXCEPTION));
         }
     }

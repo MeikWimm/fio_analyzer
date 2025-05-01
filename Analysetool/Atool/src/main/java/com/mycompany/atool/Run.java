@@ -6,7 +6,6 @@ package com.mycompany.atool;
 
 import java.util.ArrayList;
 import java.util.List;
-import javafx.geometry.Point2D;
 
 /**
  *
@@ -27,6 +26,7 @@ public class Run {
     private boolean isNullhypothesisAccepted = false;
     private double F;
     private double zVal = 0;
+    private double qVal = 0;
     public float rank = 0;
     
     
@@ -54,8 +54,8 @@ public class Run {
         this.standardDeviation = Math.floor(Math.sqrt((double)(zaehler / data.size()))* Settings.NUMBER_AFTER_COMMA) / Settings.NUMBER_AFTER_COMMA;
     }
     
-    public List<Point2D> getMinimizedData(int average_speed_per_millisec){
-        List<Point2D> converted_data = new ArrayList<>();
+    public List<DataPoint> getMinimizedData(int average_speed_per_millisec){
+        List<DataPoint> converted_data = new ArrayList<>();
         double speed = 0;
         int j;
         boolean flag = false;
@@ -63,7 +63,7 @@ public class Run {
         for (j = 0; j < data.size(); j++) {
             if(j % average_speed_per_millisec == 0 && flag){
                 double average_speed = speed / average_speed_per_millisec;
-                converted_data.add(new Point2D(j, average_speed));
+                converted_data.add(new DataPoint(average_speed, j));
                 speed = 0;
                 counter = 0;
             } else {
@@ -78,8 +78,8 @@ public class Run {
         }
         
         speed = 0;
-        for (Point2D point2D : converted_data) {
-            speed += point2D.getY();
+        for (DataPoint point2D : converted_data) {
+            speed += point2D.getSpeed();
         }
                 
         return converted_data;
@@ -206,10 +206,10 @@ public class Run {
         return this.isNullhypothesisAccepted;
     }
     
-    public static double calculateAverageSpeedOfData(List<Point2D> data){
+    public static double calculateAverageSpeedOfData(List<DataPoint> data){
         double average = 0;
-        for (Point2D point2D : data) {
-            average += point2D.getY();
+        for (DataPoint dp : data) {
+            average += dp.getSpeed();
         }
         
         return average / data.size();
@@ -221,5 +221,9 @@ public class Run {
             average += calculateAverageSpeedOfData(run.getMinimizedData(SPEED_PER_SEC));
         }
         return average / runs.size();
+    }
+
+    public void setQ(double qVal) {
+        this.qVal = qVal;
     }
 }

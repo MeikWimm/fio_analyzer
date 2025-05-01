@@ -5,8 +5,7 @@
 package com.mycompany.atool;
 
 import com.mycompany.atool.Analysis.Anova;
-import com.mycompany.atool.Analysis.ConInt;
-import com.mycompany.atool.Analysis.MannWhitney;
+import com.mycompany.atool.Analysis.TukeyHSD;
 import java.io.File;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
@@ -16,7 +15,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.Point2D;
 
 /**
  * Log files of fio are here represented as Jobs.
@@ -159,7 +157,9 @@ public class Job {
             runsCounter = 1;
         }
         
-        int run_size = (int) (data.size() / runsCounter);
+        
+        
+        int run_size = (data.size() / runsCounter);
         int i = 0;
         for (int j = 1; j <= runsCounter; j++) {
                 ArrayList<DataPoint> run_data = new ArrayList<>();
@@ -170,17 +170,13 @@ public class Job {
                 run.addRunToCompareTo(run); // add to a list of all runs to compare to for the Tests even itself
                 runs.add(run);
         }
-        
-        
+
         //Add runs to compare, i.e compare for ANOVA first run with the second run.
         
         for (int j = 0; j < runs.size()-1; j++) {
             runs.get(j).addRunToCompareTo(runs.get(j+1));
         }
         
-        //ConInt.calculateInterval(this);
-        //Anova.calculateANOVA(this);
-        //MannWhitney.calculateMannWhitneyTest(this);
     }
 
     public ObservableList<Run> getRuns() {

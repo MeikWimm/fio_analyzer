@@ -3,6 +3,7 @@ module com.mycompany.atool {
     requires javafx.fxml;
     requires commons.math3;
     requires java.logging;
+    requires jdistlib;
 
     opens com.mycompany.atool to javafx.fxml;
     opens com.mycompany.atool.Analysis to javafx.fxml;

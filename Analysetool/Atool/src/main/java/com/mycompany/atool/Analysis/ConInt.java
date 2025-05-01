@@ -10,7 +10,6 @@ import com.mycompany.atool.Run;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.fxml.FXML;
@@ -42,6 +41,8 @@ public class ConInt implements Initializable{
     @FXML public TableColumn<Run,Double> plusMinusValueColumn;
     @FXML public TableColumn<Run,Double> standardDeviationColumn;
     @FXML public TableColumn<Run,Integer> overlappingColumn;
+    
+    private Stage stage;
 
     public enum STATUS {
         SUCCESS,
@@ -78,6 +79,7 @@ public class ConInt implements Initializable{
     public void setJob(Job job){
         this.job = job;
     }
+
         
     public STATUS openWindow(){
         try {
@@ -88,20 +90,20 @@ public class ConInt implements Initializable{
              * if "fx:controller" is not set in fxml
              * fxmlLoader.setController(NewWindowController);
              */
-            Stage stage = new Stage();
+            stage = new Stage();
             stage.setTitle("Calculate Confidence Interval");
             stage.setScene(new Scene(root1));
             stage.show();
             
     } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, (Supplier<String>) e);
+            //LOGGER.log(Level.SEVERE, (Supplier<String>) e);
             LOGGER.log(Level.SEVERE, String.format("Couldn't open Window for ConInt! App state: %s", STATUS.IO_EXCEPTION));
             return STATUS.IO_EXCEPTION;
         }
         return STATUS.SUCCESS;
     }
     
-    public static void calculateInterval(Job job){
+    public void calculateInterval(Job job){
         NormalDistribution normDis = new NormalDistribution();
         
         for (Run run : job.getRuns()) {

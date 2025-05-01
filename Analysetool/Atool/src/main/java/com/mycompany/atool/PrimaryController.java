@@ -5,16 +5,15 @@ import com.mycompany.atool.Analysis.Anova;
 import com.mycompany.atool.Analysis.Charter;
 import com.mycompany.atool.Analysis.ConInt;
 import com.mycompany.atool.Analysis.MannWhitney;
+import com.mycompany.atool.Analysis.TukeyHSD;
 import java.io.IOException;
 import java.util.logging.Logger;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.function.Supplier;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -24,7 +23,6 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -42,6 +40,7 @@ public class PrimaryController implements Initializable{
     private Charter tester;
     private InputModule inputModule;
     private Settings settings;
+    //private Anova anova = new Anova();
 
     // FXML Items
     @FXML public MenuItem menuItem_open;
@@ -64,6 +63,7 @@ public class PrimaryController implements Initializable{
     @FXML public TableColumn<Job,Double> epsilonColumn;
     @FXML public TableColumn<Job,Double> alphaColumn;
     
+    private Anova anova;
     // Controller status enum
     enum STATUS{
         SUCCESS,
@@ -79,6 +79,7 @@ public class PrimaryController implements Initializable{
         LOGGER.setUseParentHandlers(false);
         LOGGER.addHandler(handler);      
     }
+
 
     @Override
     public void initialize(URL arg0, ResourceBundle arg1) {
@@ -97,10 +98,10 @@ public class PrimaryController implements Initializable{
         fileCreatedColumn.setCellValueFactory(new PropertyValueFactory<>("FileCreationDate"));
         epsilonColumn.setCellValueFactory(new PropertyValueFactory<>("Epsilon"));
         alphaColumn.setCellValueFactory(new PropertyValueFactory<>("Alpha"));
-        //table.setFocusTraversable(false);
-        
+
         setColumnTextField();
         prepareTable();
+        
     }
 
     // Code Block of callback functions
@@ -183,7 +184,7 @@ public class PrimaryController implements Initializable{
             stage.setScene(scene);
             stage.show();
     } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, (Supplier<String>) e);
+            //LOGGER.log(Level.SEVERE, (Supplier<String>) e);
             LOGGER.log(Level.SEVERE, String.format("Coudn't open Info Window! App state: %s", STATUS.IO_EXCEPTION));
         }
     }   
@@ -327,14 +328,17 @@ public class PrimaryController implements Initializable{
             
             MenuItem calculateConInt = new MenuItem("Calculate Confidence Interval");
             calculateConInt.setOnAction((ActionEvent event) -> {
-                    ConInt conInt = new ConInt(row.getItem());
+                    Job job = row.getItem();
+                    ConInt conInt = new ConInt(job);
+                    conInt.calculateInterval(job);
                     conInt.openWindow();
             });
             
             MenuItem calculateANOVA = new MenuItem("Calculate ANOVA");
-            calculateANOVA.setOnAction((ActionEvent event) -> {
-                System.out.println("com.mycompany.atool.PrimaryController.prepareTable()");
-                    Anova anova = new Anova(row.getItem());
+            calculateANOVA.setOnAction( (ActionEvent event) -> {
+                    Job job = row.getItem();
+                    anova = new Anova(job);
+                    anova.calculateANOVA();
                     anova.openWindow();
             });
             
@@ -347,6 +351,15 @@ public class PrimaryController implements Initializable{
                     mw.openWindow();
             });
             
+            MenuItem calculateTukeyHSD = new MenuItem("Calculate Tukey HSD");
+            calculateTukeyHSD.setOnAction((ActionEvent event) -> {
+                System.out.println("com.mycompany.atool.PrimaryController.prepareTable()");
+                    Job job = row.getItem();
+                    TukeyHSD tHSD = new TukeyHSD(job);
+                    tHSD.calculateTukeyHSD(job);
+                    tHSD.openWindow();
+            });
+            
             MenuItem removeItem = new MenuItem("Delete");
             removeItem.setOnAction((ActionEvent event) -> {
                 table.getItems().remove(row.getItem());
@@ -357,7 +370,7 @@ public class PrimaryController implements Initializable{
             
             
 
-            rowMenu.getItems().addAll(applyTestItem, drawFrequencyItem, calculateConInt, calculateANOVA, calculateUTest, removeItem);
+            rowMenu.getItems().addAll(applyTestItem, drawFrequencyItem, calculateConInt, calculateANOVA, calculateUTest, calculateTukeyHSD, removeItem);
 
             row.contextMenuProperty().bind(
                     Bindings.when(Bindings.isNotNull(row.itemProperty()))

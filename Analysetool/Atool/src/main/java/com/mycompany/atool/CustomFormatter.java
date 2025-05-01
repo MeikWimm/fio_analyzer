@@ -13,6 +13,10 @@ import java.util.logging.LogRecord;
  */
 public class CustomFormatter extends Formatter{
 
+    public CustomFormatter(){
+        super();
+    }
+    
     @Override
     public String format(LogRecord record) {
         StringBuilder msg = new StringBuilder();

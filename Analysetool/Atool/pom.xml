@@ -28,6 +28,12 @@
             <version>3.6.1</version>
             <type>jar</type>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/net.sourceforge.jdistlib/jdistlib -->
+        <dependency>
+            <groupId>net.sourceforge.jdistlib</groupId>
+            <artifactId>jdistlib</artifactId>
+            <version>0.4.5</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -37,6 +43,9 @@
                 <version>3.8.0</version>
                 <configuration>
                     <release>11</release>
+                    <compilerArgs>
+                        <arg>-Xlint</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
