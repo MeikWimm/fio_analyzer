@@ -4,8 +4,6 @@
  */
 package com.mycompany.atool;
 
-import com.mycompany.atool.Analysis.Anova;
-import com.mycompany.atool.Analysis.TukeyHSD;
 import java.io.File;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;

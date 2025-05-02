@@ -10,7 +10,6 @@ import com.mycompany.atool.Run;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.fxml.FXML;
@@ -52,7 +51,7 @@ public class Anova implements Initializable{
     @FXML public TableColumn<Run, Boolean> hypothesisColumn;
     
     private static int jobRunCounter = 0;
-    private boolean isWindowReady = false;
+    private static double jobAlpha = -1.0;
     private Stage stage;
     
     @Override
@@ -95,7 +94,11 @@ public class Anova implements Initializable{
     }
 
     public void calculateANOVA(){
-        if(jobRunCounter == job.getRunsCounter()) return; // If run counter didn't change, than there is no need to calculate again.
+        if(jobRunCounter == this.job.getRunsCounter() && jobAlpha == this.job.getAlpha()) {
+            return;
+        } else {
+            System.err.println("Job Change detected!");
+        }
         
         //calulcate ssa and sse for the whole job
         double sse = 0.0;
@@ -107,7 +110,7 @@ public class Anova implements Initializable{
 
 //      calculate F value between runs
 //      SSA 
-        for (Run run : job.getRuns()) {      
+        for (Run run : this.job.getRuns()) {      
             for (Run runToCompare : run.getRunToCompareTo()) {
                 double averageSpeedOfRunMinimizedData = Run.calculateAverageSpeedOfData(runToCompare.getMinimizedData(Run.SPEED_PER_SEC));
                 double averageSpeedOfAllComparedRuns = Run.calculateAverageSpeedOfRuns(run.getRunToCompareTo());
@@ -120,7 +123,7 @@ public class Anova implements Initializable{
         }
         
         //SSE
-        for (Run run : job.getRuns()) {
+        for (Run run : this.job.getRuns()) {
             for (Run runToCompare : run.getRunToCompareTo()) {
                 for (DataPoint dp : runToCompare.getMinimizedData(Run.SPEED_PER_SEC)) {
                     sse += (Math.pow((dp.getSpeed() - Run.calculateAverageSpeedOfData(runToCompare.getMinimizedData(Run.SPEED_PER_SEC))), 2));
@@ -137,7 +140,7 @@ public class Anova implements Initializable{
         }
         
         double fValue = 1;
-        for (Run run : job.getRuns()) {
+        for (Run run : this.job.getRuns()) {
             double s_2_a = run.getSSA() / (run.getRunToCompareTo().size() - 1); 
             double s_2_e = run.getSSE() / (run.getRunToCompareTo().size()  * (run.getMinimizedData(Run.SPEED_PER_SEC).size() - 1));
             fValue = s_2_a / s_2_e;
@@ -145,7 +148,7 @@ public class Anova implements Initializable{
             //System.err.println(String.format("SSA: %f, SSE: %f", run.getSSA(), run.getSSE()));
             //System.err.println(F.inverseCumulativeProbability(0.95));
          
-            if(F.inverseCumulativeProbability(0.95) > fValue){
+            if(F.inverseCumulativeProbability(this.job.getAlpha()) > fValue){
                 System.err.println("Run: " + run.getID() + " accepted");
                 //run.setNullypothesis(true);
             } else {
@@ -153,7 +156,8 @@ public class Anova implements Initializable{
                 //System.err.println("Run: " + run.getID() + " rejected");
             }
         }
-        jobRunCounter = job.getRunsCounter(); // remember counter if changed, to avoid multiple calculations with the same values.
+        jobRunCounter = this.job.getRunsCounter(); // remember counter if changed, to avoid multiple calculations with the same values.
+        jobAlpha = this.job.getAlpha();
     }
 
     private void setLabeling(){
@@ -188,6 +192,7 @@ public class Anova implements Initializable{
             stage.setScene(new Scene(root1));            
     } catch (IOException e) {
             //LOGGER.log(Level.SEVERE, (Supplier<String>) e);
+            e.printStackTrace();
             LOGGER.log(Level.SEVERE, String.format("Couldn't open Window for ANOVA! App state: %s", ConInt.STATUS.IO_EXCEPTION));
             return ConInt.STATUS.IO_EXCEPTION;
         }

@@ -43,13 +43,15 @@ public class ConInt implements Initializable{
     @FXML public TableColumn<Run,Integer> overlappingColumn;
     
     private Stage stage;
+    private static int jobRunCounter = 0;
+    private static double jobAlpha = -1.0;
 
     public enum STATUS {
         SUCCESS,
         IO_EXCEPTION
     }
     
-    private Job job;
+    private final Job job;
     public ConInt(){
         job = null;
     }
@@ -71,16 +73,7 @@ public class ConInt implements Initializable{
         labelHeader.setText(this.job.toString());
         conIntTable.setItems(this.job.getRuns());
     }
-    
-    /**
-     * 
-     * @param job 
-     */
-    public void setJob(Job job){
-        this.job = job;
-    }
 
-        
     public STATUS openWindow(){
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/mycompany/atool/ConInt.fxml"));
@@ -103,22 +96,24 @@ public class ConInt implements Initializable{
         return STATUS.SUCCESS;
     }
     
-    public void calculateInterval(Job job){
-        NormalDistribution normDis = new NormalDistribution();
+    public void calculateInterval(){
+        if(jobRunCounter == this.job.getRunsCounter() && jobAlpha == this.job.getAlpha()) {
+            return;
+        } else {
+            System.err.println("Job Change detected!");
+        }        
         
-        for (Run run : job.getRuns()) {
-//            System.err.println("-----------------------------------------------------");
-//            System.err.println(run.toString());
-//            System.err.println(run.getAverageSpeed());
-//            System.err.println(normDis.inverseCumulativeProbability(job.getAlpha()));
-//            System.err.println(run.getStandardDeviation());
-//            System.err.println((run.getData().size()));
-//                        System.err.println("-----------------------------------------------------");
-            double c1 = run.getAverageSpeed() - (normDis.inverseCumulativeProbability(job.getAlpha()) * (run.getStandardDeviation() / Math.sqrt(run.getData().size())));
+        NormalDistribution normDis = new NormalDistribution();
+
+        
+        for (Run run : this.job.getRuns()) {
+            double c1 = run.getAverageSpeed() - (normDis.inverseCumulativeProbability(this.job.getAlpha()) * (run.getStandardDeviation() / Math.sqrt(run.getData().size())));
             run.setIntervalFrom(c1);
 
-            double c2 = run.getAverageSpeed() - (normDis.inverseCumulativeProbability(job.getAlpha()) * (run.getStandardDeviation() / run.getData().size()));
+            double c2 = run.getAverageSpeed() - (normDis.inverseCumulativeProbability(this.job.getAlpha()) * (run.getStandardDeviation() / run.getData().size()));
             run.setIntervalTo(c2);   
         }
+        jobRunCounter = this.job.getRunsCounter(); // remember counter if changed, to avoid multiple calculations with the same values.
+        jobAlpha = this.job.getAlpha();
     }
 }

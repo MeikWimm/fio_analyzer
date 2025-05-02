@@ -64,6 +64,9 @@ public class PrimaryController implements Initializable{
     @FXML public TableColumn<Job,Double> alphaColumn;
     
     private Anova anova;
+    private TukeyHSD tHSD;
+    private MannWhitney mw;
+    private ConInt conInt;
     // Controller status enum
     enum STATUS{
         SUCCESS,
@@ -329,8 +332,8 @@ public class PrimaryController implements Initializable{
             MenuItem calculateConInt = new MenuItem("Calculate Confidence Interval");
             calculateConInt.setOnAction((ActionEvent event) -> {
                     Job job = row.getItem();
-                    ConInt conInt = new ConInt(job);
-                    conInt.calculateInterval(job);
+                    conInt = new ConInt(job);
+                    conInt.calculateInterval();
                     conInt.openWindow();
             });
             
@@ -346,8 +349,8 @@ public class PrimaryController implements Initializable{
             calculateUTest.setOnAction((ActionEvent event) -> {
                 System.out.println("com.mycompany.atool.PrimaryController.prepareTable()");
                     Job job = row.getItem();
-                    MannWhitney mw = new MannWhitney(job);
-                    mw.calculateMannWhitneyTest(job);
+                    mw = new MannWhitney(job);
+                    mw.calculateMannWhitneyTest();
                     mw.openWindow();
             });
             
@@ -355,8 +358,8 @@ public class PrimaryController implements Initializable{
             calculateTukeyHSD.setOnAction((ActionEvent event) -> {
                 System.out.println("com.mycompany.atool.PrimaryController.prepareTable()");
                     Job job = row.getItem();
-                    TukeyHSD tHSD = new TukeyHSD(job);
-                    tHSD.calculateTukeyHSD(job);
+                    tHSD = new TukeyHSD(job);
+                    tHSD.calculateTukeyHSD();
                     tHSD.openWindow();
             });
             
@@ -365,11 +368,7 @@ public class PrimaryController implements Initializable{
                 table.getItems().remove(row.getItem());
                 LOGGER.log(Level.INFO, String.format("Removed Job -> %s", row.getItem().toString()));
             });
-
-
             
-            
-
             rowMenu.getItems().addAll(applyTestItem, drawFrequencyItem, calculateConInt, calculateANOVA, calculateUTest, calculateTukeyHSD, removeItem);
 
             row.contextMenuProperty().bind(

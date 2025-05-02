@@ -24,9 +24,10 @@ import net.sourceforge.jdistlib.Tukey;
  */
 public class TukeyHSD implements Initializable{
     double df = 0;
-    
-    private Job job;
-    Tukey tukey; 
+    private static int jobRunCounter = 0;
+    private static double jobAlpha = -1.0;
+
+    private final Job job;
     public TukeyHSD(Job job){
         this.job = job;
     }
@@ -36,9 +37,16 @@ public class TukeyHSD implements Initializable{
 
     }
     
-    public void calculateTukeyHSD(Job job){
+    public void calculateTukeyHSD(){
+        if(jobRunCounter == this.job.getRunsCounter() && jobAlpha == this.job.getAlpha()) {
+            return;
+        } else {
+            System.err.println("Job Change detected!");
+        } 
+        
+        
         new Anova(job).calculateANOVA();
-        tukey = new Tukey(1, 2, 2 * (job.getRuns().get(0).getData().size() - 1));
+        Tukey tukey = new Tukey(1, 2, 2 * (job.getRuns().get(0).getData().size() - 1));
         for (Run run : job.getRuns()) {
             double qVal = 0;
             List<Run> runs = run.getRunToCompareTo();
@@ -51,6 +59,8 @@ public class TukeyHSD implements Initializable{
             run.setQ(qVal);
         }
         System.err.println("Q (crit): " + tukey.inverse_survival(0.05, false));
+        jobRunCounter = this.job.getRunsCounter(); // remember counter if changed, to avoid multiple calculations with the same values.
+        jobAlpha = this.job.getAlpha();
     }
     
 

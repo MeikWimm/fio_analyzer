@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.function.Supplier;
-import java.util.logging.Level;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -55,6 +53,8 @@ public class MannWhitney implements Initializable{
     NormalDistribution nDis = new NormalDistribution();
     private double zCrit_leftside = -1;
     private double zCrit_rightside = -1;
+    private static int jobRunCounter = 0;
+    private static double jobAlpha = -1.0;
     
 
     private void calculateMannWhitney(Run run1, Run run2) {
@@ -72,7 +72,6 @@ public class MannWhitney implements Initializable{
         
         Collections.sort(mergedData, new Utils.SpeedComparator());
  
-        System.err.println("_________________________________________________");
         double r = 1;
         int counter = 1;
         double new_speed, next_speed = -1;
@@ -92,7 +91,7 @@ public class MannWhitney implements Initializable{
             } else if (counter > 1) {
                 for (int i = index; i < index + counter; i++) {
                     double splitted_rank = Math.floor(((1.0 / (double) counter)) * 100.0) / 100.0;
-                    mergedData.get(i).setRank((double) r + splitted_rank);
+                    mergedData.get(i).setRank( r + splitted_rank);
                 }
                 counter = 1;
             } else {
@@ -104,7 +103,6 @@ public class MannWhitney implements Initializable{
             }
             jindex++;
         }
-        System.err.println("_________________________________________________");
         
         double run1_ranksum = 0;
         double run2_ranksum = 0;
@@ -119,8 +117,8 @@ public class MannWhitney implements Initializable{
         
         double m = mergedData.size() / 2.0;
         System.err.println("Rank Sum 1: " + run1_ranksum + " m: " + m);
-        double z_1 = (run1_ranksum - 0.5 * m * (2.0 * m + 1.0)) / (Math.sqrt((1.0/12.0) * Math.pow(m, 2) * (2.0 * m + 1.0)));
-        double z_2 = (run2_ranksum - 0.5 * m * (2.0 * m + 1.0)) / (Math.sqrt((1.0/12.0) * Math.pow(m, 2) * (2.0 * m + 1.0)));
+        //double z_1 = (run1_ranksum - 0.5 * m * (2.0 * m + 1.0)) / (Math.sqrt((1.0/12.0) * Math.pow(m, 2) * (2.0 * m + 1.0)));
+        //double z_2 = (run2_ranksum - 0.5 * m * (2.0 * m + 1.0)) / (Math.sqrt((1.0/12.0) * Math.pow(m, 2) * (2.0 * m + 1.0)));
         
        // System.err.println("Z_1: " + z_1 + " | Z_2: " + z_2);
         
@@ -185,19 +183,25 @@ public class MannWhitney implements Initializable{
         setLabeling();
     }
     
-    public void calculateMannWhitneyTest(Job job){
-        if(job.getRuns().size() <= 1) return;
+    public void calculateMannWhitneyTest(){
+        if(this.job.getRuns().size() <= 1) return;
         
-        List<Run> runs = job.getRuns();
+        if(jobRunCounter == this.job.getRunsCounter() && jobAlpha == this.job.getAlpha()) {
+            return;
+        } else {
+            System.err.println("Job Change detected!");
+        } 
+        
+        List<Run> runs = this.job.getRuns();
         for (int i = 0; i < runs.size(); i++) {
             if(i < runs.size() - 1){
                 Run run1 = runs.get(i);
                 Run run2 = runs.get(i+1);
                 calculateMannWhitney(run1, run2);
-            } else {
-                return;
             }
         }
+        jobRunCounter = this.job.getRunsCounter(); // remember counter if changed, to avoid multiple calculations with the same values.
+        jobAlpha = this.job.getAlpha();
     }
     
         public ConInt.STATUS openWindow(){
