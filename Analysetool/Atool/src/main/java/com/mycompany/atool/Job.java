@@ -4,6 +4,7 @@
  */
 package com.mycompany.atool;
 
+import com.mycompany.atool.Analysis.TTest;
 import java.io.File;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
@@ -175,6 +176,7 @@ public class Job {
             runs.get(j).addRunToCompareTo(runs.get(j+1));
         }
         
+        TTest.tTtest(this);
     }
 
     public ObservableList<Run> getRuns() {
