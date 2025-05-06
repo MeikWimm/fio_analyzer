@@ -32,8 +32,8 @@ import javafx.stage.Stage;
 public class InputModule {
         private static final Logger LOGGER = Logger.getLogger( InputModule.class.getName() );
         private boolean isDirChooserOpen = false;
-        private CONVERT convertTo;
-        private int conv = CONVERT.getConvertValue(CONVERT.DEFAULT);
+        //private CONVERT convertTo;
+        //private double conv = CONVERT.getConvertValue(CONVERT.DEFAULT);
 
     public enum STATUS {
         SUCCESS,
@@ -49,14 +49,14 @@ public class InputModule {
           MEGA_BYTE,
           MEBI_BYTE;
 
-          public static int getConvertValue(CONVERT hl) {
+          public static double getConvertValue(CONVERT hl) {
               switch (hl) {
             case MEGA_BYTE:
-                return 976;
+                return 976.0;
             case MEBI_BYTE:
-                return 1024;    
+                return 1024.0;    
             default: // KIBI_BYTE
-                return 1;
+                return 1.0;
             }
         }
     }
@@ -196,7 +196,7 @@ public class InputModule {
                         freq.put((int) speed, 1);
                     }
                 if(old_time != new_time){
-                    average_speed_per_milli = Math.floor((double) current_speed_sum/counter/conv * 100.0) / 100.0;
+                    average_speed_per_milli = Math.floor((double) current_speed_sum/counter * 100.0) / 100.0;
                     data.add(new DataPoint(average_speed_per_milli, new_time));
                     sum_speed += average_speed_per_milli;
                     old_time = new_time;
@@ -210,7 +210,7 @@ public class InputModule {
             
             int time = Integer.parseInt(s[0]);
             job.setTime(time);
-            average_speed_per_milli = Math.floor((double) current_speed_sum/counter/conv * 100.0) / 100.0;
+            average_speed_per_milli = Math.floor((double) current_speed_sum/counter * 100.0) / 100.0;
             sum_speed += average_speed_per_milli;
             double average_speed = (double) sum_speed / data.size();
             job.setAverageSpeed(average_speed);

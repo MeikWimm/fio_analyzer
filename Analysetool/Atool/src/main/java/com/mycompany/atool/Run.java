@@ -12,14 +12,15 @@ import java.util.List;
  * @author meni1999
  */
 public class Run {
-    private final List<DataPoint> data;
-    private final List<Double> new_data = new ArrayList<>();
+    private final List<DataPoint> rawData;
+    private final List<DataPoint> data = new ArrayList<>();
     private final List<Run> runToCompare = new ArrayList<>();
     private final int runID;
     private double intervalFrom = 0;
     private double intervalTo = 0;
     private double averageSpeed;
     private double standardDeviation = 0;
+    private int average_speed_per_millisec = 1;
     public static final int SPEED_PER_SEC = 10;
     private double ssa;
     private double sse;
@@ -28,6 +29,7 @@ public class Run {
     private double zVal = 0;
     private double qVal = 0;
     public float rank = 0;
+    private InputModule.CONVERT convert;
     
     
     
@@ -35,7 +37,7 @@ public class Run {
     
     public Run(final int runNumber, ArrayList<DataPoint> run_data){
         this.runID = runNumber;
-        this.data = run_data;
+        this.rawData = run_data;
         calculateRun();
     }
 
@@ -51,11 +53,19 @@ public class Run {
             zaehler += Math.pow(p.getSpeed() - averageSpeed, 2);
         }
         
-        this.standardDeviation = Math.floor(Math.sqrt((double)(zaehler / data.size()))* Settings.NUMBER_AFTER_COMMA) / Settings.NUMBER_AFTER_COMMA;
+        this.standardDeviation = Math.floor(Math.sqrt((zaehler / data.size()))* Settings.NUMBER_AFTER_COMMA) / Settings.NUMBER_AFTER_COMMA;
     }
     
-    public List<DataPoint> getMinimizedData(int average_speed_per_millisec){
-        List<DataPoint> converted_data = new ArrayList<>();
+    public void setConversion(InputModule.CONVERT convert){
+        this.convert = convert;
+    }
+    
+    public void setSpeedPerMillisec(int average_speed_per_millisec){
+        this.average_speed_per_millisec = average_speed_per_millisec;
+    }
+    
+    public List<DataPoint> getData(){
+        List<DataPoint> data = new ArrayList<>();
         double speed = 0;
         int j;
         boolean flag = false;
@@ -63,7 +73,7 @@ public class Run {
         for (j = 0; j < data.size(); j++) {
             if(j % average_speed_per_millisec == 0 && flag){
                 double average_speed = speed / average_speed_per_millisec;
-                converted_data.add(new DataPoint(average_speed, j));
+                data.add(new DataPoint(average_speed, j));
                 speed = 0;
                 counter = 0;
             } else {
@@ -78,11 +88,12 @@ public class Run {
         }
         
         speed = 0;
-        for (DataPoint point2D : converted_data) {
-            speed += point2D.getSpeed();
+        double convertVal = InputModule.CONVERT.getConvertValue(this.convert);
+        for (DataPoint point2D : data) {
+            speed += point2D.getSpeed() / convertVal;
         }
                 
-        return converted_data;
+        return data;
     }
     
     
@@ -118,15 +129,8 @@ public class Run {
         return Math.abs(this.intervalTo - this.intervalFrom);
     }
 
-    public List<DataPoint> getData(){
-        return this.data;
-    }
-    
-    public List<Double> getNewData(){
-        for (DataPoint point2D : data) {
-            new_data.add(point2D.getSpeed());
-        }
-        return this.new_data;
+    public List<DataPoint> getRawData(){
+        return this.rawData;
     }
     
     public int getOverlapping(){
@@ -205,23 +209,7 @@ public class Run {
     public boolean getNullhypothesis(){
         return this.isNullhypothesisAccepted;
     }
-    
-    public static double calculateAverageSpeedOfData(List<DataPoint> data){
-        double average = 0;
-        for (DataPoint dp : data) {
-            average += dp.getSpeed();
-        }
-        
-        return average / data.size();
-    }
-    
-    public static double calculateAverageSpeedOfRuns(List<Run> runs){
-        double average = 0;
-        for (Run run : runs) {
-            average += calculateAverageSpeedOfData(run.getMinimizedData(SPEED_PER_SEC));
-        }
-        return average / runs.size();
-    }
+
 
     public void setQ(double qVal) {
         this.qVal = qVal;
