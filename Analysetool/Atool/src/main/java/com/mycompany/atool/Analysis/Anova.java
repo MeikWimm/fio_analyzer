@@ -112,12 +112,12 @@ public class Anova implements Initializable{
 //      SSA 
         for (Run run : this.job.getRuns()) {      
             for (Run runToCompare : run.getRunToCompareTo()) {
-                double averageSpeedOfRunMinimizedData = Run.calculateAverageSpeedOfData(runToCompare.getMinimizedData(Run.SPEED_PER_SEC));
-                double averageSpeedOfAllComparedRuns = Run.calculateAverageSpeedOfRuns(run.getRunToCompareTo());
+                double averageSpeedOfRun = runToCompare.getAverageSpeed();
+                double averageSpeedOfAllComparedRuns = run.getAverageSpeedOfRunsToCompareTo();
                 //System.err.println("converted ave speed: " + averageSpeedOfRunMinimizedData + "    average speed of all runs: " + averageSpeedOfAllComparedRuns);
-                ssa += Math.pow(averageSpeedOfRunMinimizedData - averageSpeedOfAllComparedRuns,2);
+                ssa += Math.pow(averageSpeedOfRun - averageSpeedOfAllComparedRuns,2);
             }
-            ssa *= run.getMinimizedData(Run.SPEED_PER_SEC).size();
+            ssa *= run.getData().size();
             run.setSSA(ssa);
             ssa = 0;
         }
@@ -125,8 +125,8 @@ public class Anova implements Initializable{
         //SSE
         for (Run run : this.job.getRuns()) {
             for (Run runToCompare : run.getRunToCompareTo()) {
-                for (DataPoint dp : runToCompare.getMinimizedData(Run.SPEED_PER_SEC)) {
-                    sse += (Math.pow((dp.getSpeed() - Run.calculateAverageSpeedOfData(runToCompare.getMinimizedData(Run.SPEED_PER_SEC))), 2));
+                for (DataPoint dp : runToCompare.getData()) {
+                    sse += (Math.pow((dp.getSpeed() - runToCompare.getAverageSpeedOfRunsToCompareTo()), 2));
                 }
             }
             run.setSSE(sse);
@@ -142,7 +142,7 @@ public class Anova implements Initializable{
         double fValue = 1;
         for (Run run : this.job.getRuns()) {
             double s_2_a = run.getSSA() / (run.getRunToCompareTo().size() - 1); 
-            double s_2_e = run.getSSE() / (run.getRunToCompareTo().size()  * (run.getMinimizedData(Run.SPEED_PER_SEC).size() - 1));
+            double s_2_e = run.getSSE() / (run.getRunToCompareTo().size()  * (run.getData().size() - 1));
             fValue = s_2_a / s_2_e;
             run.setF(s_2_a / s_2_e);
             //System.err.println(String.format("SSA: %f, SSE: %f", run.getSSA(), run.getSSE()));

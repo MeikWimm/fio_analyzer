@@ -20,7 +20,7 @@ public class Run {
     private double intervalTo = 0;
     private double averageSpeed;
     private double standardDeviation = 0;
-    private int average_speed_per_millisec = 1;
+    private int averageSpeedPerMillisec = 10;
     public static final int SPEED_PER_SEC = 10;
     private double ssa;
     private double sse;
@@ -28,70 +28,98 @@ public class Run {
     private double F;
     private double zVal = 0;
     private double qVal = 0;
+    private boolean calcualteDataFlag = true;
     public float rank = 0;
-    private InputModule.CONVERT convert;
+    private InputModule.CONVERT convert = InputModule.CONVERT.DEFAULT;
+    private final int DEFAULT_SPEED_PER_MILLI = 1;
+    private final int MAX_SPEED_PER_MIILI = 2000;
+    private final int MIN_SPEED_PER_MIILI = 1;
     
     
     
 
     
-    public Run(final int runNumber, ArrayList<DataPoint> run_data){
+    public Run(final int runNumber, ArrayList<DataPoint> runData){
         this.runID = runNumber;
-        this.rawData = run_data;
+        this.rawData = runData;
         calculateRun();
     }
 
     private void calculateRun() {
         double ioSpeed = 0;
-        for (DataPoint p : data) {
+        for (DataPoint p : rawData) {
             ioSpeed += p.getSpeed();
         }
-        this.averageSpeed = ioSpeed / data.size();
+        this.averageSpeed = ioSpeed / rawData.size();
         
-        double zaehler = 0;
-        for (DataPoint p : data) {
-            zaehler += Math.pow(p.getSpeed() - averageSpeed, 2);
+        double nominator = 0;
+        for (DataPoint p : rawData) {
+            nominator += Math.pow(p.getSpeed() - averageSpeed, 2);
         }
         
-        this.standardDeviation = Math.floor(Math.sqrt((zaehler / data.size()))* Settings.NUMBER_AFTER_COMMA) / Settings.NUMBER_AFTER_COMMA;
+        this.standardDeviation = Math.floor(Math.sqrt((nominator / rawData.size()))* Settings.NUMBER_AFTER_COMMA) / Settings.NUMBER_AFTER_COMMA;
     }
     
     public void setConversion(InputModule.CONVERT convert){
         this.convert = convert;
     }
     
-    public void setSpeedPerMillisec(int average_speed_per_millisec){
-        this.average_speed_per_millisec = average_speed_per_millisec;
+    /**
+     * Set the average speed per millisecond.
+     * If averageSpeedPerMillisec is over 2000 or under 1, set to default: 1
+     * @param averageSpeedPerMillisec 
+     */
+    public void setSpeedPerMillisec(int averageSpeedPerMillisec){
+        if(averageSpeedPerMillisec < MIN_SPEED_PER_MIILI || averageSpeedPerMillisec > MAX_SPEED_PER_MIILI){
+            averageSpeedPerMillisec = DEFAULT_SPEED_PER_MILLI;
+        }
+        calcualteDataFlag = true; // everytime new average speed per millic sec is set, getData() re-calculates the data from raw data.
+        this.averageSpeedPerMillisec = averageSpeedPerMillisec;
     }
     
+    /**
+     * Returns the data of this Run.
+     * If averageSpeedPerMillisec is set to 1, return the raw data.
+     * Raw Data means for every millisecond there is one datapoint.
+     * So, if averageSpeedPerMillisec is set to 1000 get the average of 1000 datapoint.
+     * Therefore 1 datapoint for every 1000 millisecond (or every second).
+     * @return 
+     */
     public List<DataPoint> getData(){
-        List<DataPoint> data = new ArrayList<>();
-        double speed = 0;
-        int j;
-        boolean flag = false;
-        int counter = 0;
-        for (j = 0; j < data.size(); j++) {
-            if(j % average_speed_per_millisec == 0 && flag){
-                double average_speed = speed / average_speed_per_millisec;
-                data.add(new DataPoint(average_speed, j));
-                speed = 0;
-                counter = 0;
-            } else {
-                flag = true;
-                speed += data.get(j).getSpeed();
-                counter++;
-            }
-        }
-        if (j != 0){
-            //converted_data.add(new Point2D(j, speed / counter));
-            //System.out.println("Last data for converted list ignored.");
+        if(this.averageSpeedPerMillisec == 1){
+            return rawData;
         }
         
-        speed = 0;
-        double convertVal = InputModule.CONVERT.getConvertValue(this.convert);
-        for (DataPoint point2D : data) {
-            speed += point2D.getSpeed() / convertVal;
+        if(calcualteDataFlag){
+            double speed = 0;
+            int j;
+            boolean flag = false;
+            int counter = 0;
+            for (j = 0; j < rawData.size(); j++) {
+                if(j % averageSpeedPerMillisec == 0 && flag){
+                    double average_speed = speed / averageSpeedPerMillisec;
+                    data.add(new DataPoint(average_speed, j));
+                    speed = 0;
+                    counter = 0;
+                } else {
+                    flag = true;
+                    speed += rawData.get(j).getSpeed();
+                    counter++;
+                }
+            }
+            if (j != 0){
+                //converted_data.add(new Point2D(j, speed / counter));
+                //System.out.println("Last data for converted list ignored.");
+            }
+
+            speed = 0;
+            double convertVal = InputModule.CONVERT.getConvertValue(this.convert);
+            for (DataPoint point2D : data) {
+                speed += point2D.getSpeed() / convertVal;
+            }
+            calcualteDataFlag = false;
         }
+
                 
         return data;
     }
@@ -148,6 +176,16 @@ public class Run {
     public List<Run> getRunToCompareTo(){
         return runToCompare;
     }
+    
+    public double getAverageSpeedOfRunsToCompareTo(){
+        double speed = 0.0;
+        for (Run run : this.runToCompare) {
+            speed += run.getAverageSpeed();
+        }
+        speed = speed / this.runToCompare.size();
+        return speed;
+    }
+    
     
     public String getRunToCompareToAsString(){
         StringBuilder sb = new StringBuilder();
@@ -209,7 +247,6 @@ public class Run {
     public boolean getNullhypothesis(){
         return this.isNullhypothesisAccepted;
     }
-
 
     public void setQ(double qVal) {
         this.qVal = qVal;
