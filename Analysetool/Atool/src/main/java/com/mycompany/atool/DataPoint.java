@@ -22,6 +22,11 @@ public class DataPoint {
         this.flag = 0;
     }
     
+    @Override
+    public String toString(){
+        return String.format("Speed: %f, Time: %f", speed, time);
+    }
+    
     public void setSpeed(double speed){
         this.speed = speed;
     }

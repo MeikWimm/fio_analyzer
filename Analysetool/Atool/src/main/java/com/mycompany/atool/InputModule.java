@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.Supplier;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,22 +43,7 @@ public class InputModule {
         FAILURE
     }
 
-    public enum CONVERT{
-          DEFAULT, // KIBI_BYTE
-          MEGA_BYTE,
-          MEBI_BYTE;
 
-          public static double getConvertValue(CONVERT hl) {
-              switch (hl) {
-            case MEGA_BYTE:
-                return 976.0;
-            case MEBI_BYTE:
-                return 1024.0;    
-            default: // KIBI_BYTE
-                return 1.0;
-            }
-        }
-    }
     
     static {
         ConsoleHandler handler = new ConsoleHandler();
@@ -183,20 +167,20 @@ public class InputModule {
             int old_time = Integer.parseInt(s[0]);
             int speed = Integer.parseInt(s[1]);
             current_speed_sum += Long.parseLong(s[1]);
-            freq.put((int) speed, 1);
+            freq.put(speed, 1);
             
             
             while ((line = br.readLine()) != null) {
                 s = line.split(", ");
                 int new_time = Integer.parseInt(s[0]);
                 speed = Integer.parseInt(s[1]);
-                if(freq.containsKey((int) speed)){
+                if(freq.containsKey( speed)){
                         freq.put(speed, freq.get(speed) + 1);
                     } else {
-                        freq.put((int) speed, 1);
+                        freq.put(speed, 1);
                     }
                 if(old_time != new_time){
-                    average_speed_per_milli = Math.floor((double) current_speed_sum/counter * 100.0) / 100.0;
+                    average_speed_per_milli = (double) current_speed_sum/counter;
                     data.add(new DataPoint(average_speed_per_milli, new_time));
                     sum_speed += average_speed_per_milli;
                     old_time = new_time;
@@ -210,9 +194,9 @@ public class InputModule {
             
             int time = Integer.parseInt(s[0]);
             job.setTime(time);
-            average_speed_per_milli = Math.floor((double) current_speed_sum/counter * 100.0) / 100.0;
+            average_speed_per_milli = current_speed_sum/counter;
             sum_speed += average_speed_per_milli;
-            double average_speed = (double) sum_speed / data.size();
+            double average_speed =  sum_speed / data.size();
             job.setAverageSpeed(average_speed);
             data.add(new DataPoint(average_speed_per_milli, time));
             job.setFrequency(freq);

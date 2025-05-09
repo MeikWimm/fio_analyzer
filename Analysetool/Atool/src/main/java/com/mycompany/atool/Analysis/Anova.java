@@ -94,19 +94,19 @@ public class Anova implements Initializable{
     }
 
     public void calculateANOVA(){
+        if(job.getRuns().size() <= 1) return;
         if(jobRunCounter == this.job.getRunsCounter() && jobAlpha == this.job.getAlpha()) {
             return;
         } else {
             System.err.println("Job Change detected!");
         }
         
-        //calulcate ssa and sse for the whole job
         double sse = 0.0;
         double ssa = 0.0;
-        //int num = job.getRuns().get(0).getMinimizedData(Run.SPEED_PER_SEC).size();
-        //int denom = job.getRuns().get(0).getRunToCompareTo().size();
-        //System.err.println(num + " denom: " + denom);
-        FDistribution F = new FDistribution(1, 2);
+        int num = job.getRuns().get(0).getRunToCompareTo().size() - 1;
+        int denom = (num + 1) * (job.getRunDataSize() - 1);
+        System.err.println("nom: " + num + "    denom: " + denom);
+        FDistribution F = new FDistribution(num, denom);
 
 //      calculate F value between runs
 //      SSA 
@@ -114,7 +114,6 @@ public class Anova implements Initializable{
             for (Run runToCompare : run.getRunToCompareTo()) {
                 double averageSpeedOfRun = runToCompare.getAverageSpeed();
                 double averageSpeedOfAllComparedRuns = run.getAverageSpeedOfRunsToCompareTo();
-                //System.err.println("converted ave speed: " + averageSpeedOfRunMinimizedData + "    average speed of all runs: " + averageSpeedOfAllComparedRuns);
                 ssa += Math.pow(averageSpeedOfRun - averageSpeedOfAllComparedRuns,2);
             }
             ssa *= run.getData().size();
@@ -131,32 +130,26 @@ public class Anova implements Initializable{
             }
             run.setSSE(sse);
             sse = 0;
-//            for (Run run1 : job.getRuns()) {
-//                System.err.println(String.format("----------------------------------------------- ID: %d", run1.getID()));
-//                for (DataPoint dp : run1.getMinimizedData(Run.SPEED_PER_SEC)) {
-//                    System.err.println(String.format("%f", dp.getSpeed()));
-//                }
-//            }
         }
         
-        double fValue = 1;
+        double fValue;
         for (Run run : this.job.getRuns()) {
             double s_2_a = run.getSSA() / (run.getRunToCompareTo().size() - 1); 
             double s_2_e = run.getSSE() / (run.getRunToCompareTo().size()  * (run.getData().size() - 1));
             fValue = s_2_a / s_2_e;
             run.setF(s_2_a / s_2_e);
-            //System.err.println(String.format("SSA: %f, SSE: %f", run.getSSA(), run.getSSE()));
-            //System.err.println(F.inverseCumulativeProbability(0.95));
-         
-            if(F.inverseCumulativeProbability(this.job.getAlpha()) > fValue){
+            
+            // critical p-value < alpha value of job
+            if(F.cumulativeProbability(fValue) < this.job.getAlpha()){
                 System.err.println("Run: " + run.getID() + " accepted");
-                //run.setNullypothesis(true);
+                run.setNullypothesis(true);
             } else {
                 run.setNullypothesis(false);
-                //System.err.println("Run: " + run.getID() + " rejected");
             }
         }
-        jobRunCounter = this.job.getRunsCounter(); // remember counter if changed, to avoid multiple calculations with the same values.
+        
+        // remember counter if changed, to avoid multiple calculations with the same values.
+        jobRunCounter = this.job.getRunsCounter(); 
         jobAlpha = this.job.getAlpha();
     }
 

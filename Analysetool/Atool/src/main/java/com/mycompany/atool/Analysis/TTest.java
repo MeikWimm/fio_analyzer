@@ -14,6 +14,7 @@ import org.apache.commons.math3.distribution.TDistribution;
  */
 public class TTest {
     public static void tTtest(Job job){
+        if(true) return;
         new Anova(job).calculateANOVA();
         for (Run r : job.getRuns()) {
             if(r.getRunToCompareTo().size() <= 1) return;

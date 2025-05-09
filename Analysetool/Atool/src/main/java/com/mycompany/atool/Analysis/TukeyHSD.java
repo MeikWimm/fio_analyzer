@@ -46,7 +46,7 @@ public class TukeyHSD implements Initializable{
         
         
         new Anova(job).calculateANOVA();
-        Tukey tukey = new Tukey(1, 2, 2 * (job.getRuns().get(0).getData().size() - 1));
+        Tukey tukey = new Tukey(1, 2, 2 * (job.getRunDataSize() - 1));
         for (Run run : job.getRuns()) {
             double qVal = 0;
             List<Run> runs = run.getRunToCompareTo();

@@ -24,7 +24,7 @@ public class Job {
     public final static Integer MIN_RUN_COUNT = 1;
     public final static Integer DEFAULT_RUN_COUNT = 1;
     
-    public final static Double DEFAULT_ALPHA = 0.95;
+    public final static Double DEFAULT_ALPHA = 0.05;
     public final static Double MAX_ALPHA = 0.999;
     public final static Double MIN_ALPHA = 0.001;
     
@@ -33,7 +33,8 @@ public class Job {
     public final static Double MIN_EPSILON = 1.0;
     
     private File file;
-    private List<DataPoint> data;
+    private List<DataPoint> rawData = new ArrayList<>();
+    private List<DataPoint> convertedData = new ArrayList<>();
     private List<Run> runs;
     private Map<Integer, Integer> frequency;
     private int runsCounter = 1;
@@ -42,34 +43,40 @@ public class Job {
     private BasicFileAttributes attr;
     private double epsilon = 1;
     private double alpha = 0.95;
-    private static int counter = 1; // so that each Job has a unique ID
-    private final int ID = counter;
+    private static int COUNTER = 1; // so that each Job has a unique ID
+    private final int ID = COUNTER;
     private double calculatedF;
     private double ssa;
     private double sse;
     public double F;
+    //private double convertedAverageSpeed;
 
     public void setFileAttributes(BasicFileAttributes attr) {
         this.attr = attr;
     }
     
     public Job(){
-        data = new ArrayList<>();
+        //data = new ArrayList<>();
         frequency = new TreeMap<>();
-        counter++;
+        COUNTER++;
     }
     
     public List<DataPoint> getData(){
-        return this.data;
+
+        return this.convertedData;
     }
     
-    public void setData(List<DataPoint> data){
-        this.epsilon = data.size() / 1000;
+    public List<DataPoint> getRawData(){
+        return this.rawData;
+    }
+    
+    public void setData(List<DataPoint> rawData){
+        this.epsilon = rawData.size() / 1000;
         if(this.epsilon > MAX_EPSILON){
             this.epsilon = MAX_EPSILON;
         }
-        this.data = data;
-        setupRuns();
+        this.rawData = rawData;
+        update();
     }
     
     public File getFile(){
@@ -126,7 +133,7 @@ public class Job {
     }
     
     public double getAverageSpeed(){
-        return  Math.floor((this.averageSpeed / 1) * Settings.NUMBER_AFTER_COMMA) / Settings.NUMBER_AFTER_COMMA;
+        return  Math.floor((this.averageSpeed / Settings.CONVERSION_VALUE) * Settings.NUMBER_AFTER_COMMA) / Settings.NUMBER_AFTER_COMMA;
     }
     
     public void setFrequency(Map<Integer, Integer> freq){
@@ -149,38 +156,65 @@ public class Job {
         this.epsilon = epsilon;
     }
 
-    public void setupRuns() {
+    public void update() {
         runs = new ArrayList<>();
+        convertedData = new ArrayList<>();
         
-        if(runsCounter <= 0){
-            runsCounter = 1;
+        if(runsCounter <= 0 || runsCounter > 1000){
+            runsCounter = DEFAULT_RUN_COUNT;
         }
         
-        
-        
-        int run_size = (data.size() / runsCounter);
+        int run_size = (rawData.size() / runsCounter);
         int i = 0;
+        ArrayList<DataPoint> run_data;
         for (int j = 1; j <= runsCounter; j++) {
-                ArrayList<DataPoint> run_data = new ArrayList<>();
+                run_data = new ArrayList<>();
             for (; i < run_size*j; i++) {
-                run_data.add(this.data.get(i));
+                DataPoint dp = new DataPoint(this.rawData.get(i).getSpeed() / Settings.CONVERSION_VALUE, this.rawData.get(i).getTime());
+                run_data.add(dp);
+                convertedData.add(dp);
             }
                 Run run = new Run(j, run_data);
                 run.addRunToCompareTo(run); // add to a list of all runs to compare to for the Tests even itself
                 runs.add(run);
         }
 
-        //Add runs to compare, i.e compare for ANOVA first run with the second run.
+        double speed = 0;
+        int j;
+        boolean flag = false;
+        int counter = 0;
         
-        for (int j = 0; j < runs.size()-1; j++) {
+        //Add runs to compare, i.e compare for ANOVA first run with the second run.
+        for (j = 0; j < runs.size()-1; j++) {
             runs.get(j).addRunToCompareTo(runs.get(j+1));
         }
         
-        TTest.tTtest(this);
+        if(Settings.AVERAGE_SPEED_PER_MILLISEC == 1.0) return;
+
+        for (Run run : this.getRuns()) {
+            List<DataPoint> runData = new ArrayList<>();
+            for (j = 0; j < run.getData().size(); j++) {
+                if(j % Settings.AVERAGE_SPEED_PER_MILLISEC == 0 && flag){
+                    double average_speed = speed / Settings.AVERAGE_SPEED_PER_MILLISEC;
+                    runData.add(new DataPoint(average_speed, j));
+                    speed = 0;
+                    counter = 0;
+                } else {
+                    flag = true;
+                    speed += run.getData().get(j).getSpeed();
+                    counter++;
+                }
+            }
+            run.setData(runData);
+        }
     }
 
     public ObservableList<Run> getRuns() {
         return FXCollections.observableArrayList(this.runs);
+    }
+    
+    public int getRunDataSize(){
+        return this.getRuns().get(0).getData().size();
     }
 
     public double getSSE() {

@@ -37,6 +37,7 @@ import javafx.util.converter.IntegerStringConverter;
 
 public class PrimaryController implements Initializable{
     private static final Logger LOGGER = Logger.getLogger( PrimaryController.class.getName() );
+
     private Charter tester;
     private InputModule inputModule;
     private Settings settings;
@@ -46,6 +47,7 @@ public class PrimaryController implements Initializable{
     @FXML public MenuItem menuItem_open;
     @FXML public MenuItem menuItem_ANOVA;
     @FXML public MenuItem menuItem_Info;
+    @FXML public MenuItem menuItem_generalSettings;
     
     @FXML public Button button_refreshTable;
     @FXML public Button button_settings;
@@ -110,11 +112,6 @@ public class PrimaryController implements Initializable{
     // Code Block of callback functions
 
     @FXML
-    private void switchToSecondary() throws IOException {
-        App.setRoot("secondary");
-    }
-
-    @FXML
     private void openLogfile() {
         labelLoadInfo.setText("trying to open files...");
         InputModule.STATUS state = inputModule.loadFile();
@@ -149,20 +146,32 @@ public class PrimaryController implements Initializable{
     private void onActionRefreshTable(){
         labelLoadInfo.setText("Refresh Table...");
         InputModule.STATUS status = inputModule.readFiles();
-
+        
+        if(Settings.HAS_CHANGED){
+            for (Job job : table.getItems()) {
+                job.update();
+            }
+        }
+        
         if(status != InputModule.STATUS.SUCCESS){
             LOGGER.log(Level.WARNING, String.format("Coudn't refresh table! App state: %s", status));
             labelLoadInfo.setText("Couldn't load Files!");
         } else {
             labelLoadInfo.setText("All files loaded!");
         }
+        table.getColumns().get(0).setVisible(false);
+        table.getColumns().get(0).setVisible(true);
     }
 
     @FXML
     private void onActionOpenSettings(){
-        if(!settings.isWindowOpen()){
-            settings.openWindow();
-        }
+
+    }
+    
+    @FXML
+    private void openGeneralSettings(){
+        new Settings().openWindow();
+        
     }
  
     @FXML
@@ -296,7 +305,7 @@ public class PrimaryController implements Initializable{
     private void prepareTable(){
         runsCounterColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Integer> t) -> {
             t.getRowValue().setRunsCounter(t.getNewValue());
-            t.getRowValue().setupRuns();
+            t.getRowValue().update();
         });
         
         alphaColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {
@@ -321,12 +330,12 @@ public class PrimaryController implements Initializable{
             final ContextMenu rowMenu = new ContextMenu();
             MenuItem applyTestItem = new MenuItem("Draw job speed");
             applyTestItem.setOnAction((ActionEvent event) -> {
-                tester.drawJob(row.getItem());
+                new Charter().drawJob(row.getItem());
             });   
                         
             MenuItem drawFrequencyItem = new MenuItem("Draw job frequency");
             drawFrequencyItem.setOnAction((ActionEvent event) -> {
-                tester.drawJobFreqeuncy(row.getItem());
+                new Charter().drawJobFreqeuncy(row.getItem());
             });   
             
             MenuItem calculateConInt = new MenuItem("Calculate Confidence Interval");

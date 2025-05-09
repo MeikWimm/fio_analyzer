@@ -20,13 +20,14 @@
               <MenuItem fx:id="menuItem_open" mnemonicParsing="false" onAction="#openLogfile" text="Open" />
             </items>
           </Menu>
-          <Menu mnemonicParsing="false" text="Tests">
+          <Menu mnemonicParsing="false" text="Settings">
             <items>
               <MenuItem fx:id="menuItem_ANOVA" mnemonicParsing="false" onAction="#executeANOVA" text="ANOVA" />
                   <MenuItem mnemonicParsing="false" text="Confidence Interval" />
                   <MenuItem mnemonicParsing="false" text="T-Test" />
                   <MenuItem mnemonicParsing="false" text="Tukey-HSD" />
                   <MenuItem mnemonicParsing="false" text="U-Test" />
+                  <MenuItem fx:id="menuItem_generalSettings" mnemonicParsing="false" onAction="#openGeneralSettings" text="General" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help">
@@ -59,7 +60,6 @@
                <children>
                   <Button fx:id="button_refreshTable" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#onActionRefreshTable" text="Refresh Table" />
                   <Button id="button_settings" fx:id="button_settings" layoutX="110.0" layoutY="14.0" mnemonicParsing="false" onAction="#onActionOpenSettings" text="Settings" />
-                  <Button fx:id="primaryButton" layoutX="173.0" layoutY="14.0" mnemonicParsing="false" onAction="#switchToSecondary" text="Button" />
                </children>
             </Pane>
             <Pane prefHeight="200.0" prefWidth="1080.0">
