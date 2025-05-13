@@ -5,6 +5,7 @@ import com.mycompany.atool.Analysis.Anova;
 import com.mycompany.atool.Analysis.Charter;
 import com.mycompany.atool.Analysis.ConInt;
 import com.mycompany.atool.Analysis.MannWhitney;
+import com.mycompany.atool.Analysis.TTest;
 import com.mycompany.atool.Analysis.TukeyHSD;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -80,7 +81,7 @@ public class PrimaryController implements Initializable{
     static {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setLevel(Level.FINEST);
-        handler.setFormatter(new CustomFormatter());
+        handler.setFormatter(new Utils.CustomFormatter("Primary Controller"));
         LOGGER.setUseParentHandlers(false);
         LOGGER.addHandler(handler);      
     }
@@ -90,7 +91,7 @@ public class PrimaryController implements Initializable{
     public void initialize(URL arg0, ResourceBundle arg1) {
         inputModule = new InputModule();
         tester = new Charter();
-        settings = new Settings();
+        settings = new Settings(this);
         
         IDColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
         fileNameColumn.setCellValueFactory(new PropertyValueFactory<>("File"));
@@ -146,21 +147,13 @@ public class PrimaryController implements Initializable{
     private void onActionRefreshTable(){
         labelLoadInfo.setText("Refresh Table...");
         InputModule.STATUS status = inputModule.readFiles();
-        
-        if(Settings.HAS_CHANGED){
-            for (Job job : table.getItems()) {
-                job.update();
-            }
-        }
-        
+
         if(status != InputModule.STATUS.SUCCESS){
             LOGGER.log(Level.WARNING, String.format("Coudn't refresh table! App state: %s", status));
             labelLoadInfo.setText("Couldn't load Files!");
         } else {
             labelLoadInfo.setText("All files loaded!");
         }
-        table.getColumns().get(0).setVisible(false);
-        table.getColumns().get(0).setVisible(true);
     }
 
     @FXML
@@ -170,8 +163,7 @@ public class PrimaryController implements Initializable{
     
     @FXML
     private void openGeneralSettings(){
-        new Settings().openWindow();
-        
+        settings.openWindow();
     }
  
     @FXML
@@ -200,6 +192,21 @@ public class PrimaryController implements Initializable{
             LOGGER.log(Level.SEVERE, String.format("Coudn't open Info Window! App state: %s", STATUS.IO_EXCEPTION));
         }
     }   
+    
+    public void update(){
+        
+        if(Settings.HAS_CHANGED){
+            for (Job job : table.getItems()) {
+                job.update();
+            }
+        }
+
+        table.getColumns().get(0).setVisible(false);
+        table.getColumns().get(0).setVisible(true);    
+    
+        Settings.HAS_CHANGED = false;
+    }
+    
     
     // Code Block for setting up Table view
 
@@ -356,7 +363,6 @@ public class PrimaryController implements Initializable{
             
             MenuItem calculateUTest = new MenuItem("Calculate U-Test");
             calculateUTest.setOnAction((ActionEvent event) -> {
-                System.out.println("com.mycompany.atool.PrimaryController.prepareTable()");
                     Job job = row.getItem();
                     mw = new MannWhitney(job);
                     mw.calculateMannWhitneyTest();
@@ -365,11 +371,18 @@ public class PrimaryController implements Initializable{
             
             MenuItem calculateTukeyHSD = new MenuItem("Calculate Tukey HSD");
             calculateTukeyHSD.setOnAction((ActionEvent event) -> {
-                System.out.println("com.mycompany.atool.PrimaryController.prepareTable()");
                     Job job = row.getItem();
                     tHSD = new TukeyHSD(job);
                     tHSD.calculateTukeyHSD();
                     tHSD.openWindow();
+            });
+            
+            MenuItem calculateTTtest = new MenuItem("Calculate T-Test");
+            calculateTTtest.setOnAction((ActionEvent event) -> {
+                    Job job = row.getItem();
+                    TTest tTest = new TTest(job);
+                    tTest.tTtest();
+                    tTest.openWindow();
             });
             
             MenuItem removeItem = new MenuItem("Delete");
@@ -378,7 +391,7 @@ public class PrimaryController implements Initializable{
                 LOGGER.log(Level.INFO, String.format("Removed Job -> %s", row.getItem().toString()));
             });
             
-            rowMenu.getItems().addAll(applyTestItem, drawFrequencyItem, calculateConInt, calculateANOVA, calculateUTest, calculateTukeyHSD, removeItem);
+            rowMenu.getItems().addAll(applyTestItem, drawFrequencyItem, calculateConInt, calculateANOVA, calculateUTest, calculateTukeyHSD, calculateTTtest, removeItem);
 
             row.contextMenuProperty().bind(
                     Bindings.when(Bindings.isNotNull(row.itemProperty()))

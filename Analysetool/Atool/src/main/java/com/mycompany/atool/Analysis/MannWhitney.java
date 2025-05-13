@@ -14,13 +14,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -33,6 +35,15 @@ import org.apache.commons.math3.distribution.NormalDistribution;
  * @author meni1999
  */
 public class MannWhitney implements Initializable{
+    private static final Logger LOGGER = Logger.getLogger( MannWhitney.class.getName() );
+    
+    static {
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setLevel(Level.FINEST);
+        handler.setFormatter(new Utils.CustomFormatter("Mann-Whitney"));
+        LOGGER.setUseParentHandlers(false);
+        LOGGER.addHandler(handler);      
+    }
     
     @FXML public TableView<Run> uTestTable;
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
@@ -159,25 +170,7 @@ public class MannWhitney implements Initializable{
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
         ZColumn.setCellValueFactory(new PropertyValueFactory<>("Z"));
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
-        hypothesisColumn.setCellFactory(col -> {
-            TableCell<Run, Boolean> cell = new TableCell<Run, Boolean>() {
-                @Override
-                public void updateItem(Boolean item, boolean empty) {
-                    super.updateItem(item, empty) ;
-                    if (item == null) {
-                        setText("");
-                        setStyle("");
-                    } else if(item == false) {
-                        setStyle("-fx-background-color: tomato;");
-                        setText("Rejected");
-                    } else {
-                        setStyle("-fx-background-color: green;");
-                        setText("Accepted");
-                    }
-                }
-            };
-            return cell;
-        });
+        hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
         uTestTable.setItems(this.job.getRuns());
         setLabeling();

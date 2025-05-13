@@ -7,9 +7,12 @@ package com.mycompany.atool.Analysis;
 import com.mycompany.atool.DataPoint;
 import com.mycompany.atool.Job;
 import com.mycompany.atool.Run;
+import com.mycompany.atool.Utils;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.fxml.FXML;
@@ -18,10 +21,11 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import org.apache.commons.math3.distribution.FDistribution;
 
@@ -32,7 +36,15 @@ import org.apache.commons.math3.distribution.FDistribution;
 public class Anova implements Initializable{
     private static final Logger LOGGER = Logger.getLogger( Anova.class.getName() );
     
-    private Job job;
+    static {
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setLevel(Level.FINEST);
+        handler.setFormatter(new Utils.CustomFormatter("ANOVA"));
+        LOGGER.setUseParentHandlers(false);
+        LOGGER.addHandler(handler);      
+    }
+    
+    private final Job job;
     
     @FXML public Label averageSpeedLabel;
     @FXML public Label sseLabel;
@@ -50,9 +62,9 @@ public class Anova implements Initializable{
     @FXML public TableColumn<Run, Integer> FColumn;
     @FXML public TableColumn<Run, Boolean> hypothesisColumn;
     
-    private static int jobRunCounter = 0;
-    private static double jobAlpha = -1.0;
     private Stage stage;
+    private static String jobCode = "";
+    private double F = 0.0;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -61,28 +73,16 @@ public class Anova implements Initializable{
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
         FColumn.setCellValueFactory(new PropertyValueFactory<>("F"));
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
-        hypothesisColumn.setCellFactory(col -> {
-            TableCell<Run, Boolean> cell = new TableCell<Run, Boolean>() {
-                @Override
-                public void updateItem(Boolean item, boolean empty) {
-                    super.updateItem(item, empty) ;
-                    if (item == null) {
-                        setText("");
-                        setStyle("");
-                    } else if(item == false) {
-                        setStyle("-fx-background-color: tomato;");
-                        setText("Rejected");
-                    } else {
-                        setStyle("-fx-background-color: green;");
-                        setText("Accepted");
-                    }
-                }
-            };
-            return cell;
-        });
+        hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
+        
+        anovaTable.setOnMouseClicked((MouseEvent event) -> {
+                if(event.getButton().equals(MouseButton.PRIMARY)){
+                    setLabeling(anovaTable.getSelectionModel().getSelectedItem());
+                }
+        });        
+        
         anovaTable.setItems(this.job.getRuns());
-        setLabeling();
     }
     
     public Anova(){
@@ -95,17 +95,18 @@ public class Anova implements Initializable{
 
     public void calculateANOVA(){
         if(job.getRuns().size() <= 1) return;
-        if(jobRunCounter == this.job.getRunsCounter() && jobAlpha == this.job.getAlpha()) {
+       
+        if(job.getCode().equals(jobCode)) {
             return;
         } else {
-            System.err.println("Job Change detected!");
+            LOGGER.log(Level.INFO,String.format("Change detected for %s", this.job));
         }
         
         double sse = 0.0;
         double ssa = 0.0;
         int num = job.getRuns().get(0).getRunToCompareTo().size() - 1;
         int denom = (num + 1) * (job.getRunDataSize() - 1);
-        System.err.println("nom: " + num + "    denom: " + denom);
+        LOGGER.log(Level.INFO,String.format("Calculated Numerator %d and Denominator %d", num, denom));
         FDistribution F = new FDistribution(num, denom);
 
 //      calculate F value between runs
@@ -141,27 +142,26 @@ public class Anova implements Initializable{
             
             // critical p-value < alpha value of job
             if(F.cumulativeProbability(fValue) < this.job.getAlpha()){
-                System.err.println("Run: " + run.getID() + " accepted");
+                //System.err.println("Run: " + run.getID() + " accepted");
                 run.setNullypothesis(true);
             } else {
                 run.setNullypothesis(false);
             }
         }
         
-        // remember counter if changed, to avoid multiple calculations with the same values.
-        jobRunCounter = this.job.getRunsCounter(); 
-        jobAlpha = this.job.getAlpha();
+        // remember run counter and alpha to avoid multiple calculations with the same values.
+          jobCode = job.getCode();        
     }
 
-    private void setLabeling(){
-        averageSpeedLabel.setText(String.format("%f", this.job.getAverageSpeed()));
-        sseLabel.setText(String.format("%f", this.job.getSSE()));
-        ssaLabel.setText(String.format("%f", this.job.getSSA()));
-        sstLabel.setText(String.format("%f", this.job.getSST()));
-        ssaSstLabel.setText(String.format("%f",(this.job.getSSA() / this.job.getSST())));
-        sseSstLabel.setText(String.format("%f",(this.job.getSSE() / this.job.getSST())));
-        fCriticalLabel.setText(String.format("%f", this.job.getF()));
-        fCalculatedLabel.setText(String.format("%f", this.job.F));
+    private void setLabeling(Run run){
+        averageSpeedLabel.setText(String.format(Locale.ENGLISH, "%,.2f", run.getAverageSpeed()));
+        sseLabel.setText(String.format(Locale.ENGLISH, "%,.2f", run.getSSE()));
+        ssaLabel.setText(String.format(Locale.ENGLISH, "%,.2f", run.getSSA()));
+        sstLabel.setText(String.format(Locale.ENGLISH, "%,.2f", run.getSST()));
+        ssaSstLabel.setText(String.format(Locale.ENGLISH, "%,.2f",(run.getSSA() / run.getSST())));
+        sseSstLabel.setText(String.format(Locale.ENGLISH, "%,.2f",(run.getSSE() / run.getSST())));
+        fCriticalLabel.setText(String.format(Locale.ENGLISH, "%,.2f", this.F));
+        fCalculatedLabel.setText(String.format(Locale.ENGLISH, "%,.2f", run.getF()));
     }
     
     public void openWindow(){

@@ -7,9 +7,11 @@ package com.mycompany.atool.Analysis;
 import com.mycompany.atool.InputModule;
 import com.mycompany.atool.Job;
 import com.mycompany.atool.Run;
+import com.mycompany.atool.Utils;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.fxml.FXML;
@@ -30,6 +32,14 @@ import org.apache.commons.math3.distribution.NormalDistribution;
  */
 public class ConInt implements Initializable{
     private static final Logger LOGGER = Logger.getLogger( InputModule.class.getName() );
+    
+    static {
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setLevel(Level.FINEST);
+        handler.setFormatter(new Utils.CustomFormatter("Settings"));
+        LOGGER.setUseParentHandlers(false);
+        LOGGER.addHandler(handler);      
+    }
     
     @FXML public Label labelHeader;
     

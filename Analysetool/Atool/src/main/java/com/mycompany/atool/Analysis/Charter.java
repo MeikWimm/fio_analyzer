@@ -9,12 +9,15 @@ import com.mycompany.atool.Job;
 import com.mycompany.atool.RamerDouglasPeucker;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 /**
  *
@@ -31,9 +34,8 @@ public class Charter {
     }
     
     public void drawJob(Job job) {
-        if(job.getData().size() > 10000 && !isJobSpeedStageInitialized){
-            infoWindowLargeData();
-        }
+        
+        if(!infoWindowLargeData(job)) return;
         
         if(!isJobSpeedStageInitialized){
             stageJobSpeed = new Stage();
@@ -61,12 +63,16 @@ public class Charter {
 
         stageJobSpeed.show();
     }
-        
+       
+    /**
+     * TODO: RDP currently not working for draw job frequency
+     * @param job 
+     */
     public void drawJobFreqeuncy(Job job){
-        if(job.getData().size() > 10000 && !isJobFreqStageInitialized){
-            infoWindowLargeData();
-        }
 
+
+        if(!infoWindowLargeData(job)) return;
+        
         if(!isJobFreqStageInitialized){
             stageJobFreq = new Stage();
             final NumberAxis xAxis = new NumberAxis();
@@ -95,9 +101,22 @@ public class Charter {
     /**
      * Gets called when data point exceed 10000 to inform User.
      */
-    private void infoWindowLargeData(){
-        Alert alert = new Alert(Alert.AlertType.INFORMATION, "This could take a while because of more then 10000 data points from this job.");
-        alert.showAndWait();
+    private boolean infoWindowLargeData(Job job){
+        boolean flag = false;
+        if(job.getData().size() > 10000 && !isJobFreqStageInitialized){
+            ButtonType goodButton = new ButtonType("Ok");
+            ButtonType badButton = new ButtonType("Cancel");
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "This could take a while because of more then 10000 data points from this job.", goodButton, badButton);
+            Window window = alert.getDialogPane().getScene().getWindow();
+            window.setOnCloseRequest(e -> alert.hide());
+            Optional<ButtonType> result = alert.showAndWait();
+            
+            if(!result.isEmpty()){
+                flag = (result.get() == goodButton);
+            }
+
+        }
+        return flag;
     }
     
 }

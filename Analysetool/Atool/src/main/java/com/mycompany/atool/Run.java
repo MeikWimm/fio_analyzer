@@ -26,6 +26,7 @@ public class Run {
     private double F;
     private double zVal = 0;
     private double qVal = 0;
+    private double tVal = 0;
     public float rank = 0;
 
     
@@ -51,6 +52,7 @@ public class Run {
     }
     
     public void setData(List<DataPoint> runData){
+        this.data = new ArrayList<>();
         this.data = runData;
         calculateRun();
     }
@@ -146,6 +148,14 @@ public class Run {
         return this.zVal;
     }
     
+    public void setT(double tVal){
+        this.tVal = tVal;
+    }
+
+    public double getT(){
+        return this.tVal;
+    }
+    
     public void setSSE(double sse) {
         this.sse = sse;
     }
@@ -180,5 +190,9 @@ public class Run {
 
     public void setQ(double qVal) {
         this.qVal = qVal;
+    }
+
+    public double getQ(){
+        return this.qVal;
     }
 }

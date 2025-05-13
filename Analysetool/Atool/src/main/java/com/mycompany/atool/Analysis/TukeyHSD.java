@@ -6,15 +6,26 @@ package com.mycompany.atool.Analysis;
 
 import com.mycompany.atool.Job;
 import com.mycompany.atool.Run;
+import com.mycompany.atool.Utils;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import net.sourceforge.jdistlib.Tukey;
 
 
@@ -23,10 +34,32 @@ import net.sourceforge.jdistlib.Tukey;
  * @author meni1999
  */
 public class TukeyHSD implements Initializable{
-    double df = 0;
-    private static int jobRunCounter = 0;
-    private static double jobAlpha = -1.0;
+    private static final Logger LOGGER = Logger.getLogger( TukeyHSD.class.getName() );
+    
+    static {
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setLevel(Level.FINEST);
+        handler.setFormatter(new Utils.CustomFormatter("TukeyHSD"));
+        LOGGER.setUseParentHandlers(false);
+        LOGGER.addHandler(handler);      
+    }    
 
+    @FXML public Label averageSpeedLabel;
+    @FXML public Label sseLabel;
+    @FXML public Label ssaLabel;
+    @FXML public Label sstLabel;
+    @FXML public Label ssaSstLabel;
+    @FXML public Label sseSstLabel;
+    @FXML public Label qCritLabel;
+    @FXML public Label fCalculatedLabel;
+    
+    @FXML public TableView<Run> TukeyTable;
+    @FXML public TableColumn<Run,Double> averageSpeedColumn;
+    @FXML public TableColumn<Run, Integer> runIDColumn;
+    @FXML public TableColumn<Run, Integer> compareToRunColumn;
+    @FXML public TableColumn<Run, Integer> QColumn;
+    @FXML public TableColumn<Run, Boolean> hypothesisColumn;
+    
     private final Job job;
     public TukeyHSD(Job job){
         this.job = job;
@@ -34,16 +67,17 @@ public class TukeyHSD implements Initializable{
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
+        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
+        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
+        QColumn.setCellValueFactory(new PropertyValueFactory<>("Q"));
+        hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
+        hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
+        TukeyTable.setItems(this.job.getRuns());   
     }
     
     public void calculateTukeyHSD(){
-        if(jobRunCounter == this.job.getRunsCounter() && jobAlpha == this.job.getAlpha()) {
-            return;
-        } else {
-            System.err.println("Job Change detected!");
-        } 
-        
         
         new Anova(job).calculateANOVA();
         Tukey tukey = new Tukey(1, 2, 2 * (job.getRunDataSize() - 1));
@@ -59,8 +93,7 @@ public class TukeyHSD implements Initializable{
             run.setQ(qVal);
         }
         System.err.println("Q (crit): " + tukey.inverse_survival(0.05, false));
-        jobRunCounter = this.job.getRunsCounter(); // remember counter if changed, to avoid multiple calculations with the same values.
-        jobAlpha = this.job.getAlpha();
+
     }
     
 
@@ -69,18 +102,15 @@ public class TukeyHSD implements Initializable{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/mycompany/atool/TukeyHSD.fxml"));
             fxmlLoader.setController(this);
             Parent root1 = (Parent) fxmlLoader.load();
-            /* 
-             * if "fx:controller" is not set in fxml
-             * fxmlLoader.setController(NewWindowController);
-             */
+
             Stage stage = new Stage();
             stage.setTitle("Calculated Tukey HSD");
             stage.setScene(new Scene(root1));
             stage.show();
             
     } catch (IOException e) {
-            //LOGGER.log(Level.SEVERE, (Supplier<String>) e);
-            //LOGGER.log(Level.SEVERE, String.format("Couldn't open Window for Anova! App state: %s", ConInt.STATUS.IO_EXCEPTION));
+            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, String.format("Couldn't open Window for Anova! App state: %s", ConInt.STATUS.IO_EXCEPTION));
             return ConInt.STATUS.IO_EXCEPTION;
         }
         return ConInt.STATUS.SUCCESS;

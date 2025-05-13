@@ -38,6 +38,7 @@ public class Job {
     private List<Run> runs;
     private Map<Integer, Integer> frequency;
     private int runsCounter = 1;
+    private double conversion;
     private int time;
     private double averageSpeed;
     private BasicFileAttributes attr;
@@ -49,6 +50,7 @@ public class Job {
     private double ssa;
     private double sse;
     public double F;
+    private StringBuilder stringBuilder;
     //private double convertedAverageSpeed;
 
     public void setFileAttributes(BasicFileAttributes attr) {
@@ -58,6 +60,7 @@ public class Job {
     public Job(){
         //data = new ArrayList<>();
         frequency = new TreeMap<>();
+        stringBuilder = new StringBuilder();
         COUNTER++;
     }
     
@@ -140,6 +143,10 @@ public class Job {
         this.frequency = freq;
     }
     
+    public double getConversionVal(){
+        return this.conversion;
+    }
+    
     public Map<Integer, Integer> getFrequency(){
         return this.frequency;
     }
@@ -163,6 +170,8 @@ public class Job {
         if(runsCounter <= 0 || runsCounter > 1000){
             runsCounter = DEFAULT_RUN_COUNT;
         }
+        
+        this.conversion = Settings.CONVERSION_VALUE;
         
         int run_size = (rawData.size() / runsCounter);
         int i = 0;
@@ -189,7 +198,8 @@ public class Job {
             runs.get(j).addRunToCompareTo(runs.get(j+1));
         }
         
-        if(Settings.AVERAGE_SPEED_PER_MILLISEC == 1.0) return;
+        
+        if(Settings.AVERAGE_SPEED_PER_MILLISEC == 1) return;
 
         for (Run run : this.getRuns()) {
             List<DataPoint> runData = new ArrayList<>();
@@ -207,7 +217,7 @@ public class Job {
             }
             run.setData(runData);
         }
-    }
+}
 
     public ObservableList<Run> getRuns() {
         return FXCollections.observableArrayList(this.runs);
@@ -227,6 +237,14 @@ public class Job {
 
     public double getSSA() {
         return ssa;
+    }
+    
+    public String getCode(){
+        stringBuilder.setLength(0);
+        stringBuilder.append(Double.toString(this.alpha));
+        stringBuilder.append(Integer.toString(this.runsCounter));
+        stringBuilder.append(Double.toString(this.conversion));
+        return stringBuilder.toString();
     }
     
     public void setSSA(double ssa) {

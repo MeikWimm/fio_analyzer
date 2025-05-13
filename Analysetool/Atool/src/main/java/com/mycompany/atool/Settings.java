@@ -10,6 +10,8 @@ import java.util.ResourceBundle;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -17,6 +19,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
@@ -39,6 +42,7 @@ public class Settings implements Initializable{
     @FXML public CheckBox checkboxFileAtt;
     @FXML public CheckBox checkboxSpeedPerSec;
     @FXML public Slider avSpeedSlider;
+    @FXML public Label labelSliderVal;
     @FXML public Button buttonSaveSettings;
     @FXML public RadioButton radioButtonMebibyte;
     @FXML public RadioButton radioButtonKibiByte;
@@ -51,12 +55,14 @@ public class Settings implements Initializable{
     private static CONVERT conversion = CONVERT.DEFAULT;
     
     public static double CONVERSION_VALUE = CONVERT.getConvertValue(CONVERT.DEFAULT);
-    public static int AVERAGE_SPEED_PER_MILLISEC = 1000;
+    public static int AVERAGE_SPEED_PER_MILLISEC = 1;
+    
+    private PrimaryController primaryController;
     
     static {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setLevel(Level.FINEST);
-        handler.setFormatter(new CustomFormatter());
+        handler.setFormatter(new Utils.CustomFormatter("Settings"));
         LOGGER.setUseParentHandlers(false);
         LOGGER.addHandler(handler);      
     }
@@ -79,6 +85,10 @@ public class Settings implements Initializable{
                 return 1.0;
             }
         }
+    }
+    
+    public Settings(PrimaryController primaryController){
+        this.primaryController = primaryController;
     }
     
     public static int NUMBER_AFTER_COMMA = 10000;
@@ -106,6 +116,28 @@ public class Settings implements Initializable{
                 toggle.setSelected(true);
             }
         }
+        
+        final ChangeListener<Number> numberChangeListener = (obs, old, val) -> {
+            double roundedValue = Math.floor(val.doubleValue() / 50.0) * 50.0;
+            if(roundedValue <= 1.0) roundedValue = 1;
+            avSpeedSlider.valueProperty().set(roundedValue);
+            labelSliderVal.setText(Integer.toString((int)roundedValue));
+        };
+
+        avSpeedSlider.valueProperty().addListener(numberChangeListener);
+        
+//        avSpeedSlider.valueProperty().addListener(new ChangeListener<Number>() {
+//
+//                @Override
+//                public void changed(
+//                   ObservableValue<? extends Number> observableValue, 
+//                   Number oldValue, 
+//                   Number newValue) { 
+//                      labelSliderVal.textProperty().setValue(
+//                           String.valueOf(newValue.intValue()));
+//                  }
+//            });
+       
     }
     
 
@@ -145,6 +177,7 @@ public class Settings implements Initializable{
         Stage stage = (Stage) buttonSaveSettings.getScene().getWindow();
         // do what you have to do
         stage.close();
+        primaryController.update();
         
     }
     

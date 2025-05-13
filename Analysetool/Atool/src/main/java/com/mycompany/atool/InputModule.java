@@ -48,7 +48,7 @@ public class InputModule {
     static {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setLevel(Level.FINEST);
-        handler.setFormatter(new CustomFormatter());
+        handler.setFormatter(new Utils.CustomFormatter("Input Module"));
         LOGGER.setUseParentHandlers(false);
         LOGGER.addHandler(handler);    
     }
