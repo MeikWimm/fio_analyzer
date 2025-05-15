@@ -4,12 +4,15 @@
  */
 package com.mycompany.atool;
 
+import java.text.NumberFormat;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 
 /**
  *
@@ -39,6 +42,24 @@ public static class CustomFormatter extends Formatter{
         return msg.toString();
     }
     
+}
+
+public static class CustomStringConverter extends StringConverter<Double>{
+        private final NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
+
+        {
+             nf.setMaximumFractionDigits(3);
+             nf.setMinimumFractionDigits(3);
+        }
+
+        @Override public String toString(final Double value) {
+            return nf.format(value);
+        }
+
+        @Override public Double fromString(final String s) {
+            // Don't need this, unless table is editable, see DoubleStringConverter if needed
+            return null; 
+        }
 }
 
     public static class SpeedComparator implements Comparator<DataPoint>{

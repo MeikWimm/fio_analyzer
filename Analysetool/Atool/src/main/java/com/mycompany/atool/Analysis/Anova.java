@@ -24,6 +24,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
@@ -59,7 +60,7 @@ public class Anova implements Initializable{
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, Integer> compareToRunColumn;
-    @FXML public TableColumn<Run, Integer> FColumn;
+    @FXML public TableColumn<Run, Double> FColumn;
     @FXML public TableColumn<Run, Boolean> hypothesisColumn;
     
     private Stage stage;
@@ -69,11 +70,16 @@ public class Anova implements Initializable{
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
+        averageSpeedColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
+      
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
         FColumn.setCellValueFactory(new PropertyValueFactory<>("F"));
+        FColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));
+
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
+        
 
         
         anovaTable.setOnMouseClicked((MouseEvent event) -> {
@@ -181,6 +187,10 @@ public class Anova implements Initializable{
              * fxmlLoader.setController(NewWindowController);
              */
             stage = new Stage();
+            stage.setMaxWidth(1200);      
+            stage.setMaxHeight(800);
+            stage.setMinHeight(450);
+            stage.setMinWidth(600);
             stage.setTitle("Calculated ANOVA");
             stage.setScene(new Scene(root1));            
     } catch (IOException e) {

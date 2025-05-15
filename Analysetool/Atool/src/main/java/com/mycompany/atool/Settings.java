@@ -125,19 +125,6 @@ public class Settings implements Initializable{
         };
 
         avSpeedSlider.valueProperty().addListener(numberChangeListener);
-        
-//        avSpeedSlider.valueProperty().addListener(new ChangeListener<Number>() {
-//
-//                @Override
-//                public void changed(
-//                   ObservableValue<? extends Number> observableValue, 
-//                   Number oldValue, 
-//                   Number newValue) { 
-//                      labelSliderVal.textProperty().setValue(
-//                           String.valueOf(newValue.intValue()));
-//                  }
-//            });
-       
     }
     
 

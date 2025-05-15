@@ -27,6 +27,7 @@ public class Run {
     private double zVal = 0;
     private double qVal = 0;
     private double tVal = 0;
+    private int overlap = 0;
     public float rank = 0;
 
     
@@ -94,7 +95,11 @@ public class Run {
     }
     
     public int getOverlapping(){
-        return 0;
+        return this.overlap;
+    } 
+    
+    public void setOverlapping(int overlap){
+        this.overlap = overlap;
     } 
 
     public void setIntervalFrom(double d) {
@@ -121,8 +126,11 @@ public class Run {
     
     public String getRunToCompareToAsString(){
         StringBuilder sb = new StringBuilder();
-        for (Run run : runToCompare) {
-            sb.append(String.format("Run %d", run.getID()));
+        for (int i = 0; i < runToCompare.size(); i++) {
+            if(i < runToCompare.size() - 1){
+                sb.append(String.format("Run %d, ", runToCompare.get(i).getID()));
+            } else {
+                sb.append(String.format("Run %d", runToCompare.get(i).getID()));            }
         }
         
         return sb.toString();

@@ -26,6 +26,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
@@ -49,7 +50,7 @@ public class MannWhitney implements Initializable{
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, Integer> compareToRunColumn;
-    @FXML public TableColumn<Run, Integer> ZColumn;
+    @FXML public TableColumn<Run, Double> ZColumn;
     @FXML public TableColumn<Run, Boolean> hypothesisColumn;
    
     @FXML public Label zIntervalLabel;
@@ -166,9 +167,13 @@ public class MannWhitney implements Initializable{
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
+        averageSpeedColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
+
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
         ZColumn.setCellValueFactory(new PropertyValueFactory<>("Z"));
+        ZColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
+
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
@@ -207,6 +212,10 @@ public class MannWhitney implements Initializable{
              * fxmlLoader.setController(NewWindowController);
              */
             Stage stage = new Stage();
+            stage.setMaxWidth(1200);      
+            stage.setMaxHeight(800);
+            stage.setMinHeight(600);
+            stage.setMinWidth(600);
             stage.setTitle("Calculated U-Test");
             stage.setScene(new Scene(root1));
             stage.show();

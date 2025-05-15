@@ -6,18 +6,18 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox maxHeight="800.0" maxWidth="1200.0" minHeight="400.0" minWidth="600.0" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <TableView id="anovaTable" fx:id="anovaTable" prefHeight="227.0" prefWidth="600.0">
+      <TableView id="anovaTable" fx:id="anovaTable" prefHeight="450.0" prefWidth="800.0">
          <columns>
             <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="31.0" text="Run" />
-            <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="119.0" text="Measurment" />
-            <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="119.0" text="Compare to Run" />
-            <TableColumn id="FColumn" fx:id="FColumn" prefWidth="123.0" text="F (calculated)" />
-            <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="123.0" text="Nullhypothesis" />
+            <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="192.0" text="Measurment" />
+            <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="180.0" text="Compare to Run" />
+            <TableColumn id="FColumn" fx:id="FColumn" prefWidth="173.0" text="F (calculated)" />
+            <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="223.0" text="Nullhypothesis" />
          </columns>
       </TableView>
-      <Pane prefHeight="110.0" prefWidth="600.0">
+      <Pane prefHeight="150.0" prefWidth="800.0">
          <children>
             <Label layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="108.0" text="Average Speed =" />
             <Label layoutX="14.0" layoutY="31.0" prefHeight="17.0" prefWidth="108.0" text="SSE =" />
@@ -27,14 +27,14 @@
             <Label id="sseLabel" fx:id="sseLabel" layoutX="122.0" layoutY="31.0" prefHeight="17.0" prefWidth="108.0" text="_" />
             <Label id="ssaLabel" fx:id="ssaLabel" layoutX="122.0" layoutY="48.0" prefHeight="17.0" prefWidth="108.0" text="_" />
             <Label id="sstLabel" fx:id="sstLabel" layoutX="122.0" layoutY="65.0" prefHeight="17.0" prefWidth="108.0" text="_" />
-            <Label layoutX="230.0" layoutY="14.0" prefHeight="17.0" prefWidth="108.0" text="SSA / SST = " />
-            <Label layoutX="230.0" layoutY="31.0" prefHeight="17.0" prefWidth="108.0" text="SSE / SST = " />
-            <Label layoutX="230.0" layoutY="48.0" prefHeight="17.0" prefWidth="108.0" text="F (critical) =" />
-            <Label id="ssaSstLabel" fx:id="ssaSstLabel" layoutX="338.0" layoutY="14.0" prefHeight="17.0" prefWidth="108.0" text="_" />
-            <Label id="sseSstLabel" fx:id="sseSstLabel" layoutX="338.0" layoutY="31.0" prefHeight="17.0" prefWidth="108.0" text="_" />
-            <Label id="fCriticalLabel" fx:id="fCriticalLabel" layoutX="338.0" layoutY="48.0" prefHeight="17.0" prefWidth="108.0" text="_" />
-            <Label layoutX="230.0" layoutY="65.0" prefHeight="17.0" prefWidth="108.0" text="F (calculated) = " />
-            <Label id="fCalculatedLabel" fx:id="fCalculatedLabel" layoutX="338.0" layoutY="65.0" prefHeight="17.0" prefWidth="108.0" text="_" />
+            <Label layoutX="370.0" layoutY="14.0" prefHeight="17.0" prefWidth="108.0" text="SSA / SST = " />
+            <Label layoutX="370.0" layoutY="31.0" prefHeight="17.0" prefWidth="108.0" text="SSE / SST = " />
+            <Label layoutX="370.0" layoutY="48.0" prefHeight="17.0" prefWidth="108.0" text="F (critical) =" />
+            <Label id="ssaSstLabel" fx:id="ssaSstLabel" layoutX="478.0" layoutY="14.0" prefHeight="17.0" prefWidth="108.0" text="_" />
+            <Label id="sseSstLabel" fx:id="sseSstLabel" layoutX="478.0" layoutY="31.0" prefHeight="17.0" prefWidth="108.0" text="_" />
+            <Label id="fCriticalLabel" fx:id="fCriticalLabel" layoutX="478.0" layoutY="48.0" prefHeight="17.0" prefWidth="108.0" text="_" />
+            <Label layoutX="370.0" layoutY="65.0" prefHeight="17.0" prefWidth="108.0" text="F (calculated) = " />
+            <Label id="fCalculatedLabel" fx:id="fCalculatedLabel" layoutX="478.0" layoutY="65.0" prefHeight="17.0" prefWidth="108.0" text="_" />
          </children>
       </Pane>
    </children>

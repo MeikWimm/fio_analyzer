@@ -10,6 +10,7 @@ import com.mycompany.atool.Run;
 import com.mycompany.atool.Utils;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -23,6 +24,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
@@ -45,7 +47,7 @@ public class ConInt implements Initializable{
     
     @FXML public TableView<Run> conIntTable;
     @FXML public TableColumn<Run,Integer> runsColumn;
-    @FXML public TableColumn<Run,Integer> averageSpeedColumn;
+    @FXML public TableColumn<Run,Double> averageSpeedColumn;
     @FXML public TableColumn<Run,Double> intervalFromColumn;
     @FXML public TableColumn<Run,Double> intervalToColumn;
     @FXML public TableColumn<Run,Double> plusMinusValueColumn;
@@ -74,10 +76,19 @@ public class ConInt implements Initializable{
     public void initialize(URL url, ResourceBundle rb) {
         runsColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
+        averageSpeedColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
         intervalFromColumn.setCellValueFactory(new PropertyValueFactory<>("IntervalFrom"));
+        intervalFromColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
+
         intervalToColumn.setCellValueFactory(new PropertyValueFactory<>("IntervalTo"));
+        intervalToColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
+
         plusMinusValueColumn.setCellValueFactory(new PropertyValueFactory<>("PlusMinusValue"));
+        plusMinusValueColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
+
         standardDeviationColumn.setCellValueFactory(new PropertyValueFactory<>("StandardDeviation"));
+        standardDeviationColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
+
         overlappingColumn.setCellValueFactory(new PropertyValueFactory<>("Overlapping"));
 
         labelHeader.setText(this.job.toString());
@@ -94,6 +105,10 @@ public class ConInt implements Initializable{
              * fxmlLoader.setController(NewWindowController);
              */
             stage = new Stage();
+            stage.setMaxWidth(1200);      
+            stage.setMaxHeight(800);
+            stage.setMinHeight(600);
+            stage.setMinWidth(600);
             stage.setTitle("Calculate Confidence Interval");
             stage.setScene(new Scene(root1));
             stage.show();
@@ -104,6 +119,22 @@ public class ConInt implements Initializable{
             return STATUS.IO_EXCEPTION;
         }
         return STATUS.SUCCESS;
+    }
+    
+    private void checkOverlappingInterval(Job job){
+        List<Run> runs = job.getRuns();
+        
+        for (Run run : runs) {
+            int overlap = 0;
+            for (Run comparedRun : runs) {
+                if(!run.equals(comparedRun)){
+                    if(Math.max (0, Math.min(run.getIntervalTo(), comparedRun.getIntervalTo()) - Math.max(run.getIntervalFrom(), run.getIntervalTo()) + 1) > 0){
+                        overlap++;
+                        run.setOverlapping(overlap);
+                    }
+                }
+            }
+        }
     }
     
     public void calculateInterval(){
@@ -123,6 +154,8 @@ public class ConInt implements Initializable{
             double c2 = run.getAverageSpeed() - (normDis.inverseCumulativeProbability(this.job.getAlpha()) * (run.getStandardDeviation() / run.getData().size()));
             run.setIntervalTo(c2);   
         }
+        
+        checkOverlappingInterval(this.job);
         jobRunCounter = this.job.getRunsCounter(); // remember counter if changed, to avoid multiple calculations with the same values.
         jobAlpha = this.job.getAlpha();
     }

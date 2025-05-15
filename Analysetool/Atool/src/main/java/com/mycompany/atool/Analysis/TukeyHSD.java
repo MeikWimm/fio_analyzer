@@ -24,6 +24,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import net.sourceforge.jdistlib.Tukey;
@@ -57,7 +58,7 @@ public class TukeyHSD implements Initializable{
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, Integer> compareToRunColumn;
-    @FXML public TableColumn<Run, Integer> QColumn;
+    @FXML public TableColumn<Run, Double> QColumn;
     @FXML public TableColumn<Run, Boolean> hypothesisColumn;
     
     private final Job job;
@@ -68,9 +69,13 @@ public class TukeyHSD implements Initializable{
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
+        averageSpeedColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
+
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
         QColumn.setCellValueFactory(new PropertyValueFactory<>("Q"));
+        QColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
+
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
@@ -104,6 +109,10 @@ public class TukeyHSD implements Initializable{
             Parent root1 = (Parent) fxmlLoader.load();
 
             Stage stage = new Stage();
+            stage.setMaxWidth(1200);      
+            stage.setMaxHeight(800);
+            stage.setMinHeight(600);
+            stage.setMinWidth(600);
             stage.setTitle("Calculated Tukey HSD");
             stage.setScene(new Scene(root1));
             stage.show();

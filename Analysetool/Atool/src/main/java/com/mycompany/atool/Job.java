@@ -25,8 +25,8 @@ public class Job {
     public final static Integer DEFAULT_RUN_COUNT = 1;
     
     public final static Double DEFAULT_ALPHA = 0.05;
-    public final static Double MAX_ALPHA = 0.999;
-    public final static Double MIN_ALPHA = 0.001;
+    public final static Double MAX_ALPHA = 0.99999;
+    public final static Double MIN_ALPHA = 0.00001;
     
     public final static Double DEFAULT_EPSILON = 1.0;
     public final static Double MAX_EPSILON = 1000.0;
@@ -43,7 +43,7 @@ public class Job {
     private double averageSpeed;
     private BasicFileAttributes attr;
     private double epsilon = 1;
-    private double alpha = 0.95;
+    private double alpha = 0.05;
     private static int COUNTER = 1; // so that each Job has a unique ID
     private final int ID = COUNTER;
     private double calculatedF;
@@ -196,6 +196,10 @@ public class Job {
         //Add runs to compare, i.e compare for ANOVA first run with the second run.
         for (j = 0; j < runs.size()-1; j++) {
             runs.get(j).addRunToCompareTo(runs.get(j+1));
+        }
+        
+        if(runs.size() > 1){
+            runs.get(runs.size()-1).addRunToCompareTo(runs.get(runs.size()-2));
         }
         
         

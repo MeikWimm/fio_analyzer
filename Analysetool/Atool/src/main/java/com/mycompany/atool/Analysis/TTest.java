@@ -22,6 +22,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 import org.apache.commons.math3.distribution.TDistribution;
 
@@ -53,7 +54,7 @@ public class TTest implements Initializable{
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, Integer> compareToRunColumn;
-    @FXML public TableColumn<Run, Integer> TColumn;
+    @FXML public TableColumn<Run, Double> TColumn;
     @FXML public TableColumn<Run, Boolean> hypothesisColumn;
     
     private Job job;
@@ -89,8 +90,26 @@ public class TTest implements Initializable{
    public TTest(Job job){
        this.job = job;
    }
+   
+   
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
+        averageSpeedColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
+
+        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
+        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
+        TColumn.setCellValueFactory(new PropertyValueFactory<>("T"));
+        TColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
+
+        hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
+        hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
+
+
+        TTable.setItems(this.job.getRuns());   
+    }
     
-    private static double calculateVariance(Run run){
+    private double calculateVariance(Run run){
         return (1.0 / (run.getData().size() - 1.0)) * run.getSSE();
     }
     
@@ -104,6 +123,10 @@ public class TTest implements Initializable{
              * fxmlLoader.setController(NewWindowController);
              */
             Stage stage = new Stage();
+            stage.setMaxWidth(1200);      
+            stage.setMaxHeight(800);
+            stage.setMinHeight(600);
+            stage.setMinWidth(600);
             stage.setTitle("Calculated T-Test");
             stage.setScene(new Scene(root1));
             stage.show();
@@ -117,16 +140,4 @@ public class TTest implements Initializable{
         return ConInt.STATUS.SUCCESS;
     }
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-                averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
-        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
-        TColumn.setCellValueFactory(new PropertyValueFactory<>("T"));
-        hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
-        hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
-
-
-        TTable.setItems(this.job.getRuns());   
-    }
 }
