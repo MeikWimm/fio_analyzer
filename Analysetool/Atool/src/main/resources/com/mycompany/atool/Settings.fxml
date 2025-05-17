@@ -8,22 +8,20 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Pane?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <center>
-      <Pane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+      <Pane prefHeight="200.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
-            <CheckBox id="checkboxFileAtt" fx:id="checkboxFileAtt" layoutX="14.0" layoutY="59.0" mnemonicParsing="false" onAction="#onActionFileAttributes" prefHeight="17.0" prefWidth="130.0" text="show file attributes" />
-            <CheckBox layoutX="14.0" layoutY="97.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="195.0" text="consider first run for analysis" />
-            <CheckBox id="checkboxSpeedPerSec" fx:id="checkboxSpeedPerSec" layoutX="14.0" layoutY="133.0" mnemonicParsing="false" onAction="#onActionUseSpeedPerSec" prefHeight="17.0" prefWidth="226.0" text="use average measurement per millisec" />
-            <Slider id="avSpeedSlider" fx:id="avSpeedSlider" blockIncrement="500.0" layoutX="336.0" layoutY="130.0" majorTickUnit="50.0" max="1000.0" minorTickCount="0" prefHeight="24.0" prefWidth="190.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" />
-            <Label layoutX="272.0" layoutY="133.0" text="1 (Default)" />
-            <Label layoutX="529.0" layoutY="133.0" text="1000" />
-            <Label id="labelSliderVal" fx:id="labelSliderVal" layoutX="428.0" layoutY="168.0" text="1" textAlignment="CENTER" />
-            <Label layoutX="14.0" layoutY="168.0" text="Use conversion for data" />
-            <RadioButton fx:id="radioButtonMebibyte" layoutX="33.0" layoutY="200.0" mnemonicParsing="false" text="MebiByte" />
-            <RadioButton fx:id="radioButtonKibiByte" layoutX="33.0" layoutY="225.0" mnemonicParsing="false" text="KibiByte" />
-            <RadioButton fx:id="radioButtonKiloByte" layoutX="33.0" layoutY="249.0" mnemonicParsing="false" text="KiloByte" />
-            <Button id="buttonSaveSettings" fx:id="buttonSaveSettings" layoutX="517.0" layoutY="361.0" mnemonicParsing="false" onAction="#onActionSaveSettings" text="Save &amp; Exit" />
+            <CheckBox id="checkboxSpeedPerSec" fx:id="checkboxSpeedPerSec" layoutX="14.0" layoutY="17.0" mnemonicParsing="false" onAction="#onActionUseSpeedPerSec" prefHeight="17.0" prefWidth="226.0" text="use average measurement per millisec" />
+            <Slider id="avSpeedSlider" fx:id="avSpeedSlider" blockIncrement="500.0" layoutX="336.0" layoutY="14.0" majorTickUnit="50.0" max="1000.0" minorTickCount="0" prefHeight="24.0" prefWidth="190.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" />
+            <Label layoutX="272.0" layoutY="17.0" text="1 (Default)" />
+            <Label layoutX="529.0" layoutY="17.0" text="1000" />
+            <Label id="labelSliderVal" fx:id="labelSliderVal" layoutX="428.0" layoutY="52.0" text="1" textAlignment="CENTER" />
+            <Label layoutX="14.0" layoutY="52.0" text="Use conversion for data" />
+            <RadioButton fx:id="radioButtonMebibyte" layoutX="33.0" layoutY="84.0" mnemonicParsing="false" text="MebiByte" />
+            <RadioButton fx:id="radioButtonKibiByte" layoutX="33.0" layoutY="109.0" mnemonicParsing="false" text="KibiByte" />
+            <RadioButton fx:id="radioButtonKiloByte" layoutX="33.0" layoutY="133.0" mnemonicParsing="false" text="KiloByte" />
+            <Button id="buttonSaveSettings" fx:id="buttonSaveSettings" layoutX="504.0" layoutY="161.0" mnemonicParsing="false" onAction="#onActionSaveSettings" text="Save &amp; Exit" />
          </children>
       </Pane>
    </center>

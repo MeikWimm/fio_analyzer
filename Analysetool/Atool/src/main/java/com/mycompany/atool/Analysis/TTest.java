@@ -9,6 +9,7 @@ import com.mycompany.atool.Run;
 import com.mycompany.atool.Utils;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -41,14 +42,7 @@ public class TTest implements Initializable{
         LOGGER.addHandler(handler);      
     }
     
-    @FXML public Label averageSpeedLabel;
-    @FXML public Label sseLabel;
-    @FXML public Label ssaLabel;
-    @FXML public Label sstLabel;
-    @FXML public Label ssaSstLabel;
-    @FXML public Label sseSstLabel;
     @FXML public Label zCritLabel;
-    @FXML public Label fCalculatedLabel;
     
     @FXML public TableView<Run> TTable;
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
@@ -58,6 +52,8 @@ public class TTest implements Initializable{
     @FXML public TableColumn<Run, Boolean> hypothesisColumn;
     
     private Job job;
+    private TDistribution t;
+    private double tCrit;
     
     public void tTtest(){
         new Anova(job).calculateANOVA();
@@ -65,9 +61,7 @@ public class TTest implements Initializable{
             if(r.getRunToCompareTo().size() <= 1) return;
             Run run1 = r.getRunToCompareTo().get(0);
             Run run2 = r.getRunToCompareTo().get(1);
-            
-            TDistribution t = new TDistribution(run1.getData().size() + run2.getData().size() - 2);
-            
+                        
             double runVariance1 = calculateVariance(run1);
             double runVariance2 = calculateVariance(run2);
             
@@ -78,20 +72,28 @@ public class TTest implements Initializable{
             double nominator = (run1.getAverageSpeed() - run2.getAverageSpeed());
             double denominator = Math.sqrt((runVariance1 / runSize1) + (runVariance2 / runSize2));
             double tVal = nominator / denominator;
-            r.setT(tVal);
-            System.err.println("T value: " + Math.abs(tVal));
-            System.err.println("T crit: " + t.inverseCumulativeProbability((1.0 - job.getAlpha()) / 2.0));
-            //System.err.println(nominator);
-            //System.err.println(denominator);
+            r.setT(Math.abs(tVal));
             
+            if(t.cumulativeProbability(tVal) < this.job.getAlpha()){
+                r.setNullypothesis(false);
+            } else {
+                r.setNullypothesis(true);
+            }
         }
     }
     
    public TTest(Job job){
        this.job = job;
+       if(job.getRunDataSize() <= 1) return;
+
+       this.t = new TDistribution(job.getRuns().get(0).getData().size() * 2 - 2);
+       this.tCrit = t.inverseCumulativeProbability(1 - job.getAlpha() / 2.0);
    }
    
-   
+    private void setLabeling(){
+        zCritLabel.setText(String.format(Locale.ENGLISH, "%,.5f", this.tCrit));
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
@@ -106,7 +108,8 @@ public class TTest implements Initializable{
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
 
-        TTable.setItems(this.job.getRuns());   
+        TTable.setItems(this.job.getRuns());
+        setLabeling();
     }
     
     private double calculateVariance(Run run){
@@ -124,9 +127,9 @@ public class TTest implements Initializable{
              */
             Stage stage = new Stage();
             stage.setMaxWidth(1200);      
-            stage.setMaxHeight(800);
+            stage.setMaxHeight(600);
             stage.setMinHeight(600);
-            stage.setMinWidth(600);
+            stage.setMinWidth(800);
             stage.setTitle("Calculated T-Test");
             stage.setScene(new Scene(root1));
             stage.show();

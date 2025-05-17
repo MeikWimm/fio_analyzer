@@ -39,7 +39,6 @@ public class Settings implements Initializable{
     ToggleGroup toggleGorup = new ToggleGroup();
 
     
-    @FXML public CheckBox checkboxFileAtt;
     @FXML public CheckBox checkboxSpeedPerSec;
     @FXML public Slider avSpeedSlider;
     @FXML public Label labelSliderVal;
@@ -52,6 +51,10 @@ public class Settings implements Initializable{
     public final static int MAX_SPEED_PER_MIILI = 2000;
     public final static int MIN_SPEED_PER_MIILI = 1;
     public static boolean HAS_CHANGED = false;
+    private static final int DIGIT = 3;
+    public static final String DIGIT_FORMAT = "%,." + Integer.toString(DIGIT) + "f";
+    public static final int FRACTION_DIGITS = DIGIT;
+
     private static CONVERT conversion = CONVERT.DEFAULT;
     
     public static double CONVERSION_VALUE = CONVERT.getConvertValue(CONVERT.DEFAULT);
@@ -140,20 +143,15 @@ public class Settings implements Initializable{
         Stage stage = new Stage();
         stage.setTitle("Settings");
         stage.setScene(new Scene(root1));
-                stage.show();
+        stage.setResizable(false);
+        stage.show();
     } catch (IOException e) {
         LOGGER.log(Level.SEVERE, String.format("Coudn't open Settings Window! App state: %s", PrimaryController.STATUS.IO_EXCEPTION));
         }
     }
     
     @FXML
-    public void onActionFileAttributes(){
-        this.isFileAttr = checkboxFileAtt.isSelected();
-    }
-    
-    @FXML
     public void onActionSaveSettings(){
-        this.isFileAttr = checkboxFileAtt.isSelected();
         //LOGGER.log(Level.INFO, String.format("is FileAttr set to %b", this.isFileAttr));
         conversion = (CONVERT) toggleGorup.getSelectedToggle().getUserData(); 
         CONVERSION_VALUE = CONVERT.getConvertValue(conversion);

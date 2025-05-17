@@ -13,6 +13,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -54,13 +55,6 @@ public class MannWhitney implements Initializable{
     @FXML public TableColumn<Run, Boolean> hypothesisColumn;
    
     @FXML public Label zIntervalLabel;
-    @FXML public Label sseLabel;
-    @FXML public Label ssaLabel;
-    @FXML public Label sstLabel;
-    @FXML public Label ssaSstLabel;
-    @FXML public Label sseSstLabel;
-    @FXML public Label fCriticalLabel;
-    @FXML public Label fCalculatedLabel;
     
     NormalDistribution nDis = new NormalDistribution();
     private double zCrit_leftside = -1;
@@ -152,7 +146,14 @@ public class MannWhitney implements Initializable{
         
         run1.setZ(z);
         
-        if(z > zCrit_left && z < zCrit_right){
+        NormalDistribution n = new NormalDistribution();
+        
+        
+        double pCalc = n.cumulativeProbability(z);
+        
+        if(pCalc < this.job.getAlpha()){
+            run1.setNullypothesis(false);
+        } else {
             run1.setNullypothesis(true);
         }
     }
@@ -164,6 +165,10 @@ public class MannWhitney implements Initializable{
         this.job = job;
     }
 
+    private void setLabeling(){
+        zIntervalLabel.setText(String.format(Locale.ENGLISH, "[%,.5f,%,.5f]", this.zCrit_leftside, this.zCrit_rightside));
+    }
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
@@ -182,15 +187,17 @@ public class MannWhitney implements Initializable{
     }
     
     public void calculateMannWhitneyTest(){
-        if(this.job.getRuns().size() <= 1) return;
         
+        if(this.job.getRuns().size() <= 1) return;
+        /*
         if(jobRunCounter == this.job.getRunsCounter() && jobAlpha == this.job.getAlpha()) {
             return;
         } else {
             System.err.println("Job Change detected!");
         } 
-        
+        */
         List<Run> runs = this.job.getRuns();
+        
         for (int i = 0; i < runs.size(); i++) {
             if(i < runs.size() - 1){
                 Run run1 = runs.get(i);
@@ -198,6 +205,13 @@ public class MannWhitney implements Initializable{
                 calculateMannWhitney(run1, run2);
             }
         }
+        
+        /*
+         * Workaround for last run
+        */
+        calculateMannWhitney(runs.get(runs.size()-1), runs.get(runs.size()-1));
+
+        
         jobRunCounter = this.job.getRunsCounter(); // remember counter if changed, to avoid multiple calculations with the same values.
         jobAlpha = this.job.getAlpha();
     }
@@ -213,9 +227,9 @@ public class MannWhitney implements Initializable{
              */
             Stage stage = new Stage();
             stage.setMaxWidth(1200);      
-            stage.setMaxHeight(800);
+            stage.setMaxHeight(600);
             stage.setMinHeight(600);
-            stage.setMinWidth(600);
+            stage.setMinWidth(800);
             stage.setTitle("Calculated U-Test");
             stage.setScene(new Scene(root1));
             stage.show();
@@ -226,9 +240,5 @@ public class MannWhitney implements Initializable{
             return ConInt.STATUS.IO_EXCEPTION;
         }
         return ConInt.STATUS.SUCCESS;
-    }
-
-    private void setLabeling() {
-        zIntervalLabel.setText(String.format("[%f;%f]", zCrit_leftside, zCrit_rightside));
     }
 }

@@ -27,8 +27,10 @@ public class Run {
     private double zVal = 0;
     private double qVal = 0;
     private double tVal = 0;
-    private int overlap = 0;
+    private double OverlappingDifference = 0;
     public float rank = 0;
+    private double criticalZLeft;
+    private double criticalZRight;
 
     
     public Run(final int runNumber, List<DataPoint> runData){
@@ -94,12 +96,12 @@ public class Run {
         return Math.abs(this.intervalTo - this.intervalFrom);
     }
     
-    public int getOverlapping(){
-        return this.overlap;
+    public double getOverlappingDifference(){
+        return this.OverlappingDifference;
     } 
     
-    public void setOverlapping(int overlap){
-        this.overlap = overlap;
+    public void setOverlappingDifference(double OverlappingDifference){
+        this.OverlappingDifference = OverlappingDifference;
     } 
 
     public void setIntervalFrom(double d) {

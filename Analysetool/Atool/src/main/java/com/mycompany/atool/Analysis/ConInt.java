@@ -52,7 +52,8 @@ public class ConInt implements Initializable{
     @FXML public TableColumn<Run,Double> intervalToColumn;
     @FXML public TableColumn<Run,Double> plusMinusValueColumn;
     @FXML public TableColumn<Run,Double> standardDeviationColumn;
-    @FXML public TableColumn<Run,Integer> overlappingColumn;
+    @FXML public TableColumn<Run, String> compareToRunColumn;
+    @FXML public TableColumn<Run,Double> overlappingColumn;
     
     private Stage stage;
     private static int jobRunCounter = 0;
@@ -88,8 +89,11 @@ public class ConInt implements Initializable{
 
         standardDeviationColumn.setCellValueFactory(new PropertyValueFactory<>("StandardDeviation"));
         standardDeviationColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
-
-        overlappingColumn.setCellValueFactory(new PropertyValueFactory<>("Overlapping"));
+        
+        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
+        
+        overlappingColumn.setCellValueFactory(new PropertyValueFactory<>("OverlappingDifference"));
+        overlappingColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
 
         labelHeader.setText(this.job.toString());
         conIntTable.setItems(this.job.getRuns());
@@ -106,9 +110,9 @@ public class ConInt implements Initializable{
              */
             stage = new Stage();
             stage.setMaxWidth(1200);      
-            stage.setMaxHeight(800);
+            stage.setMaxHeight(600);
             stage.setMinHeight(600);
-            stage.setMinWidth(600);
+            stage.setMinWidth(800);
             stage.setTitle("Calculate Confidence Interval");
             stage.setScene(new Scene(root1));
             stage.show();
@@ -120,7 +124,9 @@ public class ConInt implements Initializable{
         }
         return STATUS.SUCCESS;
     }
+    /*
     
+ 
     private void checkOverlappingInterval(Job job){
         List<Run> runs = job.getRuns();
         
@@ -136,27 +142,41 @@ public class ConInt implements Initializable{
             }
         }
     }
+        */  
+
+    private double calculateOverlapp(Run run1, Run run2){
+        double overlap = Math.max(0, Math.min(run1.getIntervalTo(), run2.getIntervalTo()) - Math.max(run1.getIntervalFrom(), run2.getIntervalFrom()));
+        double length = run1.getIntervalTo() - run1.getIntervalFrom() + run2.getIntervalTo() - run2.getIntervalFrom();
+
+        return (1.0 - 2*overlap/length) * 100;
+    }
     
     public void calculateInterval(){
+        /*
         if(jobRunCounter == this.job.getRunsCounter() && jobAlpha == this.job.getAlpha()) {
             return;
         } else {
             System.err.println("Job Change detected!");
         }        
-        
+        */
         NormalDistribution normDis = new NormalDistribution();
 
         
         for (Run run : this.job.getRuns()) {
-            double c1 = run.getAverageSpeed() - (normDis.inverseCumulativeProbability(this.job.getAlpha()) * (run.getStandardDeviation() / Math.sqrt(run.getData().size())));
+            double c1 = run.getAverageSpeed() - (normDis.inverseCumulativeProbability(1.0 - this.job.getAlpha() / 2.0) * (run.getStandardDeviation() / Math.sqrt(run.getData().size())));
             run.setIntervalFrom(c1);
 
-            double c2 = run.getAverageSpeed() - (normDis.inverseCumulativeProbability(this.job.getAlpha()) * (run.getStandardDeviation() / run.getData().size()));
+            double c2 = run.getAverageSpeed() + (normDis.inverseCumulativeProbability(1.0 - this.job.getAlpha() / 2.0) * (run.getStandardDeviation() / Math.sqrt(run.getData().size())));
             run.setIntervalTo(c2);   
         }
         
-        checkOverlappingInterval(this.job);
-        jobRunCounter = this.job.getRunsCounter(); // remember counter if changed, to avoid multiple calculations with the same values.
-        jobAlpha = this.job.getAlpha();
+        List<Run> runs = this.job.getRuns();
+        for (int i = 0; i < this.job.getRuns().size() - 1; i++) {
+            double overlappingDiff = calculateOverlapp(runs.get(i), runs.get(i+1));
+            runs.get(i).setOverlappingDifference(overlappingDiff);
+            System.err.println(overlappingDiff);
+        }
+        
+        
     }
 }

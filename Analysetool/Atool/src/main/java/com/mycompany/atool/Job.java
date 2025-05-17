@@ -49,7 +49,7 @@ public class Job {
     private double calculatedF;
     private double ssa;
     private double sse;
-    public double F;
+    private double standardDeviation;
     private StringBuilder stringBuilder;
     //private double convertedAverageSpeed;
 
@@ -162,6 +162,23 @@ public class Job {
     public void setEpsilon(double epsilon){
         this.epsilon = epsilon;
     }
+    
+    public void getCoV(){
+        int k = 10;
+        int check_runs_counter = this.runsCounter - k;
+        if(check_runs_counter >= 1){
+            for (int i = 0; i < this.runsCounter - k; i++) {
+                double mean = 0;
+                for (int j = i; j < k+i; j++) {
+                    mean += getRuns().get(j).getAverageSpeed();
+                }
+                mean = mean / k;
+                System.err.println("mean: " + mean);
+                System.err.println("Standard Dev: " + getStandardDeviation());
+                System.err.println("Standard Dev: " + i + " | " + getStandardDeviation() / mean);
+            }
+        }
+    }
 
     public void update() {
         runs = new ArrayList<>();
@@ -201,7 +218,8 @@ public class Job {
         if(runs.size() > 1){
             runs.get(runs.size()-1).addRunToCompareTo(runs.get(runs.size()-2));
         }
-        
+                getCoV();
+
         
         if(Settings.AVERAGE_SPEED_PER_MILLISEC == 1) return;
 
@@ -229,6 +247,14 @@ public class Job {
     
     public int getRunDataSize(){
         return this.getRuns().get(0).getData().size();
+    }
+    
+    public void setStandardDeviation(double standardDeviation){
+        this.standardDeviation = standardDeviation;
+    }
+    
+    public double getStandardDeviation(){
+        return this.standardDeviation / Settings.CONVERSION_VALUE;
     }
 
     public double getSSE() {

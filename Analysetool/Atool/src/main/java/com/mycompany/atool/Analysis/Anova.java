@@ -7,6 +7,7 @@ package com.mycompany.atool.Analysis;
 import com.mycompany.atool.DataPoint;
 import com.mycompany.atool.Job;
 import com.mycompany.atool.Run;
+import com.mycompany.atool.Settings;
 import com.mycompany.atool.Utils;
 import java.io.IOException;
 import java.net.URL;
@@ -59,13 +60,16 @@ public class Anova implements Initializable{
     @FXML public TableView<Run> anovaTable;
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
-    @FXML public TableColumn<Run, Integer> compareToRunColumn;
+    @FXML public TableColumn<Run, String> compareToRunColumn;
     @FXML public TableColumn<Run, Double> FColumn;
     @FXML public TableColumn<Run, Boolean> hypothesisColumn;
     
     private Stage stage;
     private static String jobCode = "";
-    private double F = 0.0;
+    private double fVal = 0.0;
+    private double fCrit;
+    private int steadyStateRunID = -1;
+    private FDistribution fDistribution;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -97,23 +101,34 @@ public class Anova implements Initializable{
     
     public Anova(Job job){
         this.job = job;
+        if(job.getRuns().get(0).getRunToCompareTo().size() <= 1){
+            fDistribution = new FDistribution(1,1);
+        } else {
+            int num = job.getRuns().get(0).getRunToCompareTo().size() - 1;
+            int denom = (num + 1) * (job.getRunDataSize() - 1);
+            LOGGER.log(Level.INFO,String.format("Calculated Numerator %d and Denominator %d", num, denom));
+            fDistribution = new FDistribution(num, denom);
+            fCrit = fDistribution.inverseCumulativeProbability(job.getAlpha());
+        }
+        
+
     }
 
     public void calculateANOVA(){
         if(job.getRuns().size() <= 1) return;
        
+        /*
         if(job.getCode().equals(jobCode)) {
             return;
         } else {
             LOGGER.log(Level.INFO,String.format("Change detected for %s", this.job));
         }
-        
+        */
         double sse = 0.0;
         double ssa = 0.0;
         int num = job.getRuns().get(0).getRunToCompareTo().size() - 1;
         int denom = (num + 1) * (job.getRunDataSize() - 1);
         LOGGER.log(Level.INFO,String.format("Calculated Numerator %d and Denominator %d", num, denom));
-        FDistribution F = new FDistribution(num, denom);
 
 //      calculate F value between runs
 //      SSA 
@@ -147,27 +162,55 @@ public class Anova implements Initializable{
             run.setF(s_2_a / s_2_e);
             
             // critical p-value < alpha value of job
-            if(F.cumulativeProbability(fValue) < this.job.getAlpha()){
+            if(fDistribution.cumulativeProbability(fValue) < this.job.getAlpha()){
                 //System.err.println("Run: " + run.getID() + " accepted");
-                run.setNullypothesis(true);
-            } else {
                 run.setNullypothesis(false);
+            } else {
+                run.setNullypothesis(true);
             }
         }
+        
+        //calculateSteadyState();
         
         // remember run counter and alpha to avoid multiple calculations with the same values.
           jobCode = job.getCode();        
     }
+    
+    private void calculateSteadyState(){
+        int k = 10;
+        int check_runs_counter = this.job.getRunsCounter() - k;
+        int largestCountOfHypothesis = -1;
+        int runIDWithSmallesCount = -1;
+        if(check_runs_counter >= 1){
+            for (int i = 0; i < check_runs_counter; i++) {
+                int countOfTrueHypothesis = 0;
+                
+                for (int j = i; j < k+i; j++) {
+                    if(this.job.getRuns().get(j).getNullhypothesis()){
+                        countOfTrueHypothesis++;
+                    }
+                }
+                
+                if(countOfTrueHypothesis > largestCountOfHypothesis){
+                    runIDWithSmallesCount = i;
+                    largestCountOfHypothesis = countOfTrueHypothesis;
+                }
+                
+
+            }
+        } 
+        System.err.println("Run ID: " + runIDWithSmallesCount + " Hypothesis Count: " + largestCountOfHypothesis);
+    }
 
     private void setLabeling(Run run){
-        averageSpeedLabel.setText(String.format(Locale.ENGLISH, "%,.2f", run.getAverageSpeed()));
-        sseLabel.setText(String.format(Locale.ENGLISH, "%,.2f", run.getSSE()));
-        ssaLabel.setText(String.format(Locale.ENGLISH, "%,.2f", run.getSSA()));
-        sstLabel.setText(String.format(Locale.ENGLISH, "%,.2f", run.getSST()));
-        ssaSstLabel.setText(String.format(Locale.ENGLISH, "%,.2f",(run.getSSA() / run.getSST())));
-        sseSstLabel.setText(String.format(Locale.ENGLISH, "%,.2f",(run.getSSE() / run.getSST())));
-        fCriticalLabel.setText(String.format(Locale.ENGLISH, "%,.2f", this.F));
-        fCalculatedLabel.setText(String.format(Locale.ENGLISH, "%,.2f", run.getF()));
+        averageSpeedLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getAverageSpeed()));
+        sseLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSSE()));
+        ssaLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSSA()));
+        sstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSST()));
+        ssaSstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT,(run.getSSA() / run.getSST())));
+        sseSstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT,(run.getSSE() / run.getSST())));
+        fCriticalLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.fCrit));
+        fCalculatedLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getF()));
     }
     
     public void openWindow(){
@@ -188,9 +231,9 @@ public class Anova implements Initializable{
              */
             stage = new Stage();
             stage.setMaxWidth(1200);      
-            stage.setMaxHeight(800);
-            stage.setMinHeight(450);
-            stage.setMinWidth(600);
+            stage.setMaxHeight(600);
+            stage.setMinHeight(600);
+            stage.setMinWidth(800);
             stage.setTitle("Calculated ANOVA");
             stage.setScene(new Scene(root1));            
     } catch (IOException e) {

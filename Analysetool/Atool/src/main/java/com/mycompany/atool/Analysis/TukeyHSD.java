@@ -10,6 +10,7 @@ import com.mycompany.atool.Utils;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -20,13 +21,11 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import net.sourceforge.jdistlib.Tukey;
 
 
@@ -45,14 +44,8 @@ public class TukeyHSD implements Initializable{
         LOGGER.addHandler(handler);      
     }    
 
-    @FXML public Label averageSpeedLabel;
-    @FXML public Label sseLabel;
-    @FXML public Label ssaLabel;
-    @FXML public Label sstLabel;
-    @FXML public Label ssaSstLabel;
-    @FXML public Label sseSstLabel;
     @FXML public Label qCritLabel;
-    @FXML public Label fCalculatedLabel;
+
     
     @FXML public TableView<Run> TukeyTable;
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
@@ -62,8 +55,14 @@ public class TukeyHSD implements Initializable{
     @FXML public TableColumn<Run, Boolean> hypothesisColumn;
     
     private final Job job;
+    private final Tukey tukey;
+    private final double qCrit;
+    
     public TukeyHSD(Job job){
         this.job = job;
+
+        this.tukey = new Tukey(1, 2, 2 * (job.getRunDataSize() - 1));
+        this.qCrit = tukey.inverse_survival(1 - job.getAlpha(), false);
     }
 
     @Override
@@ -80,27 +79,32 @@ public class TukeyHSD implements Initializable{
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
         TukeyTable.setItems(this.job.getRuns());   
+        setLabeling();
     }
     
     public void calculateTukeyHSD(){
         
         new Anova(job).calculateANOVA();
-        Tukey tukey = new Tukey(1, 2, 2 * (job.getRunDataSize() - 1));
         for (Run run : job.getRuns()) {
             double qVal = 0;
             List<Run> runs = run.getRunToCompareTo();
             if(run.getRunToCompareTo().size() > 1){
                 qVal = (Math.abs(runs.get(0).getAverageSpeed() - runs.get(1).getAverageSpeed())) / (Math.sqrt(run.getSSE() / run.getData().size()));
             }
-            System.err.println("Run: " + run.getID());
-            System.err.println("Q (calc): " + qVal);
-            System.err.println("-----------------------------------------------");
-            run.setQ(qVal);
-        }
-        System.err.println("Q (crit): " + tukey.inverse_survival(0.05, false));
 
+            run.setQ(qVal);
+            
+            if(tukey.cumulative(qVal) < this.job.getAlpha()){
+                run.setNullypothesis(false);
+            } else {
+                run.setNullypothesis(true);
+            }
+        }
     }
     
+    private void setLabeling(){
+        qCritLabel.setText(String.format(Locale.ENGLISH, "%,.2f", this.qCrit));
+    }
 
     public ConInt.STATUS openWindow(){
         try {
@@ -110,9 +114,9 @@ public class TukeyHSD implements Initializable{
 
             Stage stage = new Stage();
             stage.setMaxWidth(1200);      
-            stage.setMaxHeight(800);
+            stage.setMaxHeight(600);
             stage.setMinHeight(600);
-            stage.setMinWidth(600);
+            stage.setMinWidth(800);
             stage.setTitle("Calculated Tukey HSD");
             stage.setScene(new Scene(root1));
             stage.show();

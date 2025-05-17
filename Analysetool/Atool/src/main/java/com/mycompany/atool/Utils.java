@@ -48,8 +48,8 @@ public static class CustomStringConverter extends StringConverter<Double>{
         private final NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
 
         {
-             nf.setMaximumFractionDigits(3);
-             nf.setMinimumFractionDigits(3);
+             nf.setMaximumFractionDigits(Settings.FRACTION_DIGITS);
+             nf.setMinimumFractionDigits(Settings.FRACTION_DIGITS);
         }
 
         @Override public String toString(final Double value) {

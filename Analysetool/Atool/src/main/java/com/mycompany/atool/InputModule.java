@@ -57,7 +57,7 @@ public class InputModule {
     public File selectedDirectory;
     ObservableList<Job> jobs = FXCollections.observableArrayList();
     private File[] files;
-
+    private BufferedReader br;
     public InputModule(){
         directoryChooser = new DirectoryChooser();
     }
@@ -198,6 +198,7 @@ public class InputModule {
             sum_speed += average_speed_per_milli;
             double average_speed =  sum_speed / data.size();
             job.setAverageSpeed(average_speed);
+            job.setStandardDeviation(calculateDeviation(data, average_speed));
             data.add(new DataPoint(average_speed_per_milli, time));
             job.setFrequency(freq);
 
@@ -212,6 +213,15 @@ public class InputModule {
 
     public ObservableList<Job> getJobs(){
         return jobs;
+    }
+    
+    private double calculateDeviation(List<DataPoint> data, double average_speed){
+        double standardDeviation = 0.0;
+        for (DataPoint dataPoint : data) {
+            standardDeviation += Math.pow(dataPoint.getSpeed() - average_speed, 2);
+        }
+        standardDeviation = Math.sqrt(standardDeviation / data.size());
+        return standardDeviation;
     }
 
     public File getSelectedDir() {
