@@ -6,6 +6,7 @@ package com.mycompany.atool.Analysis;
 
 import com.mycompany.atool.Job;
 import com.mycompany.atool.Run;
+import com.mycompany.atool.Settings;
 import com.mycompany.atool.Utils;
 import java.io.IOException;
 import java.net.URL;
@@ -51,18 +52,15 @@ public class TukeyHSD implements Initializable{
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, Integer> compareToRunColumn;
-    @FXML public TableColumn<Run, Double> QColumn;
-    @FXML public TableColumn<Run, Boolean> hypothesisColumn;
+    @FXML public TableColumn<Run, String> QColumn;
+    @FXML public TableColumn<Run, Byte> hypothesisColumn;
     
     private final Job job;
-    private final Tukey tukey;
-    private final double qCrit;
+    private Tukey tukey;
+    private double qHSD;
     
     public TukeyHSD(Job job){
         this.job = job;
-
-        this.tukey = new Tukey(1, 2, 2 * (job.getRunDataSize() - 1));
-        this.qCrit = tukey.inverse_survival(1 - job.getAlpha(), false);
     }
 
     @Override
@@ -72,8 +70,7 @@ public class TukeyHSD implements Initializable{
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
-        QColumn.setCellValueFactory(new PropertyValueFactory<>("Q"));
-        QColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
+        QColumn.setCellValueFactory(new PropertyValueFactory<>("QAsString"));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
@@ -83,27 +80,39 @@ public class TukeyHSD implements Initializable{
     }
     
     public void calculateTukeyHSD(){
-        
         new Anova(job).calculateANOVA();
         for (Run run : job.getRuns()) {
             double qVal = 0;
+            double overallMean = 0.0;
             List<Run> runs = run.getRunToCompareTo();
             if(run.getRunToCompareTo().size() > 1){
-                qVal = (Math.abs(runs.get(0).getAverageSpeed() - runs.get(1).getAverageSpeed())) / (Math.sqrt(run.getSSE() / run.getData().size()));
+                Run run1 = runs.get(0);
+                Run run2 = runs.get(1);
+                overallMean = Math.abs(run1.getAverageSpeed() - run2.getAverageSpeed());
+                //qVal = (Math.abs(run1.getAverageSpeed() - run2.getAverageSpeed())) / (Math.sqrt(run1.getSSE()) / Math.sqrt(calculateHarmonicMean(run1, run2)));
             }
-
-            run.setQ(qVal);
             
-            if(tukey.cumulative(qVal) < this.job.getAlpha()){
-                run.setNullypothesis(false);
+            this.tukey = new Tukey(1, 2, 2 * (job.getRunDataSize() - 1));
+            System.err.println("q: " + tukey.inverse_survival(job.getAlpha(), false));
+            System.err.println("MSW/n: " + Math.sqrt(run.getSSE() / job.getRunDataSize()));
+            
+            this.qHSD = tukey.inverse_survival(job.getAlpha(), false) * Math.sqrt((run.getSSE() / (runs.size()* (this.job.getRunDataSize()))) / job.getRunDataSize());
+            
+            run.setQ(overallMean);
+            if(!run.getRunToCompareTo().isEmpty()){
+                if(qHSD < overallMean){
+                    run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
+                } else {
+                    run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+                }
             } else {
-                run.setNullypothesis(true);
+                run.setQ(Run.UNDEFINED_VALUE);
             }
         }
     }
     
     private void setLabeling(){
-        qCritLabel.setText(String.format(Locale.ENGLISH, "%,.2f", this.qCrit));
+        qCritLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.qHSD));
     }
 
     public ConInt.STATUS openWindow(){
@@ -127,5 +136,9 @@ public class TukeyHSD implements Initializable{
             return ConInt.STATUS.IO_EXCEPTION;
         }
         return ConInt.STATUS.SUCCESS;
+    }
+
+    private double calculateHarmonicMean(Run run1, Run run2) {
+        return 1.0/(1.0/run1.getAverageSpeed() + 1.0/run2.getAverageSpeed());
     }
 }

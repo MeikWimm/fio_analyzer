@@ -201,27 +201,42 @@ public class Job {
                 convertedData.add(dp);
             }
                 Run run = new Run(j, run_data);
-                run.addRunToCompareTo(run); // add to a list of all runs to compare to for the Tests even itself
+                //run.addRunToCompareTo(run);
                 runs.add(run);
         }
 
         double speed = 0;
-        int j;
         boolean flag = false;
         int counter = 0;
         
         //Add runs to compare, i.e compare for ANOVA first run with the second run.
-        for (j = 0; j < runs.size()-1; j++) {
-            runs.get(j).addRunToCompareTo(runs.get(j+1));
-        }
         
-        if(runs.size() > 1){
-            runs.get(runs.size()-1).addRunToCompareTo(runs.get(runs.size()-2));
+        for (int j = 0; j < runs.size(); j += Settings.RUN_TO_COMPARE_TO_SIZE) {
+            for (int k = 0; k < Settings.RUN_TO_COMPARE_TO_SIZE; k++) {
+                if(j + Settings.RUN_TO_COMPARE_TO_SIZE - 1 < runs.size()){
+                    runs.get(j).addRunToCompareTo(runs.get(j + k));
+                    //System.err.println("index: " + j  + " , run added: " + (j+k));
+               }
+            }
         }
-                getCoV();
+
+        /*
+        for (int j = 0; j < runs.size(); j++) {
+            for (int k = 0; k < Settings.RUN_TO_COMPARE_TO_SIZE; k++) {
+                if(j + Settings.RUN_TO_COMPARE_TO_SIZE - 1 < runs.size()){
+                    runs.get(j).addRunToCompareTo(runs.get(j + k));
+                    //System.err.println("index: " + j  + " , run added: " + (j+k));
+               } else {
+                    runs.get(j).setNullhypothesis(null);
+                }
+            }
+        }
+*/
+        getCoV();
 
         
         if(Settings.AVERAGE_SPEED_PER_MILLISEC == 1) return;
+        int j;
 
         for (Run run : this.getRuns()) {
             List<DataPoint> runData = new ArrayList<>();

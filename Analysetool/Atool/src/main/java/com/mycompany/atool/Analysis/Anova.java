@@ -61,8 +61,8 @@ public class Anova implements Initializable{
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, String> compareToRunColumn;
-    @FXML public TableColumn<Run, Double> FColumn;
-    @FXML public TableColumn<Run, Boolean> hypothesisColumn;
+    @FXML public TableColumn<Run, String> FColumn;
+    @FXML public TableColumn<Run, Byte> hypothesisColumn;
     
     private Stage stage;
     private static String jobCode = "";
@@ -78,8 +78,7 @@ public class Anova implements Initializable{
       
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
-        FColumn.setCellValueFactory(new PropertyValueFactory<>("F"));
-        FColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));
+        FColumn.setCellValueFactory(new PropertyValueFactory<>("FAsString"));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
@@ -108,7 +107,7 @@ public class Anova implements Initializable{
             int denom = (num + 1) * (job.getRunDataSize() - 1);
             LOGGER.log(Level.INFO,String.format("Calculated Numerator %d and Denominator %d", num, denom));
             fDistribution = new FDistribution(num, denom);
-            fCrit = fDistribution.inverseCumulativeProbability(job.getAlpha());
+            fCrit = fDistribution.inverseCumulativeProbability(1.0-job.getAlpha());
         }
         
 
@@ -147,9 +146,10 @@ public class Anova implements Initializable{
         for (Run run : this.job.getRuns()) {
             for (Run runToCompare : run.getRunToCompareTo()) {
                 for (DataPoint dp : runToCompare.getData()) {
-                    sse += (Math.pow((dp.getSpeed() - runToCompare.getAverageSpeedOfRunsToCompareTo()), 2));
+                    sse += (Math.pow((dp.getSpeed() - run.getAverageSpeedOfRunsToCompareTo()), 2));
                 }
             }
+                           
             run.setSSE(sse);
             sse = 0;
         }
@@ -160,14 +160,15 @@ public class Anova implements Initializable{
             double s_2_e = run.getSSE() / (run.getRunToCompareTo().size()  * (run.getData().size() - 1));
             fValue = s_2_a / s_2_e;
             run.setF(s_2_a / s_2_e);
-            
-            // critical p-value < alpha value of job
-            if(fDistribution.cumulativeProbability(fValue) < this.job.getAlpha()){
-                //System.err.println("Run: " + run.getID() + " accepted");
-                run.setNullypothesis(false);
-            } else {
-                run.setNullypothesis(true);
+            if(!run.getRunToCompareTo().isEmpty()){
+                // critical p-value < alpha value of job
+                if(fDistribution.inverseCumulativeProbability(1.0-job.getAlpha()) < fValue){
+                    run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
+                } else {
+                    run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+                }
             }
+
         }
         
         //calculateSteadyState();
@@ -186,7 +187,7 @@ public class Anova implements Initializable{
                 int countOfTrueHypothesis = 0;
                 
                 for (int j = i; j < k+i; j++) {
-                    if(this.job.getRuns().get(j).getNullhypothesis()){
+                    if(this.job.getRuns().get(j).getNullhypothesis() == Run.ACCEPTED_NULLHYPOTHESIS){
                         countOfTrueHypothesis++;
                     }
                 }

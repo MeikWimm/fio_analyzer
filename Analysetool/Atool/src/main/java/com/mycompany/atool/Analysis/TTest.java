@@ -48,19 +48,21 @@ public class TTest implements Initializable{
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, Integer> compareToRunColumn;
-    @FXML public TableColumn<Run, Double> TColumn;
-    @FXML public TableColumn<Run, Boolean> hypothesisColumn;
+    @FXML public TableColumn<Run, String> TColumn;
+    @FXML public TableColumn<Run, Byte> hypothesisColumn;
     
     private Job job;
     private TDistribution t;
     private double tCrit;
     
     public void tTtest(){
+        
         new Anova(job).calculateANOVA();
-        for (Run r : job.getRuns()) {
-            if(r.getRunToCompareTo().size() <= 1) return;
-            Run run1 = r.getRunToCompareTo().get(0);
-            Run run2 = r.getRunToCompareTo().get(1);
+        if(job.getRuns().get(0).getRunToCompareTo().size() <= 1) return;
+
+        for (int i = 0; i < job.getRuns().size(); i += 2) {
+            Run run1 = job.getRuns().get(i);
+            Run run2 = job.getRuns().get(i + 1);
                         
             double runVariance1 = calculateVariance(run1);
             double runVariance2 = calculateVariance(run2);
@@ -71,13 +73,17 @@ public class TTest implements Initializable{
             
             double nominator = (run1.getAverageSpeed() - run2.getAverageSpeed());
             double denominator = Math.sqrt((runVariance1 / runSize1) + (runVariance2 / runSize2));
-            double tVal = nominator / denominator;
-            r.setT(Math.abs(tVal));
+            double tVal = Math.abs(nominator / denominator);
+            run1.setT(tVal);
+            run2.setT(Run.UNDEFINED_VALUE);
             
-            if(t.cumulativeProbability(tVal) < this.job.getAlpha()){
-                r.setNullypothesis(false);
-            } else {
-                r.setNullypothesis(true);
+            System.err.println(tVal);
+            if(!run1.getRunToCompareTo().isEmpty()){
+                if(this.tCrit < tVal){
+                    run1.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
+                } else {
+                    run1.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+                }                   
             }
         }
     }
@@ -100,9 +106,8 @@ public class TTest implements Initializable{
         averageSpeedColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
-        TColumn.setCellValueFactory(new PropertyValueFactory<>("T"));
-        TColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
+        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("PairwiseRunToCompareToAsString"));
+        TColumn.setCellValueFactory(new PropertyValueFactory<>("TAsString"));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());

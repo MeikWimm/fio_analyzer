@@ -76,15 +76,15 @@ public static class CustomStringConverter extends StringConverter<Double>{
         }
     }
     
-    public static Callback<TableColumn<Run, Boolean>, TableCell<Run, Boolean>> getHypothesisCellFactory(){
-        return (TableColumn<Run, Boolean> col) -> new TableCell<Run, Boolean>() {
+    public static Callback<TableColumn<Run, Byte>, TableCell<Run, Byte>> getHypothesisCellFactory(){
+        return (TableColumn<Run, Byte> col) -> new TableCell<Run, Byte>() {
             @Override
-            public void updateItem(Boolean item, boolean empty) {
+            public void updateItem(Byte item, boolean empty) {
                 super.updateItem(item, empty);
-                if (item == null) {
+                if (item == Run.UNDEFIND_NULLHYPOTHESIS || item == null) {
                     setText("");
                     setStyle("");
-                } else if (!item) {
+                } else if (item == Run.REJECTED_NULLHYPOTHESIS) {
                     setStyle("-fx-background-color: tomato;");
                     setText("Rejected");
                 } else {

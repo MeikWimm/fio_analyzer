@@ -12,6 +12,11 @@ import java.util.List;
  * @author meni1999
  */
 public class Run {
+    public static Byte ACCEPTED_NULLHYPOTHESIS = 1;
+    public static Byte REJECTED_NULLHYPOTHESIS = 0;
+    public static Byte UNDEFIND_NULLHYPOTHESIS = -1;
+    public static Double UNDEFINED_VALUE = Double.MIN_VALUE;
+    
     private List<DataPoint> data = new ArrayList<>();
     private final List<Run> runToCompare = new ArrayList<>();
     private final int runID;
@@ -22,11 +27,11 @@ public class Run {
     public static final int SPEED_PER_SEC = 10;
     private double ssa;
     private double sse;
-    private boolean isNullhypothesisAccepted = false;
+    private Byte isNullhypothesis = UNDEFIND_NULLHYPOTHESIS;
     private double F;
-    private double zVal = 0;
-    private double qVal = 0;
-    private double tVal = 0;
+    private double zVal = UNDEFINED_VALUE;
+    private double qVal = UNDEFINED_VALUE;
+    private double tVal = UNDEFINED_VALUE;
     private double OverlappingDifference = 0;
     public float rank = 0;
     private double criticalZLeft;
@@ -125,6 +130,17 @@ public class Run {
         return speed;
     }
     
+        public double getAverageSpeedOfRunsToCompareToTEST(){
+        double speed = 0.0;
+        for (Run run : this.runToCompare) {
+            speed += run.getAverageSpeed();
+         System.err.println("Run ID: " + run.getID() + " | average speed: " + run.getAverageSpeed() + " run to comare size: " + runToCompare.size());
+
+        }
+        speed = speed / this.runToCompare.size();
+        return speed;
+    }
+    
     
     public String getRunToCompareToAsString(){
         StringBuilder sb = new StringBuilder();
@@ -138,6 +154,17 @@ public class Run {
         return sb.toString();
     }
 
+    public String getPairwiseRunToCompareToAsString(){
+        if(this.getID() % 2 == 0){
+            return "";
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("Run %d, ", this.getID()));
+        sb.append(String.format("Run %d", this.getID() + 1));
+        return sb.toString();
+    }
+    
     public void setIntervalTo(double d) {
         this.intervalTo = d;
     }
@@ -150,6 +177,13 @@ public class Run {
         return this.F;
     }
     
+    public String getFAsString(){
+        if(Double.isNaN(this.F)){
+            return "";
+        }
+        return String.format(Settings.DIGIT_FORMAT, this.F);
+    }
+    
     public void setZ(double zVal){
         this.zVal = zVal;
     }
@@ -158,12 +192,26 @@ public class Run {
         return this.zVal;
     }
     
+    public String getZAsString(){
+        if(this.zVal == UNDEFINED_VALUE){
+            return "";
+        }
+        return String.format(Settings.DIGIT_FORMAT, this.zVal);
+    }
+    
     public void setT(double tVal){
         this.tVal = tVal;
     }
 
     public double getT(){
         return this.tVal;
+    }
+
+    public String getTAsString(){
+        if(this.tVal == UNDEFINED_VALUE){
+            return "";
+        }
+        return String.format(Settings.DIGIT_FORMAT, this.tVal);
     }
     
     public void setSSE(double sse) {
@@ -190,12 +238,12 @@ public class Run {
         return runID;
     }
     
-    public void setNullypothesis(boolean isNullhypothesisAccepted){
-        this.isNullhypothesisAccepted = isNullhypothesisAccepted;
+    public void setNullhypothesis(byte isNullhypothesis){
+        this.isNullhypothesis = isNullhypothesis;
     }
     
-    public boolean getNullhypothesis(){
-        return this.isNullhypothesisAccepted;
+    public byte getNullhypothesis(){
+        return this.isNullhypothesis;
     }
 
     public void setQ(double qVal) {
@@ -205,4 +253,12 @@ public class Run {
     public double getQ(){
         return this.qVal;
     }
+    
+    public String getQAsString(){
+        if(this.qVal == UNDEFINED_VALUE){
+            return "";
+        }
+        return String.format(Settings.DIGIT_FORMAT, this.qVal);
+    }
+
 }

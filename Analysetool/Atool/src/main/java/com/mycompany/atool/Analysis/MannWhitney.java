@@ -51,8 +51,8 @@ public class MannWhitney implements Initializable{
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, Integer> compareToRunColumn;
-    @FXML public TableColumn<Run, Double> ZColumn;
-    @FXML public TableColumn<Run, Boolean> hypothesisColumn;
+    @FXML public TableColumn<Run, String> ZColumn;
+    @FXML public TableColumn<Run, Byte> hypothesisColumn;
    
     @FXML public Label zIntervalLabel;
     
@@ -61,6 +61,22 @@ public class MannWhitney implements Initializable{
     private double zCrit_rightside = -1;
     private static int jobRunCounter = 0;
     private static double jobAlpha = -1.0;
+    
+        @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
+        averageSpeedColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
+
+        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
+        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("PairwiseRunToCompareToAsString"));
+        ZColumn.setCellValueFactory(new PropertyValueFactory<>("ZAsString"));
+
+        hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
+        hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
+
+        uTestTable.setItems(this.job.getRuns());
+        setLabeling();
+    }
     
 
     private void calculateMannWhitney(Run run1, Run run2) {
@@ -145,16 +161,17 @@ public class MannWhitney implements Initializable{
         System.err.println("Z Crit Right: " + zCrit_right);
         
         run1.setZ(z);
+        run2.setZ(Run.UNDEFINED_VALUE);
         
         NormalDistribution n = new NormalDistribution();
         
         
         double pCalc = n.cumulativeProbability(z);
         
-        if(pCalc < this.job.getAlpha()){
-            run1.setNullypothesis(false);
-        } else {
-            run1.setNullypothesis(true);
+        if(pCalc < this.job.getAlpha() / 2.0){
+                run1.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
+            } else {
+                run1.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
         }
     }
     private Job job;
@@ -169,22 +186,7 @@ public class MannWhitney implements Initializable{
         zIntervalLabel.setText(String.format(Locale.ENGLISH, "[%,.5f,%,.5f]", this.zCrit_leftside, this.zCrit_rightside));
     }
     
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
-        averageSpeedColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
 
-        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
-        ZColumn.setCellValueFactory(new PropertyValueFactory<>("Z"));
-        ZColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
-
-        hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
-        hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
-
-        uTestTable.setItems(this.job.getRuns());
-        setLabeling();
-    }
     
     public void calculateMannWhitneyTest(){
         
@@ -198,20 +200,14 @@ public class MannWhitney implements Initializable{
         */
         List<Run> runs = this.job.getRuns();
         
-        for (int i = 0; i < runs.size(); i++) {
+        for (int i = 0; i < runs.size(); i += 2) {
             if(i < runs.size() - 1){
                 Run run1 = runs.get(i);
                 Run run2 = runs.get(i+1);
                 calculateMannWhitney(run1, run2);
             }
         }
-        
-        /*
-         * Workaround for last run
-        */
-        calculateMannWhitney(runs.get(runs.size()-1), runs.get(runs.size()-1));
 
-        
         jobRunCounter = this.job.getRunsCounter(); // remember counter if changed, to avoid multiple calculations with the same values.
         jobAlpha = this.job.getAlpha();
     }

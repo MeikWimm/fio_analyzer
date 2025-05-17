@@ -201,8 +201,7 @@ public class InputModule {
             job.setStandardDeviation(calculateDeviation(data, average_speed));
             data.add(new DataPoint(average_speed_per_milli, time));
             job.setFrequency(freq);
-
-        job.setData(data);
+            job.setData(data);
         } catch (IOException ex) {
             //LOGGER.log(Level.SEVERE, (Supplier<String>) ex);
             LOGGER.log(Level.SEVERE, String.format("Error occured while reading file: %s. App state: %s", job.getFile(), STATUS.ERROR_WHILE_READING_FILE));

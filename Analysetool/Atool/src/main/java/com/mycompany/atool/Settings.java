@@ -41,6 +41,7 @@ public class Settings implements Initializable{
     
     @FXML public CheckBox checkboxSpeedPerSec;
     @FXML public Slider avSpeedSlider;
+    @FXML public Slider runCompareCounterSlider;
     @FXML public Label labelSliderVal;
     @FXML public Button buttonSaveSettings;
     @FXML public RadioButton radioButtonMebibyte;
@@ -58,8 +59,9 @@ public class Settings implements Initializable{
     private static CONVERT conversion = CONVERT.DEFAULT;
     
     public static double CONVERSION_VALUE = CONVERT.getConvertValue(CONVERT.DEFAULT);
-    public static int AVERAGE_SPEED_PER_MILLISEC = 1;
-    
+    public static int AVERAGE_SPEED_PER_MILLISEC = DEFAULT_SPEED_PER_MILLI;
+    public static int RUN_TO_COMPARE_TO_SIZE = 2;
+
     private PrimaryController primaryController;
     
     static {
@@ -156,6 +158,7 @@ public class Settings implements Initializable{
         conversion = (CONVERT) toggleGorup.getSelectedToggle().getUserData(); 
         CONVERSION_VALUE = CONVERT.getConvertValue(conversion);
         AVERAGE_SPEED_PER_MILLISEC = (int) avSpeedSlider.getValue();
+        RUN_TO_COMPARE_TO_SIZE = (int) runCompareCounterSlider.getValue();
         Settings.HAS_CHANGED = true;
         
         // get a handle to the stage
