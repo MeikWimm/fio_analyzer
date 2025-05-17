@@ -210,33 +210,22 @@ public class Job {
         int counter = 0;
         
         //Add runs to compare, i.e compare for ANOVA first run with the second run.
-        
-        for (int j = 0; j < runs.size(); j += Settings.RUN_TO_COMPARE_TO_SIZE) {
+        int j;
+        for (j = 0; j < runs.size(); j += Settings.RUN_TO_COMPARE_TO_SIZE) {
             for (int k = 0; k < Settings.RUN_TO_COMPARE_TO_SIZE; k++) {
                 if(j + Settings.RUN_TO_COMPARE_TO_SIZE - 1 < runs.size()){
                     runs.get(j).addRunToCompareTo(runs.get(j + k));
-                    //System.err.println("index: " + j  + " , run added: " + (j+k));
                }
             }
         }
-
-        /*
-        for (int j = 0; j < runs.size(); j++) {
-            for (int k = 0; k < Settings.RUN_TO_COMPARE_TO_SIZE; k++) {
-                if(j + Settings.RUN_TO_COMPARE_TO_SIZE - 1 < runs.size()){
-                    runs.get(j).addRunToCompareTo(runs.get(j + k));
-                    //System.err.println("index: " + j  + " , run added: " + (j+k));
-               } else {
-                    runs.get(j).setNullhypothesis(null);
-                }
-            }
+        
+        for (; j < runs.size(); j++) {
+            runs.get(j).setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
         }
-*/
         getCoV();
 
         
         if(Settings.AVERAGE_SPEED_PER_MILLISEC == 1) return;
-        int j;
 
         for (Run run : this.getRuns()) {
             List<DataPoint> runData = new ArrayList<>();

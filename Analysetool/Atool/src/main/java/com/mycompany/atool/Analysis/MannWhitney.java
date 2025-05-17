@@ -62,6 +62,14 @@ public class MannWhitney implements Initializable{
     private static int jobRunCounter = 0;
     private static double jobAlpha = -1.0;
     
+        private Job job;
+    public MannWhitney(Job job){
+        nDis = new NormalDistribution();
+        zCrit_leftside = nDis.inverseCumulativeProbability(job.getAlpha() / 2.0);
+        zCrit_rightside = nDis.inverseCumulativeProbability(1 - job.getAlpha() / 2.0);
+        this.job = job;
+    }
+    
         @Override
     public void initialize(URL url, ResourceBundle rb) {
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
@@ -76,6 +84,10 @@ public class MannWhitney implements Initializable{
 
         uTestTable.setItems(this.job.getRuns());
         setLabeling();
+    }
+    
+    private void setLabeling(){
+        zIntervalLabel.setText(String.format(Locale.ENGLISH, "[%,.5f,%,.5f]", this.zCrit_leftside, this.zCrit_rightside));
     }
     
 
@@ -151,20 +163,11 @@ public class MannWhitney implements Initializable{
         double U = Math.min(U1, U2);
         double z = (U - mu_U) / sigma_U;
         
-        System.out.println(z);
-        
-        
-        double zCrit_left = nDis.inverseCumulativeProbability(job.getAlpha() / 2);
-        System.err.println("Z Crit Left: " + zCrit_left);
-        
-        double zCrit_right = nDis.inverseCumulativeProbability(1 - job.getAlpha() / 2);
-        System.err.println("Z Crit Right: " + zCrit_right);
-        
+
         run1.setZ(z);
         run2.setZ(Run.UNDEFINED_VALUE);
-        
+        run2.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);      
         NormalDistribution n = new NormalDistribution();
-        
         
         double pCalc = n.cumulativeProbability(z);
         
@@ -174,17 +177,7 @@ public class MannWhitney implements Initializable{
                 run1.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
         }
     }
-    private Job job;
-    public MannWhitney(Job job){
-        nDis = new NormalDistribution();
-        zCrit_leftside = nDis.inverseCumulativeProbability(job.getAlpha() / 2.0);
-        zCrit_rightside = nDis.inverseCumulativeProbability(1 - job.getAlpha() / 2.0);
-        this.job = job;
-    }
 
-    private void setLabeling(){
-        zIntervalLabel.setText(String.format(Locale.ENGLISH, "[%,.5f,%,.5f]", this.zCrit_leftside, this.zCrit_rightside));
-    }
     
 
     

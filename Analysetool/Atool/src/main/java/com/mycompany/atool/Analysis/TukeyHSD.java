@@ -4,6 +4,7 @@
  */
 package com.mycompany.atool.Analysis;
 
+import com.mycompany.atool.DataPoint;
 import com.mycompany.atool.Job;
 import com.mycompany.atool.Run;
 import com.mycompany.atool.Settings;
@@ -69,7 +70,7 @@ public class TukeyHSD implements Initializable{
         averageSpeedColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
+        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("PairwiseRunToCompareToAsString"));
         QColumn.setCellValueFactory(new PropertyValueFactory<>("QAsString"));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
@@ -80,35 +81,41 @@ public class TukeyHSD implements Initializable{
     }
     
     public void calculateTukeyHSD(){
-        new Anova(job).calculateANOVA();
-        for (Run run : job.getRuns()) {
-            double qVal = 0;
-            double overallMean = 0.0;
-            List<Run> runs = run.getRunToCompareTo();
-            if(run.getRunToCompareTo().size() > 1){
-                Run run1 = runs.get(0);
-                Run run2 = runs.get(1);
-                overallMean = Math.abs(run1.getAverageSpeed() - run2.getAverageSpeed());
-                //qVal = (Math.abs(run1.getAverageSpeed() - run2.getAverageSpeed())) / (Math.sqrt(run1.getSSE()) / Math.sqrt(calculateHarmonicMean(run1, run2)));
-            }
+        for (int i = 0; i < job.getRuns().size(); i += 2) {
+            Run run1 = job.getRuns().get(i);
+            Run run2 = job.getRuns().get(i + 1);
+            double overallMean = Math.abs(run1.getAverageSpeed() - run2.getAverageSpeed());
+            double sse = calculateSSE(run1, run2);
             
             this.tukey = new Tukey(1, 2, 2 * (job.getRunDataSize() - 1));
-            System.err.println("q: " + tukey.inverse_survival(job.getAlpha(), false));
-            System.err.println("MSW/n: " + Math.sqrt(run.getSSE() / job.getRunDataSize()));
             
-            this.qHSD = tukey.inverse_survival(job.getAlpha(), false) * Math.sqrt((run.getSSE() / (runs.size()* (this.job.getRunDataSize()))) / job.getRunDataSize());
+            this.qHSD = tukey.inverse_survival(job.getAlpha(), false) * Math.sqrt((sse / (2.0 * (this.job.getRunDataSize()))) / job.getRunDataSize());
             
-            run.setQ(overallMean);
-            if(!run.getRunToCompareTo().isEmpty()){
-                if(qHSD < overallMean){
-                    run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
-                } else {
-                    run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
-                }
+            run1.setQ(overallMean);
+            run2.setQ(Run.UNDEFINED_VALUE);
+            run2.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
+            
+            if(qHSD < overallMean){
+                run1.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
             } else {
-                run.setQ(Run.UNDEFINED_VALUE);
+                run1.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
             }
         }
+    }
+    
+        private double calculateSSE(Run run1, Run run2){
+        double sse = 0;
+        double averageSpeed = (run1.getAverageSpeed() + run2.getAverageSpeed()) / 2.0;
+        
+        for (DataPoint dp : run1.getData()) {
+                    sse += (Math.pow((dp.getSpeed() - averageSpeed), 2));
+        }
+    
+        for (DataPoint dp : run2.getData()) {
+                    sse += (Math.pow((dp.getSpeed() - averageSpeed), 2));
+        }
+        
+        return sse;
     }
     
     private void setLabeling(){
@@ -136,9 +143,5 @@ public class TukeyHSD implements Initializable{
             return ConInt.STATUS.IO_EXCEPTION;
         }
         return ConInt.STATUS.SUCCESS;
-    }
-
-    private double calculateHarmonicMean(Run run1, Run run2) {
-        return 1.0/(1.0/run1.getAverageSpeed() + 1.0/run2.getAverageSpeed());
     }
 }

@@ -4,6 +4,7 @@
  */
 package com.mycompany.atool.Analysis;
 
+import com.mycompany.atool.DataPoint;
 import com.mycompany.atool.Job;
 import com.mycompany.atool.Run;
 import com.mycompany.atool.Utils;
@@ -57,15 +58,15 @@ public class TTest implements Initializable{
     
     public void tTtest(){
         
-        new Anova(job).calculateANOVA();
         if(job.getRuns().get(0).getRunToCompareTo().size() <= 1) return;
 
         for (int i = 0; i < job.getRuns().size(); i += 2) {
             Run run1 = job.getRuns().get(i);
             Run run2 = job.getRuns().get(i + 1);
-                        
-            double runVariance1 = calculateVariance(run1);
-            double runVariance2 = calculateVariance(run2);
+            
+            double sse = calculateSSE(run1, run2);
+            double runVariance1 = calculateVariance(run1, sse);
+            double runVariance2 = calculateVariance(run2, sse);
             
             
             double runSize1 = run1.getData().size();
@@ -76,15 +77,12 @@ public class TTest implements Initializable{
             double tVal = Math.abs(nominator / denominator);
             run1.setT(tVal);
             run2.setT(Run.UNDEFINED_VALUE);
-            
-            System.err.println(tVal);
-            if(!run1.getRunToCompareTo().isEmpty()){
-                if(this.tCrit < tVal){
-                    run1.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
-                } else {
-                    run1.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
-                }                   
-            }
+            run2.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
+            if(this.tCrit < tVal){
+                run1.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
+            } else {
+                run1.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+            }                   
         }
     }
     
@@ -117,8 +115,23 @@ public class TTest implements Initializable{
         setLabeling();
     }
     
-    private double calculateVariance(Run run){
-        return (1.0 / (run.getData().size() - 1.0)) * run.getSSE();
+    private double calculateVariance(Run run, double sse){
+        return (1.0 / (run.getData().size() - 1.0)) * sse;
+    }
+    
+    private double calculateSSE(Run run1, Run run2){
+        double sse = 0;
+        double averageSpeed = (run1.getAverageSpeed() + run2.getAverageSpeed()) / 2.0;
+        
+        for (DataPoint dp : run1.getData()) {
+                    sse += (Math.pow((dp.getSpeed() - averageSpeed), 2));
+        }
+    
+        for (DataPoint dp : run2.getData()) {
+                    sse += (Math.pow((dp.getSpeed() - averageSpeed), 2));
+        }
+        
+        return sse;
     }
     
     public ConInt.STATUS openWindow(){
