@@ -37,9 +37,6 @@ public class Charter {
         T_TEST,
         TUKEY_HSD
     }
-    public void executeANOVA(Job job){
-        System.out.println(job.toString());
-    }
     
     public void drawJob(Job job) {
         

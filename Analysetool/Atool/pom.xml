@@ -9,8 +9,9 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
+
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-controls -->
+        <!-- JavaFX dependencies -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -21,21 +22,24 @@
             <artifactId>javafx-fxml</artifactId>
             <version>23.0.2</version>
         </dependency>
+        <!-- Apache Commons Math -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
             <version>3.6.1</version>
             <type>jar</type>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/net.sourceforge.jdistlib/jdistlib -->
+        <!-- JDistLib dependency -->
         <dependency>
             <groupId>net.sourceforge.jdistlib</groupId>
             <artifactId>jdistlib</artifactId>
             <version>0.4.5</version>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
+            <!-- Maven Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -47,6 +51,8 @@
                     </compilerArgs>
                 </configuration>
             </plugin>
+
+            <!-- JavaFX Maven Plugin -->
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
@@ -56,44 +62,50 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <!-- Default configuration for running -->
-                        <!-- Usage: mvn clean javafx:run -->
                         <id>default-cli</id>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
                     </execution>
+                </executions>
+            </plugin>
+
+            <!-- Maven Shade Plugin for fat JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
                     <execution>
-                        <!-- Configuration for manual attach debugging -->
-                        <!-- Usage: mvn clean javafx:run@debug -->
-                        <id>debug</id>
+                        <phase>package</phase> <!-- Run during the package phase -->
+                        <goals>
+                            <goal>shade</goal> <!-- This will create the fat JAR -->
+                        </goals>
                         <configuration>
-                            <options>
-                                <option>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=localhost:8000</option>
-                            </options>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!-- Configuration for automatic IDE debugging -->
-                        <id>ide-debug</id>
-                        <configuration>
-                            <options>
-                                <option>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address}</option>
-                            </options>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!-- Configuration for automatic IDE profiling -->
-                        <id>ide-profile</id>
-                        <configuration>
-                            <options>
-				<option>${profiler.jvmargs.arg1}</option>
-				<option>${profiler.jvmargs.arg2}</option>
-				<option>${profiler.jvmargs.arg3}</option>
-				<option>${profiler.jvmargs.arg4}</option>
-				<option>${profiler.jvmargs.arg5}</option>
-                            </options>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <filters>
+                                <!-- This filter ensures that unnecessary files like signature files are excluded -->
+                                <filter>
+                                    <artifact>*:*</artifact> <!-- Include all dependencies -->
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <transformers>
+                                <!-- This transformer makes the JAR executable by specifying the main class -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.mycompany.atool.App</mainClass> <!-- Your main class here -->
+                                </transformer>
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Maven Jar Plugin for packaging the JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -113,41 +125,32 @@
                             </archive>
                         </configuration>
                     </execution>
+                </executions>
+            </plugin>
+
+            <!-- Exec Maven Plugin for running JavaFX JAR with specific arguments -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
                     <execution>
-                        <id>attach-sources</id>
-                        <phase>verify</phase>
+                        <id>run-javafx</id>
                         <goals>
-                            <goal>jar</goal>
+                            <goal>exec</goal>
                         </goals>
+                        <phase>none</phase>
                         <configuration>
-                            <classifier>sources</classifier>
-                            <includes>
-                                <include>**/*.java</include>
-                            </includes>
+                            <executable>java</executable>
+                            <commandlineArgs>
+                                --module-path ${project.build.directory}/lib --add-modules javafx.controls,javafx.fxml -jar ${project.build.directory}/Atool-1.0-SNAPSHOT.jar
+                            </commandlineArgs>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-                <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <version>3.1.0</version>
-            <executions>
-              <execution>
-                <id>run-javafx</id>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <phase>none</phase>
-                <configuration>
-                  <executable>java</executable>
-                    <commandlineArgs>
-                      --module-path ${project.build.directory}/lib --add-modules javafx.controls,javafx.fxml -jar ${project.build.directory}/Atool-1.0-SNAPSHOT.jar
-                    </commandlineArgs>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
+
         </plugins>
     </build>
+
 </project>

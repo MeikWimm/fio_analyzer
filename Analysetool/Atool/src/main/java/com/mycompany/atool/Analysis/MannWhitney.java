@@ -104,7 +104,7 @@ public class MannWhitney implements Initializable{
     }
     
     private void drawUTest(Job job){
-        charter.drawGraph(job, "U-Test", "Run", "calculated Z-Value", "calculated Z-Value", uTestData, zCrit_rightside);
+        charter.drawGraph(job, "U-Test", "Run", "Z-Value", "calculated Z-Value", uTestData, zCrit_rightside);
     }
 
     private void calculateMannWhitney(Run run1, Run run2) {
@@ -180,7 +180,6 @@ public class MannWhitney implements Initializable{
         double z = Math.abs((U - mu_U) / sigma_U);
 
         
-        System.err.println("Run: " + run1.getID() + " m: " +m );
         run1.setZ(z);
         run2.setZ(Run.UNDEFINED_VALUE);
         run2.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);      

@@ -142,8 +142,6 @@ public class Run {
         double speed = 0.0;
         for (Run run : this.runToCompare) {
             speed += run.getAverageSpeed();
-         System.err.println("Run ID: " + run.getID() + " | average speed: " + run.getAverageSpeed() + " run to comare size: " + runToCompare.size());
-
         }
         speed = speed / this.runToCompare.size();
         return speed;

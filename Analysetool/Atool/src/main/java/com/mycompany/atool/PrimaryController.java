@@ -166,16 +166,7 @@ public class PrimaryController implements Initializable{
     private void openGeneralSettings(){
         settings.openWindow();
     }
- 
-    @FXML
-    private void executeANOVA(){
-        if(table.getSelectionModel().getSelectedItem() != null){
-            tester.executeANOVA(table.getSelectionModel().getSelectedItem());
-        } else {
-            System.out.println("com.mycompany.atool.PrimaryController.executeANOVA() No item choosen for ANOVA!");  
-        }
-    }
-
+    
     @FXML
     private void openInfoWindow(){
         try {
@@ -392,7 +383,7 @@ public class PrimaryController implements Initializable{
                 LOGGER.log(Level.INFO, String.format("Removed Job -> %s", row.getItem().toString()));
             });
             
-            rowMenu.getItems().addAll(applyTestItem, drawFrequencyItem, calculateConInt, calculateANOVA, calculateUTest, calculateTukeyHSD, calculateTTtest, removeItem);
+            rowMenu.getItems().addAll(calculateConInt, calculateANOVA, calculateUTest, calculateTukeyHSD, calculateTTtest, removeItem);
 
             row.contextMenuProperty().bind(
                     Bindings.when(Bindings.isNotNull(row.itemProperty()))

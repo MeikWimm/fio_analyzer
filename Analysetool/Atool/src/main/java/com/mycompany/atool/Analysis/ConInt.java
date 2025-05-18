@@ -4,14 +4,12 @@
  */
 package com.mycompany.atool.Analysis;
 
-import com.mycompany.atool.DataPoint;
 import com.mycompany.atool.InputModule;
 import com.mycompany.atool.Job;
 import com.mycompany.atool.Run;
 import com.mycompany.atool.Utils;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -139,7 +137,7 @@ public class ConInt implements Initializable{
     }
     
     private void drawOverlappingDiffernce(Job job) {
-        charter.drawGraph(job, "Overlapping Differnce of confidence intervals", "Overlapping difference (%)", "Run", "Overlapping Difference", conIntData, Run.UNDEFINED_VALUE);
+        charter.drawGraph(job, "Overlapping Differnce of confidence intervals", "Run", "Overlapping difference (%)", "Overlapping Difference", conIntData, Run.UNDEFINED_VALUE);
     } 
     /*
     private void checkOverlappingInterval(Job job){

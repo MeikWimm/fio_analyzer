@@ -212,7 +212,6 @@ public class Job {
         }
 
         int runDataSize = (averagedData.size() / runsCounter);
-        System.err.println("averaged size : " + averagedData.size() + " | " + "raw data size: " + rawData.size() + " runDatasize: " + runDataSize + "MAX_TIME: " + MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI);
         /*
         Split job into runs depending on run_size
        
