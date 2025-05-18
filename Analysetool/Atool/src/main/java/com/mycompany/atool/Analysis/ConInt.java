@@ -4,13 +4,17 @@
  */
 package com.mycompany.atool.Analysis;
 
+import com.mycompany.atool.DataPoint;
 import com.mycompany.atool.InputModule;
 import com.mycompany.atool.Job;
 import com.mycompany.atool.Run;
 import com.mycompany.atool.Utils;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -20,6 +24,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -45,6 +50,8 @@ public class ConInt implements Initializable{
     
     @FXML public Label labelHeader;
     
+    @FXML public Button drawConIntDiffButton; 
+    
     @FXML public TableView<Run> conIntTable;
     @FXML public TableColumn<Run,Integer> runsColumn;
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
@@ -53,11 +60,15 @@ public class ConInt implements Initializable{
     @FXML public TableColumn<Run,Double> plusMinusValueColumn;
     @FXML public TableColumn<Run,Double> standardDeviationColumn;
     @FXML public TableColumn<Run, String> compareToRunColumn;
-    @FXML public TableColumn<Run,Double> overlappingColumn;
+    @FXML public TableColumn<Run,String> overlappingColumn;
     
     private Stage stage;
+    private Charter charter;
     private static int jobRunCounter = 0;
     private static double jobAlpha = -1.0;
+    private Map<Integer, Double> conIntData;
+
+
 
     public enum STATUS {
         SUCCESS,
@@ -65,12 +76,13 @@ public class ConInt implements Initializable{
     }
     
     private final Job job;
-    public ConInt(){
-        job = null;
-    }
+
     
     public ConInt(Job job){
+        charter = new Charter();
+        conIntData = new HashMap<>();
         this.job = job;
+        this.job.clearRuns();
     }
     
     @Override
@@ -92,9 +104,10 @@ public class ConInt implements Initializable{
         
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("PairwiseRunToCompareToAsString"));
         
-        overlappingColumn.setCellValueFactory(new PropertyValueFactory<>("OverlappingDifference"));
-        overlappingColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
+        overlappingColumn.setCellValueFactory(new PropertyValueFactory<>("OverlappingDifferenceAsString"));
 
+        drawConIntDiffButton.setOnAction(e -> drawOverlappingDiffernce(this.job));
+        
         labelHeader.setText(this.job.toString());
         conIntTable.setItems(this.job.getRuns());
     }
@@ -124,9 +137,11 @@ public class ConInt implements Initializable{
         }
         return STATUS.SUCCESS;
     }
-    /*
     
- 
+    private void drawOverlappingDiffernce(Job job) {
+        charter.drawGraph(job, "Overlapping Differnce of confidence intervals", "Overlapping difference (%)", "Run", "Overlapping Difference", conIntData, Run.UNDEFINED_VALUE);
+    } 
+    /*
     private void checkOverlappingInterval(Job job){
         List<Run> runs = job.getRuns();
         
@@ -169,12 +184,13 @@ public class ConInt implements Initializable{
             double c2 = run.getAverageSpeed() + (normDis.inverseCumulativeProbability(1.0 - this.job.getAlpha() / 2.0) * (run.getStandardDeviation() / Math.sqrt(run.getData().size())));
             run.setIntervalTo(c2);   
         }
-        
         List<Run> runs = this.job.getRuns();
-        for (int i = 0; i < this.job.getRuns().size() - 1; i++) {
+        for (int i = 0; i < this.job.getRuns().size() - 1; i += 2) {
             double overlappingDiff = calculateOverlapp(runs.get(i), runs.get(i+1));
             runs.get(i).setOverlappingDifference(overlappingDiff);
-            System.err.println(overlappingDiff);
+            runs.get(i+1).setOverlappingDifference(Run.UNDEFINED_VALUE);
+            conIntData.put(runs.get(i).getID(), overlappingDiff);
+            //System.err.println(overlappingDiff);
         }
         
         

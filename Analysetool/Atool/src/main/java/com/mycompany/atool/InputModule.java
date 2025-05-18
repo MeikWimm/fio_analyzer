@@ -100,6 +100,7 @@ public class InputModule {
      * 
      */
     public STATUS readFiles(/*File[] files*/) {
+        
         if(selectedDirectory == null){
             return STATUS.NO_DIR_SET;
         }
@@ -147,7 +148,6 @@ public class InputModule {
         
         return STATUS.SUCCESS;
     }
-
     /**
      * Reads the data of a .log file and saves the data in a job instance.
      * @param job 
@@ -174,11 +174,14 @@ public class InputModule {
                 s = line.split(", ");
                 int new_time = Integer.parseInt(s[0]);
                 speed = Integer.parseInt(s[1]);
+                
+                // speed frequency map
                 if(freq.containsKey( speed)){
                         freq.put(speed, freq.get(speed) + 1);
                     } else {
                         freq.put(speed, 1);
                     }
+                
                 if(old_time != new_time){
                     average_speed_per_milli = (double) current_speed_sum/counter;
                     data.add(new DataPoint(average_speed_per_milli, new_time));

@@ -7,6 +7,7 @@ import com.mycompany.atool.Analysis.ConInt;
 import com.mycompany.atool.Analysis.MannWhitney;
 import com.mycompany.atool.Analysis.TTest;
 import com.mycompany.atool.Analysis.TukeyHSD;
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 import java.net.URL;

@@ -7,6 +7,7 @@ package com.mycompany.atool.Analysis;
 import com.mycompany.atool.DataPoint;
 import com.mycompany.atool.Job;
 import com.mycompany.atool.RamerDouglasPeucker;
+import com.mycompany.atool.Run;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,7 +29,14 @@ public class Charter {
     private boolean isJobFreqStageInitialized;
     private Stage stageJobSpeed;
     private Stage stageJobFreq;
-
+    
+    public static enum GRAPH_TYPE {
+        ANOVA,
+        CON_INT,
+        U_TEST,
+        T_TEST,
+        TUKEY_HSD
+    }
     public void executeANOVA(Job job){
         System.out.println(job.toString());
     }
@@ -80,7 +88,7 @@ public class Charter {
             xAxis.setLabel("I/O-Speed in Kibibytes");
             yAxis.setLabel("Frequency");
             LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
-            XYChart.Series series = new XYChart.Series();
+            XYChart.Series<Number, Number> series = new XYChart.Series<>();
             lineChart.setTitle("Job Frequency");
             Map<Integer, Integer> data = job.getFrequency();
             for (Map.Entry<Integer, Integer> entry : data.entrySet()) {
@@ -98,6 +106,45 @@ public class Charter {
         stageJobFreq.show();
     }
     
+    public void drawGraph(Job job, String title, String xAxisLabel, String yAxisLabel, String lineLabel, Map<Integer, Double> data, double critValue) {        
+            Stage anovaGraphStage = new Stage();
+            final NumberAxis xAxis = new NumberAxis();
+            final NumberAxis yAxis = new NumberAxis();
+            xAxis.setLabel(xAxisLabel);
+            yAxis.setLabel(yAxisLabel);
+            LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
+            lineChart.setTitle(title);
+            lineChart.setHorizontalGridLinesVisible(false);
+            lineChart.setVerticalGridLinesVisible(false);
+            
+            XYChart.Series<Number, Number> series = new XYChart.Series<>();
+            series.setName(lineLabel);
+            
+
+            for (Map.Entry<Integer, Double> entry : data.entrySet()) {
+                Integer key = entry.getKey();
+                Double value = entry.getValue();
+                series.getData().add(new XYChart.Data<>(key, value));
+            }
+            
+            XYChart.Series<Number, Number> criticalLine = new XYChart.Series<>();
+            
+            if(critValue != Run.UNDEFINED_VALUE){
+                criticalLine.getData().add(new XYChart.Data<>(0, critValue));
+                criticalLine.getData().add(new XYChart.Data<>(job.getRunsCounter(), critValue));
+                lineChart.getData().add(criticalLine); 
+                criticalLine.setName("critival Value");
+           }
+
+            lineChart.getData().add(series);
+
+            
+ 
+            Scene scene  = new Scene(lineChart,800,600);
+            anovaGraphStage.setScene(scene);
+            anovaGraphStage.show();
+    }
+
     /**
      * Gets called when data point exceed 10000 to inform User.
      */

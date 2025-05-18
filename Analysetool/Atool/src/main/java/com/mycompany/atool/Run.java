@@ -6,6 +6,7 @@ package com.mycompany.atool;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  *
@@ -16,26 +17,26 @@ public class Run {
     public static Byte REJECTED_NULLHYPOTHESIS = 0;
     public static Byte UNDEFIND_NULLHYPOTHESIS = -1;
     public static Double UNDEFINED_VALUE = Double.MIN_VALUE;
+    public static Float UNDEFINED_FLOAT_VALUE = Float.MIN_VALUE;
+    public static Integer UNDEFINED_FLOAT_INTEGER = Integer.MIN_VALUE;
     
     private List<DataPoint> data = new ArrayList<>();
     private final List<Run> runToCompare = new ArrayList<>();
     private final int runID;
-    private double intervalFrom = 0;
-    private double intervalTo = 0;
-    private double averageSpeed;
-    private double standardDeviation = 0;
-    public static final int SPEED_PER_SEC = 10;
-    private double ssa;
-    private double sse;
+    private double intervalFrom = UNDEFINED_VALUE;
+    private double intervalTo  = UNDEFINED_VALUE;
+    private double averageSpeed = UNDEFINED_VALUE;
+    private double standardDeviation = UNDEFINED_VALUE;
+    private double ssa = UNDEFINED_VALUE;
+    private double sse = UNDEFINED_VALUE;
     private Byte isNullhypothesis = UNDEFIND_NULLHYPOTHESIS;
-    private double F;
+    private double F = UNDEFINED_VALUE;
     private double zVal = UNDEFINED_VALUE;
     private double qVal = UNDEFINED_VALUE;
     private double tVal = UNDEFINED_VALUE;
-    private double OverlappingDifference = 0;
-    public float rank = 0;
-    private double criticalZLeft;
-    private double criticalZRight;
+    private double cov = UNDEFINED_VALUE;
+    private double OverlappingDifference = UNDEFINED_VALUE;
+    public float rank = UNDEFINED_FLOAT_VALUE;
 
     
     public Run(final int runNumber, List<DataPoint> runData){
@@ -103,6 +104,13 @@ public class Run {
     
     public double getOverlappingDifference(){
         return this.OverlappingDifference;
+    } 
+    
+    public String getOverlappingDifferenceAsString(){
+        if(this.OverlappingDifference == UNDEFINED_VALUE){
+            return "";
+        }
+        return String.format(Settings.DIGIT_FORMAT, this.OverlappingDifference);
     } 
     
     public void setOverlappingDifference(double OverlappingDifference){
@@ -258,7 +266,24 @@ public class Run {
         if(this.qVal == UNDEFINED_VALUE){
             return "";
         }
-        return String.format(Settings.DIGIT_FORMAT, this.qVal);
+        return String.format(Locale.ENGLISH,Settings.DIGIT_FORMAT, this.qVal);
+    }
+    
+        
+    public double getCoV(){
+        return this.cov;
+    }
+    
+        
+    public String getCoVAsString(){
+        if(Double.isNaN(this.cov)){
+            return "";
+        }
+        return String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.cov * 100);
+    }
+    
+        public void setCoV(double cov){
+            this.cov = cov;
     }
 
 }

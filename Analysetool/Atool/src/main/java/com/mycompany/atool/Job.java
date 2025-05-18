@@ -163,20 +163,9 @@ public class Job {
         this.epsilon = epsilon;
     }
     
-    public void getCoV(){
-        int k = 10;
-        int check_runs_counter = this.runsCounter - k;
-        if(check_runs_counter >= 1){
-            for (int i = 0; i < this.runsCounter - k; i++) {
-                double mean = 0;
-                for (int j = i; j < k+i; j++) {
-                    mean += getRuns().get(j).getAverageSpeed();
-                }
-                mean = mean / k;
-                System.err.println("mean: " + mean);
-                System.err.println("Standard Dev: " + getStandardDeviation());
-                System.err.println("Standard Dev: " + i + " | " + getStandardDeviation() / mean);
-            }
+    public void clearRuns(){
+        for (Run run : this.runs) {
+            run.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
         }
     }
 
@@ -189,14 +178,49 @@ public class Job {
         }
         
         this.conversion = Settings.CONVERSION_VALUE;
-        
-        int run_size = (rawData.size() / runsCounter);
+        int AVERAGE_TIME_PER_MILLISEC = Settings.AVERAGE_SPEED_PER_MILLISEC;
         int i = 0;
+        
+        final int MIN_RUN_DATA_LENGTH = 8;
+        final int MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI = (int) Math.floor(rawData.size() / (MIN_RUN_DATA_LENGTH * runsCounter));
+        
+        if(AVERAGE_TIME_PER_MILLISEC > MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI){
+            AVERAGE_TIME_PER_MILLISEC = MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI;
+        }
+        
+        List<DataPoint> averagedData = new ArrayList<>();
+        if(!(AVERAGE_TIME_PER_MILLISEC == 1)){
+        double speed = 0;
+        boolean flag = false;
+        int counter = 0;
+        
+        for (DataPoint dataPoint : rawData) {
+            if(i % AVERAGE_TIME_PER_MILLISEC == 0 && flag){
+                double average_speed = speed / AVERAGE_TIME_PER_MILLISEC;
+                averagedData.add(new DataPoint(average_speed, dataPoint.getTime()));
+                speed = dataPoint.getSpeed();
+                counter = 1;
+            } else {
+                flag = true;
+                speed += dataPoint.getSpeed();
+                counter++;
+            }   
+            i++;
+        }       
+            } else {
+            averagedData = rawData;
+        }
+
+        int runDataSize = (averagedData.size() / runsCounter);
+        System.err.println("averaged size : " + averagedData.size() + " | " + "raw data size: " + rawData.size() + " runDatasize: " + runDataSize + "MAX_TIME: " + MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI);
+        /*
+        Split job into runs depending on run_size
+       
         ArrayList<DataPoint> run_data;
         for (int j = 1; j <= runsCounter; j++) {
                 run_data = new ArrayList<>();
-            for (; i < run_size*j; i++) {
-                DataPoint dp = new DataPoint(this.rawData.get(i).getSpeed() / Settings.CONVERSION_VALUE, this.rawData.get(i).getTime());
+            for (; i < runDataSize*j; i++) {
+                DataPoint dp = new DataPoint(averagedData.get(i).getSpeed() / Settings.CONVERSION_VALUE, averagedData.get(i).getTime());
                 run_data.add(dp);
                 convertedData.add(dp);
             }
@@ -204,10 +228,20 @@ public class Job {
                 //run.addRunToCompareTo(run);
                 runs.add(run);
         }
-
-        double speed = 0;
-        boolean flag = false;
-        int counter = 0;
+         */
+        i = 0;
+        ArrayList<DataPoint> run_data;
+        for (int j = 1; j <= runsCounter; j++) {
+                run_data = new ArrayList<>();
+            for (; i < runDataSize*j; i++) {
+                DataPoint dp = new DataPoint(averagedData.get(i).getSpeed() / Settings.CONVERSION_VALUE, averagedData.get(i).getTime());
+                run_data.add(dp);
+                convertedData.add(dp);
+            }
+                Run run = new Run(j, run_data);
+                //run.addRunToCompareTo(run);
+                runs.add(run);
+        }
         
         //Add runs to compare, i.e compare for ANOVA first run with the second run.
         int j;
@@ -217,31 +251,6 @@ public class Job {
                     runs.get(j).addRunToCompareTo(runs.get(j + k));
                }
             }
-        }
-        
-        for (; j < runs.size(); j++) {
-            runs.get(j).setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
-        }
-        getCoV();
-
-        
-        if(Settings.AVERAGE_SPEED_PER_MILLISEC == 1) return;
-
-        for (Run run : this.getRuns()) {
-            List<DataPoint> runData = new ArrayList<>();
-            for (j = 0; j < run.getData().size(); j++) {
-                if(j % Settings.AVERAGE_SPEED_PER_MILLISEC == 0 && flag){
-                    double average_speed = speed / Settings.AVERAGE_SPEED_PER_MILLISEC;
-                    runData.add(new DataPoint(average_speed, j));
-                    speed = 0;
-                    counter = 0;
-                } else {
-                    flag = true;
-                    speed += run.getData().get(j).getSpeed();
-                    counter++;
-                }
-            }
-            run.setData(runData);
         }
 }
 

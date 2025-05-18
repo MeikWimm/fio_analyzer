@@ -10,7 +10,9 @@ import com.mycompany.atool.Run;
 import com.mycompany.atool.Utils;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -20,6 +22,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -45,6 +48,8 @@ public class TTest implements Initializable{
     
     @FXML public Label zCritLabel;
     
+    @FXML public Button drawTTest;
+    
     @FXML public TableView<Run> TTable;
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
@@ -55,6 +60,8 @@ public class TTest implements Initializable{
     private Job job;
     private TDistribution t;
     private double tCrit;
+    private Charter charter;
+    private Map<Integer, Double> tData;
     
     public void tTtest(){
         
@@ -76,6 +83,9 @@ public class TTest implements Initializable{
             double denominator = Math.sqrt((runVariance1 / runSize1) + (runVariance2 / runSize2));
             double tVal = Math.abs(nominator / denominator);
             run1.setT(tVal);
+            
+            tData.put(run1.getID(), tVal);
+            
             run2.setT(Run.UNDEFINED_VALUE);
             run2.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
             if(this.tCrit < tVal){
@@ -88,6 +98,9 @@ public class TTest implements Initializable{
     
    public TTest(Job job){
        this.job = job;
+       this.job.clearRuns();
+       charter = new Charter();
+       tData = new HashMap<>();
        if(job.getRunDataSize() <= 1) return;
 
        this.t = new TDistribution(job.getRuns().get(0).getData().size() * 2 - 2);
@@ -110,9 +123,13 @@ public class TTest implements Initializable{
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
-
+        drawTTest.setOnAction(e -> drawTGraph(this.job));
         TTable.setItems(this.job.getRuns());
         setLabeling();
+    }
+    
+    private void drawTGraph(Job job){
+        charter.drawGraph(job, "T-Test", "Run", "T-Value", "calculated T", this.tData, tCrit);
     }
     
     private double calculateVariance(Run run, double sse){

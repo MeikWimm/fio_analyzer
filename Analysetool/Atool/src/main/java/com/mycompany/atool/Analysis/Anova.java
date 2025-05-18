@@ -6,12 +6,17 @@ package com.mycompany.atool.Analysis;
 
 import com.mycompany.atool.DataPoint;
 import com.mycompany.atool.Job;
+import com.mycompany.atool.RamerDouglasPeucker;
 import com.mycompany.atool.Run;
 import com.mycompany.atool.Settings;
 import com.mycompany.atool.Utils;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -21,6 +26,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -28,6 +37,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.apache.commons.math3.distribution.FDistribution;
 
@@ -57,9 +67,14 @@ public class Anova implements Initializable{
     @FXML public Label fCriticalLabel;
     @FXML public Label fCalculatedLabel;
     
+    @FXML public Button showFGraphButton;
+    
+    @FXML public Pane anovaPane; 
+    
     @FXML public TableView<Run> anovaTable;
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
+    @FXML public TableColumn<Run, String> covColumn;
     @FXML public TableColumn<Run, String> compareToRunColumn;
     @FXML public TableColumn<Run, String> FColumn;
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
@@ -69,13 +84,17 @@ public class Anova implements Initializable{
     private double fVal = 0.0;
     private double fCrit;
     private int steadyStateRunID = -1;
+    private Map<Integer, Double> anovaData;
     private FDistribution fDistribution;
+    private Charter charter;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         averageSpeedColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
-      
+
+        covColumn.setCellValueFactory(new PropertyValueFactory<>("CoVAsString"));
+        
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
         FColumn.setCellValueFactory(new PropertyValueFactory<>("FAsString"));
@@ -91,20 +110,34 @@ public class Anova implements Initializable{
                 }
         });        
         
+        showFGraphButton.setOnAction(e -> drawANOVAGraph(this.job));
+        
         anovaTable.setItems(this.job.getRuns());
     }
     
-    public Anova(){
-        this.job = new Job();
+     private void setLabeling(Run run){
+        averageSpeedLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getAverageSpeed()));
+        sseLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSSE()));
+        ssaLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSSA()));
+        sstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSST()));
+        ssaSstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT,(run.getSSA() / run.getSST())));
+        sseSstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT,(run.getSSE() / run.getSST())));
+        fCriticalLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.fCrit));
+        fCalculatedLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getF()));
     }
     
     public Anova(Job job){
         this.job = job;
+        this.job.clearRuns();
+        charter = new Charter();
+        anovaData = new HashMap<>();
         if(job.getRuns().get(0).getRunToCompareTo().size() <= 1){
             fDistribution = new FDistribution(1,1);
         } else {
             int num = job.getRuns().get(0).getRunToCompareTo().size() - 1;
+            //System.err.println("run data size: " + job.getRunDataSize()); 
             int denom = (num + 1) * (job.getRunDataSize() - 1);
+            //if(denom == 0 ||num == 0) return;
             LOGGER.log(Level.INFO,String.format("Calculated Numerator %d and Denominator %d", num, denom));
             fDistribution = new FDistribution(num, denom);
             fCrit = fDistribution.inverseCumulativeProbability(1.0-job.getAlpha());
@@ -115,7 +148,7 @@ public class Anova implements Initializable{
 
     public void calculateANOVA(){
         if(job.getRuns().size() <= 1) return;
-       
+        calcualteCoV();
         /*
         if(job.getCode().equals(jobCode)) {
             return;
@@ -159,16 +192,16 @@ public class Anova implements Initializable{
             double s_2_a = run.getSSA() / (run.getRunToCompareTo().size() - 1); 
             double s_2_e = run.getSSE() / (run.getRunToCompareTo().size()  * (run.getData().size() - 1));
             fValue = s_2_a / s_2_e;
-            run.setF(s_2_a / s_2_e);
+            run.setF(fValue);
             if(!run.getRunToCompareTo().isEmpty()){
                 // critical p-value < alpha value of job
-                if(fDistribution.inverseCumulativeProbability(1.0-job.getAlpha()) < fValue){
+                if(this.fCrit < fValue){
                     run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
                 } else {
                     run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
                 }
+                anovaData.put(run.getID(), fValue);
             }
-
         }
         
         //calculateSteadyState();
@@ -177,49 +210,24 @@ public class Anova implements Initializable{
           jobCode = job.getCode();        
     }
     
-    private void calculateSteadyState(){
-        int k = 10;
-        int check_runs_counter = this.job.getRunsCounter() - k;
-        int largestCountOfHypothesis = -1;
-        int runIDWithSmallesCount = -1;
-        if(check_runs_counter >= 1){
-            for (int i = 0; i < check_runs_counter; i++) {
-                int countOfTrueHypothesis = 0;
-                
-                for (int j = i; j < k+i; j++) {
-                    if(this.job.getRuns().get(j).getNullhypothesis() == Run.ACCEPTED_NULLHYPOTHESIS){
-                        countOfTrueHypothesis++;
-                    }
-                }
-                
-                if(countOfTrueHypothesis > largestCountOfHypothesis){
-                    runIDWithSmallesCount = i;
-                    largestCountOfHypothesis = countOfTrueHypothesis;
-                }
-                
-
+    private void calcualteCoV(){
+        for (Run r : this.job.getRuns()) {
+            double cov;
+            double jobStandardDeviation = this.job.getStandardDeviation();
+            double average = 0;
+            for (Run run : r.getRunToCompareTo()) {
+                average += run.getAverageSpeed();
             }
-        } 
-        System.err.println("Run ID: " + runIDWithSmallesCount + " Hypothesis Count: " + largestCountOfHypothesis);
+            average = average / r.getRunToCompareTo().size();
+            cov = jobStandardDeviation / average;
+            r.setCoV(cov);
+        }
     }
-
-    private void setLabeling(Run run){
-        averageSpeedLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getAverageSpeed()));
-        sseLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSSE()));
-        ssaLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSSA()));
-        sstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSST()));
-        ssaSstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT,(run.getSSA() / run.getSST())));
-        sseSstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT,(run.getSSE() / run.getSST())));
-        fCriticalLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.fCrit));
-        fCalculatedLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getF()));
+        public void drawANOVAGraph(Job job) {        
+            charter.drawGraph(job, "ANOVA", "Run", "F-Value", "calculated F", anovaData, this.fCrit);
     }
     
-    public void openWindow(){
-        initStage();
-        stage.show();
-    }
-    
-    public ConInt.STATUS initStage(){
+    private ConInt.STATUS initStage(){
         try {
             
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/mycompany/atool/Anova.fxml"));
@@ -236,7 +244,8 @@ public class Anova implements Initializable{
             stage.setMinHeight(600);
             stage.setMinWidth(800);
             stage.setTitle("Calculated ANOVA");
-            stage.setScene(new Scene(root1));            
+            stage.setScene(new Scene(root1));         
+            stage.show();
     } catch (IOException e) {
             //LOGGER.log(Level.SEVERE, (Supplier<String>) e);
             e.printStackTrace();
@@ -244,5 +253,9 @@ public class Anova implements Initializable{
             return ConInt.STATUS.IO_EXCEPTION;
         }
         return ConInt.STATUS.SUCCESS;
+    }
+    
+    public void openWindow(){
+        initStage();
     }
 }

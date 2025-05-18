@@ -14,6 +14,7 @@ public class DataPoint {
     private double time;
     private int flag; 
     private double rank;
+    private int runID = Run.UNDEFINED_FLOAT_INTEGER;
     
     public DataPoint(double speed, double time) {
         this.speed = speed;
@@ -58,7 +59,12 @@ public class DataPoint {
     public double getRank(){
         return this.rank;
     }
-    
-    
-    
+   
+    public int getRunID(){
+        return this.runID;
+    }
+
+    public void setRunID(int runID){
+        this.runID = runID;
+    }
 }

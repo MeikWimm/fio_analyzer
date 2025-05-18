@@ -11,8 +11,9 @@ import com.mycompany.atool.Settings;
 import com.mycompany.atool.Utils;
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -22,6 +23,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -38,6 +43,24 @@ import net.sourceforge.jdistlib.Tukey;
 public class TukeyHSD implements Initializable{
     private static final Logger LOGGER = Logger.getLogger( TukeyHSD.class.getName() );
     
+    private class TukeyDataPoint{
+        private double mean;
+        private double qHSD;
+        
+        public TukeyDataPoint(double mean, double qHSD){
+            this.mean = mean;
+            this.qHSD = qHSD;
+        }
+        
+        public double getQHSD(){
+            return this.qHSD;
+        }
+        
+        public double getMean(){
+            return this.mean;
+        }
+    }
+    
     static {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setLevel(Level.FINEST);
@@ -48,6 +71,7 @@ public class TukeyHSD implements Initializable{
 
     @FXML public Label qCritLabel;
 
+    @FXML public Button drawTukey;
     
     @FXML public TableView<Run> TukeyTable;
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
@@ -59,9 +83,12 @@ public class TukeyHSD implements Initializable{
     private final Job job;
     private Tukey tukey;
     private double qHSD;
+    private Map<Integer, TukeyDataPoint> tukeyData;
     
     public TukeyHSD(Job job){
         this.job = job;
+        this.job.clearRuns();
+        this.tukeyData = new HashMap<>();
     }
 
     @Override
@@ -76,11 +103,52 @@ public class TukeyHSD implements Initializable{
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
+        drawTukey.setOnAction(e -> drawTukeyGraph(this.job));
+        
         TukeyTable.setItems(this.job.getRuns());   
         setLabeling();
     }
     
+    public void drawTukeyGraph(Job job){
+            Stage anovaGraphStage = new Stage();
+            final NumberAxis xAxis = new NumberAxis();
+            final NumberAxis yAxis = new NumberAxis();
+            xAxis.setLabel("Run");
+            yAxis.setLabel("Mean");
+            LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
+            lineChart.setTitle("Tukey-HSD Test");
+            lineChart.setHorizontalGridLinesVisible(false);
+            lineChart.setVerticalGridLinesVisible(false);
+            
+            XYChart.Series<Number, Number> overallmeanSeries = new XYChart.Series<>();
+            overallmeanSeries.setName("Mean Between Runs");
+            
+            XYChart.Series<Number, Number> qHSDSeries = new XYChart.Series<>();
+            qHSDSeries.setName("Q-HSD");
+            
+
+            for (Map.Entry<Integer, TukeyDataPoint> entry : tukeyData.entrySet()) {
+                Integer key = entry.getKey();
+                TukeyDataPoint tukeyDataPoint = entry.getValue();
+                
+                overallmeanSeries.getData().add(new XYChart.Data<>(key, tukeyDataPoint.getMean()));
+                qHSDSeries.getData().add(new XYChart.Data<>(key, tukeyDataPoint.getQHSD()));
+            }
+            
+
+
+            lineChart.getData().add(overallmeanSeries);
+            lineChart.getData().add(qHSDSeries);
+
+            
+ 
+            Scene scene  = new Scene(lineChart,800,600);
+            anovaGraphStage.setScene(scene);
+            anovaGraphStage.show();
+    }
+    
     public void calculateTukeyHSD(){
+        if(job.getRuns().size() <= 1) return;
         for (int i = 0; i < job.getRuns().size(); i += 2) {
             Run run1 = job.getRuns().get(i);
             Run run2 = job.getRuns().get(i + 1);
@@ -92,6 +160,9 @@ public class TukeyHSD implements Initializable{
             this.qHSD = tukey.inverse_survival(job.getAlpha(), false) * Math.sqrt((sse / (2.0 * (this.job.getRunDataSize()))) / job.getRunDataSize());
             
             run1.setQ(overallMean);
+            
+            tukeyData.put(run1.getID(), new TukeyDataPoint(overallMean, qHSD));
+            
             run2.setQ(Run.UNDEFINED_VALUE);
             run2.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
             

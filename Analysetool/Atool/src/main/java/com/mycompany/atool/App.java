@@ -1,6 +1,5 @@
 package com.mycompany.atool;
 
-import com.mycompany.atool.Analysis.Anova;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

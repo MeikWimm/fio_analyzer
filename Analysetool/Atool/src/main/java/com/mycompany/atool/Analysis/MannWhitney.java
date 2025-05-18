@@ -7,13 +7,16 @@ package com.mycompany.atool.Analysis;
 import com.mycompany.atool.DataPoint;
 import com.mycompany.atool.Job;
 import com.mycompany.atool.Run;
+import com.mycompany.atool.Settings;
 import com.mycompany.atool.Utils;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -23,6 +26,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -53,6 +57,8 @@ public class MannWhitney implements Initializable{
     @FXML public TableColumn<Run, Integer> compareToRunColumn;
     @FXML public TableColumn<Run, String> ZColumn;
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
+    
+    @FXML public Button drawUTestButton;
    
     @FXML public Label zIntervalLabel;
     
@@ -61,6 +67,8 @@ public class MannWhitney implements Initializable{
     private double zCrit_rightside = -1;
     private static int jobRunCounter = 0;
     private static double jobAlpha = -1.0;
+    private Map<Integer, Double> uTestData;
+    private Charter charter;
     
         private Job job;
     public MannWhitney(Job job){
@@ -68,6 +76,9 @@ public class MannWhitney implements Initializable{
         zCrit_leftside = nDis.inverseCumulativeProbability(job.getAlpha() / 2.0);
         zCrit_rightside = nDis.inverseCumulativeProbability(1 - job.getAlpha() / 2.0);
         this.job = job;
+        this.job.clearRuns();
+        this.charter = new Charter();
+        this.uTestData = new HashMap<>();
     }
     
         @Override
@@ -83,13 +94,18 @@ public class MannWhitney implements Initializable{
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
         uTestTable.setItems(this.job.getRuns());
+        
+        drawUTestButton.setOnAction(e -> drawUTest(this.job));
         setLabeling();
     }
     
     private void setLabeling(){
-        zIntervalLabel.setText(String.format(Locale.ENGLISH, "[%,.5f,%,.5f]", this.zCrit_leftside, this.zCrit_rightside));
+        zIntervalLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.zCrit_rightside));
     }
     
+    private void drawUTest(Job job){
+        charter.drawGraph(job, "U-Test", "Run", "calculated Z-Value", "calculated Z-Value", uTestData, zCrit_rightside);
+    }
 
     private void calculateMannWhitney(Run run1, Run run2) {
         List<DataPoint> runData1 = run1.getData();
@@ -150,7 +166,7 @@ public class MannWhitney implements Initializable{
         }
         
         double m = mergedData.size() / 2.0;
-        System.err.println("Rank Sum 1: " + run1_ranksum + " m: " + m);
+        //.err.println("Rank Sum 1: " + run1_ranksum + " m: " + m);
         //double z_1 = (run1_ranksum - 0.5 * m * (2.0 * m + 1.0)) / (Math.sqrt((1.0/12.0) * Math.pow(m, 2) * (2.0 * m + 1.0)));
         //double z_2 = (run2_ranksum - 0.5 * m * (2.0 * m + 1.0)) / (Math.sqrt((1.0/12.0) * Math.pow(m, 2) * (2.0 * m + 1.0)));
         
@@ -161,17 +177,20 @@ public class MannWhitney implements Initializable{
         double mu_U = m * m * 0.5;
         double sigma_U = Math.sqrt((m * m * (2*m + 1))/12.0);
         double U = Math.min(U1, U2);
-        double z = (U - mu_U) / sigma_U;
-        
+        double z = Math.abs((U - mu_U) / sigma_U);
 
+        
+        System.err.println("Run: " + run1.getID() + " m: " +m );
         run1.setZ(z);
         run2.setZ(Run.UNDEFINED_VALUE);
         run2.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);      
         NormalDistribution n = new NormalDistribution();
         
+        uTestData.put(run1.getID(), z);
+        
         double pCalc = n.cumulativeProbability(z);
         
-        if(pCalc < this.job.getAlpha() / 2.0){
+        if(pCalc > 1 - this.job.getAlpha() / 2.0){
                 run1.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
             } else {
                 run1.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);

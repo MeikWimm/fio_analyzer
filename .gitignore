@@ -19,6 +19,8 @@ books
 *.toc
 *.txt
 *.lot
+*.rar
+*.dll
 *.dvi
 *.ps
 *.~*
