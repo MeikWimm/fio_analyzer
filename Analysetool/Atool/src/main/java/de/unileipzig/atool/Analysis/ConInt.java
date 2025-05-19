@@ -112,7 +112,7 @@ public class ConInt implements Initializable{
 
     public STATUS openWindow(){
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/mycompany/atool/ConInt.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/ConInt.fxml"));
             fxmlLoader.setController(this);
             Parent root1 = (Parent) fxmlLoader.load();
             /* 

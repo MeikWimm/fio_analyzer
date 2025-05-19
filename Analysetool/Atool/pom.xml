@@ -115,7 +115,7 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>com.mycompany.atool.App</mainClass>
+                                    <mainClass>de.unileipzig.atool.App</mainClass>
                                     <addClasspath>true</addClasspath>
                                 </manifest>
                             </archive>
