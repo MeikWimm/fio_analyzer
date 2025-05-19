@@ -1,4 +1,4 @@
-module com.mycompany.atool {
+module de.unileipzig.atool {
     requires javafx.controls;
     requires javafx.fxml;
     requires commons.math3;

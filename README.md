@@ -8,7 +8,7 @@ Ein Analysewerkzeug für `fio`-Benchmark-Logs mit grafischer Oberfläche und sta
 
 - **JavaFX Library**  
   [https://gluonhq.com/products/javafx/](https://gluonhq.com/products/javafx/)  
-  → Inhalt von `javafx-sdk-21.0.1 (LTS)` ins `target/`-Verzeichnis kopieren.
+  → Den Ordner `lib` aus `javafx-sdk-21.0.1/lib` ins `target/`-Verzeichnis kopieren.
 
 - **OpenJDK 21**
 
@@ -20,9 +20,9 @@ Ein Analysewerkzeug für `fio`-Benchmark-Logs mit grafischer Oberfläche und sta
 mvn package
 
 # Anwendung starten
-- mvn exec:exec@run-javafx
-- or
-- java --module-path ${project.build.directory}/lib --add-modules javafx.controls,javafx.fxml -jar ${project.build.directory}/Atool-1.0-SNAPSHOT.jar
+- mvn exec:exec@run-javafx (oder:)
+- java --module-path ./lib --add-modules javafx.controls,javafx.fxml -jar ./Atool-1.0-SNAPSHOT.jar
+    - diesen Command im /target Verzeichnis ausführen
 
 ## Verwendung
 
