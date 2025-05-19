@@ -35,3 +35,5 @@ books
 *.dep
 /Analysetool/Atool/target/
 papers/
+.idea/
+*.iml
