@@ -6,6 +6,6 @@ module de.unileipzig.atool {
     requires jdistlib;
 
     opens de.unileipzig.atool to javafx.fxml;
-    opens com.mycompany.atool.Analysis to javafx.fxml;
+    opens de.unileipzig.atool.Analysis to javafx.fxml;
     exports de.unileipzig.atool;
 }
