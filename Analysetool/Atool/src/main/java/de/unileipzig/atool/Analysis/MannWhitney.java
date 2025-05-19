@@ -225,7 +225,7 @@ public class MannWhitney implements Initializable{
     
         public ConInt.STATUS openWindow(){
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/mycompany/atool/MannWithney.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/MannWithney.fxml"));
             fxmlLoader.setController(this);
             Parent root1 = (Parent) fxmlLoader.load();
             /* 

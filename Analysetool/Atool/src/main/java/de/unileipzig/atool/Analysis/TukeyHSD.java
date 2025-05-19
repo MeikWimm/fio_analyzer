@@ -195,7 +195,7 @@ public class TukeyHSD implements Initializable{
 
     public ConInt.STATUS openWindow(){
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/mycompany/atool/TukeyHSD.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/TukeyHSD.fxml"));
             fxmlLoader.setController(this);
             Parent root1 = (Parent) fxmlLoader.load();
 

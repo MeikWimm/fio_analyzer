@@ -133,7 +133,7 @@ public class Settings implements Initializable{
 
     public void openWindow(){
     try {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/mycompany/atool/Settings.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/Settings.fxml"));
         fxmlLoader.setController(this);
         Parent root1 = (Parent) fxmlLoader.load();
         /* 
