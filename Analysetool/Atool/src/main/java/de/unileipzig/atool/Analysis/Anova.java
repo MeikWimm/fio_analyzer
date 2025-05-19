@@ -35,6 +35,8 @@ import java.util.logging.Logger;
 public class Anova implements Initializable {
     private static final Logger LOGGER = Logger.getLogger(Anova.class.getName());
 
+    public record SigRunData(List<Run> comparedRuns, double sse){}
+
     static {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setLevel(Level.FINEST);
@@ -68,13 +70,15 @@ public class Anova implements Initializable {
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
     //private static String jobCode = "";
     private double fCrit;
+    private final List<SigRunData> significantRuns;
 
     public Anova(Job job) {
         this.job = job;
         this.job.clearRuns();
-        charter = new Charter();
-        anovaData = new HashMap<>();
-        covData = new HashMap<>();
+        this.charter = new Charter();
+        this.anovaData = new HashMap<>();
+        this.covData = new HashMap<>();
+        this.significantRuns = new ArrayList<>();
         FDistribution fDistribution;
         if (job.getRuns().getFirst().getRunToCompareTo().size() <= 1) {
             fDistribution = new FDistribution(1, 1);
@@ -129,8 +133,8 @@ public class Anova implements Initializable {
         fCalculatedLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getF()));
     }
 
-    public void calculateANOVA() {
-        if (job.getRuns().size() <= 1) return;
+    public List<SigRunData> calculateANOVA() {
+        if (job.getRuns().size() <= 1) return null;
         /*
         if(job.getCode().equals(jobCode)) {
             return;
@@ -182,6 +186,7 @@ public class Anova implements Initializable {
                     run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
                 } else {
                     run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+                    significantRuns.add(new SigRunData(run.getRunToCompareTo(), run.getSSE()));
                 }
                 anovaData.put(run.getID(), fValue);
                 covData.put(run.getID(), cov);
@@ -190,7 +195,7 @@ public class Anova implements Initializable {
                 run.setCoV(Run.UNDEFINED_VALUE);
             }
         }
-
+    return significantRuns;
         //calculateSteadyState();
 
         // remember run counter and alpha to avoid multiple calculations with the same values.
@@ -198,17 +203,13 @@ public class Anova implements Initializable {
     }
 
     private double calcualteCoV(Run r) {
-        double cov;
         double jobStandardDeviation = this.job.getStandardDeviation();
-        double average = 0;
+        double sum = 0;
         for (Run run : r.getRunToCompareTo()) {
-            average += run.getAverageSpeed();
+            sum += run.getAverageSpeed();
         }
-        average = average / r.getRunToCompareTo().size();
-        cov = jobStandardDeviation / average;
-        r.setCoV(cov);
-        r.setCoV(Run.UNDEFINED_VALUE);
-        return cov;
+        double average = sum / r.getRunToCompareTo().size();
+        return jobStandardDeviation / average;
     }
 
     public void drawANOVAGraph(Job job) {

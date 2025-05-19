@@ -4,17 +4,13 @@
  */
 package de.unileipzig.atool.Analysis;
 
-import de.unileipzig.atool.DataPoint;
 import de.unileipzig.atool.Job;
 import de.unileipzig.atool.Run;
 import de.unileipzig.atool.Settings;
 import de.unileipzig.atool.Utils;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,26 +36,10 @@ import net.sourceforge.jdistlib.Tukey;
  *
  * @author meni1999
  */
-public class TukeyHSD implements Initializable{
+public class TukeyHSD  implements Initializable{
     private static final Logger LOGGER = Logger.getLogger( TukeyHSD.class.getName() );
-    
-    private static class TukeyDataPoint{
-        private final double mean;
-        private final double qHSD;
-        
-        public TukeyDataPoint(double mean, double qHSD){
-            this.mean = mean;
-            this.qHSD = qHSD;
-        }
-        
-        public double getQHSD(){
-            return this.qHSD;
-        }
-        
-        public double getMean(){
-            return this.mean;
-        }
-    }
+
+    private record TukeyDataPoint(double mean, double qHSD) {}
     
     static {
         ConsoleHandler handler = new ConsoleHandler();
@@ -83,8 +63,12 @@ public class TukeyHSD implements Initializable{
     private final Job job;
     private double qHSD;
     private final Map<Integer, TukeyDataPoint> tukeyData;
+    private final List<Anova.SigRunData> significantRuns;
     
     public TukeyHSD(Job job){
+        //super(job);
+        Anova anova = new Anova(job);
+        this.significantRuns = anova.calculateANOVA();
         this.job = job;
         this.job.clearRuns();
         this.tukeyData = new HashMap<>();
@@ -130,16 +114,12 @@ public class TukeyHSD implements Initializable{
                 Integer key = entry.getKey();
                 TukeyDataPoint tukeyDataPoint = entry.getValue();
                 
-                overallmeanSeries.getData().add(new XYChart.Data<>(key, tukeyDataPoint.getMean()));
-                qHSDSeries.getData().add(new XYChart.Data<>(key, tukeyDataPoint.getQHSD()));
+                overallmeanSeries.getData().add(new XYChart.Data<>(key, tukeyDataPoint.mean()));
+                qHSDSeries.getData().add(new XYChart.Data<>(key, tukeyDataPoint.qHSD()));
             }
-            
-
 
             lineChart.getData().add(overallmeanSeries);
             lineChart.getData().add(qHSDSeries);
-
-            
  
             Scene scene  = new Scene(lineChart,800,600);
             anovaGraphStage.setScene(scene);
@@ -148,46 +128,53 @@ public class TukeyHSD implements Initializable{
     
     public void calculateTukeyHSD(){
         if(job.getRuns().size() <= 1) return;
-        for (int i = 0; i < job.getRuns().size(); i += 2) {
-            Run run1 = job.getRuns().get(i);
-            Run run2 = job.getRuns().get(i + 1);
-            double overallMean = Math.abs(run1.getAverageSpeed() - run2.getAverageSpeed());
-            double sse = calculateSSE(run1, run2);
-
+        int groupSize = significantRuns.getFirst().comparedRuns().size();
+        for (int i = 0; i < significantRuns.size() - 1; i++) {
             Tukey tukey = new Tukey(1, 2, 2 * (job.getRunDataSize() - 1));
-            
+            List<Run> group1 = significantRuns.get(i).comparedRuns();
+            List<Run> group2 = significantRuns.get(i + 1).comparedRuns();
+            double speedSumGroup1 = 0;
+            double speedSumGroup2 = 0;
+
+            for (int j = 0; j < group1.size(); j++) {
+                Run run1 = group1.get(j);
+                Run run2 = group2.get(j);
+
+                speedSumGroup1 += run1.getAverageSpeed();
+                speedSumGroup2 += run2.getAverageSpeed();
+            }
+
+            double averageSpeedGroup1 = speedSumGroup1 / group1.size();
+            double averageSpeedGroup2 = speedSumGroup2 / group2.size();
+
+            double sse = significantRuns.get(i).sse();
+            double overallMean = Math.abs(averageSpeedGroup1 - averageSpeedGroup2);
+
             this.qHSD = tukey.inverse_survival(job.getAlpha(), false) * Math.sqrt((sse / (2.0 * (this.job.getRunDataSize()))) / job.getRunDataSize());
-            
-            run1.setQ(overallMean);
-            
-            tukeyData.put(run1.getID(), new TukeyDataPoint(overallMean, qHSD));
-            
-            run2.setQ(Run.UNDEFINED_VALUE);
-            run2.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
-            
+
+            Run firstRunOfCompareList = group1.getFirst();
+            firstRunOfCompareList.setQ(overallMean);
+            for (int j = 1; j < group1.size(); j++) {
+                Run run = group1.get(j);
+                run.setQ(Run.UNDEFINED_VALUE);
+                run.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
+            }
+
+            for (Run run : group2) {
+                run.setQ(Run.UNDEFINED_VALUE);
+                run.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
+            }
+
+            tukeyData.put(firstRunOfCompareList.getID(), new TukeyDataPoint(overallMean, qHSD));
+
             if(qHSD < overallMean){
-                run1.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
+                firstRunOfCompareList.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
             } else {
-                run1.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+                firstRunOfCompareList.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
             }
         }
     }
-    
-        private double calculateSSE(Run run1, Run run2){
-        double sse = 0;
-        double averageSpeed = (run1.getAverageSpeed() + run2.getAverageSpeed()) / 2.0;
-        
-        for (DataPoint dp : run1.getData()) {
-                    sse += (Math.pow((dp.getSpeed() - averageSpeed), 2));
-        }
-    
-        for (DataPoint dp : run2.getData()) {
-                    sse += (Math.pow((dp.getSpeed() - averageSpeed), 2));
-        }
-        
-        return sse;
-    }
-    
+
     private void setLabeling(){
         qCritLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.qHSD));
     }

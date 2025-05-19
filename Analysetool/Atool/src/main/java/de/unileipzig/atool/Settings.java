@@ -130,7 +130,9 @@ public class Settings implements Initializable {
 
     @FXML
     public void onActionUseSpeedPerSec() {
-
+        boolean isSpeedPerSecSelected = checkboxSpeedPerSec.isSelected();
+        LOGGER.log(Level.INFO, String.format("use Average Speed per Sec set to %b", isSpeedPerSecSelected));
+        avSpeedSlider.setDisable(!isSpeedPerSecSelected);
     }
 
     public enum CONVERT {
