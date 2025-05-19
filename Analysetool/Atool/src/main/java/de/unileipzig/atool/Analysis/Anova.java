@@ -2,13 +2,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.atool.Analysis;
+package de.unileipzig.atool.Analysis;
 
-import com.mycompany.atool.DataPoint;
-import com.mycompany.atool.Job;
-import com.mycompany.atool.Run;
-import com.mycompany.atool.Settings;
-import com.mycompany.atool.Utils;
+import de.unileipzig.atool.DataPoint;
+import de.unileipzig.atool.Job;
+import de.unileipzig.atool.Run;
+import de.unileipzig.atool.Settings;
+import de.unileipzig.atool.Utils;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
@@ -50,6 +50,7 @@ public class Anova implements Initializable{
         LOGGER.addHandler(handler);      
     }
     
+    
     private final Job job;
     
     @FXML public Label averageSpeedLabel;
@@ -62,6 +63,7 @@ public class Anova implements Initializable{
     @FXML public Label fCalculatedLabel;
     
     @FXML public Button showFGraphButton;
+    @FXML public Button showCoVGraph;
     
     @FXML public Pane anovaPane; 
     
@@ -74,13 +76,12 @@ public class Anova implements Initializable{
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
     
     private Stage stage;
-    private static String jobCode = "";
-    private double fVal = 0.0;
+    //private static String jobCode = "";
     private double fCrit;
-    private int steadyStateRunID = -1;
-    private Map<Integer, Double> anovaData;
-    private FDistribution fDistribution;
-    private Charter charter;
+    private final Map<Integer, Double> anovaData;
+    private final Map<Integer, Double> covData;
+    private final FDistribution fDistribution;
+    private final Charter charter;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -102,8 +103,9 @@ public class Anova implements Initializable{
                 if(event.getButton().equals(MouseButton.PRIMARY)){
                     setLabeling(anovaTable.getSelectionModel().getSelectedItem());
                 }
-        });        
+        }); 
         
+        showCoVGraph.setOnAction(e -> drawCoVGraph(this.job));
         showFGraphButton.setOnAction(e -> drawANOVAGraph(this.job));
         
         anovaTable.setItems(this.job.getRuns());
@@ -125,6 +127,7 @@ public class Anova implements Initializable{
         this.job.clearRuns();
         charter = new Charter();
         anovaData = new HashMap<>();
+        covData = new HashMap<>();
         if(job.getRuns().get(0).getRunToCompareTo().size() <= 1){
             fDistribution = new FDistribution(1,1);
         } else {
@@ -142,7 +145,6 @@ public class Anova implements Initializable{
 
     public void calculateANOVA(){
         if(job.getRuns().size() <= 1) return;
-        calcualteCoV();
         /*
         if(job.getCode().equals(jobCode)) {
             return;
@@ -189,23 +191,27 @@ public class Anova implements Initializable{
             run.setF(fValue);
             if(!run.getRunToCompareTo().isEmpty()){
                 // critical p-value < alpha value of job
+                double cov = calcualteCoV(run);
                 if(this.fCrit < fValue){
                     run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
                 } else {
                     run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
                 }
                 anovaData.put(run.getID(), fValue);
+                covData.put(run.getID(), cov);
+            } else {
+                run.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
+                run.setCoV(Run.UNDEFINED_VALUE);
             }
         }
         
         //calculateSteadyState();
         
         // remember run counter and alpha to avoid multiple calculations with the same values.
-          jobCode = job.getCode();        
+        //  jobCode = job.getCode();        
     }
     
-    private void calcualteCoV(){
-        for (Run r : this.job.getRuns()) {
+    private double calcualteCoV(Run r){
             double cov;
             double jobStandardDeviation = this.job.getStandardDeviation();
             double average = 0;
@@ -214,11 +220,15 @@ public class Anova implements Initializable{
             }
             average = average / r.getRunToCompareTo().size();
             cov = jobStandardDeviation / average;
-            r.setCoV(cov);
-        }
+            r.setCoV(cov);            
+            r.setCoV(Run.UNDEFINED_VALUE);
+            return cov;
     }
         public void drawANOVAGraph(Job job) {        
             charter.drawGraph(job, "ANOVA", "Run", "F-Value", "calculated F", anovaData, this.fCrit);
+    }
+        public void drawCoVGraph(Job job) {        
+            charter.drawGraph(job, "Coefficent of Variation", "Run", "CoV", "calculated CoV (%)", covData, Run.UNDEFINED_VALUE);
     }
     
     private ConInt.STATUS initStage(){

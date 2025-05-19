@@ -2,12 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.atool.Analysis;
+package de.unileipzig.atool.Analysis;
 
-import com.mycompany.atool.InputModule;
-import com.mycompany.atool.Job;
-import com.mycompany.atool.Run;
-import com.mycompany.atool.Utils;
+import de.unileipzig.atool.InputModule;
+import de.unileipzig.atool.Job;
+import de.unileipzig.atool.Run;
+import de.unileipzig.atool.Utils;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;

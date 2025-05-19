@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.atool;
+package de.unileipzig.atool;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -274,7 +274,7 @@ public class Run {
     
         
     public String getCoVAsString(){
-        if(Double.isNaN(this.cov)){
+        if(this.cov == Run.UNDEFINED_VALUE){
             return "";
         }
         return String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.cov * 100);

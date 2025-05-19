@@ -5,7 +5,7 @@ module com.mycompany.atool {
     requires java.logging;
     requires jdistlib;
 
-    opens com.mycompany.atool to javafx.fxml;
+    opens de.unileipzig.atool to javafx.fxml;
     opens com.mycompany.atool.Analysis to javafx.fxml;
-    exports com.mycompany.atool;
+    exports de.unileipzig.atool;
 }

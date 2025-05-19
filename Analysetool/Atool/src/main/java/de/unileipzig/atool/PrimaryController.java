@@ -1,13 +1,12 @@
-package com.mycompany.atool;
+package de.unileipzig.atool;
 
 
-import com.mycompany.atool.Analysis.Anova;
-import com.mycompany.atool.Analysis.Charter;
-import com.mycompany.atool.Analysis.ConInt;
-import com.mycompany.atool.Analysis.MannWhitney;
-import com.mycompany.atool.Analysis.TTest;
-import com.mycompany.atool.Analysis.TukeyHSD;
-import java.io.File;
+import de.unileipzig.atool.Analysis.Anova;
+import de.unileipzig.atool.Analysis.Charter;
+import de.unileipzig.atool.Analysis.ConInt;
+import de.unileipzig.atool.Analysis.MannWhitney;
+import de.unileipzig.atool.Analysis.TTest;
+import de.unileipzig.atool.Analysis.TukeyHSD;
 import java.io.IOException;
 import java.util.logging.Logger;
 import java.net.URL;
@@ -327,13 +326,13 @@ public class PrimaryController implements Initializable{
         table.setRowFactory((TableView<Job> tableView) -> {
             final TableRow<Job> row = new TableRow<>();
             final ContextMenu rowMenu = new ContextMenu();
-            MenuItem applyTestItem = new MenuItem("Draw job speed");
-            applyTestItem.setOnAction((ActionEvent event) -> {
+            MenuItem drawJob = new MenuItem("Draw job speed");
+            drawJob.setOnAction((ActionEvent event) -> {
                 new Charter().drawJob(row.getItem());
             });   
                         
-            MenuItem drawFrequencyItem = new MenuItem("Draw job frequency");
-            drawFrequencyItem.setOnAction((ActionEvent event) -> {
+            MenuItem drawFrequency = new MenuItem("Draw job frequency");
+            drawFrequency.setOnAction((ActionEvent event) -> {
                 new Charter().drawJobFreqeuncy(row.getItem());
             });   
             
@@ -383,7 +382,7 @@ public class PrimaryController implements Initializable{
                 LOGGER.log(Level.INFO, String.format("Removed Job -> %s", row.getItem().toString()));
             });
             
-            rowMenu.getItems().addAll(calculateConInt, calculateANOVA, calculateUTest, calculateTukeyHSD, calculateTTtest, removeItem);
+            rowMenu.getItems().addAll(drawJob, drawFrequency,calculateConInt, calculateANOVA, calculateUTest, calculateTukeyHSD, calculateTTtest, removeItem);
 
             row.contextMenuProperty().bind(
                     Bindings.when(Bindings.isNotNull(row.itemProperty()))

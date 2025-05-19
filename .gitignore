@@ -34,3 +34,4 @@ books
 *.dpth
 *.dep
 /Analysetool/Atool/target/
+papers/

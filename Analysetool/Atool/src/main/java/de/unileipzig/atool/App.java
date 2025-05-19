@@ -1,4 +1,4 @@
-package com.mycompany.atool;
+package de.unileipzig.atool;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

@@ -6,8 +6,8 @@
     <version>1.0-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
     </properties>
 
     <dependencies>
@@ -70,23 +70,21 @@
                 </executions>
             </plugin>
 
-            <!-- Maven Shade Plugin for fat JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.2.1</version>
                 <executions>
                     <execution>
-                        <phase>package</phase> <!-- Run during the package phase -->
+                        <phase>package</phase> 
                         <goals>
-                            <goal>shade</goal> <!-- This will create the fat JAR -->
+                            <goal>shade</goal> 
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <filters>
-                                <!-- This filter ensures that unnecessary files like signature files are excluded -->
                                 <filter>
-                                    <artifact>*:*</artifact> <!-- Include all dependencies -->
+                                    <artifact>*:*</artifact> 
                                     <excludes>
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
@@ -95,9 +93,8 @@
                                 </filter>
                             </filters>
                             <transformers>
-                                <!-- This transformer makes the JAR executable by specifying the main class -->
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.mycompany.atool.App</mainClass> <!-- Your main class here -->
+                                    <mainClass>com.mycompany.atool.App</mainClass> 
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -105,7 +102,6 @@
                 </executions>
             </plugin>
 
-            <!-- Maven Jar Plugin for packaging the JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -128,7 +124,6 @@
                 </executions>
             </plugin>
 
-            <!-- Exec Maven Plugin for running JavaFX JAR with specific arguments -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>

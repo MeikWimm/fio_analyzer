@@ -2,9 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.atool;
+package de.unileipzig.atool;
 
-import com.mycompany.atool.Analysis.TTest;
+import de.unileipzig.atool.Analysis.TTest;
 import java.io.File;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
