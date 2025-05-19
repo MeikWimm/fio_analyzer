@@ -7,9 +7,6 @@ import de.unileipzig.atool.DataPoint;
 import de.unileipzig.atool.Job;
 import de.unileipzig.atool.RamerDouglasPeucker;
 import de.unileipzig.atool.Run;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -19,10 +16,14 @@ import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 /**
  * Diese Klasse stellt Methoden zur grafischen Darstellung von Jobs bereit.
  * Sie verwendet JavaFX, um Daten als Liniendiagramme darzustellen.
- * 
+ *
  * @author meni1999
  */
 public class Charter {
@@ -34,6 +35,7 @@ public class Charter {
     /**
      * Zeichnet den Verlauf eines Jobs über die Zeit (I/O-Speed vs. Zeit).
      * Bei großen Datenmengen (> 10000) wird eine Warnung angezeigt.
+     *
      * @param job Das Job-Objekt mit den zu zeichnenden Daten.
      */
     public void drawJob(Job job) {
@@ -50,7 +52,7 @@ public class Charter {
             window.setOnCloseRequest(e -> alert.hide());
             Optional<ButtonType> result = alert.showAndWait();
 
-            if (!result.isEmpty()) {
+            if (result.isPresent()) {
                 proceedDrawing = (result.get() == goodButton);
             }
         }
@@ -93,6 +95,7 @@ public class Charter {
     /**
      * Zeichnet die Frequenzverteilung der I/O-Geschwindigkeit eines Jobs.
      * RDP wird hier nicht verwendet.
+     *
      * @param job Das Job-Objekt mit Frequenzdaten.
      */
     public void drawJobFreqeuncy(Job job) {
@@ -109,7 +112,7 @@ public class Charter {
             window.setOnCloseRequest(e -> alert.hide());
             Optional<ButtonType> result = alert.showAndWait();
 
-            if (!result.isEmpty()) {
+            if (result.isPresent()) {
                 proceedDrawing = (result.get() == goodButton);
             }
         }
@@ -149,14 +152,14 @@ public class Charter {
     /**
      * Zeichnet ein allgemeines Diagramm für statistische Auswertungen (z.B. ANOVA).
      * Optional kann eine kritische Linie eingezeichnet werden.
-     * 
-     * @param job Das Job-Objekt.
-     * @param title Titel des Diagramms
+     *
+     * @param job        Das Job-Objekt.
+     * @param title      Titel des Diagramms
      * @param xAxisLabel Bezeichnung der X-Achse
      * @param yAxisLabel Bezeichnung der Y-Achse
-     * @param lineLabel Bezeichnung der Datenlinie
-     * @param data Die darzustellenden Daten als Map (X: Integer (RunID), Y: Double (z.B korrespondierender F-Wert))
-     * @param critValue Optionaler kritischer Schwellenwert
+     * @param lineLabel  Bezeichnung der Datenlinie
+     * @param data       Die darzustellenden Daten als Map (X: Integer (RunID), Y: Double (z.B korrespondierender F-Wert))
+     * @param critValue  Optionaler kritischer Schwellenwert
      */
     public void drawGraph(Job job, String title, String xAxisLabel, String yAxisLabel,
                           String lineLabel, Map<Integer, Double> data, double critValue) {

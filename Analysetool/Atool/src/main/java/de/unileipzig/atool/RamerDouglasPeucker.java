@@ -11,9 +11,10 @@ import java.util.List;
  */
 public class RamerDouglasPeucker {
 
-    private RamerDouglasPeucker() { }
+    private RamerDouglasPeucker() {
+    }
 
-    private static double sqr(double x) { 
+    private static double sqr(double x) {
         return Math.pow(x, 2);
     }
 
@@ -28,18 +29,18 @@ public class RamerDouglasPeucker {
         final double l2 = distanceBetweenPoints(vx, vy, wx, wy);  // Länge des Segments im Quadrat
 
         // Wenn das Segment nur ein Punkt ist
-        if (l2 == 0) 
+        if (l2 == 0)
             return distanceBetweenPoints(px, py, vx, vy);
 
         // Berechne das Projektionsverhältnis t des Punktes auf die Linie
         final double t = ((px - vx) * (wx - vx) + (py - vy) * (wy - vy)) / l2;
 
         // Fall 1: Projektion liegt vor dem Startpunkt
-        if (t < 0) 
+        if (t < 0)
             return distanceBetweenPoints(px, py, vx, vy);
 
         // Fall 2: Projektion liegt hinter dem Endpunkt
-        if (t > 1) 
+        if (t > 1)
             return distanceBetweenPoints(px, py, wx, wy);
 
         // Fall 3: Projektion liegt auf dem Segment
@@ -54,10 +55,10 @@ public class RamerDouglasPeucker {
     /**
      * Ramer-Douglas-Peucker-Algorithmus
      *
-     * @param list Ursprüngliche Punktliste
-     * @param s Startindex
-     * @param e Endindex
-     * @param epsilon Toleranzschwelle (je größer, desto stärker wird vereinfacht)
+     * @param list       Ursprüngliche Punktliste
+     * @param s          Startindex
+     * @param e          Endindex
+     * @param epsilon    Toleranzschwelle (je größer, desto stärker wird vereinfacht)
      * @param resultList Ergebnisliste mit vereinfachten Punkten
      */
     private static void douglasPeucker(List<DataPoint> list, int s, int e, double epsilon, List<DataPoint> resultList) {
@@ -102,8 +103,8 @@ public class RamerDouglasPeucker {
 
     /**
      * Methode zur Vereinfachung einer Punktliste.
-     * 
-     * @param list Ursprüngliche Liste von DataPoints (Zeit, Geschwindigkeit)
+     *
+     * @param list    Ursprüngliche Liste von DataPoints (Zeit, Geschwindigkeit)
      * @param epsilon Toleranz (je höher, desto stärker wird vereinfacht)
      * @return Vereinfachte Liste von DataPoints
      */

@@ -43,9 +43,9 @@ import net.sourceforge.jdistlib.Tukey;
 public class TukeyHSD implements Initializable{
     private static final Logger LOGGER = Logger.getLogger( TukeyHSD.class.getName() );
     
-    private class TukeyDataPoint{
-        private double mean;
-        private double qHSD;
+    private static class TukeyDataPoint{
+        private final double mean;
+        private final double qHSD;
         
         public TukeyDataPoint(double mean, double qHSD){
             this.mean = mean;
@@ -81,9 +81,8 @@ public class TukeyHSD implements Initializable{
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
     
     private final Job job;
-    private Tukey tukey;
     private double qHSD;
-    private Map<Integer, TukeyDataPoint> tukeyData;
+    private final Map<Integer, TukeyDataPoint> tukeyData;
     
     public TukeyHSD(Job job){
         this.job = job;
@@ -154,8 +153,8 @@ public class TukeyHSD implements Initializable{
             Run run2 = job.getRuns().get(i + 1);
             double overallMean = Math.abs(run1.getAverageSpeed() - run2.getAverageSpeed());
             double sse = calculateSSE(run1, run2);
-            
-            this.tukey = new Tukey(1, 2, 2 * (job.getRunDataSize() - 1));
+
+            Tukey tukey = new Tukey(1, 2, 2 * (job.getRunDataSize() - 1));
             
             this.qHSD = tukey.inverse_survival(job.getAlpha(), false) * Math.sqrt((sse / (2.0 * (this.job.getRunDataSize()))) / job.getRunDataSize());
             
@@ -193,7 +192,7 @@ public class TukeyHSD implements Initializable{
         qCritLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.qHSD));
     }
 
-    public ConInt.STATUS openWindow(){
+    public void openWindow(){
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/TukeyHSD.fxml"));
             fxmlLoader.setController(this);
@@ -211,8 +210,6 @@ public class TukeyHSD implements Initializable{
     } catch (IOException e) {
             e.printStackTrace();
             LOGGER.log(Level.SEVERE, String.format("Couldn't open Window for Anova! App state: %s", ConInt.STATUS.IO_EXCEPTION));
-            return ConInt.STATUS.IO_EXCEPTION;
         }
-        return ConInt.STATUS.SUCCESS;
     }
 }

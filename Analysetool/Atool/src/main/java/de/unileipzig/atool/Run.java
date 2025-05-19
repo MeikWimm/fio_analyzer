@@ -18,7 +18,7 @@ public class Run {
     public static Byte UNDEFIND_NULLHYPOTHESIS = -1;
     public static Double UNDEFINED_VALUE = Double.MIN_VALUE;
     public static Float UNDEFINED_FLOAT_VALUE = Float.MIN_VALUE;
-    public static Integer UNDEFINED_FLOAT_INTEGER = Integer.MIN_VALUE;
+    public static Integer UNDEFINED_INTEGER = Integer.MIN_VALUE;
     
     private List<DataPoint> data = new ArrayList<>();
     private final List<Run> runToCompare = new ArrayList<>();

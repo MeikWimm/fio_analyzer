@@ -6,65 +6,64 @@ package de.unileipzig.atool;
 
 
 /**
- *
  * @author meni1999
  */
 public class DataPoint {
     private double speed;
     private double time;
-    private int flag; 
+    private int flag;
     private double rank;
-    private int runID = Run.UNDEFINED_FLOAT_INTEGER;
-    
+    private int runID = Run.UNDEFINED_INTEGER;
+
     public DataPoint(double speed, double time) {
         this.speed = speed;
         this.time = time;
-        this.rank = 0;
-        this.flag = 0;
+        this.rank = Run.UNDEFINED_VALUE;
+        this.flag = Run.UNDEFINED_INTEGER;
     }
-    
+
     @Override
-    public String toString(){
+    public String toString() {
         return String.format("Speed: %f, Time: %f", speed, time);
     }
-    
-    public void setSpeed(double speed){
-        this.speed = speed;
-    }
 
-    public void setTime(double time){
-        this.time = time;
-    }
-
-    public void setFlag(int flag){
-        this.flag = flag;
-    }
-
-    public void setRank(double rank){
-        this.rank = rank;
-    }
-    
-    public double getSpeed(){
+    public double getSpeed() {
         return this.speed;
     }
 
-    public double getTime(){
+    public void setSpeed(double speed) {
+        this.speed = speed;
+    }
+
+    public double getTime() {
         return this.time;
     }
-    
-    public double getFlag(){
+
+    public void setTime(double time) {
+        this.time = time;
+    }
+
+    public double getFlag() {
         return this.flag;
     }
 
-    public double getRank(){
+    public void setFlag(int flag) {
+        this.flag = flag;
+    }
+
+    public double getRank() {
         return this.rank;
     }
-   
-    public int getRunID(){
+
+    public void setRank(double rank) {
+        this.rank = rank;
+    }
+
+    public int getRunID() {
         return this.runID;
     }
 
-    public void setRunID(int runID){
+    public void setRunID(int runID) {
         this.runID = runID;
     }
 }
