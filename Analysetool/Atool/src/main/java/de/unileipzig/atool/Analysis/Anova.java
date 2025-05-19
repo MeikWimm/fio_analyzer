@@ -234,8 +234,8 @@ public class Anova implements Initializable{
     private ConInt.STATUS initStage(){
         try {
             
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/mycompany/atool/Anova.fxml"));
-            FXMLLoader.load(getClass().getResource("/com/mycompany/atool/Anova.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/Anova.fxml"));
+            FXMLLoader.load(getClass().getResource("/de/unileipzig/atool/Anova.fxml"));
             fxmlLoader.setController(this);
             Parent root1 = fxmlLoader.load();
             /* 
