@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <TableView id="anovaTable" fx:id="uTestTable" prefHeight="547.0" prefWidth="800.0">
+         <columns>
+            <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="31.0" text="Run" />
+            <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="119.0" text="Measurment" />
+            <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="119.0" text="Compare to Run" />
+            <TableColumn id="FColumn" fx:id="ZColumn" prefWidth="123.0" text="Z (calculated)" />
+            <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="123.0" text="Nullhypothesis" />
+         </columns>
+      </TableView>
+      <Pane prefHeight="125.0" prefWidth="800.0">
+         <children>
+            <Label layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="225.0" text="Calcluated Z = " />
+            <Label id="zIntervalLabel" fx:id="zIntervalLabel" layoutX="104.0" layoutY="14.0" prefHeight="17.0" prefWidth="142.0" text="_" />
+            <Button id="drawUTestButton" fx:id="drawUTestButton" layoutX="14.0" layoutY="43.0" mnemonicParsing="false" text="Draw U-Test" />
+         </children>
+      </Pane>
+   </children>
+</VBox>
