@@ -186,7 +186,7 @@ public class Charter {
 
         // Kritische Linie
         XYChart.Series<Number, Number> criticalLine = new XYChart.Series<>();
-        if (critValue != Run.UNDEFINED_VALUE) {
+        if (critValue != Run.UNDEFINED_DOUBLE_VALUE) {
             criticalLine.getData().add(new XYChart.Data<>(0, critValue));
             criticalLine.getData().add(new XYChart.Data<>(job.getRunsCounter(), critValue));
             criticalLine.setName("critical Value");

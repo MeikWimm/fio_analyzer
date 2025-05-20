@@ -18,7 +18,7 @@ public class DataPoint {
     public DataPoint(double speed, double time) {
         this.speed = speed;
         this.time = time;
-        this.rank = Run.UNDEFINED_VALUE;
+        this.rank = Run.UNDEFINED_DOUBLE_VALUE;
         this.flag = Run.UNDEFINED_INTEGER;
     }
 

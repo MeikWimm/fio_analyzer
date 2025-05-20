@@ -69,8 +69,7 @@ public class TukeyHSD  implements Initializable{
         //super(job);
         Anova anova = new Anova(job);
         this.significantRuns = anova.calculateANOVA();
-        this.job = job;
-        this.job.clearRuns();
+        this.job = new Job(job);
         this.tukeyData = new HashMap<>();
     }
 
@@ -156,12 +155,12 @@ public class TukeyHSD  implements Initializable{
             firstRunOfCompareList.setQ(overallMean);
             for (int j = 1; j < group1.size(); j++) {
                 Run run = group1.get(j);
-                run.setQ(Run.UNDEFINED_VALUE);
+                run.setQ(Run.UNDEFINED_DOUBLE_VALUE);
                 run.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
             }
 
             for (Run run : group2) {
-                run.setQ(Run.UNDEFINED_VALUE);
+                run.setQ(Run.UNDEFINED_DOUBLE_VALUE);
                 run.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
             }
 

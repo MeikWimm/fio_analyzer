@@ -10,10 +10,7 @@ import javafx.collections.ObservableList;
 import java.io.File;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Log files of fio are here represented as Jobs.
@@ -50,14 +47,34 @@ public class Job {
     private double ssa;
     private double sse;
     private double standardDeviation;
-    private final StringBuilder stringBuilder;
+    //private Job job;
     //private double convertedAverageSpeed;
 
     public Job() {
         //data = new ArrayList<>();
         frequency = new TreeMap<>();
-        stringBuilder = new StringBuilder();
         COUNTER++;
+    }
+
+    public Job(Job other) {
+        // Create a new ID (if you want to retain the original ID, copy it instead)
+        this.file = other.file; // Shallow copy — files are immutable in practice
+        this.runs = new ArrayList<>();
+        for (Run run : other.runs) {
+            this.runs.add(new Run(run)); // assumes Run has a copy constructor
+        }
+
+        this.runsCounter = other.runsCounter;
+        this.conversion = other.conversion;
+        this.time = other.time;
+        this.averageSpeed = other.averageSpeed;
+        this.attr = other.attr; // Shallow copy – if you want to copy metadata deeply, use Files.readAttributes again
+        this.epsilon = other.epsilon;
+        this.alpha = other.alpha;
+        this.calculatedF = other.calculatedF;
+        this.ssa = other.ssa;
+        this.sse = other.sse;
+        this.standardDeviation = other.standardDeviation;
     }
 
     public void setFileAttributes(BasicFileAttributes attr) {
@@ -258,6 +275,10 @@ public class Job {
         return FXCollections.observableArrayList(this.runs);
     }
 
+    public List<Run> getRunsList(){
+        return this.runs;
+    }
+
     public int getRunDataSize() {
         return this.getRuns().getFirst().getData().size();
     }
@@ -284,14 +305,6 @@ public class Job {
 
     public void setSSA(double ssa) {
         this.ssa = ssa;
-    }
-
-    public String getCode() {
-        stringBuilder.setLength(0);
-        stringBuilder.append(this.alpha);
-        stringBuilder.append(this.runsCounter);
-        stringBuilder.append(this.conversion);
-        return stringBuilder.toString();
     }
 
     public double getSST() {

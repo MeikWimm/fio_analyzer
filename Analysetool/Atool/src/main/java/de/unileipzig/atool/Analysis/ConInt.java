@@ -68,8 +68,7 @@ public class ConInt implements Initializable {
     public ConInt(Job job) {
         charter = new Charter();
         conIntData = new HashMap<>();
-        this.job = job;
-        this.job.clearRuns();
+        this.job = new Job(job);
     }
 
     @Override
@@ -124,7 +123,7 @@ public class ConInt implements Initializable {
     }
 
     private void drawOverlappingDiffernce(Job job) {
-        charter.drawGraph(job, "Overlapping Differnce of confidence intervals", "Run", "Overlapping difference (%)", "Overlapping Difference", conIntData, Run.UNDEFINED_VALUE);
+        charter.drawGraph(job, "Overlapping Differnce of confidence intervals", "Run", "Overlapping difference (%)", "Overlapping Difference", conIntData, Run.UNDEFINED_DOUBLE_VALUE);
     }
 
     private double calculateOverlapp(Run run1, Run run2) {
@@ -173,7 +172,7 @@ public class ConInt implements Initializable {
         for (int i = 0; i < this.job.getRuns().size() - 1; i += 2) {
             double overlappingDiff = calculateOverlapp(runs.get(i), runs.get(i + 1));
             runs.get(i).setOverlappingDifference(overlappingDiff);
-            runs.get(i + 1).setOverlappingDifference(Run.UNDEFINED_VALUE);
+            runs.get(i + 1).setOverlappingDifference(Run.UNDEFINED_DOUBLE_VALUE);
             conIntData.put(runs.get(i).getID(), overlappingDiff);
             //System.err.println(overlappingDiff);
         }

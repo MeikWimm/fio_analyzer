@@ -5,6 +5,7 @@
 package de.unileipzig.atool.Analysis;
 
 import de.unileipzig.atool.*;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -73,8 +74,8 @@ public class Anova implements Initializable {
     private final List<SigRunData> significantRuns;
 
     public Anova(Job job) {
-        this.job = job;
-        this.job.clearRuns();
+        this.job = new Job(job);
+
         this.charter = new Charter();
         this.anovaData = new HashMap<>();
         this.covData = new HashMap<>();
@@ -91,9 +92,8 @@ public class Anova implements Initializable {
             fDistribution = new FDistribution(num, denom);
             fCrit = fDistribution.inverseCumulativeProbability(1.0 - job.getAlpha());
         }
-
-
     }
+
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -110,6 +110,7 @@ public class Anova implements Initializable {
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
 
+
         anovaTable.setOnMouseClicked((MouseEvent event) -> {
             if (event.getButton().equals(MouseButton.PRIMARY)) {
                 setLabeling(anovaTable.getSelectionModel().getSelectedItem());
@@ -118,8 +119,7 @@ public class Anova implements Initializable {
 
         showCoVGraph.setOnAction(e -> drawCoVGraph(this.job));
         showFGraphButton.setOnAction(e -> drawANOVAGraph(this.job));
-
-        anovaTable.setItems(this.job.getRuns());
+        anovaTable.setItems(FXCollections.observableList(this.job.getRuns()));
     }
 
     private void setLabeling(Run run) {
@@ -192,7 +192,7 @@ public class Anova implements Initializable {
                 covData.put(run.getID(), cov);
             } else {
                 run.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
-                run.setCoV(Run.UNDEFINED_VALUE);
+                run.setCoV(Run.UNDEFINED_DOUBLE_VALUE);
             }
         }
     return significantRuns;
@@ -217,7 +217,7 @@ public class Anova implements Initializable {
     }
 
     public void drawCoVGraph(Job job) {
-        charter.drawGraph(job, "Coefficent of Variation", "Run", "CoV", "calculated CoV (%)", covData, Run.UNDEFINED_VALUE);
+        charter.drawGraph(job, "Coefficent of Variation", "Run", "CoV", "calculated CoV (%)", covData, Run.UNDEFINED_DOUBLE_VALUE);
     }
 
     private void initStage() {

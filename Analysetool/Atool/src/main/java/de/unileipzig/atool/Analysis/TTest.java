@@ -63,8 +63,7 @@ public class TTest implements Initializable {
     private final Map<Integer, Double> tData;
 
     public TTest(Job job) {
-        this.job = job;
-        this.job.clearRuns();
+        this.job = new Job(job);
         charter = new Charter();
         tData = new HashMap<>();
         if (job.getRunDataSize() <= 1) return;
@@ -96,7 +95,7 @@ public class TTest implements Initializable {
 
             tData.put(run1.getID(), tVal);
 
-            run2.setT(Run.UNDEFINED_VALUE);
+            run2.setT(Run.UNDEFINED_DOUBLE_VALUE);
             run2.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
             if (this.tCrit < tVal) {
                 run1.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);

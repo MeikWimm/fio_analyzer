@@ -59,8 +59,7 @@ public class MannWhitney implements Initializable {
     public MannWhitney(Job job) {
         nDis = new NormalDistribution();
         zCrit_rightside = nDis.inverseCumulativeProbability(1 - job.getAlpha() / 2.0);
-        this.job = job;
-        this.job.clearRuns();
+        this.job = new Job(job);
         this.charter = new Charter();
         this.uTestData = new HashMap<>();
     }
@@ -164,7 +163,7 @@ public class MannWhitney implements Initializable {
 
 
         run1.setZ(z);
-        run2.setZ(Run.UNDEFINED_VALUE);
+        run2.setZ(Run.UNDEFINED_DOUBLE_VALUE);
         run2.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
         NormalDistribution n = new NormalDistribution();
 
