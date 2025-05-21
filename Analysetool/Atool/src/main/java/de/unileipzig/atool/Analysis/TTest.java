@@ -72,9 +72,9 @@ public class TTest implements Initializable {
         this.tCrit = t.inverseCumulativeProbability(1 - job.getAlpha() / 2.0);
     }
 
-    public void tTtest() {
+    public void tTest() {
 
-        if (job.getRuns().getFirst().getRunToCompareTo().size() <= 1) return;
+        if (job.getGroups().size() <= 1) return;
 
         for (int i = 0; i < job.getRuns().size(); i += 2) {
             Run run1 = job.getRuns().get(i);
@@ -115,7 +115,7 @@ public class TTest implements Initializable {
         averageSpeedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("PairwiseRunToCompareToAsString"));
+        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
         TColumn.setCellValueFactory(new PropertyValueFactory<>("TAsString"));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));

@@ -36,7 +36,7 @@ import net.sourceforge.jdistlib.Tukey;
  *
  * @author meni1999
  */
-public class TukeyHSD  implements Initializable{
+public class TukeyHSD extends Anova implements Initializable{
     private static final Logger LOGGER = Logger.getLogger( TukeyHSD.class.getName() );
 
     private record TukeyDataPoint(double mean, double qHSD) {}
@@ -63,13 +63,10 @@ public class TukeyHSD  implements Initializable{
     private final Job job;
     private double qHSD;
     private final Map<Integer, TukeyDataPoint> tukeyData;
-    private final List<Anova.SigRunData> significantRuns;
-    
+
     public TukeyHSD(Job job){
-        //super(job);
-        Anova anova = new Anova(job);
-        this.significantRuns = anova.calculateANOVA();
-        this.job = new Job(job);
+        super(job);
+        this.job = job;
         this.tukeyData = new HashMap<>();
     }
 
@@ -79,7 +76,7 @@ public class TukeyHSD  implements Initializable{
         averageSpeedColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("PairwiseRunToCompareToAsString"));
+        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
         QColumn.setCellValueFactory(new PropertyValueFactory<>("QAsString"));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
@@ -126,12 +123,14 @@ public class TukeyHSD  implements Initializable{
     }
     
     public void calculateTukeyHSD(){
-        if(job.getRuns().size() <= 1) return;
-        int groupSize = significantRuns.getFirst().comparedRuns().size();
-        for (int i = 0; i < significantRuns.size() - 1; i++) {
+        List<List<Run>> significantGroups = super.calculateANOVA();
+        this.job.resetRuns();
+
+        if(job.getGroupSize() <= 1) return;
+        for (int i = 0; i < significantGroups.size() - 1; i++) {
             Tukey tukey = new Tukey(1, 2, 2 * (job.getRunDataSize() - 1));
-            List<Run> group1 = significantRuns.get(i).comparedRuns();
-            List<Run> group2 = significantRuns.get(i + 1).comparedRuns();
+            List<Run> group1 = significantGroups.get(i);
+            List<Run> group2 = significantGroups.get(i + 1);
             double speedSumGroup1 = 0;
             double speedSumGroup2 = 0;
 
@@ -146,30 +145,29 @@ public class TukeyHSD  implements Initializable{
             double averageSpeedGroup1 = speedSumGroup1 / group1.size();
             double averageSpeedGroup2 = speedSumGroup2 / group2.size();
 
-            double sse = significantRuns.get(i).sse();
+            double sse = significantGroups.get(i).getFirst().getSSE();
             double overallMean = Math.abs(averageSpeedGroup1 - averageSpeedGroup2);
 
             this.qHSD = tukey.inverse_survival(job.getAlpha(), false) * Math.sqrt((sse / (2.0 * (this.job.getRunDataSize()))) / job.getRunDataSize());
+            Run run = group1.getFirst();
+            run.setQ(overallMean);
+//            for (int j = 1; j < group1.size(); j++) {
+//                Run run = group1.get(j);
+//                run.setQ(Run.UNDEFINED_DOUBLE_VALUE);
+//                run.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
+//            }
+//
+//            for (Run run : group2) {
+//                run.setQ(Run.UNDEFINED_DOUBLE_VALUE);
+//                run.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
+//            }
 
-            Run firstRunOfCompareList = group1.getFirst();
-            firstRunOfCompareList.setQ(overallMean);
-            for (int j = 1; j < group1.size(); j++) {
-                Run run = group1.get(j);
-                run.setQ(Run.UNDEFINED_DOUBLE_VALUE);
-                run.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
-            }
-
-            for (Run run : group2) {
-                run.setQ(Run.UNDEFINED_DOUBLE_VALUE);
-                run.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
-            }
-
-            tukeyData.put(firstRunOfCompareList.getID(), new TukeyDataPoint(overallMean, qHSD));
+            tukeyData.put(run.getID(), new TukeyDataPoint(overallMean, qHSD));
 
             if(qHSD < overallMean){
-                firstRunOfCompareList.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
+                run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
             } else {
-                firstRunOfCompareList.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+                run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
             }
         }
     }

@@ -44,25 +44,53 @@ public class Job {
     private double epsilon = 1;
     private double alpha = 0.05;
     private double calculatedF;
-    private double ssa;
-    private double sse;
     private double standardDeviation;
+    private int groupSize = 2; // default group size
+    private List<List<Run>> groups;
+    private int runDataSize;
     //private Job job;
     //private double convertedAverageSpeed;
 
-    public Job() {
-        //data = new ArrayList<>();
-        frequency = new TreeMap<>();
+    public Job(List<DataPoint> data) {
+        this.frequency = new TreeMap<>();
+        setData(data);
+        setupGroups();
         COUNTER++;
     }
 
+    public Job(Job other, int groupSize) {
+        this.file = other.file;
+        this.runs = new ArrayList<>();
+        for (Run run : other.runs) {
+            this.runs.add(new Run(run));
+        }
+        this.file = other.file;
+        this.rawData = new ArrayList<>(other.rawData);
+        this.convertedData = new ArrayList<>(other.convertedData);
+        this.frequency = new HashMap<>(other.frequency);
+        this.runsCounter = other.runsCounter;
+        this.conversion = other.conversion;
+        this.time = other.time;
+        this.averageSpeed = other.averageSpeed;
+        this.attr = other.attr;
+        this.epsilon = other.epsilon;
+        this.alpha = other.alpha;
+        this.calculatedF = other.calculatedF;
+        this.standardDeviation = other.standardDeviation;
+        this.groupSize = groupSize;
+        this.runDataSize = other.runDataSize;
+        setupGroups();
+    }
+
     public Job(Job other) {
-        // Create a new ID (if you want to retain the original ID, copy it instead)
         this.file = other.file; // Shallow copy — files are immutable in practice
         this.runs = new ArrayList<>();
         for (Run run : other.runs) {
             this.runs.add(new Run(run)); // assumes Run has a copy constructor
         }
+        this.rawData = other.rawData;
+        this.convertedData = other.convertedData;
+        this.frequency = other.frequency;
 
         this.runsCounter = other.runsCounter;
         this.conversion = other.conversion;
@@ -72,9 +100,10 @@ public class Job {
         this.epsilon = other.epsilon;
         this.alpha = other.alpha;
         this.calculatedF = other.calculatedF;
-        this.ssa = other.ssa;
-        this.sse = other.sse;
         this.standardDeviation = other.standardDeviation;
+        this.groupSize = other.groupSize;
+        this.runDataSize = other.runDataSize;
+        setupGroups();
     }
 
     public void setFileAttributes(BasicFileAttributes attr) {
@@ -82,17 +111,16 @@ public class Job {
     }
 
     public List<DataPoint> getData() {
-
         return this.convertedData;
     }
 
-    public void setData(List<DataPoint> rawData) {
+    private void setData(List<DataPoint> rawData) {
         this.epsilon = rawData.size() / 1000.0;
         if (this.epsilon > MAX_EPSILON) {
             this.epsilon = MAX_EPSILON;
         }
         this.rawData = rawData;
-        update();
+        updateRunsData();
     }
 
     public List<DataPoint> getRawData() {
@@ -122,6 +150,7 @@ public class Job {
 
     public void setRunsCounter(int runsCounter) {
         this.runsCounter = runsCounter;
+        updateRunsData();
     }
 
     public double getAlpha() {
@@ -181,16 +210,15 @@ public class Job {
         this.epsilon = epsilon;
     }
 
-    public void clearRuns() {
+    public void resetRuns() {
         for (Run run : this.runs) {
-            run.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
+            run.reset();
         }
     }
 
-    public void update() {
+    public void updateRunsData() {
         runs = new ArrayList<>();
         convertedData = new ArrayList<>();
-
         if (runsCounter <= 0 || runsCounter > 1000) {
             runsCounter = DEFAULT_RUN_COUNT;
         }
@@ -229,58 +257,53 @@ public class Job {
             averagedData = rawData;
         }
 
-        int runDataSize = (averagedData.size() / runsCounter);
+        this.runDataSize = (averagedData.size() / runsCounter);
         /*
         Split job into runs depending on run_size
-       
-        ArrayList<DataPoint> run_data;
-        for (int j = 1; j <= runsCounter; j++) {
-                run_data = new ArrayList<>();
-            for (; i < runDataSize*j; i++) {
-                DataPoint dp = new DataPoint(averagedData.get(i).getSpeed() / Settings.CONVERSION_VALUE, averagedData.get(i).getTime());
-                run_data.add(dp);
-                convertedData.add(dp);
-            }
-                Run run = new Run(j, run_data);
-                //run.addRunToCompareTo(run);
-                runs.add(run);
-        }
-         */
+        */
         i = 0;
         ArrayList<DataPoint> run_data;
         for (int j = 1; j <= runsCounter; j++) {
             run_data = new ArrayList<>();
-            for (; i < runDataSize * j; i++) {
+            for (; i < this.runDataSize * j; i++) {
                 DataPoint dp = new DataPoint(averagedData.get(i).getSpeed() / Settings.CONVERSION_VALUE, averagedData.get(i).getTime());
                 run_data.add(dp);
                 convertedData.add(dp);
             }
             Run run = new Run(j, run_data);
-            //run.addRunToCompareTo(run);
             runs.add(run);
         }
+    }
 
-        //Add runs to compare, i.e compare for ANOVA first run with the second run.
-        int j;
-        for (j = 0; j < runs.size(); j += Settings.RUN_TO_COMPARE_TO_SIZE) {
-            for (int k = 0; k < Settings.RUN_TO_COMPARE_TO_SIZE; k++) {
-                if (j + Settings.RUN_TO_COMPARE_TO_SIZE - 1 < runs.size()) {
-                    runs.get(j).addRunToCompareTo(runs.get(j + k));
-                }
+    public void setupGroups(){
+        System.out.println("group size" + this.groupSize);
+        this.groups = new ArrayList<>();
+        int groupCount = runsCounter / this.groupSize;
+        int runIndex = 0;
+        for (int i = 0; i < groupCount; i++) {
+            List<Run> group = new ArrayList<>();
+            for (int j = 0; j < this.groupSize; j++) {
+                group.add(runs.get(runIndex));
+                runIndex++;
             }
+            this.groups.add(group);
         }
+    }
+
+    public List<List<Run>> getGroups(){
+        return this.groups;
+    }
+
+    public int getGroupSize(){
+        return this.groupSize;
     }
 
     public ObservableList<Run> getRuns() {
         return FXCollections.observableArrayList(this.runs);
     }
 
-    public List<Run> getRunsList(){
-        return this.runs;
-    }
-
     public int getRunDataSize() {
-        return this.getRuns().getFirst().getData().size();
+        return this.runDataSize;
     }
 
     public double getStandardDeviation() {
@@ -289,26 +312,6 @@ public class Job {
 
     public void setStandardDeviation(double standardDeviation) {
         this.standardDeviation = standardDeviation;
-    }
-
-    public double getSSE() {
-        return sse;
-    }
-
-    public void setSSE(double sse) {
-        this.sse = sse;
-    }
-
-    public double getSSA() {
-        return ssa;
-    }
-
-    public void setSSA(double ssa) {
-        this.ssa = ssa;
-    }
-
-    public double getSST() {
-        return sse + ssa;
     }
 
     public double getF() {

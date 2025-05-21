@@ -49,6 +49,13 @@ public class InputModule {
     private boolean isDirChooserOpen = false;
     private File[] files;
     private BufferedReader br;
+    private int time;
+    private double averageSpeed;
+    private double standardDeviation;
+    private List<DataPoint> data;
+    private Map<Integer, Integer> freq;
+    private BasicFileAttributes fileAttribute;
+
     public InputModule() {
         directoryChooser = new DirectoryChooser();
     }
@@ -112,23 +119,30 @@ public class InputModule {
                 }
                 if (!is_file_already_added) {
                     found_new_files = true;
-                    Job job = new Job();
+                    readData(file);
+
+                    Job job = new Job(this.data);
                     job.setFile(file);
-                    STATUS status = readData(job);
-                    if (status != STATUS.SUCCESS) {
-                        return status;
-                    }
-                    LOGGER.log(Level.INFO, String.format("New job added -> %s", job));
+                    job.setFileAttributes(this.fileAttribute);
+                    job.setTime(this.time);
+                    job.setAverageSpeed(this.averageSpeed);
+                    job.setStandardDeviation(this.standardDeviation);
+                    //data.add(new DataPoint(average_speed_per_milli, this.time));
                     jobs.add(job);
+                    LOGGER.log(Level.INFO, String.format("New job added -> %s", job));
                 }
             } else {
-                Job job = new Job();
+                readData(file);
+
+                Job job = new Job(this.data);
                 job.setFile(file);
-                STATUS status = readData(job);
-                if (status != STATUS.SUCCESS) {
-                    return status;
-                }
+                job.setFileAttributes(this.fileAttribute);
+                job.setTime(this.time);
+                job.setAverageSpeed(this.averageSpeed);
+                job.setStandardDeviation(this.standardDeviation);
+                //data.add(new DataPoint(average_speed_per_milli, this.time));
                 jobs.add(job);
+                LOGGER.log(Level.INFO, String.format("Added new found job -> %s", job));
             }
         }
 
@@ -139,17 +153,16 @@ public class InputModule {
         return STATUS.SUCCESS;
     }
 
+
     /**
      * Reads the data of a .log file and saves the data in a job instance.
      *
-     * @param job
      */
-    private STATUS readData(Job job) {
+    private void readData(File file) {
         List<DataPoint> data = new ArrayList<>(); // Point2D for x = time and y = speed
         Map<Integer, Integer> freq = new TreeMap<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(job.getFile()))) {
-            BasicFileAttributes attr = Files.readAttributes(job.getFile().toPath(), BasicFileAttributes.class);
-            job.setFileAttributes(attr);
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            this.fileAttribute = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
             String line = br.readLine();
             long current_speed_sum = 0;
             double average_speed_per_milli;
@@ -186,23 +199,19 @@ public class InputModule {
                     counter++;
                 }
             }
-
-            int time = Integer.parseInt(s[0]);
-            job.setTime(time);
             average_speed_per_milli = current_speed_sum / (double) counter;
             sum_speed += average_speed_per_milli;
-            double average_speed = sum_speed / data.size();
-            job.setAverageSpeed(average_speed);
-            job.setStandardDeviation(calculateDeviation(data, average_speed));
-            data.add(new DataPoint(average_speed_per_milli, time));
-            job.setFrequency(freq);
-            job.setData(data);
+            data.add(new DataPoint(average_speed_per_milli, this.time));
+
+            this.time = Integer.parseInt(s[0]);
+            this.averageSpeed = sum_speed / data.size();
+            this.standardDeviation = calculateDeviation(data, this.averageSpeed);
+            this.freq = freq;
+            this.data = data;
         } catch (IOException ex) {
             //LOGGER.log(Level.SEVERE, (Supplier<String>) ex);
-            LOGGER.log(Level.SEVERE, String.format("Error occured while reading file: %s. App state: %s", job.getFile(), STATUS.ERROR_WHILE_READING_FILE));
-            return STATUS.ERROR_WHILE_READING_FILE;
+            LOGGER.log(Level.SEVERE, String.format("Error occured while reading file: %s. App state: %s", "radate", STATUS.ERROR_WHILE_READING_FILE));
         }
-        return STATUS.SUCCESS;
     }
 
     public ObservableList<Job> getJobs() {

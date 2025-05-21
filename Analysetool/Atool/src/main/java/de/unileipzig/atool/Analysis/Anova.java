@@ -5,7 +5,6 @@
 package de.unileipzig.atool.Analysis;
 
 import de.unileipzig.atool.*;
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -36,8 +35,6 @@ import java.util.logging.Logger;
 public class Anova implements Initializable {
     private static final Logger LOGGER = Logger.getLogger(Anova.class.getName());
 
-    public record SigRunData(List<Run> comparedRuns, double sse){}
-
     static {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setLevel(Level.FINEST);
@@ -46,54 +43,66 @@ public class Anova implements Initializable {
         LOGGER.addHandler(handler);
     }
 
-
     private final Job job;
     private final Map<Integer, Double> anovaData;
     private final Map<Integer, Double> covData;
     private final Charter charter;
-    @FXML public Label averageSpeedLabel;
-    @FXML public Label sseLabel;
-    @FXML public Label ssaLabel;
-    @FXML public Label sstLabel;
-    @FXML public Label ssaSstLabel;
-    @FXML public Label sseSstLabel;
-    @FXML public Label fCriticalLabel;
-    @FXML public Label fCalculatedLabel;
-    @FXML public Button showFGraphButton;
-    @FXML public Button showCoVGraph;
-    @FXML public Pane anovaPane;
-    @FXML public TableView<Run> anovaTable;
-    @FXML public TableColumn<Run, Double> averageSpeedColumn;
-    @FXML public TableColumn<Run, Integer> runIDColumn;
-    @FXML public TableColumn<Run, String> covColumn;
-    @FXML public TableColumn<Run, String> compareToRunColumn;
-    @FXML public TableColumn<Run, String> FColumn;
-    @FXML public TableColumn<Run, Byte> hypothesisColumn;
-    //private static String jobCode = "";
+    private List<List<Run>> significantRuns;
+    @FXML
+    public Label averageSpeedLabel;
+    @FXML
+    public Label sseLabel;
+    @FXML
+    public Label ssaLabel;
+    @FXML
+    public Label sstLabel;
+    @FXML
+    public Label ssaSstLabel;
+    @FXML
+    public Label sseSstLabel;
+    @FXML
+    public Label fCriticalLabel;
+    @FXML
+    public Label fCalculatedLabel;
+    @FXML
+    public Button showFGraphButton;
+    @FXML
+    public Button showCoVGraph;
+    @FXML
+    public Pane anovaPane;
+    @FXML
+    public TableView<Run> anovaTable;
+    @FXML
+    public TableColumn<Run, Double> averageSpeedColumn;
+    @FXML
+    public TableColumn<Run, Integer> runIDColumn;
+    @FXML
+    public TableColumn<Run, String> covColumn;
+    @FXML
+    public TableColumn<Run, String> compareToRunColumn;
+    @FXML
+    public TableColumn<Run, String> FColumn;
+    @FXML
+    public TableColumn<Run, Byte> hypothesisColumn;
     private double fCrit;
-    private final List<SigRunData> significantRuns;
-
     public Anova(Job job) {
-        this.job = new Job(job);
-
+        this.job = job;
+        this.job.resetRuns();
         this.charter = new Charter();
         this.anovaData = new HashMap<>();
         this.covData = new HashMap<>();
         this.significantRuns = new ArrayList<>();
         FDistribution fDistribution;
-        if (job.getRuns().getFirst().getRunToCompareTo().size() <= 1) {
+        int num = job.getGroupSize() - 1;
+        int denom = (num + 1) * (job.getRunDataSize() - 1);
+        if (job.getGroups().size() <= 1) {
             fDistribution = new FDistribution(1, 1);
         } else {
-            int num = job.getRuns().getFirst().getRunToCompareTo().size() - 1;
-            //System.err.println("run data size: " + job.getRunDataSize());
-            int denom = (num + 1) * (job.getRunDataSize() - 1);
-            //if(denom == 0 ||num == 0) return;
-            LOGGER.log(Level.INFO, String.format("Calculated Numerator %d and Denominator %d", num, denom));
             fDistribution = new FDistribution(num, denom);
             fCrit = fDistribution.inverseCumulativeProbability(1.0 - job.getAlpha());
         }
+        LOGGER.log(Level.INFO, String.format("Calculated Numerator %d and Denominator %d", num, denom));
     }
-
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -110,7 +119,6 @@ public class Anova implements Initializable {
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
 
-
         anovaTable.setOnMouseClicked((MouseEvent event) -> {
             if (event.getButton().equals(MouseButton.PRIMARY)) {
                 setLabeling(anovaTable.getSelectionModel().getSelectedItem());
@@ -119,7 +127,7 @@ public class Anova implements Initializable {
 
         showCoVGraph.setOnAction(e -> drawCoVGraph(this.job));
         showFGraphButton.setOnAction(e -> drawANOVAGraph(this.job));
-        anovaTable.setItems(FXCollections.observableList(this.job.getRuns()));
+        anovaTable.setItems(this.job.getRuns());
     }
 
     private void setLabeling(Run run) {
@@ -133,7 +141,7 @@ public class Anova implements Initializable {
         fCalculatedLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getF()));
     }
 
-    public List<SigRunData> calculateANOVA() {
+    public List<List<Run>> calculateANOVA() {
         if (job.getRuns().size() <= 1) return null;
         /*
         if(job.getCode().equals(jobCode)) {
@@ -144,71 +152,119 @@ public class Anova implements Initializable {
         */
         double sse = 0.0;
         double ssa = 0.0;
-        int num = job.getRuns().getFirst().getRunToCompareTo().size() - 1;
-        int denom = (num + 1) * (job.getRunDataSize() - 1);
-        LOGGER.log(Level.INFO, String.format("Calculated Numerator %d and Denominator %d", num, denom));
+        //int num = job.getGroupSize() - 1;
+        //int denom = (num + 1) * (job.getRunDataSize() - 1);
 
 //      calculate F value between runs
-//      SSA 
-        for (Run run : this.job.getRuns()) {
-            for (Run runToCompare : run.getRunToCompareTo()) {
-                double averageSpeedOfRun = runToCompare.getAverageSpeed();
-                double averageSpeedOfAllComparedRuns = run.getAverageSpeedOfRunsToCompareTo();
-                ssa += Math.pow(averageSpeedOfRun - averageSpeedOfAllComparedRuns, 2);
+//      SSA
+//        for (Run run : this.job.getRuns()) {
+//            for (Run runToCompare : run.getRunToCompareTo()) {
+//                double averageSpeedOfRun = runToCompare.getAverageSpeed();
+//                double averageSpeedOfAllComparedRuns = run.getAverageSpeedOfRunsToCompareTo();
+//                ssa += Math.pow(averageSpeedOfRun - averageSpeedOfAllComparedRuns, 2);
+//            }
+//            ssa *= run.getData().size();
+//            run.setSSA(ssa);
+//            ssa = 0;
+//        }
+        for (List<Run> group : this.job.getGroups()) {
+            for (Run run : group) {
+                double averageSpeedOfRun = run.getAverageSpeed();
+                ssa += Math.pow(averageSpeedOfRun - this.getGroupAverageSpeed(group), 2);
+                ssa *= run.getData().size();
+                run.setSSA(ssa);
+                ssa = 0;
             }
-            ssa *= run.getData().size();
-            run.setSSA(ssa);
-            ssa = 0;
         }
 
         //SSE
-        for (Run run : this.job.getRuns()) {
-            for (Run runToCompare : run.getRunToCompareTo()) {
-                for (DataPoint dp : runToCompare.getData()) {
-                    sse += (Math.pow((dp.getSpeed() - run.getAverageSpeedOfRunsToCompareTo()), 2));
-                }
-            }
+//        for (Run run : this.job.getRuns()) {
+//            for (Run runToCompare : run.getRunToCompareTo()) {
+//                for (DataPoint dp : runToCompare.getData()) {
+//                    sse += (Math.pow((dp.getSpeed() - run.getAverageSpeedOfRunsToCompareTo()), 2));
+//                }
+//            }
+//
+//            run.setSSE(sse);
+//            sse = 0;
+//        }
 
-            run.setSSE(sse);
-            sse = 0;
+        for (List<Run> group : this.job.getGroups()) {
+            for (Run run : group) {
+                for (DataPoint dp : run.getData()) {
+                    sse += (Math.pow((dp.getSpeed() - this.getGroupAverageSpeed(group)), 2));
+                }
+                run.setSSE(sse);
+                sse = 0;
+            }
         }
 
+        significantRuns = new ArrayList<>();
         double fValue;
-        for (Run run : this.job.getRuns()) {
-            double s_2_a = run.getSSA() / (run.getRunToCompareTo().size() - 1);
-            double s_2_e = run.getSSE() / (run.getRunToCompareTo().size() * (run.getData().size() - 1));
+        double cov;
+        for (List<Run> group : this.job.getGroups()) {
+            Run run = group.getFirst();
+            cov = calcualteCoV(group);
+            double s_2_a = run.getSSA() / (this.job.getGroupSize() - 1);
+            double s_2_e = run.getSSE() / (this.job.getGroupSize() * (run.getData().size() - 1));
             fValue = s_2_a / s_2_e;
+            run.setCoV(cov);
             run.setF(fValue);
-            if (!run.getRunToCompareTo().isEmpty()) {
-                // critical p-value < alpha value of job
-                double cov = calcualteCoV(run);
-                if (this.fCrit < fValue) {
-                    run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
-                } else {
-                    run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
-                    significantRuns.add(new SigRunData(run.getRunToCompareTo(), run.getSSE()));
-                }
-                anovaData.put(run.getID(), fValue);
-                covData.put(run.getID(), cov);
+            anovaData.put(run.getID(), fValue);
+            covData.put(run.getID(), cov);
+            if (this.fCrit < fValue) {
+                run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
             } else {
-                run.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
-                run.setCoV(Run.UNDEFINED_DOUBLE_VALUE);
+                run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+                significantRuns.add(group);
+                //significantRuns.add(new SigRunData(run.getRunToCompareTo(), run.getSSE()));
             }
         }
-    return significantRuns;
+
+//        for (Run run : this.job.getRuns()) {
+//            double s_2_a = run.getSSA() / (this.job.getGroupSize() - 1);
+//            double s_2_e = run.getSSE() / (this.job.getGroupSize() * (run.getData().size() - 1));
+//            fValue = s_2_a / s_2_e;
+//            if (!job.getGroups().isEmpty()) {
+//                // critical p-value < alpha value of job
+//                double cov = calcualteCoV(run);
+//                if (this.fCrit < fValue) {
+//                    run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
+//                } else {
+//                    run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+//                    significantRuns.add(new SigRunData(run.getRunToCompareTo(), run.getSSE()));
+//                }
+//                run.setCoV(cov);
+//                run.setF(fValue);
+//                anovaData.put(run.getID(), fValue);
+//                covData.put(run.getID(), cov);
+//            } else {
+//                run.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
+//                run.setCoV(Run.UNDEFINED_DOUBLE_VALUE);
+//            }
+//        }
+        return significantRuns;
         //calculateSteadyState();
 
         // remember run counter and alpha to avoid multiple calculations with the same values.
-        //  jobCode = job.getCode();        
+        //  jobCode = job.getCode();
     }
 
-    private double calcualteCoV(Run r) {
-        double jobStandardDeviation = this.job.getStandardDeviation();
-        double sum = 0;
-        for (Run run : r.getRunToCompareTo()) {
+    private double getGroupAverageSpeed(List<Run> group) {
+        double sum = 0.0;
+        for (Run run : group) {
             sum += run.getAverageSpeed();
         }
-        double average = sum / r.getRunToCompareTo().size();
+        return sum / group.size();
+    }
+
+    private double calcualteCoV(List<Run> group) {
+        double jobStandardDeviation = this.job.getStandardDeviation();
+        double sum = 0;
+        for (Run run : group) {
+            sum += run.getAverageSpeed();
+        }
+        double average = sum / group.size();
         return jobStandardDeviation / average;
     }
 
@@ -247,5 +303,8 @@ public class Anova implements Initializable {
 
     public void openWindow() {
         initStage();
+    }
+
+    public record SigRunData(List<Run> comparedRuns, double sse) {
     }
 }

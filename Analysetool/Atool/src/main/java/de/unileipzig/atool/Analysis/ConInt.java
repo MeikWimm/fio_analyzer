@@ -88,7 +88,7 @@ public class ConInt implements Initializable {
         standardDeviationColumn.setCellValueFactory(new PropertyValueFactory<>("StandardDeviation"));
         standardDeviationColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("PairwiseRunToCompareToAsString"));
+        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
 
         overlappingColumn.setCellValueFactory(new PropertyValueFactory<>("OverlappingDifferenceAsString"));
 

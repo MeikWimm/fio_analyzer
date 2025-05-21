@@ -163,7 +163,7 @@ public class PrimaryController implements Initializable {
 
         if (Settings.HAS_CHANGED) {
             for (Job job : table.getItems()) {
-                job.update();
+                job.updateRunsData();
             }
         }
 
@@ -276,7 +276,6 @@ public class PrimaryController implements Initializable {
     private void prepareTable() {
         runsCounterColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Integer> t) -> {
             t.getRowValue().setRunsCounter(t.getNewValue());
-            t.getRowValue().update();
         });
 
         alphaColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {
@@ -320,7 +319,7 @@ public class PrimaryController implements Initializable {
             MenuItem calculateANOVA = new MenuItem("Calculate ANOVA");
             calculateANOVA.setOnAction((ActionEvent event) -> {
                 Job job = row.getItem();
-                anova = new Anova(job);
+                anova = new Anova(new Job(job, Settings.RUN_TO_COMPARE_TO_SIZE));
                 anova.calculateANOVA();
                 anova.openWindow();
             });
@@ -336,7 +335,7 @@ public class PrimaryController implements Initializable {
             MenuItem calculateTukeyHSD = new MenuItem("Calculate Tukey HSD");
             calculateTukeyHSD.setOnAction((ActionEvent event) -> {
                 Job job = row.getItem();
-                tHSD = new TukeyHSD(job);
+                tHSD = new TukeyHSD(new Job(job, Settings.RUN_TO_COMPARE_TO_SIZE));
                 tHSD.calculateTukeyHSD();
                 tHSD.openWindow();
             });
@@ -345,7 +344,7 @@ public class PrimaryController implements Initializable {
             calculateTTtest.setOnAction((ActionEvent event) -> {
                 Job job = row.getItem();
                 TTest tTest = new TTest(job);
-                tTest.tTtest();
+                tTest.tTest();
                 tTest.openWindow();
             });
 

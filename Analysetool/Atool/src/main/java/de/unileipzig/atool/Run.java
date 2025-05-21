@@ -21,7 +21,7 @@ public class Run {
     public static Integer UNDEFINED_INTEGER = Integer.MIN_VALUE;
     
     private List<DataPoint> data = new ArrayList<>();
-    private final List<Run> runToCompare = new ArrayList<>();
+    private List<Run> runToCompare = new ArrayList<>();
     private final int runID;
     private double intervalFrom = UNDEFINED_DOUBLE_VALUE;
     private double intervalTo  = UNDEFINED_DOUBLE_VALUE;
@@ -48,7 +48,7 @@ public class Run {
     public Run(Run run) {
         this.runID = run.getRunID();
         this.data = new ArrayList<>(run.getData()); // shallow copy; use deep copy if needed
-        this.runToCompare.addAll(run.getRunToCompareTo()); // shallow copy
+        this.runToCompare = new ArrayList<>();
         this.intervalFrom = run.getIntervalFrom();
         this.intervalTo = run.getIntervalTo();
         this.averageSpeed = run.getAverageSpeed();
@@ -78,12 +78,6 @@ public class Run {
         
         this.standardDeviation = Math.floor(Math.sqrt((nominator / data.size()))* Settings.NUMBER_AFTER_COMMA) / Settings.NUMBER_AFTER_COMMA;
     }
-    
-    public void setData(List<DataPoint> runData){
-        this.data = new ArrayList<>();
-        this.data = runData;
-        calculateRun();
-    }
 
     public List<DataPoint> getData(){      
         return data;
@@ -112,11 +106,11 @@ public class Run {
      public void getIntervalFrom(double intervalFrom){
         this.intervalFrom = intervalFrom;
     }
-    
+
     public void getIntervalTo(double intervalTo){
         this.intervalTo = intervalTo;
     }
-    
+
     public double getPlusMinusValue(){
         return Math.abs(this.intervalTo - this.intervalFrom);
     }
@@ -140,14 +134,6 @@ public class Run {
         this.intervalFrom = d;
     }
     
-    public void addRunToCompareTo(Run run){
-        runToCompare.add(run);
-    }
-    
-    public List<Run> getRunToCompareTo(){
-        return runToCompare;
-    }
-    
     public double getAverageSpeedOfRunsToCompareTo(){
         double speed = 0.0;
         for (Run run : this.runToCompare) {
@@ -156,38 +142,12 @@ public class Run {
         speed = speed / this.runToCompare.size();
         return speed;
     }
-    
-        public double getAverageSpeedOfRunsToCompareToTEST(){
-        double speed = 0.0;
-        for (Run run : this.runToCompare) {
-            speed += run.getAverageSpeed();
-        }
-        speed = speed / this.runToCompare.size();
-        return speed;
-    }
-    
-    
-    public String getRunToCompareToAsString(){
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < runToCompare.size(); i++) {
-            if(i < runToCompare.size() - 1){
-                sb.append(String.format("Run %d, ", runToCompare.get(i).getID()));
-            } else {
-                sb.append(String.format("Run %d", runToCompare.get(i).getID()));            }
-        }
-        
-        return sb.toString();
-    }
 
-    public String getPairwiseRunToCompareToAsString(){
-        if(this.getID() % 2 == 0){
+    public String getRunToCompareToAsString(){
+        if(runToCompare.isEmpty()){
             return "";
         }
-        
-        StringBuilder sb = new StringBuilder();
-        sb.append(String.format("Run %d, ", this.getID()));
-        sb.append(String.format("Run %d", this.getID() + 1));
-        return sb.toString();
+        return String.format("Run %d - Run %d", runToCompare.getFirst().getRunID(), runToCompare.getLast().getRunID());
     }
     
     public void setIntervalTo(double d) {
@@ -203,7 +163,7 @@ public class Run {
     }
     
     public String getFAsString(){
-        if(Double.isNaN(this.F)){
+        if(this.F == UNDEFINED_DOUBLE_VALUE){
             return "";
         }
         return String.format(Settings.DIGIT_FORMAT, this.F);
@@ -299,8 +259,23 @@ public class Run {
         return String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.cov * 100);
     }
     
-        public void setCoV(double cov){
+    public void setCoV(double cov){
             this.cov = cov;
     }
 
+    public void reset() {
+        this.intervalFrom = UNDEFINED_DOUBLE_VALUE;
+        this.intervalTo = UNDEFINED_DOUBLE_VALUE;
+        //this.averageSpeed = UNDEFINED_DOUBLE_VALUE;
+        //this.standardDeviation = UNDEFINED_DOUBLE_VALUE;
+        //this.ssa =UNDEFINED_DOUBLE_VALUE;
+        //this.sse = UNDEFINED_DOUBLE_VALUE;
+        this.isNullhypothesis = UNDEFIND_NULLHYPOTHESIS;
+        this.F = UNDEFINED_DOUBLE_VALUE;
+        this.zVal = UNDEFINED_DOUBLE_VALUE;
+        this.qVal = UNDEFINED_DOUBLE_VALUE;
+        this.tVal = UNDEFINED_DOUBLE_VALUE;
+        this.cov = UNDEFINED_DOUBLE_VALUE;
+        this.overlappingDifference = UNDEFINED_DOUBLE_VALUE;
+    }
 }
