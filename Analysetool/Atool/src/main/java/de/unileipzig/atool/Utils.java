@@ -73,6 +73,9 @@ public abstract class Utils {
 
         @Override
         public String toString(final Double value) {
+            if(value.equals(Run.UNDEFINED_DOUBLE_VALUE)){
+                return "";
+            }
             return nf.format(value);
         }
 

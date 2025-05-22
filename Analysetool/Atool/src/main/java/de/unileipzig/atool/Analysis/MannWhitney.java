@@ -41,6 +41,9 @@ public class MannWhitney implements Initializable {
         LOGGER.addHandler(handler);
     }
 
+    private final Map<Integer, Double> uTestData;
+    private final Charter charter;
+    private final Job job;
     @FXML public TableView<Run> uTestTable;
     @FXML public TableColumn<Run, Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
@@ -49,19 +52,20 @@ public class MannWhitney implements Initializable {
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
     @FXML public Button drawUTestButton;
     @FXML public Label zIntervalLabel;
-    NormalDistribution nDis = new NormalDistribution();
-    private double zCrit_rightside = -1;
-    private final Map<Integer, Double> uTestData;
-    private final Charter charter;
-
-    private final Job job;
+    private double zCrit;
+    private boolean compareInterceptingRuns = false;
 
     public MannWhitney(Job job) {
-        nDis = new NormalDistribution();
-        zCrit_rightside = nDis.inverseCumulativeProbability(1 - job.getAlpha() / 2.0);
         this.job = new Job(job);
         this.charter = new Charter();
         this.uTestData = new HashMap<>();
+    }
+
+    public MannWhitney(Job job, boolean compareInterceptingRuns) {
+        this.job = new Job(job);
+        this.charter = new Charter();
+        this.uTestData = new HashMap<>();
+        this.compareInterceptingRuns = compareInterceptingRuns;
     }
 
     @Override
@@ -70,36 +74,39 @@ public class MannWhitney implements Initializable {
         averageSpeedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
+        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
         ZColumn.setCellValueFactory(new PropertyValueFactory<>("ZAsString"));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
-        uTestTable.setItems(this.job.getRuns());
+        uTestTable.setItems(this.job.getRunsCompacted());
 
         drawUTestButton.setOnAction(e -> drawUTest(this.job));
         setLabeling();
     }
 
     private void setLabeling() {
-        zIntervalLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.zCrit_rightside));
+        zIntervalLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.zCrit));
     }
 
     private void drawUTest(Job job) {
-        charter.drawGraph(job, "U-Test", "Run", "Z-Value", "calculated Z-Value", uTestData, zCrit_rightside);
+        charter.drawGraph(job, "U-Test", "Run", "Z-Value", "calculated Z-Value", uTestData, zCrit);
     }
 
     private void calculateMannWhitney(Run run1, Run run2) {
-        List<DataPoint> runData1 = run1.getData();
-        List<DataPoint> runData2 = run2.getData();
-        for (int i = 0; i < runData1.size(); i++) {
-            runData1.get(i).setFlag(0);
-            runData2.get(i).setFlag(1);
+        List<RankedDataPoint> rankedData1 = new ArrayList<>();
+        List<RankedDataPoint> rankedData2 = new ArrayList<>();
+        NormalDistribution n = new NormalDistribution();
+
+        int size = run1.getData().size();
+        for (int i = 0; i < size; i++) {
+            rankedData1.add(new RankedDataPoint(run1.getData().get(i), 0, 0));
+            rankedData2.add(new RankedDataPoint(run2.getData().get(i), 0, 1));
         }
 
-        List<DataPoint> mergedData = new ArrayList<>(runData1);
-        mergedData.addAll(runData2);
+        List<RankedDataPoint> mergedData = new ArrayList<>(rankedData1);
+        mergedData.addAll(rankedData2);
 
 
         mergedData.sort(new Utils.SpeedComparator());
@@ -109,7 +116,7 @@ public class MannWhitney implements Initializable {
         double new_speed, next_speed = -1;
         int index = 0;
         int jindex = 0;
-        for (DataPoint p : mergedData) {
+        for (RankedDataPoint p : mergedData) {
             new_speed = p.getSpeed();
             if (jindex < mergedData.size() - 1) {
                 next_speed = mergedData.get(jindex + 1).getSpeed();
@@ -139,7 +146,7 @@ public class MannWhitney implements Initializable {
         double run1_ranksum = 0;
         double run2_ranksum = 0;
 
-        for (DataPoint dataPoint : mergedData) {
+        for (RankedDataPoint dataPoint : mergedData) {
             if (dataPoint.getFlag() == 0) {
                 run1_ranksum += dataPoint.getRank();
             } else {
@@ -148,50 +155,43 @@ public class MannWhitney implements Initializable {
         }
 
         double m = mergedData.size() / 2.0;
-        //.err.println("Rank Sum 1: " + run1_ranksum + " m: " + m);
-        //double z_1 = (run1_ranksum - 0.5 * m * (2.0 * m + 1.0)) / (Math.sqrt((1.0/12.0) * Math.pow(m, 2) * (2.0 * m + 1.0)));
-        //double z_2 = (run2_ranksum - 0.5 * m * (2.0 * m + 1.0)) / (Math.sqrt((1.0/12.0) * Math.pow(m, 2) * (2.0 * m + 1.0)));
-
-        // System.err.println("Z_1: " + z_1 + " | Z_2: " + z_2);
-
         double U1 = m * m + ((m * (m + 1) / 2)) - run1_ranksum;
         double U2 = m * m + ((m * (m + 1) / 2)) - run2_ranksum;
         double mu_U = m * m * 0.5;
         double sigma_U = Math.sqrt((m * m * (2 * m + 1)) / 12.0);
         double U = Math.min(U1, U2);
         double z = Math.abs((U - mu_U) / sigma_U);
+        this.zCrit = n.inverseCumulativeProbability(1 - this.job.getAlpha() / 2.0);
 
-
-        run1.setZ(z);
-        run2.setZ(Run.UNDEFINED_DOUBLE_VALUE);
-        run2.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
-        NormalDistribution n = new NormalDistribution();
 
         uTestData.put(run1.getID(), z);
 
         double pCalc = n.cumulativeProbability(z);
-
-        if (pCalc > 1 - this.job.getAlpha() / 2.0) {
-            run1.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
+        double pCrit = 1 - this.job.getAlpha() / 2.0;
+        byte hypothesis;
+        if (pCalc > pCrit) {
+            hypothesis = Run.REJECTED_NULLHYPOTHESIS;
         } else {
-            run1.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+            hypothesis = Run.ACCEPTED_NULLHYPOTHESIS;
         }
+
+        run1.setZ(z);
+        run1.setNullhypothesis(hypothesis);
+
+
+        LOGGER.log(Level.INFO, String.format("Run %d compared to Run %d, U_1 = %f and U_2 = %f", run1.getRunID(), run2.getID(), U1, U2));
+        LOGGER.log(Level.INFO, String.format("calculated p: %f and critical p: %f", pCalc, pCrit));
+        LOGGER.log(Level.INFO, String.format("Null hypothesis for compared Runs -> %s", Run.HypothesistoString(hypothesis)));
     }
 
-
     public void calculateMannWhitneyTest() {
-
         if (this.job.getRuns().size() <= 1) return;
-        /*
-        if(jobRunCounter == this.job.getRunsCounter() && jobAlpha == this.job.getAlpha()) {
-            return;
-        } else {
-            System.err.println("Job Change detected!");
-        } 
-        */
         List<Run> runs = this.job.getRuns();
-
-        for (int i = 0; i < runs.size(); i += 2) {
+        int skipCount = Job.DEFAULT_GROUP_SIZE;
+        if(compareInterceptingRuns){
+            skipCount = 1;
+        }
+        for (int i = 0; i < runs.size(); i += skipCount) {
             if (i < runs.size() - 1) {
                 Run run1 = runs.get(i);
                 Run run2 = runs.get(i + 1);
@@ -205,10 +205,7 @@ public class MannWhitney implements Initializable {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/MannWithney.fxml"));
             fxmlLoader.setController(this);
             Parent root1 = fxmlLoader.load();
-            /*
-             * if "fx:controller" is not set in fxml
-             * fxmlLoader.setController(NewWindowController);
-             */
+
             Stage stage = new Stage();
             stage.setMaxWidth(1200);
             stage.setMaxHeight(600);
@@ -219,8 +216,32 @@ public class MannWhitney implements Initializable {
             stage.show();
 
         } catch (IOException e) {
+            e.printStackTrace();
             //LOGGER.log(Level.SEVERE, (Supplier<String>) e);
-            //LOGGER.log(Level.SEVERE, String.format("Couldn't open Window for Anova! App state: %s", ConInt.STATUS.IO_EXCEPTION));
+            LOGGER.log(Level.SEVERE, String.format("Couldn't open Window for Anova! App state: %s", ConInt.STATUS.IO_EXCEPTION));
+        }
+    }
+
+    private static class RankedDataPoint extends DataPoint {
+        int flag;
+        double rank;
+
+        public RankedDataPoint(DataPoint dp, int rank, int flag) {
+            super(dp.getSpeed(), dp.getTime());
+            this.rank = rank;
+            this.flag = flag;
+        }
+
+        public double getRank() {
+            return rank;
+        }
+
+        public void setRank(double rank) {
+            this.rank = rank;
+        }
+
+        public int getFlag() {
+            return flag;
         }
     }
 }

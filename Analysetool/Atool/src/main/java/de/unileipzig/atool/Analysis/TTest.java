@@ -64,49 +64,8 @@ public class TTest implements Initializable {
 
     public TTest(Job job) {
         this.job = new Job(job);
-        charter = new Charter();
-        tData = new HashMap<>();
-        if (job.getRunDataSize() <= 1) return;
-
-        TDistribution t = new TDistribution(job.getRuns().getFirst().getData().size() * 2 - 2);
-        this.tCrit = t.inverseCumulativeProbability(1 - job.getAlpha() / 2.0);
-    }
-
-    public void tTest() {
-
-        if (job.getGroups().size() <= 1) return;
-
-        for (int i = 0; i < job.getRuns().size(); i += 2) {
-            Run run1 = job.getRuns().get(i);
-            Run run2 = job.getRuns().get(i + 1);
-
-            double sse = calculateSSE(run1, run2);
-            double runVariance1 = calculateVariance(run1, sse);
-            double runVariance2 = calculateVariance(run2, sse);
-
-
-            double runSize1 = run1.getData().size();
-            double runSize2 = run2.getData().size();
-
-            double nominator = (run1.getAverageSpeed() - run2.getAverageSpeed());
-            double denominator = Math.sqrt((runVariance1 / runSize1) + (runVariance2 / runSize2));
-            double tVal = Math.abs(nominator / denominator);
-            run1.setT(tVal);
-
-            tData.put(run1.getID(), tVal);
-
-            run2.setT(Run.UNDEFINED_DOUBLE_VALUE);
-            run2.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
-            if (this.tCrit < tVal) {
-                run1.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
-            } else {
-                run1.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
-            }
-        }
-    }
-
-    private void setLabeling() {
-        zCritLabel.setText(String.format(Locale.ENGLISH, "%,.5f", this.tCrit));
+        this.charter = new Charter();
+        this.tData = new HashMap<>();
     }
 
     @Override
@@ -115,19 +74,49 @@ public class TTest implements Initializable {
         averageSpeedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
+        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
         TColumn.setCellValueFactory(new PropertyValueFactory<>("TAsString"));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
         drawTTest.setOnAction(e -> drawTGraph(this.job));
-        TTable.setItems(this.job.getRuns());
+        TTable.setItems(this.job.getRunsCompacted());
         setLabeling();
     }
 
-    private void drawTGraph(Job job) {
-        charter.drawGraph(job, "T-Test", "Run", "T-Value", "calculated T", this.tData, tCrit);
+    private void setLabeling() {
+        zCritLabel.setText(String.format(Locale.ENGLISH, "%,.5f", this.tCrit));
+    }
+
+    public void tTest() {
+        if (job.getGroups().size() <= 1) return;
+        TDistribution t = new TDistribution(job.getRuns().getFirst().getData().size() * 2 - 2);
+        this.tCrit = t.inverseCumulativeProbability(1 - job.getAlpha() / 2.0);
+
+
+        for (int i = 0; i < job.getRuns().size(); i += Job.DEFAULT_GROUP_SIZE) {
+            Run run1 = job.getRuns().get(i);
+            Run run2 = job.getRuns().get(i + 1);
+
+            double sse = calculateSSE(run1, run2);
+            double runVariance1 = calculateVariance(run1, sse);
+            double runVariance2 = calculateVariance(run2, sse);
+            double runSize = this.job.getRunDataSize();
+
+            double nominator = (run1.getAverageSpeed() - run2.getAverageSpeed());
+            double denominator = Math.sqrt((runVariance1 / runSize) + (runVariance2 / runSize));
+            double tVal = Math.abs(nominator / denominator);
+            run1.setT(tVal);
+
+            tData.put(run1.getID(), tVal);
+
+            if (this.tCrit < tVal) {
+                run1.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
+            } else {
+                run1.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+            }
+        }
     }
 
     private double calculateVariance(Run run, double sse) {
@@ -147,6 +136,10 @@ public class TTest implements Initializable {
         }
 
         return sse;
+    }
+
+    private void drawTGraph(Job job) {
+        charter.drawGraph(job, "T-Test", "Run", "T-Value", "calculated T", this.tData, tCrit);
     }
 
     public void openWindow() {

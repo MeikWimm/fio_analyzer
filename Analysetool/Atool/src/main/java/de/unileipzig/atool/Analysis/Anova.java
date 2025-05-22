@@ -81,7 +81,7 @@ public class Anova implements Initializable {
     @FXML
     public TableColumn<Run, String> compareToRunColumn;
     @FXML
-    public TableColumn<Run, String> FColumn;
+    public TableColumn<Run, Double> FColumn;
     @FXML
     public TableColumn<Run, Byte> hypothesisColumn;
     private double fCrit;
@@ -112,8 +112,10 @@ public class Anova implements Initializable {
         covColumn.setCellValueFactory(new PropertyValueFactory<>("CoVAsString"));
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
-        FColumn.setCellValueFactory(new PropertyValueFactory<>("FAsString"));
+        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
+
+        FColumn.setCellValueFactory(new PropertyValueFactory<>("F"));
+        FColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
@@ -121,13 +123,16 @@ public class Anova implements Initializable {
 
         anovaTable.setOnMouseClicked((MouseEvent event) -> {
             if (event.getButton().equals(MouseButton.PRIMARY)) {
-                setLabeling(anovaTable.getSelectionModel().getSelectedItem());
+                Run run = anovaTable.getSelectionModel().getSelectedItem();
+                if(run != null){
+                    setLabeling(run);
+                }
             }
         });
 
         showCoVGraph.setOnAction(e -> drawCoVGraph(this.job));
         showFGraphButton.setOnAction(e -> drawANOVAGraph(this.job));
-        anovaTable.setItems(this.job.getRuns());
+        anovaTable.setItems(this.job.getRunsCompacted());
     }
 
     private void setLabeling(Run run) {

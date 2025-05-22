@@ -76,7 +76,7 @@ public class TukeyHSD extends Anova implements Initializable{
         averageSpeedColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
+        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
         QColumn.setCellValueFactory(new PropertyValueFactory<>("QAsString"));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
@@ -84,7 +84,7 @@ public class TukeyHSD extends Anova implements Initializable{
 
         drawTukey.setOnAction(e -> drawTukeyGraph(this.job));
         
-        TukeyTable.setItems(this.job.getRuns());   
+        TukeyTable.setItems(this.job.getRunsCompacted());
         setLabeling();
     }
     

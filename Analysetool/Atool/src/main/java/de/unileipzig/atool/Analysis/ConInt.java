@@ -88,14 +88,14 @@ public class ConInt implements Initializable {
         standardDeviationColumn.setCellValueFactory(new PropertyValueFactory<>("StandardDeviation"));
         standardDeviationColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("RunToCompareToAsString"));
+        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
 
         overlappingColumn.setCellValueFactory(new PropertyValueFactory<>("OverlappingDifferenceAsString"));
 
         drawConIntDiffButton.setOnAction(e -> drawOverlappingDiffernce(this.job));
 
         labelHeader.setText(this.job.toString());
-        conIntTable.setItems(this.job.getRuns());
+        conIntTable.setItems(this.job.getRunsCompacted());
     }
 
     public void openWindow() {

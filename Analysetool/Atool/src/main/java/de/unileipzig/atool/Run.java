@@ -13,9 +13,10 @@ import java.util.Locale;
  * @author meni1999
  */
 public class Run {
-    public static Byte ACCEPTED_NULLHYPOTHESIS = 1;
-    public static Byte REJECTED_NULLHYPOTHESIS = 0;
-    public static Byte UNDEFIND_NULLHYPOTHESIS = -1;
+    public static final byte ACCEPTED_NULLHYPOTHESIS = 1;
+    public static final byte REJECTED_NULLHYPOTHESIS = 0;
+    public static final byte UNDEFIND_NULLHYPOTHESIS = -1;
+
     public static Double UNDEFINED_DOUBLE_VALUE = Double.MIN_VALUE;
     public static Float UNDEFINED_FLOAT_VALUE = Float.MIN_VALUE;
     public static Integer UNDEFINED_INTEGER = Integer.MIN_VALUE;
@@ -36,6 +37,7 @@ public class Run {
     private double tVal = UNDEFINED_DOUBLE_VALUE;
     private double cov = UNDEFINED_DOUBLE_VALUE;
     private double overlappingDifference = UNDEFINED_DOUBLE_VALUE;
+    private String group = "";
 
     
     public Run(final int runNumber, List<DataPoint> runData){
@@ -45,23 +47,32 @@ public class Run {
     }
 
     // Copy constructor
-    public Run(Run run) {
-        this.runID = run.getRunID();
-        this.data = new ArrayList<>(run.getData()); // shallow copy; use deep copy if needed
+    public Run(Run other) {
+        this.runID = other.getRunID();
+        this.data = new ArrayList<>(other.getData()); // shallow copy; use deep copy if needed
         this.runToCompare = new ArrayList<>();
-        this.intervalFrom = run.getIntervalFrom();
-        this.intervalTo = run.getIntervalTo();
-        this.averageSpeed = run.getAverageSpeed();
-        this.standardDeviation = run.getStandardDeviation();
-        this.ssa = run.getSSA();
-        this.sse = run.getSSE();
-        this.isNullhypothesis = run.getNullhypothesis();
-        this.F = run.getF();
-        this.zVal = run.getZ();
-        this.qVal = run.getQ();
-        this.tVal = run.getT();
-        this.cov = run.getCoV();
-        this.overlappingDifference = run.getOverlappingDifference();
+        this.intervalFrom = other.getIntervalFrom();
+        this.intervalTo = other.getIntervalTo();
+        this.averageSpeed = other.getAverageSpeed();
+        this.standardDeviation = other.getStandardDeviation();
+        this.ssa = other.getSSA();
+        this.sse = other.getSSE();
+        this.isNullhypothesis = other.getNullhypothesis();
+        this.F = other.getF();
+        this.zVal = other.getZ();
+        this.qVal = other.getQ();
+        this.tVal = other.getT();
+        this.cov = other.getCoV();
+        this.group = other.group;
+        this.overlappingDifference = other.getOverlappingDifference();
+    }
+
+    public static String HypothesistoString(byte hypothesis) {
+        return switch (hypothesis) {
+            case ACCEPTED_NULLHYPOTHESIS -> "ACCEPTED_NULLHYPOTHESIS";
+            case REJECTED_NULLHYPOTHESIS -> "REJECTED_NULLHYPOTHESIS";
+            default -> "UNDEFINED_DOUBLE_VALUE";
+        };
     }
 
     private void calculateRun() {
@@ -166,7 +177,7 @@ public class Run {
         if(this.F == UNDEFINED_DOUBLE_VALUE){
             return "";
         }
-        return String.format(Settings.DIGIT_FORMAT, this.F);
+        return String.format(Locale.ENGLISH,Settings.DIGIT_FORMAT, this.F);
     }
     
     public void setZ(double zVal){
@@ -277,5 +288,13 @@ public class Run {
         this.tVal = UNDEFINED_DOUBLE_VALUE;
         this.cov = UNDEFINED_DOUBLE_VALUE;
         this.overlappingDifference = UNDEFINED_DOUBLE_VALUE;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
+    public String getGroup() {
+        return group;
     }
 }

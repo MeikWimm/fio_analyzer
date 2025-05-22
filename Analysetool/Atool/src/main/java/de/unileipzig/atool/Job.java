@@ -29,6 +29,7 @@ public class Job {
     public final static Double DEFAULT_EPSILON = 1.0;
     public final static Double MAX_EPSILON = 1000.0;
     public final static Double MIN_EPSILON = 1.0;
+    public static final int DEFAULT_GROUP_SIZE = 2;
     private static int COUNTER = 1; // so that each Job has a unique ID
     private final int ID = COUNTER;
     private File file;
@@ -45,8 +46,9 @@ public class Job {
     private double alpha = 0.05;
     private double calculatedF;
     private double standardDeviation;
-    private int groupSize = 2; // default group size
+    private int groupSize = DEFAULT_GROUP_SIZE;
     private List<List<Run>> groups;
+    private List<Run> runss;
     private int runDataSize;
     //private Job job;
     //private double convertedAverageSpeed;
@@ -101,7 +103,7 @@ public class Job {
         this.alpha = other.alpha;
         this.calculatedF = other.calculatedF;
         this.standardDeviation = other.standardDeviation;
-        this.groupSize = other.groupSize;
+        this.groupSize = DEFAULT_GROUP_SIZE;
         this.runDataSize = other.runDataSize;
         setupGroups();
     }
@@ -278,6 +280,7 @@ public class Job {
     public void setupGroups(){
         System.out.println("group size" + this.groupSize);
         this.groups = new ArrayList<>();
+        this.runss =  new ArrayList<>();
         int groupCount = runsCounter / this.groupSize;
         int runIndex = 0;
         for (int i = 0; i < groupCount; i++) {
@@ -286,7 +289,9 @@ public class Job {
                 group.add(runs.get(runIndex));
                 runIndex++;
             }
+            group.getFirst().setGroup(String.format("Run %d - Run %d", group.getFirst().getRunID(), group.getLast().getRunID()));
             this.groups.add(group);
+            this.runss.add(group.getFirst());
         }
     }
 
@@ -300,6 +305,10 @@ public class Job {
 
     public ObservableList<Run> getRuns() {
         return FXCollections.observableArrayList(this.runs);
+    }
+
+    public ObservableList<Run> getRunsCompacted() {
+        return FXCollections.observableArrayList(this.runss);
     }
 
     public int getRunDataSize() {

@@ -9,17 +9,12 @@ package de.unileipzig.atool;
  * @author meni1999
  */
 public class DataPoint {
-    private double speed;
-    private double time;
-    private int flag;
-    private double rank;
-    private int runID = Run.UNDEFINED_INTEGER;
+    protected double speed;
+    protected double time;
 
     public DataPoint(double speed, double time) {
         this.speed = speed;
         this.time = time;
-        this.rank = Run.UNDEFINED_DOUBLE_VALUE;
-        this.flag = Run.UNDEFINED_INTEGER;
     }
 
     @Override
@@ -31,39 +26,8 @@ public class DataPoint {
         return this.speed;
     }
 
-    public void setSpeed(double speed) {
-        this.speed = speed;
-    }
-
     public double getTime() {
         return this.time;
     }
 
-    public void setTime(double time) {
-        this.time = time;
-    }
-
-    public double getFlag() {
-        return this.flag;
-    }
-
-    public void setFlag(int flag) {
-        this.flag = flag;
-    }
-
-    public double getRank() {
-        return this.rank;
-    }
-
-    public void setRank(double rank) {
-        this.rank = rank;
-    }
-
-    public int getRunID() {
-        return this.runID;
-    }
-
-    public void setRunID(int runID) {
-        this.runID = runID;
-    }
 }
