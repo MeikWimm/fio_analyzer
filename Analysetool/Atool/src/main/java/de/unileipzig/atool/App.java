@@ -15,6 +15,7 @@ import java.io.IOException;
 public class App extends Application {
 
 
+    public static boolean DEBUG_MODE = true;
     private static Scene scene;
 
     static void setRoot(String fxml) throws IOException {

@@ -63,7 +63,7 @@ public class TTest implements Initializable {
     private final Map<Integer, Double> tData;
 
     public TTest(Job job) {
-        this.job = new Job(job);
+        this.job = job;
         this.charter = new Charter();
         this.tData = new HashMap<>();
     }
@@ -95,7 +95,7 @@ public class TTest implements Initializable {
         this.tCrit = t.inverseCumulativeProbability(1 - job.getAlpha() / 2.0);
 
 
-        for (int i = 0; i < job.getRuns().size(); i += Job.DEFAULT_GROUP_SIZE) {
+        for (int i = 0; i < job.getRuns().size() - 1; i += Job.DEFAULT_SKIP_COUNT) {
             Run run1 = job.getRuns().get(i);
             Run run2 = job.getRuns().get(i + 1);
 

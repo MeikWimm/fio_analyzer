@@ -164,6 +164,7 @@ public class PrimaryController implements Initializable {
         if (Settings.HAS_CHANGED) {
             for (Job job : table.getItems()) {
                 job.updateRunsData();
+                job.setSkipGroups(Settings.SKIP_GROUPS);
             }
         }
 
@@ -311,23 +312,17 @@ public class PrimaryController implements Initializable {
             MenuItem calculateConInt = new MenuItem("Calculate Confidence Interval");
             calculateConInt.setOnAction((ActionEvent event) -> {
                 Job job = row.getItem();
-                conInt = new ConInt(job);
+                ConInt conInt = new ConInt(new Job(job, Settings.RUN_TO_COMPARE_TO_SIZE, Settings.SKIP_GROUPS));
                 conInt.calculateInterval();
                 conInt.openWindow();
             });
 
-            MenuItem calculateANOVA = new MenuItem("Calculate ANOVA");
-            calculateANOVA.setOnAction((ActionEvent event) -> {
-                Job job = row.getItem();
-                anova = new Anova(new Job(job, Settings.RUN_TO_COMPARE_TO_SIZE));
-                anova.calculateANOVA();
-                anova.openWindow();
-            });
+            MenuItem calculateANOVA = getMenuItem(row);
 
             MenuItem calculateUTest = new MenuItem("Calculate U-Test");
             calculateUTest.setOnAction((ActionEvent event) -> {
                 Job job = row.getItem();
-                mw = new MannWhitney(job);
+                MannWhitney mw = new MannWhitney(new Job(job, Settings.RUN_TO_COMPARE_TO_SIZE, Settings.SKIP_GROUPS));
                 mw.calculateMannWhitneyTest();
                 mw.openWindow();
             });
@@ -335,17 +330,17 @@ public class PrimaryController implements Initializable {
             MenuItem calculateTukeyHSD = new MenuItem("Calculate Tukey HSD");
             calculateTukeyHSD.setOnAction((ActionEvent event) -> {
                 Job job = row.getItem();
-                tHSD = new TukeyHSD(new Job(job, Settings.RUN_TO_COMPARE_TO_SIZE));
-                tHSD.calculateTukeyHSD();
+                tHSD = new TukeyHSD(new Job(job, Settings.RUN_TO_COMPARE_TO_SIZE, Settings.SKIP_GROUPS));
+                tHSD.calculate();
                 tHSD.openWindow();
             });
 
             MenuItem calculateTTtest = new MenuItem("Calculate T-Test");
             calculateTTtest.setOnAction((ActionEvent event) -> {
                 Job job = row.getItem();
-                TTest tTest = new TTest(job);
-                tTest.tTest();
-                tTest.openWindow();
+                TTest ttest = new TTest(new Job(job, Settings.RUN_TO_COMPARE_TO_SIZE, Settings.SKIP_GROUPS));
+                ttest.tTest();
+                ttest.openWindow();
             });
 
             MenuItem removeItem = new MenuItem("Delete");
@@ -362,6 +357,17 @@ public class PrimaryController implements Initializable {
                             .otherwise((ContextMenu) null));
             return row;
         });
+    }
+
+    private MenuItem getMenuItem(TableRow<Job> row) {
+        MenuItem calculateANOVA = new MenuItem("Calculate ANOVA");
+        calculateANOVA.setOnAction((ActionEvent event) -> {
+            Job job = row.getItem();
+            anova = new Anova(new Job(job, Settings.RUN_TO_COMPARE_TO_SIZE, Settings.SKIP_GROUPS));
+            anova.calculate();
+            anova.openWindow();
+        });
+        return calculateANOVA;
     }
 
     // Controller status enum

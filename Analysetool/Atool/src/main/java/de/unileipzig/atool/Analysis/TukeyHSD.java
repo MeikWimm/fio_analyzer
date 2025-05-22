@@ -121,18 +121,24 @@ public class TukeyHSD extends Anova implements Initializable{
             anovaGraphStage.setScene(scene);
             anovaGraphStage.show();
     }
-    
-    public void calculateTukeyHSD(){
-        List<List<Run>> significantGroups = super.calculateANOVA();
-        this.job.resetRuns();
 
-        if(job.getGroupSize() <= 1) return;
-        for (int i = 0; i < significantGroups.size() - 1; i++) {
+    @Override
+    protected void applyPostHoc(List<List<Run>> anovaResult) {
+        calculateTukeyHSD(anovaResult);
+    }
+
+    public void calculateTukeyHSD(List<List<Run>> anovaResult){
+        //this.job.resetRuns();
+
+        if(anovaResult == null) return;
+        if(anovaResult.size() <= 1) return;
+        for (int i = 0; i < anovaResult.size() - 1; i++) {
             Tukey tukey = new Tukey(1, 2, 2 * (job.getRunDataSize() - 1));
-            List<Run> group1 = significantGroups.get(i);
-            List<Run> group2 = significantGroups.get(i + 1);
+            List<Run> group1 = anovaResult.get(i);
+            List<Run> group2 = anovaResult.get(i + 1);
             double speedSumGroup1 = 0;
             double speedSumGroup2 = 0;
+
 
             for (int j = 0; j < group1.size(); j++) {
                 Run run1 = group1.get(j);
@@ -145,7 +151,7 @@ public class TukeyHSD extends Anova implements Initializable{
             double averageSpeedGroup1 = speedSumGroup1 / group1.size();
             double averageSpeedGroup2 = speedSumGroup2 / group2.size();
 
-            double sse = significantGroups.get(i).getFirst().getSSE();
+            double sse = anovaResult.get(i).getFirst().getSSE();
             double overallMean = Math.abs(averageSpeedGroup1 - averageSpeedGroup2);
 
             this.qHSD = tukey.inverse_survival(job.getAlpha(), false) * Math.sqrt((sse / (2.0 * (this.job.getRunDataSize()))) / job.getRunDataSize());
@@ -195,5 +201,10 @@ public class TukeyHSD extends Anova implements Initializable{
             e.printStackTrace();
             LOGGER.log(Level.SEVERE, String.format("Couldn't open Window for Anova! App state: %s", ConInt.STATUS.IO_EXCEPTION));
         }
+    }
+
+    @Override
+    public boolean shouldResetHypotheses() {
+        return true;
     }
 }

@@ -29,7 +29,7 @@ public class Job {
     public final static Double DEFAULT_EPSILON = 1.0;
     public final static Double MAX_EPSILON = 1000.0;
     public final static Double MIN_EPSILON = 1.0;
-    public static final int DEFAULT_GROUP_SIZE = 2;
+    public static final int DEFAULT_SKIP_COUNT = 1;
     private static int COUNTER = 1; // so that each Job has a unique ID
     private final int ID = COUNTER;
     private File file;
@@ -46,10 +46,11 @@ public class Job {
     private double alpha = 0.05;
     private double calculatedF;
     private double standardDeviation;
-    private int groupSize = DEFAULT_GROUP_SIZE;
+    private int groupSize = DEFAULT_SKIP_COUNT;
     private List<List<Run>> groups;
     private List<Run> runss;
     private int runDataSize;
+    private boolean skipGroups;
     //private Job job;
     //private double convertedAverageSpeed;
 
@@ -60,7 +61,7 @@ public class Job {
         COUNTER++;
     }
 
-    public Job(Job other, int groupSize) {
+    public Job(Job other, int groupSize, boolean skipGroups) {
         this.file = other.file;
         this.runs = new ArrayList<>();
         for (Run run : other.runs) {
@@ -81,10 +82,11 @@ public class Job {
         this.standardDeviation = other.standardDeviation;
         this.groupSize = groupSize;
         this.runDataSize = other.runDataSize;
+        this.skipGroups = skipGroups;
         setupGroups();
     }
 
-    public Job(Job other) {
+    public Job(Job other, boolean skipGroups) {
         this.file = other.file; // Shallow copy — files are immutable in practice
         this.runs = new ArrayList<>();
         for (Run run : other.runs) {
@@ -103,8 +105,9 @@ public class Job {
         this.alpha = other.alpha;
         this.calculatedF = other.calculatedF;
         this.standardDeviation = other.standardDeviation;
-        this.groupSize = DEFAULT_GROUP_SIZE;
+        this.groupSize = DEFAULT_SKIP_COUNT;
         this.runDataSize = other.runDataSize;
+        this.skipGroups = skipGroups;
         setupGroups();
     }
 
@@ -278,20 +281,48 @@ public class Job {
     }
 
     public void setupGroups(){
-        System.out.println("group size" + this.groupSize);
         this.groups = new ArrayList<>();
         this.runss =  new ArrayList<>();
-        int groupCount = runsCounter / this.groupSize;
-        int runIndex = 0;
-        for (int i = 0; i < groupCount; i++) {
-            List<Run> group = new ArrayList<>();
-            for (int j = 0; j < this.groupSize; j++) {
-                group.add(runs.get(runIndex));
+
+        if(this.skipGroups){
+            // create Groups like Run 1 - Run 2, Run 3 - Run 4, Run 5 - Run 6,...
+            int groupCount = runsCounter / this.groupSize;
+            int runIndex = 0;
+
+            for (int i = 0; i < groupCount; i++) {
+                List<Run> group = new ArrayList<>();
+                for (int j = 0; j < this.groupSize; j++) {
+                    group.add(runs.get(runIndex));
+                    runIndex++;
+                }
+                group.getFirst().setGroup(String.format("Run %d - Run %d", group.getFirst().getRunID(), group.getLast().getRunID()));
+                this.groups.add(group);
+                this.runss.add(group.getFirst());
+            }
+        } else {
+            // create Groups like Run 1 - Run 2, Run 2 - Run 3, Run 3 - Run 4,...
+            int groupCount = runsCounter / this.groupSize;
+            groupCount = groupCount + (groupCount - 1);
+            int runIndex = 0;
+
+            for (int i = 0; i < groupCount; i++) {
+                List<Run> group = new ArrayList<>();
+                if(this.groupSize - 1 > 0){
+                    for (int j = 0; j < this.groupSize; j++) {
+                        if(runIndex + j < this.runs.size()){
+                            group.add(runs.get(runIndex + j));
+                        }
+                    }
+                } else {
+                    group.add(runs.get(runIndex));
+                }
+                if(group.size() == groupSize){
+                    group.getFirst().setGroup(String.format("Run %d - Run %d", group.getFirst().getRunID(), group.getLast().getRunID()));
+                    this.groups.add(group);
+                }
+                this.runss.add(runs.get(runIndex));
                 runIndex++;
             }
-            group.getFirst().setGroup(String.format("Run %d - Run %d", group.getFirst().getRunID(), group.getLast().getRunID()));
-            this.groups.add(group);
-            this.runss.add(group.getFirst());
         }
     }
 
@@ -329,5 +360,9 @@ public class Job {
 
     public void setF(double f) {
         this.calculatedF = f;
+    }
+
+    public void setSkipGroups(boolean skipGroups) {
+        this.skipGroups = skipGroups;
     }
 }

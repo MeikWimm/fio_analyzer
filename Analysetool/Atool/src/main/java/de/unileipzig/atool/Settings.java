@@ -27,6 +27,7 @@ public class Settings implements Initializable {
     public final static int DEFAULT_SPEED_PER_MILLI = 1;
     public final static int MAX_SPEED_PER_MIILI = 2000;
     public final static int MIN_SPEED_PER_MIILI = 1;
+    public static final boolean SKIP_GROUPS = false;
     private static final Logger LOGGER = Logger.getLogger(Settings.class.getName());
     private static final int DIGIT = 3;
     public static final String DIGIT_FORMAT = "%,." + DIGIT + "f";

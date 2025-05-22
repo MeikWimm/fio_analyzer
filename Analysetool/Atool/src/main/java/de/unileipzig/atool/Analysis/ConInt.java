@@ -68,7 +68,7 @@ public class ConInt implements Initializable {
     public ConInt(Job job) {
         charter = new Charter();
         conIntData = new HashMap<>();
-        this.job = new Job(job);
+        this.job = job;
     }
 
     @Override
@@ -169,7 +169,7 @@ public class ConInt implements Initializable {
             run.setIntervalTo(c2);
         }
         List<Run> runs = this.job.getRuns();
-        for (int i = 0; i < this.job.getRuns().size() - 1; i += 2) {
+        for (int i = 0; i < this.job.getRuns().size() - 1; i += Job.DEFAULT_SKIP_COUNT) {
             double overlappingDiff = calculateOverlapp(runs.get(i), runs.get(i + 1));
             runs.get(i).setOverlappingDifference(overlappingDiff);
             runs.get(i + 1).setOverlappingDifference(Run.UNDEFINED_DOUBLE_VALUE);

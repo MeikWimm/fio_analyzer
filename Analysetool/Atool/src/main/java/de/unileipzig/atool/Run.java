@@ -144,15 +144,6 @@ public class Run {
     public void setIntervalFrom(double d) {
         this.intervalFrom = d;
     }
-    
-    public double getAverageSpeedOfRunsToCompareTo(){
-        double speed = 0.0;
-        for (Run run : this.runToCompare) {
-            speed += run.getAverageSpeed();
-        }
-        speed = speed / this.runToCompare.size();
-        return speed;
-    }
 
     public String getRunToCompareToAsString(){
         if(runToCompare.isEmpty()){

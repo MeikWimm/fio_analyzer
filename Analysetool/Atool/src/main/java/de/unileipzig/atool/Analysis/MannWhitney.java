@@ -53,19 +53,11 @@ public class MannWhitney implements Initializable {
     @FXML public Button drawUTestButton;
     @FXML public Label zIntervalLabel;
     private double zCrit;
-    private boolean compareInterceptingRuns = false;
 
     public MannWhitney(Job job) {
-        this.job = new Job(job);
+        this.job = job;
         this.charter = new Charter();
         this.uTestData = new HashMap<>();
-    }
-
-    public MannWhitney(Job job, boolean compareInterceptingRuns) {
-        this.job = new Job(job);
-        this.charter = new Charter();
-        this.uTestData = new HashMap<>();
-        this.compareInterceptingRuns = compareInterceptingRuns;
     }
 
     @Override
@@ -187,11 +179,9 @@ public class MannWhitney implements Initializable {
     public void calculateMannWhitneyTest() {
         if (this.job.getRuns().size() <= 1) return;
         List<Run> runs = this.job.getRuns();
-        int skipCount = Job.DEFAULT_GROUP_SIZE;
-        if(compareInterceptingRuns){
-            skipCount = 1;
-        }
-        for (int i = 0; i < runs.size(); i += skipCount) {
+        int skipCount = Job.DEFAULT_SKIP_COUNT;
+
+        for (int i = 0; i < runs.size(); i ++) {
             if (i < runs.size() - 1) {
                 Run run1 = runs.get(i);
                 Run run2 = runs.get(i + 1);

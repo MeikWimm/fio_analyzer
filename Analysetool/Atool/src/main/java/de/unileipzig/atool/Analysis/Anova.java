@@ -48,46 +48,29 @@ public class Anova implements Initializable {
     private final Map<Integer, Double> covData;
     private final Charter charter;
     private List<List<Run>> significantRuns;
-    @FXML
-    public Label averageSpeedLabel;
-    @FXML
-    public Label sseLabel;
-    @FXML
-    public Label ssaLabel;
-    @FXML
-    public Label sstLabel;
-    @FXML
-    public Label ssaSstLabel;
-    @FXML
-    public Label sseSstLabel;
-    @FXML
-    public Label fCriticalLabel;
-    @FXML
-    public Label fCalculatedLabel;
-    @FXML
-    public Button showFGraphButton;
-    @FXML
-    public Button showCoVGraph;
-    @FXML
-    public Pane anovaPane;
-    @FXML
-    public TableView<Run> anovaTable;
-    @FXML
-    public TableColumn<Run, Double> averageSpeedColumn;
-    @FXML
-    public TableColumn<Run, Integer> runIDColumn;
-    @FXML
-    public TableColumn<Run, String> covColumn;
-    @FXML
-    public TableColumn<Run, String> compareToRunColumn;
-    @FXML
-    public TableColumn<Run, Double> FColumn;
-    @FXML
-    public TableColumn<Run, Byte> hypothesisColumn;
+    @FXML public Label averageSpeedLabel;
+    @FXML public Label sseLabel;
+    @FXML public Label ssaLabel;
+    @FXML public Label sstLabel;
+    @FXML public Label ssaSstLabel;
+    @FXML public Label sseSstLabel;
+    @FXML public Label fCriticalLabel;
+    @FXML public Label fCalculatedLabel;
+    @FXML public Button showFGraphButton;
+    @FXML public Button showCoVGraph;
+    @FXML public Pane anovaPane;
+    @FXML public TableView<Run> anovaTable;
+    @FXML public TableColumn<Run, Double> averageSpeedColumn;
+    @FXML public TableColumn<Run, Integer> runIDColumn;
+    @FXML public TableColumn<Run, String> covColumn;
+    @FXML public TableColumn<Run, String> compareToRunColumn;
+    @FXML public TableColumn<Run, Double> FColumn;
+    @FXML public TableColumn<Run, Byte> hypothesisColumn;
     private double fCrit;
+
     public Anova(Job job) {
         this.job = job;
-        this.job.resetRuns();
+        //this.job.resetRuns();
         this.charter = new Charter();
         this.anovaData = new HashMap<>();
         this.covData = new HashMap<>();
@@ -101,6 +84,7 @@ public class Anova implements Initializable {
             fDistribution = new FDistribution(num, denom);
             fCrit = fDistribution.inverseCumulativeProbability(1.0 - job.getAlpha());
         }
+
         LOGGER.log(Level.INFO, String.format("Calculated Numerator %d and Denominator %d", num, denom));
     }
 
@@ -146,7 +130,14 @@ public class Anova implements Initializable {
         fCalculatedLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getF()));
     }
 
-    public List<List<Run>> calculateANOVA() {
+    public void calculate(){
+        List<List<Run>> anovaResult = calculateANOVA();
+        applyPostHoc(anovaResult);
+    }
+
+    protected void applyPostHoc(List<List<Run>> anovaResult){}
+
+    protected List<List<Run>> calculateANOVA() {
         if (job.getRuns().size() <= 1) return null;
         /*
         if(job.getCode().equals(jobCode)) {
@@ -209,6 +200,7 @@ public class Anova implements Initializable {
         double cov;
         for (List<Run> group : this.job.getGroups()) {
             Run run = group.getFirst();
+            Run runForPostHoc = new Run(group.getFirst());
             cov = calcualteCoV(group);
             double s_2_a = run.getSSA() / (this.job.getGroupSize() - 1);
             double s_2_e = run.getSSE() / (this.job.getGroupSize() * (run.getData().size() - 1));
@@ -222,9 +214,16 @@ public class Anova implements Initializable {
             } else {
                 run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
                 significantRuns.add(group);
-                //significantRuns.add(new SigRunData(run.getRunToCompareTo(), run.getSSE()));
             }
         }
+
+        //Post-Hoc
+//        for (List<Run> group : this.job.getGroups()) {
+//            Run firstRun = new Run(group.getFirst());
+//            if(firstRun.getNullhypothesis() == Run.ACCEPTED_NULLHYPOTHESIS){
+//                significantRuns.add(group);
+//            }
+//        }
 
 //        for (Run run : this.job.getRuns()) {
 //            double s_2_a = run.getSSA() / (this.job.getGroupSize() - 1);
@@ -248,11 +247,11 @@ public class Anova implements Initializable {
 //                run.setCoV(Run.UNDEFINED_DOUBLE_VALUE);
 //            }
 //        }
-        return significantRuns;
-        //calculateSteadyState();
+        if (shouldResetHypotheses()){
+            this.job.resetRuns();
+        }
 
-        // remember run counter and alpha to avoid multiple calculations with the same values.
-        //  jobCode = job.getCode();
+        return significantRuns;
     }
 
     private double getGroupAverageSpeed(List<Run> group) {
@@ -281,7 +280,7 @@ public class Anova implements Initializable {
         charter.drawGraph(job, "Coefficent of Variation", "Run", "CoV", "calculated CoV (%)", covData, Run.UNDEFINED_DOUBLE_VALUE);
     }
 
-    private void initStage() {
+    public void openWindow() {
         try {
 
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/Anova.fxml"));
@@ -306,10 +305,10 @@ public class Anova implements Initializable {
         }
     }
 
-    public void openWindow() {
-        initStage();
-    }
-
-    public record SigRunData(List<Run> comparedRuns, double sse) {
+    public boolean shouldResetHypotheses() {
+        if(App.DEBUG_MODE && this.getClass() != Anova.class){
+                LOGGER.log(Level.WARNING, String.format("Subclass %s should overwrite shouldResetHypotheses()", this.getClass().getSimpleName()));
+        }
+        return false;
     }
 }
