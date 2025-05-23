@@ -16,7 +16,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.util.converter.DoubleStringConverter;
 import javafx.util.converter.IntegerStringConverter;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -164,7 +163,6 @@ public class PrimaryController implements Initializable {
         if (Settings.HAS_CHANGED) {
             for (Job job : table.getItems()) {
                 job.updateRunsData();
-                job.setSkipGroups(Settings.SKIP_GROUPS);
             }
         }
 
@@ -312,33 +310,42 @@ public class PrimaryController implements Initializable {
             MenuItem calculateConInt = new MenuItem("Calculate Confidence Interval");
             calculateConInt.setOnAction((ActionEvent event) -> {
                 Job job = row.getItem();
-                ConInt conInt = new ConInt(new Job(job, Settings.RUN_TO_COMPARE_TO_SIZE, Settings.SKIP_GROUPS));
-                conInt.calculateInterval();
-                conInt.openWindow();
+                //ConInt conInt = new ConInt(new Job(job, Settings.RUN_TO_COMPARE_TO_SIZE, Settings.SKIP_GROUPS));
+                //conInt.calculateInterval();
+                //conInt.openWindow();
             });
 
-            MenuItem calculateANOVA = getMenuItem(row);
+            MenuItem calculateANOVA = new MenuItem("Calculate ANOVA");
+            calculateANOVA.setOnAction((ActionEvent event) -> {
+                Job job = row.getItem();
+                anova = new Anova(job,false, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
+                anova.calculate();
+                anova.openWindow();
+            });
 
             MenuItem calculateUTest = new MenuItem("Calculate U-Test");
             calculateUTest.setOnAction((ActionEvent event) -> {
                 Job job = row.getItem();
-                MannWhitney mw = new MannWhitney(new Job(job, Settings.RUN_TO_COMPARE_TO_SIZE, Settings.SKIP_GROUPS));
-                mw.calculateMannWhitneyTest();
+                MannWhitney mw = new MannWhitney(job, true, 2, job.getAlpha());
+                mw.calculate();
                 mw.openWindow();
             });
 
             MenuItem calculateTukeyHSD = new MenuItem("Calculate Tukey HSD");
             calculateTukeyHSD.setOnAction((ActionEvent event) -> {
                 Job job = row.getItem();
-                tHSD = new TukeyHSD(new Job(job, Settings.RUN_TO_COMPARE_TO_SIZE, Settings.SKIP_GROUPS));
-                tHSD.calculate();
+                Anova anova = new Anova(job, true, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
+                TukeyHSD tHSD = new TukeyHSD(anova, job.getAlpha());
+
+                anova.calculate();
+                anova.calculatePostHoc(tHSD);
                 tHSD.openWindow();
             });
 
             MenuItem calculateTTtest = new MenuItem("Calculate T-Test");
             calculateTTtest.setOnAction((ActionEvent event) -> {
                 Job job = row.getItem();
-                TTest ttest = new TTest(new Job(job, Settings.RUN_TO_COMPARE_TO_SIZE, Settings.SKIP_GROUPS));
+                TTest ttest = new TTest(job, false, 2, job.getAlpha());
                 ttest.tTest();
                 ttest.openWindow();
             });
@@ -349,7 +356,18 @@ public class PrimaryController implements Initializable {
                 LOGGER.log(Level.INFO, String.format("Removed Job -> %s", row.getItem().toString()));
             });
 
-            rowMenu.getItems().addAll(drawJob, drawFrequency, calculateConInt, calculateANOVA, calculateUTest, calculateTukeyHSD, calculateTTtest, removeItem);
+            MenuItem bon = new MenuItem("Bonferroni");
+            bon.setOnAction((ActionEvent event) -> {
+                Job job = row.getItem();
+                Anova anova = new Anova(job, true, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
+                Bonferroni bonTest = new Bonferroni(anova);
+
+                anova.calculate();
+                anova.calculatePostHoc(bonTest);
+                //tHSD.openWindow();
+            });
+
+            rowMenu.getItems().addAll(drawJob, drawFrequency, calculateConInt, calculateANOVA, calculateUTest, calculateTukeyHSD, calculateTTtest, removeItem, bon);
 
             row.contextMenuProperty().bind(
                     Bindings.when(Bindings.isNotNull(row.itemProperty()))
@@ -357,17 +375,6 @@ public class PrimaryController implements Initializable {
                             .otherwise((ContextMenu) null));
             return row;
         });
-    }
-
-    private MenuItem getMenuItem(TableRow<Job> row) {
-        MenuItem calculateANOVA = new MenuItem("Calculate ANOVA");
-        calculateANOVA.setOnAction((ActionEvent event) -> {
-            Job job = row.getItem();
-            anova = new Anova(new Job(job, Settings.RUN_TO_COMPARE_TO_SIZE, Settings.SKIP_GROUPS));
-            anova.calculate();
-            anova.openWindow();
-        });
-        return calculateANOVA;
     }
 
     // Controller status enum

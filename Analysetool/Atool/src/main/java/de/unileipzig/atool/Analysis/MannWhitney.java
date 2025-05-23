@@ -30,8 +30,30 @@ import java.util.logging.Logger;
 /**
  * @author meni1999
  */
-public class MannWhitney implements Initializable {
+public class MannWhitney extends GenericTest implements Initializable {
     private static final Logger LOGGER = Logger.getLogger(MannWhitney.class.getName());
+    private static class RankedDataPoint extends DataPoint {
+        int flag;
+        double rank;
+
+        public RankedDataPoint(DataPoint dp, int rank, int flag) {
+            super(dp.getSpeed(), dp.getTime());
+            this.rank = rank;
+            this.flag = flag;
+        }
+
+        public double getRank() {
+            return rank;
+        }
+
+        public void setRank(double rank) {
+            this.rank = rank;
+        }
+
+        public int getFlag() {
+            return flag;
+        }
+    }
 
     static {
         ConsoleHandler handler = new ConsoleHandler();
@@ -43,7 +65,6 @@ public class MannWhitney implements Initializable {
 
     private final Map<Integer, Double> uTestData;
     private final Charter charter;
-    private final Job job;
     @FXML public TableView<Run> uTestTable;
     @FXML public TableColumn<Run, Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
@@ -54,8 +75,8 @@ public class MannWhitney implements Initializable {
     @FXML public Label zIntervalLabel;
     private double zCrit;
 
-    public MannWhitney(Job job) {
-        this.job = job;
+    public MannWhitney(Job job, boolean skip, int groupSize, double alpha) {
+        super(job, skip, groupSize, alpha);
         this.charter = new Charter();
         this.uTestData = new HashMap<>();
     }
@@ -72,9 +93,9 @@ public class MannWhitney implements Initializable {
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
-        uTestTable.setItems(this.job.getRunsCompacted());
+        uTestTable.setItems(this.job.getRuns());
 
-        drawUTestButton.setOnAction(e -> drawUTest(this.job));
+        drawUTestButton.setOnAction(e -> draw());
         setLabeling();
     }
 
@@ -82,11 +103,12 @@ public class MannWhitney implements Initializable {
         zIntervalLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.zCrit));
     }
 
-    private void drawUTest(Job job) {
-        charter.drawGraph(job, "U-Test", "Run", "Z-Value", "calculated Z-Value", uTestData, zCrit);
+    @Override
+    public void draw() {
+        charter.drawGraph(this.job, "U-Test", "Run", "Z-Value", "calculated Z-Value", uTestData, zCrit);
     }
 
-    private void calculateMannWhitney(Run run1, Run run2) {
+    private void calculatePair(Run run1, Run run2) {
         List<RankedDataPoint> rankedData1 = new ArrayList<>();
         List<RankedDataPoint> rankedData2 = new ArrayList<>();
         NormalDistribution n = new NormalDistribution();
@@ -176,7 +198,8 @@ public class MannWhitney implements Initializable {
         LOGGER.log(Level.INFO, String.format("Null hypothesis for compared Runs -> %s", Run.HypothesistoString(hypothesis)));
     }
 
-    public void calculateMannWhitneyTest() {
+    @Override
+    public void calculate() {
         if (this.job.getRuns().size() <= 1) return;
         List<Run> runs = this.job.getRuns();
         int skipCount = Job.DEFAULT_SKIP_COUNT;
@@ -185,7 +208,7 @@ public class MannWhitney implements Initializable {
             if (i < runs.size() - 1) {
                 Run run1 = runs.get(i);
                 Run run2 = runs.get(i + 1);
-                calculateMannWhitney(run1, run2);
+                calculatePair(run1, run2);
             }
         }
     }
@@ -212,26 +235,4 @@ public class MannWhitney implements Initializable {
         }
     }
 
-    private static class RankedDataPoint extends DataPoint {
-        int flag;
-        double rank;
-
-        public RankedDataPoint(DataPoint dp, int rank, int flag) {
-            super(dp.getSpeed(), dp.getTime());
-            this.rank = rank;
-            this.flag = flag;
-        }
-
-        public double getRank() {
-            return rank;
-        }
-
-        public void setRank(double rank) {
-            this.rank = rank;
-        }
-
-        public int getFlag() {
-            return flag;
-        }
-    }
 }

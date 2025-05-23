@@ -95,7 +95,7 @@ public class ConInt implements Initializable {
         drawConIntDiffButton.setOnAction(e -> drawOverlappingDiffernce(this.job));
 
         labelHeader.setText(this.job.toString());
-        conIntTable.setItems(this.job.getRunsCompacted());
+        conIntTable.setItems(this.job.getRuns());
     }
 
     public void openWindow() {

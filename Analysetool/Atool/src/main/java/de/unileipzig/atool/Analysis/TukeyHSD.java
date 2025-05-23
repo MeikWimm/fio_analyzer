@@ -36,7 +36,7 @@ import net.sourceforge.jdistlib.Tukey;
  *
  * @author meni1999
  */
-public class TukeyHSD extends Anova implements Initializable{
+public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnalyzer {
     private static final Logger LOGGER = Logger.getLogger( TukeyHSD.class.getName() );
 
     private record TukeyDataPoint(double mean, double qHSD) {}
@@ -57,17 +57,16 @@ public class TukeyHSD extends Anova implements Initializable{
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, Integer> compareToRunColumn;
-    @FXML public TableColumn<Run, String> QColumn;
+    @FXML public TableColumn<Run, Double> QColumn;
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
-    
-    private final Job job;
     private double qHSD;
     private final Map<Integer, TukeyDataPoint> tukeyData;
+    private double alpha = 0.05;
 
-    public TukeyHSD(Job job){
-        super(job);
-        this.job = job;
+    public TukeyHSD(Anova anova , double alpha){
+        super(anova);
         this.tukeyData = new HashMap<>();
+        this.alpha = alpha;
     }
 
     @Override
@@ -77,18 +76,19 @@ public class TukeyHSD extends Anova implements Initializable{
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
-        QColumn.setCellValueFactory(new PropertyValueFactory<>("QAsString"));
+        QColumn.setCellValueFactory(new PropertyValueFactory<>("Q"));
+        QColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
-        drawTukey.setOnAction(e -> drawTukeyGraph(this.job));
+        drawTukey.setOnAction(e -> draw());
         
-        TukeyTable.setItems(this.job.getRunsCompacted());
-        setLabeling();
+        TukeyTable.setItems(this.job.getRuns());
+        qCritLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.qHSD));
     }
-    
-    public void drawTukeyGraph(Job job){
+
+    public void draw(){
             Stage anovaGraphStage = new Stage();
             final NumberAxis xAxis = new NumberAxis();
             final NumberAxis yAxis = new NumberAxis();
@@ -123,19 +123,12 @@ public class TukeyHSD extends Anova implements Initializable{
     }
 
     @Override
-    protected void applyPostHoc(List<List<Run>> anovaResult) {
-        calculateTukeyHSD(anovaResult);
-    }
-
-    public void calculateTukeyHSD(List<List<Run>> anovaResult){
-        //this.job.resetRuns();
-
-        if(anovaResult == null) return;
-        if(anovaResult.size() <= 1) return;
-        for (int i = 0; i < anovaResult.size() - 1; i++) {
-            Tukey tukey = new Tukey(1, 2, 2 * (job.getRunDataSize() - 1));
-            List<Run> group1 = anovaResult.get(i);
-            List<Run> group2 = anovaResult.get(i + 1);
+    public void apply(List<Run> sigRuns, List<List<Run>> result) {
+        int runDataSize = job.getRunDataSize();
+        for (int i = 0; i < result.size() - 1; i++) {
+            Tukey tukey = new Tukey(1, 2, 2 * (runDataSize - 1));
+            List<Run> group1 = result.get(i);
+            List<Run> group2 = result.get(i + 1);
             double speedSumGroup1 = 0;
             double speedSumGroup2 = 0;
 
@@ -151,22 +144,12 @@ public class TukeyHSD extends Anova implements Initializable{
             double averageSpeedGroup1 = speedSumGroup1 / group1.size();
             double averageSpeedGroup2 = speedSumGroup2 / group2.size();
 
-            double sse = anovaResult.get(i).getFirst().getSSE();
+            double sse = result.get(i).getFirst().getSSE();
             double overallMean = Math.abs(averageSpeedGroup1 - averageSpeedGroup2);
 
-            this.qHSD = tukey.inverse_survival(job.getAlpha(), false) * Math.sqrt((sse / (2.0 * (this.job.getRunDataSize()))) / job.getRunDataSize());
+            this.qHSD = tukey.inverse_survival(alpha, false) * Math.sqrt((sse / (2.0 * (runDataSize))) / runDataSize);
             Run run = group1.getFirst();
             run.setQ(overallMean);
-//            for (int j = 1; j < group1.size(); j++) {
-//                Run run = group1.get(j);
-//                run.setQ(Run.UNDEFINED_DOUBLE_VALUE);
-//                run.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
-//            }
-//
-//            for (Run run : group2) {
-//                run.setQ(Run.UNDEFINED_DOUBLE_VALUE);
-//                run.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
-//            }
 
             tukeyData.put(run.getID(), new TukeyDataPoint(overallMean, qHSD));
 
@@ -176,10 +159,6 @@ public class TukeyHSD extends Anova implements Initializable{
                 run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
             }
         }
-    }
-
-    private void setLabeling(){
-        qCritLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.qHSD));
     }
 
     public void openWindow(){
@@ -201,10 +180,5 @@ public class TukeyHSD extends Anova implements Initializable{
             e.printStackTrace();
             LOGGER.log(Level.SEVERE, String.format("Couldn't open Window for Anova! App state: %s", ConInt.STATUS.IO_EXCEPTION));
         }
-    }
-
-    @Override
-    public boolean shouldResetHypotheses() {
-        return true;
     }
 }

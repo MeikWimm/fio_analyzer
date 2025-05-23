@@ -17,6 +17,11 @@ public class DataPoint {
         this.time = time;
     }
 
+    public DataPoint(DataPoint other){
+        this.speed = other.speed;
+        this.time = other.time;
+    }
+
     @Override
     public String toString() {
         return String.format("Speed: %f, Time: %f", speed, time);

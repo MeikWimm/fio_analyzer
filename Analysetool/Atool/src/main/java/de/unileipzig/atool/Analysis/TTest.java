@@ -24,10 +24,7 @@ import org.apache.commons.math3.distribution.TDistribution;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,7 +32,7 @@ import java.util.logging.Logger;
 /**
  * @author meni1999
  */
-public class TTest implements Initializable {
+public class TTest extends GenericTest implements Initializable {
     private static final Logger LOGGER = Logger.getLogger(TTest.class.getName());
 
     static {
@@ -57,14 +54,13 @@ public class TTest implements Initializable {
     @FXML public TableColumn<Run, String> TColumn;
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
 
-    private final Job job;
     private double tCrit;
     private final Charter charter;
     private final Map<Integer, Double> tData;
 
-    public TTest(Job job) {
-        this.job = job;
-        this.charter = new Charter();
+    public TTest(Job job, boolean skip, int groupSize, double alpha) {
+        super(job, skip, groupSize, alpha);
+    this.charter = new Charter();
         this.tData = new HashMap<>();
     }
 
@@ -81,7 +77,7 @@ public class TTest implements Initializable {
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
         drawTTest.setOnAction(e -> drawTGraph(this.job));
-        TTable.setItems(this.job.getRunsCompacted());
+        TTable.setItems(this.job.getRuns());
         setLabeling();
     }
 
@@ -90,8 +86,8 @@ public class TTest implements Initializable {
     }
 
     public void tTest() {
-        if (job.getGroups().size() <= 1) return;
-        TDistribution t = new TDistribution(job.getRuns().getFirst().getData().size() * 2 - 2);
+        if (groups.size() <= 1) return;
+        TDistribution t = new TDistribution(job.getRunDataSize() * 2 - 2);
         this.tCrit = t.inverseCumulativeProbability(1 - job.getAlpha() / 2.0);
 
 
