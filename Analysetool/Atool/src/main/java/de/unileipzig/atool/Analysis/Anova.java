@@ -259,6 +259,10 @@ public class Anova extends GenericTest implements Initializable {
         charter.drawGraph(job, "ANOVA", "Run", "F-Value", "calculated F", anovaData, this.fCrit);
     }
 
+    public double getCriticalValue(){
+        return fCrit;
+    }
+
     public void drawCoVGraph(Job job) {
         charter.drawGraph(job, "Coefficent of Variation", "Run", "CoV", "calculated CoV (%)", covData, Run.UNDEFINED_DOUBLE_VALUE);
     }

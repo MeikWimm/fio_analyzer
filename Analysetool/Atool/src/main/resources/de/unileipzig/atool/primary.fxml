@@ -16,19 +16,15 @@
       <MenuBar fx:id="menuBar" prefHeight="22.0" prefWidth="751.0" BorderPane.alignment="CENTER">
         <menus>
           <Menu mnemonicParsing="false" text="File">
-            <items>
-              <MenuItem fx:id="menuItem_open" mnemonicParsing="false" onAction="#openLogfile" text="Open" />
-            </items>
-          </Menu>
+               <items>
+                  <MenuItem id="menuItem_open" fx:id="menuItem_open" mnemonicParsing="false" onAction="#openLogfile" text="Open" />
+               </items></Menu>
           <Menu mnemonicParsing="false" text="Settings">
             <items>
                   <MenuItem fx:id="menuItem_generalSettings" mnemonicParsing="false" onAction="#openGeneralSettings" text="General" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help" visible="false">
-            <items>
-                  <MenuItem fx:id="menuItem_Info" mnemonicParsing="false" onAction="#openInfoWindow" text="Info" />
-            </items>
           </Menu>
         </menus>
       </MenuBar>
@@ -37,7 +33,7 @@
       <VBox prefHeight="200.0" prefWidth="744.0" BorderPane.alignment="CENTER">
          <children>
             <Label id="labelLoadInfo" fx:id="labelLoadInfo" text="Choose a Dirctory to load the logs." />
-            <TableView id="table" fx:id="table" editable="true" prefHeight="550.0" prefWidth="1080.0">
+            <TableView id="table" fx:id="table" editable="true" onKeyReleased="#onActionKey" prefHeight="550.0" prefWidth="1080.0">
               <columns>
                   <TableColumn id="IDColumn" fx:id="IDColumn" prefWidth="35.00000190734863" text="ID" />
                 <TableColumn id="fileNameColumn" fx:id="fileNameColumn" prefWidth="181.99996185302734" sortable="false" text="File" />

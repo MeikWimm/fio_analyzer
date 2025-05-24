@@ -4,15 +4,20 @@
  */
 package de.unileipzig.atool;
 
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
+import javafx.beans.binding.Bindings;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
+import javafx.util.converter.DoubleStringConverter;
+import javafx.util.converter.IntegerStringConverter;
+import org.apache.commons.math3.ode.events.Action;
 
 import java.text.NumberFormat;
-import java.util.Comparator;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
@@ -86,11 +91,136 @@ public abstract class Utils {
         }
     }
 
+    public static class SafeIntegerStringConverter extends IntegerStringConverter {
+        @Override
+        public Integer fromString(String value) {
+            Integer val = Job.DEFAULT_RUN_COUNT;
+            try {
+                val = Integer.valueOf(value);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+            return val;
+        }
+    }
+
+    public static class SafeDoubleStringConverter extends DoubleStringConverter {
+        @Override
+        public Double fromString(String value) {
+            Double val = Run.UNDEFINED_DOUBLE_VALUE;
+            try {
+                val = Double.valueOf(value);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+            return val;
+        }
+    }
+
     public static class SpeedComparator implements Comparator<DataPoint> {
 
         @Override
         public int compare(DataPoint lhs, DataPoint rhs) {
             return Double.compare(lhs.getSpeed(), rhs.getSpeed());
+        }
+    }
+
+    public static class ValidatedIntegerTableCell<S> extends TextFieldTableCell<S, Integer> {
+        private final int maxValue;
+        private final int minValue;
+        private final int defaultValue;
+        private final Label labelLoadInfo;
+        private final String info;
+
+        public ValidatedIntegerTableCell(Label labelLoadInfo, int maxValue, int minValue, int defaultValue, String info) {
+            super(new SafeIntegerStringConverter());
+            this.labelLoadInfo = labelLoadInfo;
+            this.maxValue = maxValue;
+            this.minValue = minValue;
+            this.defaultValue = defaultValue;
+            this.info = info;
+
+        }
+
+        @Override
+        public void commitEdit(Integer newValue) {
+            if (newValue > maxValue) {
+                labelLoadInfo.setText(info);
+                super.commitEdit(defaultValue);
+            } else if (newValue < minValue) {
+                labelLoadInfo.setText(info);
+                super.commitEdit(defaultValue);
+            } else {
+                super.commitEdit(newValue);
+            }
+        }
+    }
+
+    public static class ValidatedDoubleTableCell<S> extends TextFieldTableCell<S, Double> {
+        private final double maxValue;
+        private final double minValue;
+        private final double defaultValue;
+        private final Label labelLoadInfo;
+        private final String info;
+
+        public ValidatedDoubleTableCell(Label labelLoadInfo, double maxValue, double minValue, double defaultValue, String info) {
+            super(new SafeDoubleStringConverter());
+            this.labelLoadInfo = labelLoadInfo;
+            this.maxValue = maxValue;
+            this.minValue = minValue;
+            this.defaultValue = defaultValue;
+            this.info = info;
+
+        }
+
+        @Override
+        public void commitEdit(Double newValue) {
+            if (newValue > maxValue) {
+                labelLoadInfo.setText(info);
+                super.commitEdit(defaultValue);
+            } else if (newValue < minValue) {
+                labelLoadInfo.setText(info);
+                super.commitEdit(defaultValue);
+            } else {
+                super.commitEdit(newValue);
+            }
+        }
+    }
+
+    public static class customTableRow implements Callback<TableView<Job>, TableRow<Job>> {
+
+        private final List<MenuItem> menuItems = new ArrayList<>();
+
+        // Add a MenuItem template with an action
+        public void addMenuItem(String name, BiConsumer<TableRow<Job>, TableView<Job>> handler) {
+            menuItemBuilders.add((row, table) -> {
+                MenuItem item = new MenuItem(name);
+                item.setOnAction(e -> handler.accept(row, table));
+                return item;
+            });
+        }
+
+
+        @Override
+        public TableRow<Job> call(TableView<Job> table) {
+            final TableRow<Job> row = new TableRow<>();
+            final ContextMenu rowMenu = new ContextMenu();
+
+
+            // Create a new instance of each MenuItem for this row
+            for (MenuItem template : menuItems) {
+                MenuItem item = new MenuItem(template.getText());
+                item.setOnAction(template.getOnAction());
+                rowMenu.getItems().add(item);
+            }
+
+            row.contextMenuProperty().bind(
+                    Bindings.when(row.emptyProperty())
+                            .then((ContextMenu) null)
+                            .otherwise(rowMenu)
+            );
+
+            return row;
         }
     }
 }

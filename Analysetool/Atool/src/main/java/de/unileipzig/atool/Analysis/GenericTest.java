@@ -21,8 +21,8 @@ public abstract class GenericTest {
         LOGGER.addHandler(handler);
     }
 
-    Job job;
-    List<List<Run>> groups;
+    protected Job job;
+    protected List<List<Run>> groups;
     List<List<Run>> resultGroups;
     List<Run> resultRuns;
     double alpha;
@@ -39,12 +39,8 @@ public abstract class GenericTest {
     public void calculate(){}
 
     public void calculatePostHoc(PostHocAnalyzer postHocAnalyzer){
-//        if(this.resultGroups == null){
-//            LOGGER.log(Level.WARNING, String.format("%s result is null", this.getClass().getName()));
-//            return;
-//        }
         if(this.resultGroups.size() < 2) {
-            LOGGER.log(Level.WARNING, String.format("%s result is 1", this.getClass().getName()));
+            LOGGER.log(Level.WARNING, String.format("%s group size of test result is 1", this.getClass().getName()));
             return;
         }
 
@@ -70,5 +66,9 @@ public abstract class GenericTest {
 
     public double getAlpha() {
         return alpha;
+    }
+
+    public double getCriticalValue(){
+        return Run.UNDEFINED_DOUBLE_VALUE;
     }
 }

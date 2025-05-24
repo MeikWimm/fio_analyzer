@@ -217,15 +217,15 @@ public class Run {
     }
 
     public void reset() {
-        this.intervalFrom = UNDEFINED_DOUBLE_VALUE;
-        this.intervalTo = UNDEFINED_DOUBLE_VALUE;
+        //this.intervalFrom = UNDEFINED_DOUBLE_VALUE;
+       // this.intervalTo = UNDEFINED_DOUBLE_VALUE;
         this.isNullhypothesis = UNDEFIND_NULLHYPOTHESIS;
-        this.F = UNDEFINED_DOUBLE_VALUE;
-        this.zVal = UNDEFINED_DOUBLE_VALUE;
-        this.qVal = UNDEFINED_DOUBLE_VALUE;
-        this.tVal = UNDEFINED_DOUBLE_VALUE;
-        this.cov = UNDEFINED_DOUBLE_VALUE;
-        this.overlappingDifference = UNDEFINED_DOUBLE_VALUE;
+        //this.F = UNDEFINED_DOUBLE_VALUE;
+        //this.zVal = UNDEFINED_DOUBLE_VALUE;
+        //this.qVal = UNDEFINED_DOUBLE_VALUE;
+        //this.tVal = UNDEFINED_DOUBLE_VALUE;
+        //this.cov = UNDEFINED_DOUBLE_VALUE;
+       // this.overlappingDifference = UNDEFINED_DOUBLE_VALUE;
     }
 
     public void setGroup(String group) {

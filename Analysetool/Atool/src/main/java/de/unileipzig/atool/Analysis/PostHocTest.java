@@ -6,9 +6,13 @@ import de.unileipzig.atool.Run;
 import java.util.List;
 
 public abstract class PostHocTest {
-    Job job;
+    protected GenericTest test;
 
     public PostHocTest(GenericTest test){
-        this.job = test.getJob();
+        this.test = test;
+    }
+
+    public GenericTest getTest() {
+        return test;
     }
 }

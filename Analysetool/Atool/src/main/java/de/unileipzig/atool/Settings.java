@@ -108,7 +108,8 @@ public class Settings implements Initializable {
             stage.setResizable(false);
             stage.show();
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, String.format("Coudn't open Settings Window! App state: %s", PrimaryController.STATUS.IO_EXCEPTION));
+            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Coudn't open Settings Window! App state");
         }
     }
 

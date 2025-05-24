@@ -15,7 +15,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.util.converter.DoubleStringConverter;
-import javafx.util.converter.IntegerStringConverter;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -37,35 +37,57 @@ public class PrimaryController implements Initializable {
     }
 
     // FXML Items
-    @FXML public MenuItem menuItem_open;
-    @FXML public MenuItem menuItem_ANOVA;
+    @FXML
+    public MenuItem menuItem_open;
+    @FXML
+    public MenuItem menuItem_ANOVA;
     //private Anova anova = new Anova();
-    @FXML public MenuItem menuItem_Info;
-    @FXML public MenuItem menuItem_generalSettings;
-    @FXML public Button button_refreshTable;
-    @FXML public Button button_settings;
-    @FXML public Label labelLoadInfo;
-    @FXML public TableView<Job> table;
-    @FXML public TableColumn<Job, String> IDColumn;
-    @FXML public TableColumn<Job, String> fileNameColumn;
-    @FXML public TableColumn<Job, Integer> runsCounterColumn;
-    @FXML public TableColumn<Job, String> speedColumn;
-    @FXML public TableColumn<Job, String> timeColumn;
-    @FXML public TableColumn<Job, String> lastModifiedColumn;
-    @FXML public TableColumn<Job, String> fileCreatedColumn;
-    @FXML public TableColumn<Job, Double> epsilonColumn;
-    @FXML public TableColumn<Job, Double> alphaColumn;
+    @FXML
+    public MenuItem menuItem_Info;
+    @FXML
+    public MenuItem menuItem_generalSettings;
+    @FXML
+    public Button button_refreshTable;
+    @FXML
+    public Button button_settings;
+    @FXML
+    public Label labelLoadInfo;
+    @FXML
+    public TableView<Job> table;
+    @FXML
+    public TableColumn<Job, String> IDColumn;
+    @FXML
+    public TableColumn<Job, String> fileNameColumn;
+    @FXML
+    public TableColumn<Job, Integer> runsCounterColumn;
+    @FXML
+    public TableColumn<Job, String> speedColumn;
+    @FXML
+    public TableColumn<Job, String> timeColumn;
+    @FXML
+    public TableColumn<Job, String> lastModifiedColumn;
+    @FXML
+    public TableColumn<Job, String> fileCreatedColumn;
+    @FXML
+    public TableColumn<Job, Double> epsilonColumn;
+    @FXML
+    public TableColumn<Job, Double> alphaColumn;
+
+    public MenuItem helloItem;
+
     private InputModule inputModule;
     private Settings settings;
     private Anova anova;
     private TukeyHSD tHSD;
     private MannWhitney mw;
     private ConInt conInt;
+    private Job job;
 
     @Override
     public void initialize(URL arg0, ResourceBundle arg1) {
         inputModule = new InputModule();
         settings = new Settings(this);
+        Utils.customTableRow menuItems = new Utils.customTableRow();
 
         IDColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
         fileNameColumn.setCellValueFactory(new PropertyValueFactory<>("File"));
@@ -79,9 +101,76 @@ public class PrimaryController implements Initializable {
         epsilonColumn.setCellValueFactory(new PropertyValueFactory<>("Epsilon"));
         alphaColumn.setCellValueFactory(new PropertyValueFactory<>("Alpha"));
 
+        menuItems.addMenuItem("Draw Job Speed", this::onActionDrawJobSpeed);
+        menuItems.addMenuItem("Draw Job Frequency", this::onActionDrawJobFreq);
+        menuItems.addMenuItem("Confidence Interval", this::onActionCalcConInt);
+        menuItems.addMenuItem("calculate Anova", this::onActionCalcAnova);
+        menuItems.addMenuItem("calculate T-Test!", this::onActionCalcTTest);
+        menuItems.addMenuItem("calculate U-Test!", this::onActionCalcMannWhitneyTest);
+        menuItems.addMenuItem("calculate Tukey-HSD!", this::onActionCalcTukeyHSD);
+
+        table.setRowFactory(menuItems);
+
         setColumnTextField();
         prepareTable();
 
+    }
+
+    // Code block setup for editing on a table row
+    private void setColumnTextField() {
+        //Column Edit setup
+        runsCounterColumn.setCellFactory(tc -> new Utils.ValidatedIntegerTableCell<>(
+                labelLoadInfo, Job.MIN_RUN_COUNT, Job.MAX_RUN_COUNT, Job.DEFAULT_RUN_COUNT,
+                String.format("Run count must be a value between %d and %d", Job.MIN_RUN_COUNT, Job.MAX_RUN_COUNT )
+        ));
+
+        alphaColumn.setCellFactory(tc -> new Utils.ValidatedDoubleTableCell<>(
+                labelLoadInfo, Job.MIN_ALPHA, Job.MAX_ALPHA, Job.DEFAULT_ALPHA,
+                String.format("Alpha must be a value between %f and %f", Job.MIN_ALPHA, Job.MAX_ALPHA )
+        ));
+
+
+        epsilonColumn.setCellFactory(tc -> new Utils.ValidatedDoubleTableCell<>(
+                labelLoadInfo, Job.MIN_EPSILON, Job.MAX_EPSILON, Job.DEFAULT_RUN_COUNT,
+                String.format("Epsilon count must be a value between %f and %f", Job.MIN_EPSILON, Job.MAX_EPSILON )
+        ));
+    }
+
+    // Code block setup for commiting on a table row
+    private void prepareTable() {
+        runsCounterColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Integer> t) -> {
+            t.getRowValue().setRunsCounter(t.getNewValue());
+        });
+
+        alphaColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {
+            t.getRowValue().setAlpha(t.getNewValue());
+        });
+
+        epsilonColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {
+            t.getRowValue().setEpsilon(t.getNewValue());
+        });
+    }
+
+    private void onActionDrawJobSpeed(ActionEvent actionEvent) {
+    }
+
+    private void onActionDrawJobFreq(ActionEvent actionEvent) {
+    }
+
+    private void onActionCalcConInt(ActionEvent actionEvent) {
+    }
+
+    private void onActionCalcAnova(ActionEvent actionEvent) {
+        Anova anova = new Anova()
+    }
+
+    private void onActionCalcTTest(ActionEvent actionEvent) {
+    }
+
+    private void onActionCalcMannWhitneyTest(ActionEvent actionEvent) {
+    }
+
+    private void onActionCalcTukeyHSD(ActionEvent actionEvent) {
     }
 
     @FXML
@@ -129,34 +218,27 @@ public class PrimaryController implements Initializable {
             labelLoadInfo.setText("All files loaded!");
         }
     }
-
-    @FXML
-    private void onActionOpenSettings() {
-
-    }
-
+    
     @FXML
     private void openGeneralSettings() {
         settings.openWindow();
     }
 
+    // Handling keyboard input
     @FXML
-    private void openInfoWindow() {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader();
-            fxmlLoader.setLocation(getClass().getResource("secondary.fxml"));
-
-
-            Scene scene = new Scene(fxmlLoader.load(), 600, 400);
-            Stage stage = new Stage();
-            stage.setTitle("New Window");
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            //LOGGER.log(Level.SEVERE, (Supplier<String>) e);
-            LOGGER.log(Level.SEVERE, String.format("Coudn't open Info Window! App state: %s", STATUS.IO_EXCEPTION));
+    private void onActionKey(KeyEvent e) {
+        if (e.getCode() == KeyCode.DELETE) {
+            int pos = table.getSelectionModel().getSelectedIndex();
+            Job removedJob = table.getItems().remove(pos);
+            LOGGER.log(Level.INFO, String.format("Removed Job -> %s", removedJob.toString()));
         }
     }
+
+    public void onActionHello(ActionEvent event){
+        System.out.println("ITEMS SE");
+    }
+
+
 
     public void update() {
 
@@ -172,217 +254,6 @@ public class PrimaryController implements Initializable {
         Settings.HAS_CHANGED = false;
     }
 
-    private void setColumnTextField() {
-
-        //Run Column setup
-        runsCounterColumn.setCellFactory(tc -> new TextFieldTableCell<>(new IntegerStringConverter() {
-            @Override
-            public Integer fromString(String value) {
-                Integer val = Job.DEFAULT_RUN_COUNT;
-                try {
-                    val = Integer.valueOf(value);
-                } catch (NumberFormatException e) {
-                    String msg = String.format("Input was not a number! App status: %s", STATUS.INCORRECT_INPUT);
-                    LOGGER.log(Level.WARNING, msg);
-                }
-                return val;
-            }
-        }) {
-            @Override
-            public void commitEdit(Integer newValue) {
-                if (newValue > Job.MAX_RUN_COUNT) {
-                    String msg = String.format("Run count is too large %d < %d. App state: %s", newValue, Job.MAX_RUN_COUNT, STATUS.INCORRECT_INPUT);
-                    LOGGER.log(Level.WARNING, msg);
-                    labelLoadInfo.setText(String.format("Allowed run count between %d and %d", Job.MIN_RUN_COUNT, Job.MAX_RUN_COUNT));
-                    super.commitEdit(Job.DEFAULT_RUN_COUNT);
-                } else if (newValue < Job.MIN_RUN_COUNT) {
-                    String msg = String.format("Run count is too small %d > %d. App state: %s", newValue, Job.MIN_RUN_COUNT, STATUS.INCORRECT_INPUT);
-                    labelLoadInfo.setText(String.format("Allowed run count between %d and %d", Job.MIN_RUN_COUNT, Job.MIN_RUN_COUNT));
-                    LOGGER.log(Level.WARNING, msg);
-                    super.commitEdit(Job.DEFAULT_RUN_COUNT);
-                } else {
-                    super.commitEdit(newValue);
-                }
-            }
-        });
-
-        alphaColumn.setCellFactory(tc -> new TextFieldTableCell<>(new DoubleStringConverter() {
-            @Override
-            public Double fromString(String value) {
-                Double val = Job.DEFAULT_ALPHA;
-                try {
-                    val = Double.valueOf(value);
-                } catch (NumberFormatException e) {
-                    String msg = String.format("Input was not a number! App status: %s", STATUS.INCORRECT_INPUT);
-                    LOGGER.log(Level.WARNING, msg);
-                }
-                return val;
-            }
-        }) {
-            @Override
-            public void commitEdit(Double newValue) {
-                if (newValue > Job.MAX_ALPHA) {
-                    String msg = String.format("Alpha is too large %f < %f. App state: %s", newValue, Job.MAX_ALPHA, STATUS.INCORRECT_INPUT);
-                    LOGGER.log(Level.WARNING, msg);
-                    labelLoadInfo.setText(String.format("Allowed alpha between %f and %f", Job.MIN_ALPHA, Job.MAX_ALPHA));
-                    super.commitEdit(Job.DEFAULT_ALPHA);
-                } else if (newValue < Job.MIN_ALPHA) {
-                    String msg = String.format("Alpha is too small %f < %f. App state: %s", newValue, Job.MIN_ALPHA, STATUS.INCORRECT_INPUT);
-                    labelLoadInfo.setText(String.format("Allowed alpha between %f and %f", Job.MIN_ALPHA, Job.MAX_ALPHA));
-                    LOGGER.log(Level.WARNING, msg);
-                    super.commitEdit(Job.DEFAULT_ALPHA);
-                } else {
-                    super.commitEdit(newValue);
-                }
-            }
-        });
-
-        epsilonColumn.setCellFactory(tc -> new TextFieldTableCell<>(new DoubleStringConverter() {
-            @Override
-            public Double fromString(String value) {
-                Double val = Job.DEFAULT_EPSILON;
-                try {
-                    val = Double.valueOf(value);
-                } catch (NumberFormatException e) {
-                    String msg = String.format("Input was not a number! App status: %s", STATUS.INCORRECT_INPUT);
-                    LOGGER.log(Level.WARNING, msg);
-                }
-                return val;
-            }
-        }) {
-            @Override
-            public void commitEdit(Double newValue) {
-                if (newValue > Job.MAX_EPSILON) {
-                    String msg = String.format("Run count is too large %f < %f. App state: %s", newValue, Job.MAX_EPSILON, STATUS.INCORRECT_INPUT);
-                    LOGGER.log(Level.WARNING, msg);
-                    labelLoadInfo.setText(String.format("Allowed epsilon between %f and %f", Job.MIN_EPSILON, Job.MAX_EPSILON));
-                    super.commitEdit(Job.DEFAULT_EPSILON);
-                } else if (newValue < Job.MIN_EPSILON) {
-                    String msg = String.format("Run count is too small %f > %f. App state: %s", newValue, Job.MIN_EPSILON, STATUS.INCORRECT_INPUT);
-                    LOGGER.log(Level.WARNING, msg);
-                    labelLoadInfo.setText(String.format("Allowed epsilon between %f and %f", Job.MIN_EPSILON, Job.MAX_EPSILON));
-                    super.commitEdit(Job.DEFAULT_EPSILON);
-                } else {
-                    super.commitEdit(newValue);
-                }
-            }
-        });
-    }
-
-
-    // Code Block for setting up Table view
-
-    private void prepareTable() {
-        runsCounterColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Integer> t) -> {
-            t.getRowValue().setRunsCounter(t.getNewValue());
-        });
-
-        alphaColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {
-            t.getRowValue().setAlpha(t.getNewValue());
-        });
-
-        epsilonColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {
-            t.getRowValue().setEpsilon(t.getNewValue());
-        });
-
-        table.setOnKeyReleased((KeyEvent t) -> {
-            KeyCode key = t.getCode();
-            if (key == KeyCode.DELETE) {
-                int pos = table.getSelectionModel().getSelectedIndex();
-                Job removedJob = table.getItems().remove(pos);
-                LOGGER.log(Level.INFO, String.format("Removed Job -> %s", removedJob.toString()));
-            }
-        });
-
-        table.setRowFactory((TableView<Job> tableView) -> {
-            final TableRow<Job> row = new TableRow<>();
-            final ContextMenu rowMenu = new ContextMenu();
-            MenuItem drawJob = new MenuItem("Draw job speed");
-            drawJob.setOnAction((ActionEvent event) -> {
-                new Charter().drawJob(row.getItem());
-            });
-
-            MenuItem drawFrequency = new MenuItem("Draw job frequency");
-            drawFrequency.setOnAction((ActionEvent event) -> {
-                new Charter().drawJobFreqeuncy(row.getItem());
-            });
-
-            MenuItem calculateConInt = new MenuItem("Calculate Confidence Interval");
-            calculateConInt.setOnAction((ActionEvent event) -> {
-                Job job = row.getItem();
-                //ConInt conInt = new ConInt(new Job(job, Settings.RUN_TO_COMPARE_TO_SIZE, Settings.SKIP_GROUPS));
-                //conInt.calculateInterval();
-                //conInt.openWindow();
-            });
-
-            MenuItem calculateANOVA = new MenuItem("Calculate ANOVA");
-            calculateANOVA.setOnAction((ActionEvent event) -> {
-                Job job = row.getItem();
-                anova = new Anova(job,false, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
-                anova.calculate();
-                anova.openWindow();
-            });
-
-            MenuItem calculateUTest = new MenuItem("Calculate U-Test");
-            calculateUTest.setOnAction((ActionEvent event) -> {
-                Job job = row.getItem();
-                MannWhitney mw = new MannWhitney(job, true, 2, job.getAlpha());
-                mw.calculate();
-                mw.openWindow();
-            });
-
-            MenuItem calculateTukeyHSD = new MenuItem("Calculate Tukey HSD");
-            calculateTukeyHSD.setOnAction((ActionEvent event) -> {
-                Job job = row.getItem();
-                Anova anova = new Anova(job, true, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
-                TukeyHSD tHSD = new TukeyHSD(anova, job.getAlpha());
-
-                anova.calculate();
-                anova.calculatePostHoc(tHSD);
-                tHSD.openWindow();
-            });
-
-            MenuItem calculateTTtest = new MenuItem("Calculate T-Test");
-            calculateTTtest.setOnAction((ActionEvent event) -> {
-                Job job = row.getItem();
-                TTest ttest = new TTest(job, false, 2, job.getAlpha());
-                ttest.tTest();
-                ttest.openWindow();
-            });
-
-            MenuItem removeItem = new MenuItem("Delete");
-            removeItem.setOnAction((ActionEvent event) -> {
-                table.getItems().remove(row.getItem());
-                LOGGER.log(Level.INFO, String.format("Removed Job -> %s", row.getItem().toString()));
-            });
-
-            MenuItem bon = new MenuItem("Bonferroni");
-            bon.setOnAction((ActionEvent event) -> {
-                Job job = row.getItem();
-                Anova anova = new Anova(job, true, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
-                Bonferroni bonTest = new Bonferroni(anova);
-
-                anova.calculate();
-                anova.calculatePostHoc(bonTest);
-                //tHSD.openWindow();
-            });
-
-            rowMenu.getItems().addAll(drawJob, drawFrequency, calculateConInt, calculateANOVA, calculateUTest, calculateTukeyHSD, calculateTTtest, removeItem, bon);
-
-            row.contextMenuProperty().bind(
-                    Bindings.when(Bindings.isNotNull(row.itemProperty()))
-                            .then(rowMenu)
-                            .otherwise((ContextMenu) null));
-            return row;
-        });
-    }
-
-    // Controller status enum
-    enum STATUS {
-        SUCCESS,
-        INCORRECT_INPUT,
-        IO_EXCEPTION
-    }
 }
 
 

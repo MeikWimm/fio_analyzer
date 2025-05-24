@@ -61,12 +61,10 @@ public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnaly
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
     private double qHSD;
     private final Map<Integer, TukeyDataPoint> tukeyData;
-    private double alpha = 0.05;
 
-    public TukeyHSD(Anova anova , double alpha){
+    public TukeyHSD(Anova anova){
         super(anova);
         this.tukeyData = new HashMap<>();
-        this.alpha = alpha;
     }
 
     @Override
@@ -84,7 +82,7 @@ public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnaly
 
         drawTukey.setOnAction(e -> draw());
         
-        TukeyTable.setItems(this.job.getRuns());
+        TukeyTable.setItems(this.test.getJob().getRuns());
         qCritLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.qHSD));
     }
 
@@ -124,7 +122,7 @@ public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnaly
 
     @Override
     public void apply(List<Run> sigRuns, List<List<Run>> result) {
-        int runDataSize = job.getRunDataSize();
+        int runDataSize = test.getJob().getRunDataSize();
         for (int i = 0; i < result.size() - 1; i++) {
             Tukey tukey = new Tukey(1, 2, 2 * (runDataSize - 1));
             List<Run> group1 = result.get(i);
@@ -147,7 +145,7 @@ public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnaly
             double sse = result.get(i).getFirst().getSSE();
             double overallMean = Math.abs(averageSpeedGroup1 - averageSpeedGroup2);
 
-            this.qHSD = tukey.inverse_survival(alpha, false) * Math.sqrt((sse / (2.0 * (runDataSize))) / runDataSize);
+            this.qHSD = tukey.inverse_survival(test.getAlpha(), false) * Math.sqrt((sse / (2.0 * (runDataSize))) / runDataSize);
             Run run = group1.getFirst();
             run.setQ(overallMean);
 
