@@ -2,21 +2,14 @@ package de.unileipzig.atool;
 
 
 import de.unileipzig.atool.Analysis.*;
-import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.stage.Stage;
-import javafx.util.converter.DoubleStringConverter;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.ConsoleHandler;
@@ -77,67 +70,82 @@ public class PrimaryController implements Initializable {
 
     private InputModule inputModule;
     private Settings settings;
-    private Anova anova;
-    private TukeyHSD tHSD;
-    private MannWhitney mw;
-    private ConInt conInt;
-    private Job job;
+
 
     @Override
     public void initialize(URL arg0, ResourceBundle arg1) {
         inputModule = new InputModule();
         settings = new Settings(this);
-        Utils.customTableRow menuItems = new Utils.customTableRow();
 
+        setupCellValueFactory();
+        setupTableMenuItems();
+        setupColumnTextField();
+        setupTableCellCommit();
+
+    }
+
+    public void update() {
+
+        if (Settings.HAS_CHANGED) {
+            for (Job job : table.getItems()) {
+                job.updateRunsData();
+            }
+        }
+
+        table.getColumns().getFirst().setVisible(false);
+        table.getColumns().getFirst().setVisible(true);
+
+        Settings.HAS_CHANGED = false;
+    }
+
+    private void setupCellValueFactory() {
         IDColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
         fileNameColumn.setCellValueFactory(new PropertyValueFactory<>("File"));
         runsCounterColumn.setCellValueFactory(new PropertyValueFactory<>("RunsCounter"));
-
-
         speedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("TimeInSec"));
         lastModifiedColumn.setCellValueFactory(new PropertyValueFactory<>("FileLastModifiedDate"));
         fileCreatedColumn.setCellValueFactory(new PropertyValueFactory<>("FileCreationDate"));
         epsilonColumn.setCellValueFactory(new PropertyValueFactory<>("Epsilon"));
         alphaColumn.setCellValueFactory(new PropertyValueFactory<>("Alpha"));
-
-        menuItems.addMenuItem("Draw Job Speed", this::onActionDrawJobSpeed);
-        menuItems.addMenuItem("Draw Job Frequency", this::onActionDrawJobFreq);
-        menuItems.addMenuItem("Confidence Interval", this::onActionCalcConInt);
-        menuItems.addMenuItem("calculate Anova", this::onActionCalcAnova);
-        menuItems.addMenuItem("calculate T-Test!", this::onActionCalcTTest);
-        menuItems.addMenuItem("calculate U-Test!", this::onActionCalcMannWhitneyTest);
-        menuItems.addMenuItem("calculate Tukey-HSD!", this::onActionCalcTukeyHSD);
-
-        table.setRowFactory(menuItems);
-
-        setColumnTextField();
-        prepareTable();
-
     }
 
     // Code block setup for editing on a table row
-    private void setColumnTextField() {
+    private void setupColumnTextField() {
         //Column Edit setup
         runsCounterColumn.setCellFactory(tc -> new Utils.ValidatedIntegerTableCell<>(
                 labelLoadInfo, Job.MIN_RUN_COUNT, Job.MAX_RUN_COUNT, Job.DEFAULT_RUN_COUNT,
-                String.format("Run count must be a value between %d and %d", Job.MIN_RUN_COUNT, Job.MAX_RUN_COUNT )
+                String.format("Run count must be a value between %d and %d", Job.MIN_RUN_COUNT, Job.MAX_RUN_COUNT)
         ));
 
         alphaColumn.setCellFactory(tc -> new Utils.ValidatedDoubleTableCell<>(
                 labelLoadInfo, Job.MIN_ALPHA, Job.MAX_ALPHA, Job.DEFAULT_ALPHA,
-                String.format("Alpha must be a value between %f and %f", Job.MIN_ALPHA, Job.MAX_ALPHA )
+                String.format("Alpha must be a value between %f and %f", Job.MIN_ALPHA, Job.MAX_ALPHA)
         ));
 
 
         epsilonColumn.setCellFactory(tc -> new Utils.ValidatedDoubleTableCell<>(
                 labelLoadInfo, Job.MIN_EPSILON, Job.MAX_EPSILON, Job.DEFAULT_RUN_COUNT,
-                String.format("Epsilon count must be a value between %f and %f", Job.MIN_EPSILON, Job.MAX_EPSILON )
+                String.format("Epsilon count must be a value between %f and %f", Job.MIN_EPSILON, Job.MAX_EPSILON)
         ));
     }
 
+    private void setupTableMenuItems() {
+        Utils.CustomTableRowFactory menuItems = new Utils.CustomTableRowFactory();
+        menuItems.addMenuItem("Draw Job Speed", this::onActionDrawJobSpeed);
+        menuItems.addMenuItem("calculate Anova", this::onActionCalcAnova);
+        menuItems.addMenuItem("Draw Job Frequency", this::onActionDrawJobFreq);
+      menuItems.addMenuItem("Confidence Interval", this::onActionCalcConInt);
+      menuItems.addMenuItem("calculate Anova", this::onActionCalcAnova);
+      menuItems.addMenuItem("calculate T-Test!", this::onActionCalcTTest);
+      menuItems.addMenuItem("calculate U-Test!", this::onActionCalcMannWhitneyTest);
+      menuItems.addMenuItem("calculate Tukey-HSD!", this::onActionCalcTukeyHSD);
+
+        table.setRowFactory(menuItems);
+    }
+
     // Code block setup for commiting on a table row
-    private void prepareTable() {
+    private void setupTableCellCommit() {
         runsCounterColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Integer> t) -> {
             t.getRowValue().setRunsCounter(t.getNewValue());
         });
@@ -151,26 +159,54 @@ public class PrimaryController implements Initializable {
         });
     }
 
-    private void onActionDrawJobSpeed(ActionEvent actionEvent) {
+    private void onActionDrawJobSpeed(TableRow<Job> row, TableView<Job> table) {
+        Job job = row.getItem();
+        Charter charter = new Charter();
+        charter.drawGraph("Job Speed", "Time","Speed","Speed",0,job.getSeries());
     }
 
-    private void onActionDrawJobFreq(ActionEvent actionEvent) {
+    private void onActionCalcConInt(TableRow<Job> row, TableView<Job> table) {
+        Job job = row.getItem();
+        ConInt tTest = new ConInt(job);
+        tTest.calculateInterval();
+        tTest.openWindow();
     }
 
-    private void onActionCalcConInt(ActionEvent actionEvent) {
+    private void onActionCalcAnova(TableRow<Job> row, TableView<Job> table) {
+        Job job = row.getItem();
+        Anova anova = new Anova(job, false, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
+        anova.calculate();
+        anova.openWindow();
     }
 
-    private void onActionCalcAnova(ActionEvent actionEvent) {
-        Anova anova = new Anova()
+    private void onActionDrawJobFreq(TableRow<Job> row, TableView<Job> table) {
+        Job job = row.getItem();
+        CUSUM cusum = new CUSUM(job, true, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
+        cusum.calculate();
+        cusum.draw();
     }
 
-    private void onActionCalcTTest(ActionEvent actionEvent) {
+    private void onActionCalcTTest(TableRow<Job> row, TableView<Job> table) {
+        Job job = row.getItem();
+        TTest tTest = new TTest(job, true, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
+        tTest.calculate();
+        tTest.openWindow();
     }
 
-    private void onActionCalcMannWhitneyTest(ActionEvent actionEvent) {
+    private void onActionCalcMannWhitneyTest(TableRow<Job> row, TableView<Job> table) {
+        Job job = row.getItem();
+        MannWhitney tTest = new MannWhitney(job, false, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
+        tTest.calculate();
+        tTest.openWindow();
     }
 
-    private void onActionCalcTukeyHSD(ActionEvent actionEvent) {
+    private void onActionCalcTukeyHSD(TableRow<Job> row, TableView<Job> table) {
+        Job job = row.getItem();
+        Anova anova = new Anova(job, true, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
+        TukeyHSD tTest = new TukeyHSD(anova);
+        anova.calculate();
+        anova.calculatePostHoc(tTest);
+        tTest.openWindow();
     }
 
     @FXML
@@ -218,7 +254,7 @@ public class PrimaryController implements Initializable {
             labelLoadInfo.setText("All files loaded!");
         }
     }
-    
+
     @FXML
     private void openGeneralSettings() {
         settings.openWindow();
@@ -234,24 +270,8 @@ public class PrimaryController implements Initializable {
         }
     }
 
-    public void onActionHello(ActionEvent event){
+    public void onActionHello(ActionEvent event) {
         System.out.println("ITEMS SE");
-    }
-
-
-
-    public void update() {
-
-        if (Settings.HAS_CHANGED) {
-            for (Job job : table.getItems()) {
-                job.updateRunsData();
-            }
-        }
-
-        table.getColumns().getFirst().setVisible(false);
-        table.getColumns().getFirst().setVisible(true);
-
-        Settings.HAS_CHANGED = false;
     }
 
 }

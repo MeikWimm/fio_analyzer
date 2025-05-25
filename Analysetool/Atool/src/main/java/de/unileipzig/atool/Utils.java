@@ -5,15 +5,15 @@
 package de.unileipzig.atool;
 
 import javafx.beans.binding.Bindings;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import javafx.scene.chart.Axis;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.DoubleStringConverter;
 import javafx.util.converter.IntegerStringConverter;
-import org.apache.commons.math3.ode.events.Action;
 
 import java.text.NumberFormat;
 import java.util.*;
@@ -132,7 +132,7 @@ public abstract class Utils {
         private final Label labelLoadInfo;
         private final String info;
 
-        public ValidatedIntegerTableCell(Label labelLoadInfo, int maxValue, int minValue, int defaultValue, String info) {
+        public ValidatedIntegerTableCell(Label labelLoadInfo, int minValue, int maxValue, int defaultValue, String info) {
             super(new SafeIntegerStringConverter());
             this.labelLoadInfo = labelLoadInfo;
             this.maxValue = maxValue;
@@ -187,40 +187,60 @@ public abstract class Utils {
         }
     }
 
-    public static class customTableRow implements Callback<TableView<Job>, TableRow<Job>> {
+    public static class CustomTableRowFactory implements Callback<TableView<Job>, TableRow<Job>> {
 
-        private final List<MenuItem> menuItems = new ArrayList<>();
+        // A descriptor class for each menu item to be added later
+        private static class MenuItemDescriptor {
+            String name;
+            BiConsumer<TableRow<Job>, TableView<Job>> handler;
 
-        // Add a MenuItem template with an action
-        public void addMenuItem(String name, BiConsumer<TableRow<Job>, TableView<Job>> handler) {
-            menuItemBuilders.add((row, table) -> {
-                MenuItem item = new MenuItem(name);
-                item.setOnAction(e -> handler.accept(row, table));
-                return item;
-            });
+            MenuItemDescriptor(String name, BiConsumer<TableRow<Job>, TableView<Job>> handler) {
+                this.name = name;
+                this.handler = handler;
+            }
         }
 
+        private final List<MenuItemDescriptor> menuItemDescriptors = new ArrayList<>();
+
+        public void addMenuItem(String name, BiConsumer<TableRow<Job>, TableView<Job>> handler) {
+            menuItemDescriptors.add(new MenuItemDescriptor(name, handler));
+        }
 
         @Override
         public TableRow<Job> call(TableView<Job> table) {
             final TableRow<Job> row = new TableRow<>();
             final ContextMenu rowMenu = new ContextMenu();
 
-
-            // Create a new instance of each MenuItem for this row
-            for (MenuItem template : menuItems) {
-                MenuItem item = new MenuItem(template.getText());
-                item.setOnAction(template.getOnAction());
+            // Build actual MenuItems using row and table
+            for (MenuItemDescriptor descriptor : menuItemDescriptors) {
+                MenuItem item = new MenuItem(descriptor.name);
+                item.setOnAction(e -> descriptor.handler.accept(row, table));
                 rowMenu.getItems().add(item);
             }
 
             row.contextMenuProperty().bind(
-                    Bindings.when(row.emptyProperty())
-                            .then((ContextMenu) null)
-                            .otherwise(rowMenu)
+                Bindings.when(row.emptyProperty())
+                        .then((ContextMenu) null)
+                        .otherwise(rowMenu)
             );
 
             return row;
         }
+    }
+
+    public static class CustomLineChart<X, Y> extends LineChart<X, Y> {
+
+
+        public CustomLineChart(Axis<X> axis, Axis<Y> axis1) {
+            super(axis, axis1);
+            //axis.setAutoRanging(false);
+            //axis1.setAutoRanging(false);
+        }
+
+        @Override
+        protected void dataItemAdded(Series series, int i, Data data) {
+            //no-op
+        }
+
     }
 }

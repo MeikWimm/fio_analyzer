@@ -87,7 +87,7 @@ public class TTest extends GenericTest implements Initializable {
 
     public void tTest() {
         if (groups.size() <= 1) return;
-        TDistribution t = new TDistribution(job.getRunDataSize() * 2 - 2);
+        TDistribution t = new TDistribution(job.getData().size() * 2 - 2);
         this.tCrit = t.inverseCumulativeProbability(1 - job.getAlpha() / 2.0);
 
 
@@ -98,7 +98,7 @@ public class TTest extends GenericTest implements Initializable {
             double sse = calculateSSE(run1, run2);
             double runVariance1 = calculateVariance(run1, sse);
             double runVariance2 = calculateVariance(run2, sse);
-            double runSize = this.job.getRunDataSize();
+            double runSize = this.job.getData().size();
 
             double nominator = (run1.getAverageSpeed() - run2.getAverageSpeed());
             double denominator = Math.sqrt((runVariance1 / runSize) + (runVariance2 / runSize));
@@ -135,7 +135,7 @@ public class TTest extends GenericTest implements Initializable {
     }
 
     private void drawTGraph(Job job) {
-        charter.drawGraph(job, "T-Test", "Run", "T-Value", "calculated T", this.tData, tCrit);
+        charter.drawGraph("T-Test", "Run", "T-Value", "calculated T", this.tData, job.getRunsCounter(), tCrit);
     }
 
     public void openWindow() {

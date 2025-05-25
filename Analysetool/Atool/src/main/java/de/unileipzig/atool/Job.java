@@ -11,6 +11,10 @@ import java.io.File;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.logging.Level;
+
+import de.unileipzig.atool.Analysis.GenericTest;
+import javafx.scene.chart.XYChart;
 
 /**
  * Log files of fio are here represented as Jobs.
@@ -34,7 +38,7 @@ public class Job {
 
     private final int ID = COUNTER;
     private File file;
-    private List<DataPoint> rawData = new ArrayList<>();
+    //private List<DataPoint> rawData = new ArrayList<>();
     private List<DataPoint> convertedData = new ArrayList<>();
     private List<Run> runs;
     private Map<Integer, Integer> frequency;
@@ -48,22 +52,28 @@ public class Job {
     private double calculatedF;
     private double standardDeviation;
     private int runDataSize;
-
+    private final List<DataPoint> data;
+    private final List<XYChart.Data<Number, Number>> speedSeries;
 
     public Job(List<DataPoint> data) {
         this.frequency = new TreeMap<>();
-        setData(data);
+        this.speedSeries = new ArrayList<>();
+        this.data = data;
+        prepareData();
         COUNTER++;
     }
 
     public Job(Job other) {
+        other.updateRunsData();
         this.file = other.file;
         this.runs = new ArrayList<>();
+        this.data = other.data;
+        this.speedSeries = other.speedSeries;
         for (Run run : other.runs) {
             this.runs.add(new Run(run));
         }
         this.file = other.file;
-        this.rawData = new ArrayList<>(other.rawData);
+        //this.rawData = new ArrayList<>(other.rawData);
         this.convertedData = new ArrayList<>(other.convertedData);
         this.frequency = new HashMap<>(other.frequency);
         this.runsCounter = other.runsCounter;
@@ -86,18 +96,17 @@ public class Job {
         return this.convertedData;
     }
 
-    private void setData(List<DataPoint> rawData) {
-        this.epsilon = rawData.size() / 1000.0;
+    private void prepareData() {
+        //this.epsilon = rawData.size() / 1000.0;
         if (this.epsilon > MAX_EPSILON) {
             this.epsilon = MAX_EPSILON;
         }
-        this.rawData = rawData;
         updateRunsData();
     }
 
-    public List<DataPoint> getRawData() {
-        return this.rawData;
-    }
+//    public List<DataPoint> getRawData() {
+//        return this.rawData;
+//    }
 
     public File getFile() {
         return this.file;
@@ -122,7 +131,6 @@ public class Job {
 
     public void setRunsCounter(int runsCounter) {
         this.runsCounter = runsCounter;
-        updateRunsData();
     }
 
     public double getAlpha() {
@@ -196,7 +204,8 @@ public class Job {
         int i = 0;
 
         final int MIN_RUN_DATA_LENGTH = 8;
-        final int MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI = (int) Math.floor(rawData.size() / (double) (MIN_RUN_DATA_LENGTH * runsCounter));
+        //final int MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI = (int) Math.floor(rawData.size() / (double) (MIN_RUN_DATA_LENGTH * runsCounter));
+        final int MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI = (int) Math.floor(data.size() / (double) (MIN_RUN_DATA_LENGTH * runsCounter));
 
         if (AVERAGE_TIME_PER_MILLISEC > MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI) {
             AVERAGE_TIME_PER_MILLISEC = MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI;
@@ -212,7 +221,7 @@ public class Job {
             boolean flag = false;
             int counter = 0;
 
-            for (DataPoint dataPoint : rawData) {
+            for (DataPoint dataPoint : data /*rawData*/) {
                 if (i % AVERAGE_TIME_PER_MILLISEC == 0 && flag) {
                     double average_speed = speed / AVERAGE_TIME_PER_MILLISEC;
                     averagedData.add(new DataPoint(average_speed, dataPoint.getTime()));
@@ -226,7 +235,7 @@ public class Job {
                 i++;
             }
         } else {
-            averagedData = rawData;
+            averagedData = data /*rawData*/;
         }
 
         this.runDataSize = (averagedData.size() / runsCounter);
@@ -245,15 +254,42 @@ public class Job {
             Run run = new Run(j, run_data);
             runs.add(run);
         }
+        
+        if(runs.size() > 20) {
+        	for (int j = 0; j < 5; j++) {
+    			//this.runs.remove(j);
+    		}
+        }
+                
+//        for (Run run : runs) {
+//        	i = 0;
+//            	ArrayList<DataPoint> updatedData = new ArrayList<>();
+//    			double std = Math.sqrt(GenericTest.variance(run));
+//    			double average = GenericTest.average(run);
+//    			double threshold = 3.5;
+//    	        double median = GenericTest.median(run);
+//    	        double madValue = GenericTest.mad(run, median);
+//    			for (DataPoint dp : run.getData()) {
+//    				double x = dp.getSpeed();
+//    	            double modifiedZScore = Math.abs(0.67449 * (x - median) / madValue);
+//
+//    				System.err.println(String.format("madValue: %f", modifiedZScore));
+//    				if(modifiedZScore < 10.0) {
+//    					updatedData.add(new DataPoint(x, dp.getTime()));
+//    				}
+//    			}
+//    			run.updateData(updatedData);
+//			i++;
+//		}
     }
 
     public ObservableList<Run> getRuns() {
         return FXCollections.observableArrayList(this.runs);
     }
 
-    public int getRunDataSize() {
-        return this.runDataSize;
-    }
+//    public int getRunDataSize() {
+//        return this.data.size();
+//    }
 
     public double getStandardDeviation() {
         return this.standardDeviation / Settings.CONVERSION_VALUE;
@@ -309,5 +345,15 @@ public class Job {
             }
         }
         return groups;
+    }
+
+    public List<XYChart.Data<Number, Number>> getSeries() {
+        if(this.speedSeries.isEmpty()){
+            for(DataPoint dp: data){
+                speedSeries.add(new XYChart.Data<>(dp.getTime(), dp.getSpeed()));
+            }
+        }
+
+        return this.speedSeries;
     }
 }

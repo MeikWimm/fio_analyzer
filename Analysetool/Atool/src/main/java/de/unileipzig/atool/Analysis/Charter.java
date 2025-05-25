@@ -3,10 +3,7 @@
  */
 package de.unileipzig.atool.Analysis;
 
-import de.unileipzig.atool.DataPoint;
-import de.unileipzig.atool.Job;
-import de.unileipzig.atool.RamerDouglasPeucker;
-import de.unileipzig.atool.Run;
+import de.unileipzig.atool.*;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -32,65 +29,66 @@ public class Charter {
     private Stage stageJobSpeed;
     private Stage stageJobFreq;
 
+
     /**
      * Zeichnet den Verlauf eines Jobs über die Zeit (I/O-Speed vs. Zeit).
      * Bei großen Datenmengen (> 10000) wird eine Warnung angezeigt.
      *
      * @param job Das Job-Objekt mit den zu zeichnenden Daten.
      */
-    public void drawJob(Job job) {
-        boolean proceedDrawing = true;
-
-        // Warnung bei sehr großen Datenmengen
-        if (job.getData().size() > 10000) {
-            ButtonType goodButton = new ButtonType("Ok");
-            ButtonType badButton = new ButtonType("Cancel");
-            Alert alert = new Alert(Alert.AlertType.INFORMATION,
-                    "This could take a while because of more than 10000 data points from this job.",
-                    goodButton, badButton);
-            Window window = alert.getDialogPane().getScene().getWindow();
-            window.setOnCloseRequest(e -> alert.hide());
-            Optional<ButtonType> result = alert.showAndWait();
-
-            if (result.isPresent()) {
-                proceedDrawing = (result.get() == goodButton);
-            }
-        }
-
-        if (!proceedDrawing) return;
-
-        // Nur initialisieren, wenn es noch nicht gemacht wurde
-        if (!isJobSpeedStageInitialized) {
-            stageJobSpeed = new Stage();
-
-            final NumberAxis xAxis = new NumberAxis();
-            final NumberAxis yAxis = new NumberAxis();
-            xAxis.setLabel("Time in milliseconds");
-            yAxis.setLabel("I/O-Speed in Kibibytes");
-
-            LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
-            lineChart.setHorizontalGridLinesVisible(false);
-            lineChart.setVerticalGridLinesVisible(false);
-            lineChart.setTitle("Job");
-
-            XYChart.Series<Number, Number> series = new XYChart.Series<>();
-
-            // Datenreduktion mit dem Ramer-Douglas-Peucker-Algorithmus
-            List<DataPoint> data = job.getData();
-            List<DataPoint> reduced_data = RamerDouglasPeucker.douglasPeucker(data, job.getEpsilon());
-
-            for (DataPoint p : reduced_data) {
-                series.getData().add(new XYChart.Data<>(p.getTime(), p.getSpeed()));
-            }
-
-            Scene scene = new Scene(lineChart, 800, 600);
-            lineChart.getData().add(series);
-            stageJobSpeed.setScene(scene);
-            isJobSpeedStageInitialized = true;
-        }
-
-        stageJobSpeed.show();
-    }
+//    public void drawJob(Job job) {
+//        boolean proceedDrawing = true;
+//
+//        // Warnung bei sehr großen Datenmengen
+//        if (job.getData().size() > 10000) {
+//            ButtonType goodButton = new ButtonType("Ok");
+//            ButtonType badButton = new ButtonType("Cancel");
+//            Alert alert = new Alert(Alert.AlertType.INFORMATION,
+//                    "This could take a while because of more than 10000 data points from this job.",
+//                    goodButton, badButton);
+//            Window window = alert.getDialogPane().getScene().getWindow();
+//            window.setOnCloseRequest(e -> alert.hide());
+//            Optional<ButtonType> result = alert.showAndWait();
+//
+//            if (result.isPresent()) {
+//                proceedDrawing = (result.get() == goodButton);
+//            }
+//        }
+//
+//        if (!proceedDrawing) return;
+//
+//        // Nur initialisieren, wenn es noch nicht gemacht wurde
+//        if (!isJobSpeedStageInitialized) {
+//            stageJobSpeed = new Stage();
+//
+//            final NumberAxis xAxis = new NumberAxis();
+//            final NumberAxis yAxis = new NumberAxis();
+//            xAxis.setLabel("Time in milliseconds");
+//            yAxis.setLabel("I/O-Speed in Kibibytes");
+//
+//            LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
+//            lineChart.setHorizontalGridLinesVisible(false);
+//            lineChart.setVerticalGridLinesVisible(false);
+//            lineChart.setTitle("Job");
+//
+//            XYChart.Series<Number, Number> series = new XYChart.Series<>();
+//
+//            // Datenreduktion mit dem Ramer-Douglas-Peucker-Algorithmus
+//            List<DataPoint> data = job.getData();
+//            List<DataPoint> reduced_data = RamerDouglasPeucker.douglasPeucker(data, job.getEpsilon());
+//
+//            for (DataPoint p : reduced_data) {
+//                series.getData().add(new XYChart.Data<>(p.getTime(), p.getSpeed()));
+//            }
+//
+//            Scene scene = new Scene(lineChart, 800, 600);
+//            lineChart.getData().add(series);
+//            stageJobSpeed.setScene(scene);
+//            isJobSpeedStageInitialized = true;
+//        }
+//
+//        stageJobSpeed.show();
+//    }
 
     /**
      * Zeichnet die Frequenzverteilung der I/O-Geschwindigkeit eines Jobs.
@@ -153,24 +151,25 @@ public class Charter {
      * Zeichnet ein allgemeines Diagramm für statistische Auswertungen (z.B. ANOVA).
      * Optional kann eine kritische Linie eingezeichnet werden.
      *
-     * @param job        Das Job-Objekt.
      * @param title      Titel des Diagramms
      * @param xAxisLabel Bezeichnung der X-Achse
      * @param yAxisLabel Bezeichnung der Y-Achse
      * @param lineLabel  Bezeichnung der Datenlinie
      * @param data       Die darzustellenden Daten als Map (X: Integer (RunID), Y: Double (z.B korrespondierender F-Wert))
+     * @param runSize    Das Job-Objekt.
      * @param critValue  Optionaler kritischer Schwellenwert
      */
-    public void drawGraph(Job job, String title, String xAxisLabel, String yAxisLabel,
-                          String lineLabel, Map<Integer, Double> data, double critValue) {
-        Stage anovaGraphStage = new Stage();
+    public final void drawGraph(String title, String xAxisLabel, String yAxisLabel, String lineLabel, Map<Integer, Double> data, int runSize,
+                          double critValue) {
+        Stage graphStage = new Stage();
 
         final NumberAxis xAxis = new NumberAxis();
         final NumberAxis yAxis = new NumberAxis();
         xAxis.setLabel(xAxisLabel);
         yAxis.setLabel(yAxisLabel);
 
-        LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
+        //LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
+        Utils.CustomLineChart<Number, Number> lineChart = new Utils.CustomLineChart<>(xAxis, yAxis);
         lineChart.setTitle(title);
         lineChart.setHorizontalGridLinesVisible(false);
         lineChart.setVerticalGridLinesVisible(false);
@@ -188,15 +187,112 @@ public class Charter {
         XYChart.Series<Number, Number> criticalLine = new XYChart.Series<>();
         if (critValue != Run.UNDEFINED_DOUBLE_VALUE) {
             criticalLine.getData().add(new XYChart.Data<>(0, critValue));
-            criticalLine.getData().add(new XYChart.Data<>(job.getRunsCounter(), critValue));
+            criticalLine.getData().add(new XYChart.Data<>(runSize, critValue));
             criticalLine.setName("critical Value");
             lineChart.getData().add(criticalLine);
         }
 
         lineChart.getData().add(series);
         Scene scene = new Scene(lineChart, 800, 600);
-        anovaGraphStage.setScene(scene);
-        anovaGraphStage.show();
+        graphStage.setScene(scene);
+        graphStage.show();
+    }
+    @SafeVarargs
+    public final void drawGraph(String title, String xAxisLabel, String yAxisLabel, String lineLabel, double constant, List<XYChart.Data<Number, Number>>... dataList) {
+        Stage graphStage = new Stage();
+
+        final NumberAxis xAxis = new NumberAxis();
+        final NumberAxis yAxis = new NumberAxis();
+        xAxis.setLabel(xAxisLabel);
+        yAxis.setLabel(yAxisLabel);
+
+        Utils.CustomLineChart<Number, Number> lineChart = new Utils.CustomLineChart<>(xAxis, yAxis);
+        lineChart.setTitle(title);
+        lineChart.setCreateSymbols(false);
+
+
+        for (List<XYChart.Data<Number, Number>> data: dataList){
+            XYChart.Series<Number, Number> series = new XYChart.Series<>();
+            series.getData().addAll(data);
+            lineChart.getData().add(series);
+        }
+
+        //min = getMinX(seriesList);
+        //max = getMaxX(seriesList);
+
+        for (int i = 0; i < 1; i++) {
+            lineChart.getData().add(createConstantSeries(constant, dataList));
+        }
+
+        Scene scene = new Scene(lineChart, 800, 600);
+        graphStage.setScene(scene);
+        graphStage.show();
+    }
+
+    @SafeVarargs
+    public final void drawGraph(String title, String xAxisLabel, String yAxisLabel, String lineLabel, XYChart.Series<Number, Number>... seriesList) {
+        Stage graphStage = new Stage();
+
+        final NumberAxis xAxis = new NumberAxis();
+        final NumberAxis yAxis = new NumberAxis();
+        xAxis.setLabel(xAxisLabel);
+        yAxis.setLabel(yAxisLabel);
+
+        Utils.CustomLineChart<Number, Number> lineChart = new Utils.CustomLineChart<>(xAxis, yAxis);
+        lineChart.setTitle(title);
+        lineChart.setCreateSymbols(false);
+
+        for (XYChart.Series<Number, Number> serie: seriesList){
+            serie.setName(lineLabel);
+            lineChart.getData().add(serie);
+        }
+
+        Scene scene = new Scene(lineChart, 800, 600);
+        graphStage.setScene(scene);
+        graphStage.show();
+    }
+
+    @SafeVarargs
+    private XYChart.Series<Number, Number> createConstantSeries(double constant, List<XYChart.Data<Number, Number>>... dataList){
+        double min = getMinX(dataList);
+        double max = getMaxX(dataList);
+
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
+        series.getData().add(new XYChart.Data<>(min, constant));
+        series.getData().add(new XYChart.Data<>(max, constant));
+        return series;
+    }
+
+    @SafeVarargs
+    private static double getMinX(List<XYChart.Data<Number, Number>>... dataList) {
+        double minX = Double.POSITIVE_INFINITY;
+
+        for (List<XYChart.Data<Number, Number>> data : dataList) {
+            for (XYChart.Data<Number, Number> datum : data) {
+                double x = datum.getXValue().doubleValue();
+                if (x < minX) {
+                    minX = x;
+                }
+            }
+        }
+
+        return (minX == Double.POSITIVE_INFINITY) ? Double.NaN : minX;
+    }
+
+    @SafeVarargs
+    private static double getMaxX(List<XYChart.Data<Number, Number>>... dataList) {
+        double maxX = Double.NEGATIVE_INFINITY;
+
+        for (List<XYChart.Data<Number, Number>> data : dataList) {
+            for (XYChart.Data<Number, Number> datum : data) {
+                double x = datum.getXValue().doubleValue();
+                if (x > maxX) {
+                    maxX = x;
+                }
+            }
+        }
+
+        return (maxX == Double.NEGATIVE_INFINITY) ? Double.NaN : maxX;
     }
 
 }

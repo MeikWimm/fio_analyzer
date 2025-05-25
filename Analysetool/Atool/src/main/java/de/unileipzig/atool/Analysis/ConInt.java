@@ -123,7 +123,7 @@ public class ConInt implements Initializable {
     }
 
     private void drawOverlappingDiffernce(Job job) {
-        charter.drawGraph(job, "Overlapping Differnce of confidence intervals", "Run", "Overlapping difference (%)", "Overlapping Difference", conIntData, Run.UNDEFINED_DOUBLE_VALUE);
+        charter.drawGraph("Overlapping Differnce of confidence intervals", "Run", "Overlapping difference (%)", "Overlapping Difference", conIntData, job.getRunsCounter(), Run.UNDEFINED_DOUBLE_VALUE);
     }
 
     private double calculateOverlapp(Run run1, Run run2) {

@@ -10,6 +10,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -19,6 +20,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.apache.commons.math3.distribution.FDistribution;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
@@ -32,6 +34,7 @@ import java.util.logging.Logger;
 public class Anova extends GenericTest implements Initializable {
     private static final Logger LOGGER = Logger.getLogger(Anova.class.getName());
 
+
     static {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setLevel(Level.FINEST);
@@ -39,9 +42,8 @@ public class Anova extends GenericTest implements Initializable {
         LOGGER.setUseParentHandlers(false);
         LOGGER.addHandler(handler);
     }
-
-    private final Map<Integer, Double> anovaData;
-    private final Map<Integer, Double> covData;
+    private final List<XYChart.Data<Number, Number>> anovaData;
+    private final List<XYChart.Data<Number, Number>> covData;
     private final Charter charter;
     //private List<List<Run>> significantRuns;
     @FXML public Label averageSpeedLabel;
@@ -63,14 +65,13 @@ public class Anova extends GenericTest implements Initializable {
     @FXML public TableColumn<Run, Double> FColumn;
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
     private double fCrit;
+    private double averageCoV;
 
     public Anova(Job job, boolean skip, int groupSize, double alpha) {
         super(job, skip, groupSize, alpha);
         this.charter = new Charter();
-        this.anovaData = new HashMap<>();
-        this.covData = new HashMap<>();
-
-
+        this.anovaData =  new ArrayList<>();
+        this.covData =  new ArrayList<>();
     }
 
     @Override
@@ -120,54 +121,28 @@ public class Anova extends GenericTest implements Initializable {
     public void calculate() {
 
         int num = this.groups.size() - 1;
-        int denom = (num + 1) * (this.job.getRunDataSize() - 1);
+        int denom = (num + 1) * (this.job.getData().size() - 1);
         FDistribution fDistribution = new FDistribution(num, denom);
         fCrit = fDistribution.inverseCumulativeProbability(1.0 - alpha);
         double sse = 0.0;
         double ssa = 0.0;
-        //int num = job.getGroupSize() - 1;
-        //int denom = (num + 1) * (job.getRunDataSize() - 1);
-
-//      calculate F value between runs
-//      SSA
-//        for (Run run : this.job.getRuns()) {
-//            for (Run runToCompare : run.getRunToCompareTo()) {
-//                double averageSpeedOfRun = runToCompare.getAverageSpeed();
-//                double averageSpeedOfAllComparedRuns = run.getAverageSpeedOfRunsToCompareTo();
-//                ssa += Math.pow(averageSpeedOfRun - averageSpeedOfAllComparedRuns, 2);
-//            }
-//            ssa *= run.getData().size();
-//            run.setSSA(ssa);
-//            ssa = 0;
-//        }
 
 
         for (List<Run> group : this.groups) {
             for (Run run : group) {
                 double averageSpeedOfRun = run.getAverageSpeed();
-                ssa += Math.pow(averageSpeedOfRun - this.getGroupAverageSpeed(group), 2);
+                ssa += Math.pow(averageSpeedOfRun - GenericTest.average(group), 2);
                 ssa *= run.getData().size();
                 run.setSSA(ssa);
                 ssa = 0;
             }
         }
 
-        //SSE
-//        for (Run run : this.job.getRuns()) {
-//            for (Run runToCompare : run.getRunToCompareTo()) {
-//                for (DataPoint dp : runToCompare.getData()) {
-//                    sse += (Math.pow((dp.getSpeed() - run.getAverageSpeedOfRunsToCompareTo()), 2));
-//                }
-//            }
-//
-//            run.setSSE(sse);
-//            sse = 0;
-//        }
 
         for (List<Run> group : this.groups) {
             for (Run run : group) {
                 for (DataPoint dp : run.getData()) {
-                    sse += (Math.pow((dp.getSpeed() - this.getGroupAverageSpeed(group)), 2));
+                    sse += (Math.pow((dp.getSpeed() - GenericTest.average(group)), 2));
                 }
                 run.setSSE(sse);
                 sse = 0;
@@ -178,7 +153,7 @@ public class Anova extends GenericTest implements Initializable {
         double cov;
         for (List<Run> group : this.groups) {
             Run run = group.getFirst();
-            cov = calcualteCoV(group);
+            cov = GenericTest.calcualteCoV(this.job.getStandardDeviation(),group);
             double s_2_a = run.getSSA() / (this.groups.size() - 1);
             double s_2_e = run.getSSE() / (this.groups.size() * (run.getData().size() - 1));
             fValue = s_2_a / s_2_e;
@@ -186,77 +161,38 @@ public class Anova extends GenericTest implements Initializable {
             run.setF(fValue);
             run.setP(1.0 - fDistribution.cumulativeProbability(fValue));
 
-            anovaData.put(run.getID(), fValue);
-            covData.put(run.getID(), cov);
             if (this.fCrit < fValue) {
                 run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
             } else {
                 run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
                 resultGroups.add(group);
             }
+
+            anovaData.add(new XYChart.Data<>(run.getID(), fValue));
+            covData.add(new XYChart.Data<>(run.getID(), cov));
         }
 
-        //Post-Hoc
-//        for (List<Run> group : this.job.getGroups()) {
-//            Run firstRun = new Run(group.getFirst());
-//            if(firstRun.getNullhypothesis() == Run.ACCEPTED_NULLHYPOTHESIS){
-//                significantRuns.add(group);
-//            }
-//        }
 
-//        for (Run run : this.job.getRuns()) {
-//            double s_2_a = run.getSSA() / (this.job.getGroupSize() - 1);
-//            double s_2_e = run.getSSE() / (this.job.getGroupSize() * (run.getData().size() - 1));
-//            fValue = s_2_a / s_2_e;
-//            if (!job.getGroups().isEmpty()) {
-//                // critical p-value < alpha value of job
-//                double cov = calcualteCoV(run);
-//                if (this.fCrit < fValue) {
-//                    run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
-//                } else {
-//                    run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
-//                    significantRuns.add(new SigRunData(run.getRunToCompareTo(), run.getSSE()));
-//                }
-//                run.setCoV(cov);
-//                run.setF(fValue);
-//                anovaData.put(run.getID(), fValue);
-//                covData.put(run.getID(), cov);
-//            } else {
-//                run.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
-//                run.setCoV(Run.UNDEFINED_DOUBLE_VALUE);
-//            }
-//        }
-//        LOGGER.log(Level.INFO, "SSA, SSE, and F-values before calculation:");
-//        for (List<Run> group : this.groups) {
-//            for (Run run : group) {
-//                LOGGER.log(Level.INFO, String.format("Run %d | Avg: %.2f | SSE: %.2f | SSA: %.2f",
-//                        run.getID(), run.getAverageSpeed(), run.getSSE(), run.getSSA()));
-//            }
-//        }
-        //return significantRuns;
+        // Logging
         LOGGER.log(Level.INFO, String.format("Calculated Numerator %d and Denominator %d", num, denom));
+        for (List<Run> list : groups) {
+        	Run run = list.getFirst();
+            LOGGER.log(Level.INFO, String.format("SSE, %f, SSA %f, CoV: %f, P: %f, F: %f", run.getSSE(), run.getSSA(), run.getCoV(), run.getP(), run.getF()));
+		}
     }
 
-    private double getGroupAverageSpeed(List<Run> group) {
-        double sum = 0.0;
-        for (Run run : group) {
-            sum += run.getAverageSpeed();
-        }
-        return sum / group.size();
-    }
-
-    private double calcualteCoV(List<Run> group) {
-        double jobStandardDeviation = this.job.getStandardDeviation();
-        double sum = 0;
-        for (Run run : group) {
-            sum += run.getAverageSpeed();
-        }
-        double average = sum / group.size();
-        return jobStandardDeviation / average;
-    }
+//    private double getGroupAverageSpeed(List<Run> group) {
+//        double sum = 0.0;
+//        for (Run run : group) {
+//            sum += run.getAverageSpeed();
+//        }
+//        return sum / group.size();
+//    }
 
     public void drawANOVAGraph(Job job) {
-        charter.drawGraph(job, "ANOVA", "Run", "F-Value", "calculated F", anovaData, this.fCrit);
+        charter.drawGraph("ANOVA", "Run", "F-Value", "calculated F",this.fCrit,  anovaData);
+        charter.drawGraph("Windows CoV", "Job", "F-Value", "calculated F",  10, covData);
+
     }
 
     public double getCriticalValue(){
@@ -264,7 +200,56 @@ public class Anova extends GenericTest implements Initializable {
     }
 
     public void drawCoVGraph(Job job) {
-        charter.drawGraph(job, "Coefficent of Variation", "Run", "CoV", "calculated CoV (%)", covData, Run.UNDEFINED_DOUBLE_VALUE);
+        List<XYChart.Data<Number, Number>> covData = new ArrayList<>();
+        List<XYChart.Data<Number, Number>> covAveraged = new ArrayList<>();
+        int initWindow = 50;
+        int windowSize = 50;
+        double sum = 0;
+        double k = 0.5;           // Slack value
+
+        List<DataPoint> data = this.job.getData();
+        List<Double> windowList = new ArrayList<>();
+        for (int i = 0; i < initWindow; i++) {
+            sum += data.get(i).getSpeed();
+            windowList.add(data.get(i).getSpeed());
+        }
+        double targetMean = sum / initWindow;
+
+        //cusumPosData.getData().add(new XYChart.Data<>(0.0, 0.0));
+        //cusumNegData.getData().add(new XYChart.Data<>(0.0, 0.0));
+
+
+        int l = 1;
+        for (int i = 0; i < data.size(); i++) {
+            double time = data.get(i).getTime();
+            double std = Math.sqrt(GenericTest.variance(windowList, targetMean)) / targetMean;
+
+            // Check if last `windowSize` CUSUM values are within threshold
+            if (i >= windowSize * l) {
+                covData.add(new XYChart.Data<>(time, std));
+                sum = 0;
+                for (int j = 0; j < windowSize; j++) {
+                    sum += data.get(i).getSpeed();
+                }
+                targetMean = sum / windowSize;
+                l++;
+            }
+        }
+
+        double sumCoV = 0;
+        for (XYChart.Data<Number, Number> covDatum : covData) {
+            sumCoV += (double) covDatum.getYValue();
+        }
+        this.averageCoV = sumCoV / covData.size();
+
+        for (XYChart.Data<Number, Number> covDatum : covData) {
+            double cov = (double) covDatum.getYValue();
+            covAveraged.add(new XYChart.Data<>(covDatum.getXValue(), averageCoV - cov));
+
+        }
+
+        charter.drawGraph("CoV", "Run", "F-Value", "calculated F",0,  covData);
+        charter.drawGraph("CoV Averaged", "Run", "F-Value", "calculated F",0,  covAveraged);
     }
 
     public final void openWindow() {
@@ -291,12 +276,5 @@ public class Anova extends GenericTest implements Initializable {
             e.printStackTrace();
             LOGGER.log(Level.SEVERE, String.format("Couldn't open Window for ANOVA! App state: %s", ConInt.STATUS.IO_EXCEPTION));
         }
-    }
-
-    public boolean shouldResetHypotheses() {
-        if(App.DEBUG_MODE && this.getClass() != Anova.class){
-                LOGGER.log(Level.WARNING, String.format("Subclass %s should overwrite shouldResetHypotheses()", this.getClass().getSimpleName()));
-        }
-        return false;
     }
 }

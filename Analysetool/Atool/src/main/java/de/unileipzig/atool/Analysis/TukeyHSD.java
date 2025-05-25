@@ -122,7 +122,7 @@ public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnaly
 
     @Override
     public void apply(List<Run> sigRuns, List<List<Run>> result) {
-        int runDataSize = test.getJob().getRunDataSize();
+        int runDataSize = test.getJob().getData().size();
         for (int i = 0; i < result.size() - 1; i++) {
             Tukey tukey = new Tukey(1, 2, 2 * (runDataSize - 1));
             List<Run> group1 = result.get(i);

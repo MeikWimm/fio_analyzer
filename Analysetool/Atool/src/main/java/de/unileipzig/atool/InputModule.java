@@ -6,6 +6,8 @@ package de.unileipzig.atool;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Point2D;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.DirectoryChooser;
@@ -18,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -127,9 +130,7 @@ public class InputModule {
                     job.setTime(this.time);
                     job.setAverageSpeed(this.averageSpeed);
                     job.setStandardDeviation(this.standardDeviation);
-                    //data.add(new DataPoint(average_speed_per_milli, this.time));
                     jobs.add(job);
-                    LOGGER.log(Level.INFO, String.format("New job added -> %s", job));
                 }
             } else {
                 readData(file);
@@ -140,14 +141,16 @@ public class InputModule {
                 job.setTime(this.time);
                 job.setAverageSpeed(this.averageSpeed);
                 job.setStandardDeviation(this.standardDeviation);
-                //data.add(new DataPoint(average_speed_per_milli, this.time));
                 jobs.add(job);
-                LOGGER.log(Level.INFO, String.format("Added new found job -> %s", job));
             }
         }
 
         if (!found_new_files && !temp.isEmpty()) {
             LOGGER.log(Level.INFO, "Nothing to refresh in Table.");
+        } else {
+        	for (Job job : temp) {
+                LOGGER.log(Level.INFO, String.format("Added new found job -> %s", job));
+			}
         }
 
         return STATUS.SUCCESS;
@@ -180,12 +183,7 @@ public class InputModule {
                 int new_time = Integer.parseInt(s[0]);
                 speed = Integer.parseInt(s[1]);
 
-                // speed frequency map
-                if (freq.containsKey(speed)) {
-                    freq.put(speed, freq.get(speed) + 1);
-                } else {
-                    freq.put(speed, 1);
-                }
+                freq.merge(speed, 1, Integer::sum);
 
                 if (old_time != new_time) {
                     average_speed_per_milli = (double) current_speed_sum / counter;
@@ -201,7 +199,8 @@ public class InputModule {
             }
             average_speed_per_milli = current_speed_sum / (double) counter;
             sum_speed += average_speed_per_milli;
-            data.add(new DataPoint(average_speed_per_milli, this.time));
+            //data.add(new DataPoint(average_speed_per_milli, this.time));
+            //speedSeries.getData().add(new XYChart.Data<>(average_speed_per_milli, this.time));
 
             this.time = Integer.parseInt(s[0]);
             this.averageSpeed = sum_speed / data.size();
@@ -209,6 +208,7 @@ public class InputModule {
             this.freq = freq;
             this.data = data;
         } catch (IOException ex) {
+            ex.printStackTrace();
             //LOGGER.log(Level.SEVERE, (Supplier<String>) ex);
             LOGGER.log(Level.SEVERE, String.format("Error occured while reading file: %s. App state: %s", "radate", STATUS.ERROR_WHILE_READING_FILE));
         }

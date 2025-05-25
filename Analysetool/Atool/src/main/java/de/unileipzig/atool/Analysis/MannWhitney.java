@@ -105,7 +105,7 @@ public class MannWhitney extends GenericTest implements Initializable {
 
     @Override
     public void draw() {
-        charter.drawGraph(this.job, "U-Test", "Run", "Z-Value", "calculated Z-Value", uTestData, zCrit);
+        charter.drawGraph("U-Test", "Run", "Z-Value", "calculated Z-Value", uTestData, job.getRunsCounter(), zCrit);
     }
 
     private void calculatePair(Run run1, Run run2) {
