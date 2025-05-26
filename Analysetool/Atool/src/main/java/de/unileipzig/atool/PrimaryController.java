@@ -133,13 +133,13 @@ public class PrimaryController implements Initializable {
     private void setupTableMenuItems() {
         Utils.CustomTableRowFactory menuItems = new Utils.CustomTableRowFactory();
         menuItems.addMenuItem("Draw Job Speed", this::onActionDrawJobSpeed);
-        menuItems.addMenuItem("calculate Anova", this::onActionCalcAnova);
         menuItems.addMenuItem("Draw Job Frequency", this::onActionDrawJobFreq);
-      menuItems.addMenuItem("Confidence Interval", this::onActionCalcConInt);
-      menuItems.addMenuItem("calculate Anova", this::onActionCalcAnova);
-      menuItems.addMenuItem("calculate T-Test!", this::onActionCalcTTest);
-      menuItems.addMenuItem("calculate U-Test!", this::onActionCalcMannWhitneyTest);
-      menuItems.addMenuItem("calculate Tukey-HSD!", this::onActionCalcTukeyHSD);
+        menuItems.addMenuItem("Confidence Interval", this::onActionCalcConInt);
+        menuItems.addMenuItem("Anova", this::onActionCalcAnova);
+        menuItems.addMenuItem("T-Test", this::onActionCalcTTest);
+        menuItems.addMenuItem("U-Test", this::onActionCalcMannWhitneyTest);
+        menuItems.addMenuItem("Tukey-HSD", this::onActionCalcTukeyHSD);
+        menuItems.addMenuItem("Cusum", this::onActionCalcCusum);
 
         table.setRowFactory(menuItems);
     }
@@ -162,7 +162,7 @@ public class PrimaryController implements Initializable {
     private void onActionDrawJobSpeed(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
         Charter charter = new Charter();
-        charter.drawGraph("Job Speed", "Time","Speed","Speed",0,job.getSeries());
+        charter.drawGraph("Job Speed", "Time", "Speed", "Speed", 0, job.getSeries());
     }
 
     private void onActionCalcConInt(TableRow<Job> row, TableView<Job> table) {
@@ -182,7 +182,7 @@ public class PrimaryController implements Initializable {
     private void onActionDrawJobFreq(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
         CUSUM cusum = new CUSUM(job, true, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
-        cusum.calculate();
+        cusum.calculateWindowed();
         cusum.draw();
     }
 
@@ -207,6 +207,13 @@ public class PrimaryController implements Initializable {
         anova.calculate();
         anova.calculatePostHoc(tTest);
         tTest.openWindow();
+    }
+
+    private void onActionCalcCusum(TableRow<Job> row, TableView<Job> table) {
+        Job job = row.getItem();
+        CUSUM cusum = new CUSUM(job, true, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
+        cusum.calculate();
+        cusum.draw();
     }
 
     @FXML

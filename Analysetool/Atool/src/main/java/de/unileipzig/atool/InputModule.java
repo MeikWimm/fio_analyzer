@@ -6,8 +6,6 @@ package de.unileipzig.atool;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.Point2D;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.DirectoryChooser;
@@ -19,8 +17,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -66,7 +64,6 @@ public class InputModule {
     /**
      * DirectoryChooser gets all log files from a choosen directory.
      *
-     * @return
      */
     public STATUS loadFile() {
         if (!isDirChooserOpen) {
@@ -86,7 +83,10 @@ public class InputModule {
                 alert.show();
                 return STATUS.NO_FILES_FOUND;
             } else {
+                long time = System.currentTimeMillis();
                 readFiles();
+                System.out.println("Time: " + ((System.currentTimeMillis() - time) / 1000.0));
+
             }
         } else {
             return STATUS.NO_DIR_SET;
@@ -156,6 +156,30 @@ public class InputModule {
         return STATUS.SUCCESS;
     }
 
+    public static int[] parseFirstTwoValues(String line) {
+        int[] result = new int[2];
+        int value = 0, idx = 0;
+
+        for (int i = 0; i < line.length() && idx < 2; i++) {
+            char ch = line.charAt(i);
+            if (ch == ',') {
+                result[idx++] = value;
+                value = 0;
+                // Skip space if present
+                if (i + 1 < line.length() && line.charAt(i + 1) == ' ') i++;
+            } else if (ch >= '0' && ch <= '9') {
+                value = value * 10 + (ch - '0');
+            }
+        }
+
+        // Only need this if line ends before second comma (just in case)
+        if (idx < 2) {
+            result[idx] = value;
+        }
+
+        return result;
+    }
+
 
     /**
      * Reads the data of a .log file and saves the data in a job instance.
@@ -167,21 +191,28 @@ public class InputModule {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             this.fileAttribute = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
             String line = br.readLine();
+            int[] values = parseFirstTwoValues(line);
+
+            int old_time = values[0];
+            int speed = values[1];
             long current_speed_sum = 0;
             double average_speed_per_milli;
             double sum_speed = 0;
             int counter = 1;
-            String[] s = line.split(", ");
-            int old_time = Integer.parseInt(s[0]);
-            int speed = Integer.parseInt(s[1]);
-            current_speed_sum += Long.parseLong(s[1]);
+           // String[] s = line.split(", ");
+           // int old_time = Integer.parseInt(s[0]);
+            //int speed = Integer.parseInt(s[1]);
+            current_speed_sum += speed;
             freq.put(speed, 1);
 
 
             while ((line = br.readLine()) != null) {
-                s = line.split(", ");
-                int new_time = Integer.parseInt(s[0]);
-                speed = Integer.parseInt(s[1]);
+                int[] s = parseFirstTwoValues(line);
+                //int first = s[0];
+                //int second = s[1];
+                //s = line.split(", ");
+                int new_time = s[0];
+                speed = s[1];
 
                 freq.merge(speed, 1, Integer::sum);
 
@@ -190,10 +221,10 @@ public class InputModule {
                     data.add(new DataPoint(average_speed_per_milli, new_time));
                     sum_speed += average_speed_per_milli;
                     old_time = new_time;
-                    current_speed_sum = Long.parseLong(s[1]);
+                    current_speed_sum = s[1];
                     counter = 1;
                 } else {
-                    current_speed_sum += Long.parseLong(s[1]);
+                    current_speed_sum += s[1];
                     counter++;
                 }
             }
@@ -202,7 +233,8 @@ public class InputModule {
             //data.add(new DataPoint(average_speed_per_milli, this.time));
             //speedSeries.getData().add(new XYChart.Data<>(average_speed_per_milli, this.time));
 
-            this.time = Integer.parseInt(s[0]);
+
+            this.time = old_time;
             this.averageSpeed = sum_speed / data.size();
             this.standardDeviation = calculateDeviation(data, this.averageSpeed);
             this.freq = freq;

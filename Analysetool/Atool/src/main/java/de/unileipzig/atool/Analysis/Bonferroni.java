@@ -26,25 +26,6 @@ import java.util.logging.Level;
 
 public class Bonferroni extends PostHocTest implements PostHocAnalyzer {
 
-    @FXML public Label averageSpeedLabel;
-    @FXML public Label sseLabel;
-    @FXML public Label ssaLabel;
-    @FXML public Label sstLabel;
-    @FXML public Label ssaSstLabel;
-    @FXML public Label sseSstLabel;
-    @FXML public Label fCriticalLabel;
-    @FXML public Label fCalculatedLabel;
-    @FXML public Button showFGraphButton;
-    @FXML public Button showCoVGraph;
-    @FXML public Pane anovaPane;
-    @FXML public TableView<Run> anovaTable;
-    @FXML public TableColumn<Run, Double> averageSpeedColumn;
-    @FXML public TableColumn<Run, Integer> runIDColumn;
-    @FXML public TableColumn<Run, Double> covColumn;
-    @FXML public TableColumn<Run, String> compareToRunColumn;
-    @FXML public TableColumn<Run, Double> FColumn;
-    @FXML public TableColumn<Run, Byte> hypothesisColumn;
-
     public Bonferroni(Anova anova) {
         super(anova);
     }

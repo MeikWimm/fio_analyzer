@@ -40,6 +40,7 @@
             <Button id="showFGraphButton" fx:id="showFGraphButton" layoutX="14.0" layoutY="90.0" mnemonicParsing="false" text="Show F-Graph" />
             <Button id="showCoVGraph" fx:id="showCoVGraph" layoutX="122.0" layoutY="90.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="117.0" text="Show CoV Graph" />
             <Label layoutX="478.0" layoutY="82.0" prefHeight="17.0" prefWidth="91.0" text="Job σ =" />
+            <Button id="showWinCoVGraph" fx:id="showWinCoVGraph" layoutX="250.0" layoutY="90.0" mnemonicParsing="false" text="Show windowed CoV Graph" />
          </children>
       </Pane>
    </children>

@@ -6,7 +6,6 @@ import de.unileipzig.atool.Run;
 import de.unileipzig.atool.Utils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -100,7 +99,7 @@ public abstract class GenericTest {
     // Calculate the median of a sorted list
     public static double median(Run run) {
     	ArrayList<DataPoint> sorted = new ArrayList<DataPoint>(run.getData()); 
-    	Collections.sort(sorted, new Utils.SpeedComparator());
+    	sorted.sort(new Utils.SpeedComparator());
         int n = sorted.size();
         if (n % 2 == 1) {
             return sorted.get(n / 2).getSpeed();
@@ -112,7 +111,7 @@ public abstract class GenericTest {
     // Calculate the median of a sorted list
     public static double median(List<DataPoint> data) {
     	ArrayList<DataPoint> sorted = new ArrayList<DataPoint>(data); 
-    	Collections.sort(sorted, new Utils.SpeedComparator());
+    	sorted.sort(new Utils.SpeedComparator());
         int n = sorted.size();
         if (n % 2 == 1) {
             return sorted.get(n / 2).getSpeed();
@@ -127,7 +126,7 @@ public abstract class GenericTest {
         for (DataPoint dp : run.getData()) {
             deviations.add(new DataPoint(Math.abs(dp.getSpeed() - median), dp.getTime()));
         }
-        Collections.sort(deviations, new Utils.SpeedComparator());
+        deviations.sort(new Utils.SpeedComparator());
         return median(deviations);
     }
     

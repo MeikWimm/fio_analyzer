@@ -4,6 +4,7 @@ module de.unileipzig.atool {
     requires commons.math3;
     requires java.logging;
     requires jdistlib;
+    requires java.sql;
 
     opens de.unileipzig.atool to javafx.fxml;
     opens de.unileipzig.atool.Analysis to javafx.fxml;

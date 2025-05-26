@@ -11,7 +11,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseButton;
@@ -23,7 +26,10 @@ import org.apache.commons.math3.distribution.FDistribution;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,36 +48,57 @@ public class Anova extends GenericTest implements Initializable {
         LOGGER.setUseParentHandlers(false);
         LOGGER.addHandler(handler);
     }
+
     private final List<XYChart.Data<Number, Number>> anovaData;
     private final List<XYChart.Data<Number, Number>> covData;
+    private final List<XYChart.Data<Number, Number>> covAveragedData;
     private final Charter charter;
-    //private List<List<Run>> significantRuns;
-    @FXML public Label averageSpeedLabel;
-    @FXML public Label sseLabel;
-    @FXML public Label ssaLabel;
-    @FXML public Label sstLabel;
-    @FXML public Label ssaSstLabel;
-    @FXML public Label sseSstLabel;
-    @FXML public Label fCriticalLabel;
-    @FXML public Label fCalculatedLabel;
-    @FXML public Button showFGraphButton;
-    @FXML public Button showCoVGraph;
-    @FXML public Pane anovaPane;
-    @FXML public TableView<Run> anovaTable;
-    @FXML public TableColumn<Run, Double> averageSpeedColumn;
-    @FXML public TableColumn<Run, Integer> runIDColumn;
-    @FXML public TableColumn<Run, Double> covColumn;
-    @FXML public TableColumn<Run, String> compareToRunColumn;
-    @FXML public TableColumn<Run, Double> FColumn;
-    @FXML public TableColumn<Run, Byte> hypothesisColumn;
+    @FXML
+    public Label averageSpeedLabel;
+    @FXML
+    public Label sseLabel;
+    @FXML
+    public Label ssaLabel;
+    @FXML
+    public Label sstLabel;
+    @FXML
+    public Label ssaSstLabel;
+    @FXML
+    public Label sseSstLabel;
+    @FXML
+    public Label fCriticalLabel;
+    @FXML
+    public Label fCalculatedLabel;
+    @FXML
+    public Button showFGraphButton;
+    @FXML
+    public Button showCoVGraph;
+    @FXML
+    public Button showWinCoVGraph;
+    @FXML
+    public Pane anovaPane;
+    @FXML
+    public TableView<Run> anovaTable;
+    @FXML
+    public TableColumn<Run, Double> averageSpeedColumn;
+    @FXML
+    public TableColumn<Run, Integer> runIDColumn;
+    @FXML
+    public TableColumn<Run, Double> covColumn;
+    @FXML
+    public TableColumn<Run, String> compareToRunColumn;
+    @FXML
+    public TableColumn<Run, Double> FColumn;
+    @FXML
+    public TableColumn<Run, Byte> hypothesisColumn;
     private double fCrit;
-    private double averageCoV;
 
     public Anova(Job job, boolean skip, int groupSize, double alpha) {
         super(job, skip, groupSize, alpha);
         this.charter = new Charter();
-        this.anovaData =  new ArrayList<>();
-        this.covData =  new ArrayList<>();
+        this.anovaData = new ArrayList<>();
+        this.covData = new ArrayList<>();
+        this.covAveragedData = new ArrayList<>();
     }
 
     @Override
@@ -94,14 +121,16 @@ public class Anova extends GenericTest implements Initializable {
         anovaTable.setOnMouseClicked((MouseEvent event) -> {
             if (event.getButton().equals(MouseButton.PRIMARY)) {
                 Run run = anovaTable.getSelectionModel().getSelectedItem();
-                if(run != null){
+                if (run != null) {
                     setLabeling(run);
                 }
             }
         });
 
-        showCoVGraph.setOnAction(e -> drawCoVGraph(this.job));
         showFGraphButton.setOnAction(e -> drawANOVAGraph(this.job));
+        showCoVGraph.setOnAction(e -> drawAveragedCoVGraph(this.job));
+        showWinCoVGraph.setOnAction(e -> drawCoVGraph(this.job));
+
         anovaTable.setItems(this.job.getRuns());
 
     }
@@ -119,7 +148,64 @@ public class Anova extends GenericTest implements Initializable {
 
     @Override
     public void calculate() {
+        calculateAnovaAndCoV();
+        calculateAveragedCoV();
+    }
 
+    private void calculateAveragedCoV() {
+        int initWindow = 100;
+        int windowSize = 100;
+        double sum = 0;
+        //double k = 0.5;           // Slack value
+
+        List<DataPoint> data = this.job.getData();
+        List<Double> windowList = new ArrayList<>();
+        for (int i = 0; i < initWindow; i++) {
+            sum += data.get(i).getSpeed();
+            windowList.add(data.get(i).getSpeed());
+        }
+        double targetMean = sum / initWindow;
+        //double time = data.get(i).getTime();
+        double cov = Math.sqrt(GenericTest.variance(windowList, targetMean)) / targetMean;
+        covAveragedData.add(new XYChart.Data<>(0, cov));
+
+        boolean isInit = false;
+        int l = 1;
+        for (int i = initWindow; i < data.size(); i += windowSize) {
+            sum = 0;
+            int j = windowSize * l;
+            int nextWindow = windowSize * (l + 1);
+            for (; j < nextWindow; j++) {
+                if (j < data.size() - windowSize) {
+                    windowList.add(data.get(j).getSpeed());
+                    sum += data.get(j).getSpeed();
+                }
+                //int lastBit = j - data.size() - windowSize;
+            }
+            if (sum != 0) {
+                targetMean = sum / windowSize;
+                double time = data.get(i).getTime();
+                cov = Math.sqrt(GenericTest.variance(windowList, targetMean)) / targetMean;
+                covAveragedData.add(new XYChart.Data<>(l, cov));
+            }
+            windowList.clear();
+            l++;
+        }
+
+        // Using the average cov of the job and compare it to the windowed cov
+//        double sumCoV = 0;
+//        for (XYChart.Data<Number, Number> covDatum : covData) {
+//            sumCoV += (double) covDatum.getYValue();
+//        }
+//        double averageCoV = sumCoV / covData.size();
+
+//        for (XYChart.Data<Number, Number> covDatum : covData) {
+//            double cov = (double) covDatum.getYValue();
+//            covAveragedData.add(new XYChart.Data<>(covDatum.getXValue(), cov));
+//        }
+    }
+
+    private void calculateAnovaAndCoV() {
         int num = this.groups.size() - 1;
         int denom = (num + 1) * (this.job.getData().size() - 1);
         FDistribution fDistribution = new FDistribution(num, denom);
@@ -153,7 +239,7 @@ public class Anova extends GenericTest implements Initializable {
         double cov;
         for (List<Run> group : this.groups) {
             Run run = group.getFirst();
-            cov = GenericTest.calcualteCoV(this.job.getStandardDeviation(),group);
+            cov = GenericTest.calcualteCoV(this.job.getStandardDeviation(), group);
             double s_2_a = run.getSSA() / (this.groups.size() - 1);
             double s_2_e = run.getSSE() / (this.groups.size() * (run.getData().size() - 1));
             fValue = s_2_a / s_2_e;
@@ -172,84 +258,39 @@ public class Anova extends GenericTest implements Initializable {
             covData.add(new XYChart.Data<>(run.getID(), cov));
         }
 
-
         // Logging
         LOGGER.log(Level.INFO, String.format("Calculated Numerator %d and Denominator %d", num, denom));
         for (List<Run> list : groups) {
-        	Run run = list.getFirst();
+            Run run = list.getFirst();
             LOGGER.log(Level.INFO, String.format("SSE, %f, SSA %f, CoV: %f, P: %f, F: %f", run.getSSE(), run.getSSA(), run.getCoV(), run.getP(), run.getF()));
-		}
+        }
     }
 
-//    private double getGroupAverageSpeed(List<Run> group) {
-//        double sum = 0.0;
-//        for (Run run : group) {
-//            sum += run.getAverageSpeed();
-//        }
-//        return sum / group.size();
-//    }
+    private void drawANOVAGraph(Job job) {
+                File file = new File("D:\\warmup_speed_log.log");
 
-    public void drawANOVAGraph(Job job) {
-        charter.drawGraph("ANOVA", "Run", "F-Value", "calculated F",this.fCrit,  anovaData);
-        charter.drawGraph("Windows CoV", "Job", "F-Value", "calculated F",  10, covData);
+        LogGenerator.generate(
+                file,
+                50,       // Total 50 runs
+                500,        //line per runs
+                5000,     //  lines per run
+                20000,     // start speed
+                2500     // warm up lines
+        );
 
+        charter.drawGraph("ANOVA", "Run", "F-Value", "calculated F", this.fCrit, anovaData);
     }
 
-    public double getCriticalValue(){
+    private void drawCoVGraph(Job job) {
+        charter.drawGraph("Run CoV", "Per run", "F-Value", "calculated F", 0, covData);
+    }
+
+    private void drawAveragedCoVGraph(Job job) {
+        charter.drawGraph("CoV Windowed", "Job", "F-Value", "calculated F", 0, covAveragedData);
+    }
+
+    public double getCriticalValue() {
         return fCrit;
-    }
-
-    public void drawCoVGraph(Job job) {
-        List<XYChart.Data<Number, Number>> covData = new ArrayList<>();
-        List<XYChart.Data<Number, Number>> covAveraged = new ArrayList<>();
-        int initWindow = 50;
-        int windowSize = 50;
-        double sum = 0;
-        double k = 0.5;           // Slack value
-
-        List<DataPoint> data = this.job.getData();
-        List<Double> windowList = new ArrayList<>();
-        for (int i = 0; i < initWindow; i++) {
-            sum += data.get(i).getSpeed();
-            windowList.add(data.get(i).getSpeed());
-        }
-        double targetMean = sum / initWindow;
-
-        //cusumPosData.getData().add(new XYChart.Data<>(0.0, 0.0));
-        //cusumNegData.getData().add(new XYChart.Data<>(0.0, 0.0));
-
-
-        int l = 1;
-        for (int i = 0; i < data.size(); i++) {
-            double time = data.get(i).getTime();
-            double std = Math.sqrt(GenericTest.variance(windowList, targetMean)) / targetMean;
-
-            // Check if last `windowSize` CUSUM values are within threshold
-            if (i >= windowSize * l) {
-                covData.add(new XYChart.Data<>(time, std));
-                sum = 0;
-                for (int j = 0; j < windowSize; j++) {
-                    sum += data.get(i).getSpeed();
-                }
-                targetMean = sum / windowSize;
-                l++;
-            }
-        }
-
-        double sumCoV = 0;
-        for (XYChart.Data<Number, Number> covDatum : covData) {
-            sumCoV += (double) covDatum.getYValue();
-        }
-        this.averageCoV = sumCoV / covData.size();
-
-        for (XYChart.Data<Number, Number> covDatum : covData) {
-            double cov = (double) covDatum.getYValue();
-            covAveraged.add(new XYChart.Data<>(covDatum.getXValue(), averageCoV - cov));
-
-        }
-
-        charter.drawGraph("CoV", "Run", "F-Value", "calculated F",0,  covData);
-        charter.drawGraph("CoV Averaged", "Run", "F-Value", "calculated F",0,  covAveraged);
     }
 
     public final void openWindow() {

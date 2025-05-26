@@ -69,7 +69,7 @@ public class MannWhitney extends GenericTest implements Initializable {
     @FXML public TableColumn<Run, Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, Integer> compareToRunColumn;
-    @FXML public TableColumn<Run, String> ZColumn;
+    @FXML public TableColumn<Run, Double> ZColumn;
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
     @FXML public Button drawUTestButton;
     @FXML public Label zIntervalLabel;
@@ -88,7 +88,8 @@ public class MannWhitney extends GenericTest implements Initializable {
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
-        ZColumn.setCellValueFactory(new PropertyValueFactory<>("ZAsString"));
+        ZColumn.setCellValueFactory(new PropertyValueFactory<>("Z"));
+        ZColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
@@ -202,7 +203,6 @@ public class MannWhitney extends GenericTest implements Initializable {
     public void calculate() {
         if (this.job.getRuns().size() <= 1) return;
         List<Run> runs = this.job.getRuns();
-        int skipCount = Job.DEFAULT_SKIP_COUNT;
 
         for (int i = 0; i < runs.size(); i ++) {
             if (i < runs.size() - 1) {

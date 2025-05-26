@@ -51,7 +51,7 @@ public class TTest extends GenericTest implements Initializable {
     @FXML public TableColumn<Run, Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, Integer> compareToRunColumn;
-    @FXML public TableColumn<Run, String> TColumn;
+    @FXML public TableColumn<Run, Double> TColumn;
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
 
     private double tCrit;
@@ -71,7 +71,8 @@ public class TTest extends GenericTest implements Initializable {
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
-        TColumn.setCellValueFactory(new PropertyValueFactory<>("TAsString"));
+        TColumn.setCellValueFactory(new PropertyValueFactory<>("T"));
+        TColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
@@ -85,7 +86,8 @@ public class TTest extends GenericTest implements Initializable {
         zCritLabel.setText(String.format(Locale.ENGLISH, "%,.5f", this.tCrit));
     }
 
-    public void tTest() {
+    @Override
+    public void calculate() {
         if (groups.size() <= 1) return;
         TDistribution t = new TDistribution(job.getData().size() * 2 - 2);
         this.tCrit = t.inverseCumulativeProbability(1 - job.getAlpha() / 2.0);
