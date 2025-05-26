@@ -176,7 +176,6 @@ public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnaly
             
     } catch (IOException e) {
             e.printStackTrace();
-            LOGGER.log(Level.SEVERE, String.format("Couldn't open Window for Anova! App state: %s", ConInt.STATUS.IO_EXCEPTION));
         }
     }
 }

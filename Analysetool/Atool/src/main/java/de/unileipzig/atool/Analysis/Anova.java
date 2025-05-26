@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  */
 public class Anova extends GenericTest implements Initializable {
     private static final Logger LOGGER = Logger.getLogger(Anova.class.getName());
-
+    private static final boolean SKIP_GROUPS = Settings.SKIP_GROUPS_ANOVA;
 
     static {
         ConsoleHandler handler = new ConsoleHandler();
@@ -313,9 +313,7 @@ public class Anova extends GenericTest implements Initializable {
             System.out.println(this.job);
             stage.show();
         } catch (IOException e) {
-            //LOGGER.log(Level.SEVERE, (Supplier<String>) e);
             e.printStackTrace();
-            LOGGER.log(Level.SEVERE, String.format("Couldn't open Window for ANOVA! App state: %s", ConInt.STATUS.IO_EXCEPTION));
         }
     }
 }

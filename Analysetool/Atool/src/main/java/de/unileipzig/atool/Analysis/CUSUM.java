@@ -32,19 +32,6 @@ public class CUSUM extends GenericTest{
         double h = 5.0;
         if (data.size() < initWindow + windowSize) return;
 
-        // Estimate target mean from the initial window
-//        double sum = 0;
-//        int skippedRuns = job.getRuns().size() * 2;
-//        for (int i = skippedRuns; i < job.getData().size(); i++) {
-//            sum += data.get(i).getSpeed();
-//        }
-//        double targetMean = sum / (job.getData().size() - skippedRuns);
-        //double targetMean = 20000;
-//        double targetMean = job.getAverageSpeed();
-        double firstSpeed = job.getData().getFirst().getSpeed();
-        double targetMean = (firstSpeed - this.job.getAverageSpeed()) / (this.job.getStandardDeviation());
-
-
         cusumPosData.add(new XYChart.Data<>(0.0, 0.0));
         cusumNegData.add(new XYChart.Data<>(0.0, 0.0));
         cusumData.add(new XYChart.Data<>(0.0,0.0));
@@ -53,39 +40,85 @@ public class CUSUM extends GenericTest{
         double lastCPos = 0;
         double lastCNeg = 0;
         double lastCSum = 0;
-        int l = 1;
-        for (int i = 1; i < data.size(); i += 1) {
-            double speed = data.get(i).getSpeed();
-            double time = data.get(i).getTime();
-            double cPos = Math.max(0.0, lastCPos + (speed - targetMean - k));
-            double cNeg = Math.min(0.0, lastCNeg + (speed - targetMean + k));
-            double cSum = lastCSum + (speed - targetMean - k);
-
-            // Check if last `windowSize` CUSUM values are within threshold
-//            if (i >= windowSize * l) {
-//                sum = 0;
-//                int j = windowSize * l;
-//                int nextWindow = windowSize * (l + 1);
-//                for (; j < nextWindow; j++) {
-//                    if (j < data.size() - windowSize) {
-//                        sum += data.get(j).getSpeed();
-//                    }
-//                }
-//            }
-//            if (sum != 0) {
-//                targetMean = sum / windowSize;
-//                time = data.get(i).getTime();
-//            }
+        List<Run> runs = this.job.getRuns();
+        double averageJob = this.job.getAverageSpeed();
+        for (Run run: runs) {
+            double speed = run.getAverageSpeed();
+            double ID = run.getID();
+            double cPos = Math.max(0.0, lastCPos + (run.getAverageSpeed() - averageJob - k));
+            double cNeg = Math.min(0.0, lastCNeg + (speed - averageJob + k));
+            double cSum = lastCSum + (speed - averageJob - k);
 
             lastCPos = cPos;
             lastCNeg = cNeg;
             lastCSum = cSum;
-            targetMean = (speed - this.job.getAverageSpeed()) / (this.job.getStandardDeviation());
-            cusumPosData.add(new XYChart.Data<>(time, cPos));
-            cusumNegData.add(new XYChart.Data<>(time, cNeg));
-            cusumData.add(new XYChart.Data<>(time, cSum));
 
-            l++;
+            cusumPosData.add(new XYChart.Data<>(ID, cPos));
+            cusumNegData.add(new XYChart.Data<>(ID, cNeg));
+            cusumData.add(new XYChart.Data<>(ID, cSum));
+        }
+    }
+
+    public void calculateWindowedRuns() {
+
+        List<Run> runs = this.job.getRuns();
+        int windowSize = 2;
+        if (runs.size() < windowSize + windowSize) return;
+
+        double k = 0.25;     // 142202       // Slack value
+        double h = 5.0;
+        double sum = 0;
+
+        cusumPosData.add(new XYChart.Data<>(0.0, 0.0));
+        cusumNegData.add(new XYChart.Data<>(0.0, 0.0));
+        cusumData.add(new XYChart.Data<>(0.0,0.0));
+
+        for (int i = 0; i < windowSize; i++){
+            sum += runs.get(i).getAverageSpeed();
+        }
+        double targetMean = sum / windowSize;
+
+        double lastCPos = 0;
+        double lastCNeg = 0;
+        double lastCSum = 0;
+        int l = 1;
+        int i = 0;
+        for (Run run: runs) {
+            double speed = run.getAverageSpeed();
+            double ID = run.getID();
+            double cPos = Math.max(0.0, lastCPos + (run.getAverageSpeed() - targetMean - k));
+            double cNeg = Math.min(0.0, lastCNeg + (speed - targetMean + k));
+            double cSum = lastCSum + (speed - targetMean - k);
+
+            // Check if last `windowSize` CUSUM values are within threshold
+            int counter = windowSize;
+            if (i >= windowSize * l) {
+                sum = 0;
+                int j = windowSize * l;
+                int nextWindow = windowSize * (l + 1);
+                for (; j < nextWindow; j++) {
+                    if (j < runs.size() - windowSize) {
+                        speed = runs.get(j).getAverageSpeed();
+                        sum += speed;
+                        counter --;
+                    }
+                }
+                if (counter != 0) {
+                    break;
+                }
+
+                targetMean = sum / windowSize;
+                l++;
+            }
+
+            lastCPos = cPos;
+            lastCNeg = cNeg;
+            lastCSum = cSum;
+
+            cusumPosData.add(new XYChart.Data<>(ID, cPos));
+            cusumNegData.add(new XYChart.Data<>(ID, cNeg));
+            cusumData.add(new XYChart.Data<>(ID, cSum));
+            i++;
         }
     }
 
@@ -93,7 +126,7 @@ public class CUSUM extends GenericTest{
         List<DataPoint> data = this.job.getData();
         List<Double> windowList = new ArrayList<>();
         int windowSize = 100;
-        double k = 0;           // Slack value
+        double k = 0.0;           // Slack value
         double h = 5.0;
         if (data.size() < windowSize + windowSize) return;
 

@@ -133,13 +133,15 @@ public class PrimaryController implements Initializable {
     private void setupTableMenuItems() {
         Utils.CustomTableRowFactory menuItems = new Utils.CustomTableRowFactory();
         menuItems.addMenuItem("Draw Job Speed", this::onActionDrawJobSpeed);
-        menuItems.addMenuItem("Draw Job Frequency", this::onActionDrawJobFreq);
+       // menuItems.addMenuItem("Draw Job Frequency", this::onActionDrawJobFreq);
         menuItems.addMenuItem("Confidence Interval", this::onActionCalcConInt);
         menuItems.addMenuItem("Anova", this::onActionCalcAnova);
         menuItems.addMenuItem("T-Test", this::onActionCalcTTest);
         menuItems.addMenuItem("U-Test", this::onActionCalcMannWhitneyTest);
         menuItems.addMenuItem("Tukey-HSD", this::onActionCalcTukeyHSD);
-        menuItems.addMenuItem("Cusum", this::onActionCalcCusum);
+        menuItems.addMenuItem("CUSUM Runs", this::onActionCalcCusum);
+        menuItems.addMenuItem("CUSUM Job", this::onActionCalcCusumJob);
+
 
         table.setRowFactory(menuItems);
     }
@@ -167,52 +169,57 @@ public class PrimaryController implements Initializable {
 
     private void onActionCalcConInt(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        ConInt tTest = new ConInt(job);
-        tTest.calculateInterval();
-        tTest.openWindow();
+        ConInt conInt = new ConInt(job, false, job.getAlpha());
+        conInt.calculate();
+        conInt.openWindow();
     }
 
     private void onActionCalcAnova(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        Anova anova = new Anova(job, false, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
+        Anova anova = new Anova(job, false, Settings.GROUP_SIZE, job.getAlpha());
         anova.calculate();
         anova.openWindow();
     }
 
     private void onActionDrawJobFreq(TableRow<Job> row, TableView<Job> table) {
-        Job job = row.getItem();
-        CUSUM cusum = new CUSUM(job, true, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
-        cusum.calculateWindowed();
-        cusum.draw();
+
     }
 
     private void onActionCalcTTest(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        TTest tTest = new TTest(job, true, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
+        TTest tTest = new TTest(job, true, Settings.GROUP_SIZE, job.getAlpha());
         tTest.calculate();
         tTest.openWindow();
     }
 
     private void onActionCalcMannWhitneyTest(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        MannWhitney tTest = new MannWhitney(job, false, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
+        MannWhitney tTest = new MannWhitney(job, false, Settings.GROUP_SIZE, job.getAlpha());
         tTest.calculate();
         tTest.openWindow();
     }
 
     private void onActionCalcTukeyHSD(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        Anova anova = new Anova(job, true, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
+        Anova anova = new Anova(job, true, Settings.GROUP_SIZE, job.getAlpha());
         TukeyHSD tTest = new TukeyHSD(anova);
         anova.calculate();
         anova.calculatePostHoc(tTest);
         tTest.openWindow();
+        System.out.println(job.getStandardDeviation());
     }
 
     private void onActionCalcCusum(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        CUSUM cusum = new CUSUM(job, true, Settings.RUN_TO_COMPARE_TO_SIZE, job.getAlpha());
+        CUSUM cusum = new CUSUM(job, true, Settings.GROUP_SIZE, job.getAlpha());
         cusum.calculate();
+        cusum.draw();
+    }
+
+    private void onActionCalcCusumJob(TableRow<Job> row, TableView<Job> table) {
+        Job job = row.getItem();
+        CUSUM cusum = new CUSUM(job, true, Settings.GROUP_SIZE, job.getAlpha());
+        cusum.calculateWindowed();
         cusum.draw();
     }
 

@@ -93,7 +93,7 @@ public class Job {
     }
 
     public List<DataPoint> getData() {
-        return this.convertedData;
+        return this.data;
     }
 
     private void prepareData() {
@@ -104,14 +104,9 @@ public class Job {
         updateRunsData();
     }
 
-//    public List<DataPoint> getRawData() {
-//        return this.rawData;
-//    }
-
     public File getFile() {
         return this.file;
     }
-
 
     public void setFile(File file) {
         this.file = file;
@@ -163,7 +158,7 @@ public class Job {
     }
 
     public double getAverageSpeed() {
-        return Math.floor((this.averageSpeed / Settings.CONVERSION_VALUE) * Settings.NUMBER_AFTER_COMMA) / Settings.NUMBER_AFTER_COMMA;
+        return ((this.averageSpeed / Settings.CONVERSION_VALUE));
     }
 
     public void setAverageSpeed(double average_speed) {
@@ -193,6 +188,7 @@ public class Job {
     }
 
     public void updateRunsData() {
+        List<DataPoint> data = this.getData();
         runs = new ArrayList<>();
         convertedData = new ArrayList<>();
         if (runsCounter <= 0 || runsCounter > 1000) {
@@ -283,6 +279,82 @@ public class Job {
 //		}
     }
 
+    public List<DataPoint> getDataNormalize() {
+        if (data == null || data.size() < 2) {
+            throw new IllegalArgumentException("Data list must contain at least two elements.");
+        }
+
+        int n = data.size();
+        double sum = 0.0;
+
+        for (DataPoint value : data) {
+            sum += value.getSpeed();
+        }
+        double mean = sum / n;
+
+        double squaredDiffSum = 0.0;
+        for (DataPoint value : data) {
+            double diff = value.getSpeed() - mean;
+            squaredDiffSum += diff * diff;
+        }
+        double stdDev = Math.sqrt(squaredDiffSum / (n - 1)); // Sample standard deviation
+
+        List<DataPoint> normalized = new ArrayList<>();
+        for (DataPoint value : data) {
+            double z = (value.getSpeed() - mean) / stdDev;
+            normalized.add(new DataPoint(z, value.getTime()));
+        }
+
+        return normalized;
+    }
+
+    // Normalize data using median and MAD
+    public List<DataPoint> getMADNormalized() {
+        if (data == null || data.size() < 2) {
+            throw new IllegalArgumentException("Data list must contain at least two elements.");
+        }
+
+        // Step 1: Compute the median
+        List<DataPoint> sorted = new ArrayList<>(data);
+        sorted.sort(new Utils.SpeedComparator());
+        double median = computeMedian(sorted);
+
+        // Step 2: Compute the absolute deviations from the median
+        List<DataPoint> absDeviations = new ArrayList<>();
+        for (DataPoint value : data) {
+            absDeviations.add(new DataPoint(Math.abs(value.getSpeed() - median), value.time));
+        }
+
+        // Step 3: Compute MAD (Median Absolute Deviation)
+        sorted.sort(new Utils.SpeedComparator());
+        double mad = computeMedian(absDeviations);
+
+        if (mad == 0) {
+            throw new ArithmeticException("MAD is zero — normalization cannot proceed.");
+        }
+
+        // Step 4: Normalize using robust z-score
+        // z_i = (x_i - median) / (MAD * 1.4826)
+        double madScale = mad * 1.4826;  // Consistency constant for normal distribution
+        List<DataPoint> normalized = new ArrayList<>();
+        for (DataPoint value : data) {
+            double z = (value.getSpeed() - median) / madScale;
+            normalized.add(new DataPoint(z, value.time));
+        }
+
+        return normalized;
+    }
+
+    // Helper to compute the median
+    private double computeMedian(List<DataPoint> sorted) {
+        int n = sorted.size();
+        if (n % 2 == 0) {
+            return (sorted.get(n / 2 - 1).getSpeed() + sorted.get(n / 2).getSpeed()) / 2.0;
+        } else {
+            return sorted.get(n / 2).getSpeed();
+        }
+    }
+
     public ObservableList<Run> getRuns() {
         return FXCollections.observableArrayList(this.runs);
     }
@@ -292,7 +364,7 @@ public class Job {
 //    }
 
     public double getStandardDeviation() {
-        return this.standardDeviation / Settings.CONVERSION_VALUE;
+        return this.standardDeviation;
     }
 
     public void setStandardDeviation(double standardDeviation) {

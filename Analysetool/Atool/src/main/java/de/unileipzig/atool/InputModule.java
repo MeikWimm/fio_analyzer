@@ -251,13 +251,14 @@ public class InputModule {
     }
 
     private double calculateDeviation(List<DataPoint> data, double average_speed) {
-        double standardDeviation = 0.0;
+        double sum = 0.0;
         for (DataPoint dataPoint : data) {
-            standardDeviation += Math.pow(dataPoint.getSpeed() - average_speed, 2);
+            sum += Math.pow(dataPoint.getSpeed() - average_speed, 2);
         }
-        standardDeviation = Math.sqrt(standardDeviation / data.size());
-        return standardDeviation;
+        return Math.sqrt(sum / data.size());
     }
+
+
 
     public File getSelectedDir() {
         return this.selectedDirectory;

@@ -89,7 +89,7 @@ public class Run {
             nominator += Math.pow(p.getSpeed() - averageSpeed, 2);
         }
         
-        this.standardDeviation = Math.floor(Math.sqrt((nominator / data.size()))* Settings.NUMBER_AFTER_COMMA) / Settings.NUMBER_AFTER_COMMA;
+        this.standardDeviation = (Math.sqrt((nominator / data.size())));
     }
 
     public List<DataPoint> getData(){      

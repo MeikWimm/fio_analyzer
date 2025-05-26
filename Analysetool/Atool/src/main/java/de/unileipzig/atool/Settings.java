@@ -5,6 +5,7 @@
 package de.unileipzig.atool;
 
 import javafx.beans.value.ChangeListener;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -24,21 +25,7 @@ import java.util.logging.Logger;
  * @author meni1999
  */
 public class Settings implements Initializable {
-    public final static int DEFAULT_SPEED_PER_MILLI = 10;
-    public final static int MAX_SPEED_PER_MIILI = 2000;
-    public final static int MIN_SPEED_PER_MIILI = 1;
-    public static final boolean SKIP_GROUPS = false;
     private static final Logger LOGGER = Logger.getLogger(Settings.class.getName());
-    private static final int DIGIT = 3;
-    public static final String DIGIT_FORMAT = "%,." + DIGIT + "f";
-    public static final int FRACTION_DIGITS = DIGIT;
-    public static boolean HAS_CHANGED = false;
-    public static double CONVERSION_VALUE = CONVERT.getConvertValue(CONVERT.DEFAULT);
-    public static int AVERAGE_SPEED_PER_MILLISEC = DEFAULT_SPEED_PER_MILLI;
-    public static int RUN_TO_COMPARE_TO_SIZE = 2;
-    public static int NUMBER_AFTER_COMMA = 10000;
-    public static double CONVERT_SPEED_UNIT = CONVERT.getConvertValue(CONVERT.DEFAULT);
-    private static CONVERT conversion = CONVERT.DEFAULT;
 
     static {
         ConsoleHandler handler = new ConsoleHandler();
@@ -47,6 +34,31 @@ public class Settings implements Initializable {
         LOGGER.setUseParentHandlers(false);
         LOGGER.addHandler(handler);
     }
+
+    public final static int DEFAULT_SPEED_PER_MILLI = 1;
+    public final static int MAX_SPEED_PER_MIILI = 2000;
+    public final static int MIN_SPEED_PER_MIILI = 1;
+
+    public static final boolean SKIP_GROUPS_ANOVA = false;
+    public static final boolean SKIP_GROUPS_CON_INT = false;
+    public static final boolean SKIP_GROUPS_T_TEST = false;
+    public static final boolean SKIP_GROUPS_U_TEST = false;
+    public static final boolean SKIP_GROUPS_CUSUM = false;
+    public static final boolean SKIP_GROUPS_TUKEY_HSD = false;
+
+    public static int GROUP_SIZE = 2;
+
+    private static boolean IS_SPEED_PER_MILLI_SELECTED;
+
+    private static final int DIGIT = 3;
+    public static final String DIGIT_FORMAT = "%,." + DIGIT + "f";
+    public static final int FRACTION_DIGITS = DIGIT;
+
+    public static double CONVERSION_VALUE = CONVERT.getConvertValue(CONVERT.DEFAULT);
+    public static int AVERAGE_SPEED_PER_MILLISEC = DEFAULT_SPEED_PER_MILLI;
+    private static CONVERT conversion = CONVERT.DEFAULT;
+
+    public static boolean HAS_CHANGED = false;
 
     @FXML public CheckBox checkboxSpeedPerSec;
     @FXML public Slider avSpeedSlider;
@@ -57,7 +69,6 @@ public class Settings implements Initializable {
     @FXML public RadioButton radioButtonKibiByte;
     @FXML public RadioButton radioButtonKiloByte;
     private final ToggleGroup toggleGorup = new ToggleGroup();
-    private boolean isFileAttr;
     private final PrimaryController primaryController;
 
     public Settings(PrimaryController primaryController) {
@@ -75,6 +86,20 @@ public class Settings implements Initializable {
         radioButtonKiloByte.setToggleGroup(toggleGorup);
         radioButtonMebibyte.setToggleGroup(toggleGorup);
 
+        final ChangeListener<Number> numberChangeListener = (obs, old, val) -> {
+            double roundedValue = Math.floor(val.doubleValue() / 50.0) * 50.0;
+            if (roundedValue <= 1.0) roundedValue = 1;
+            avSpeedSlider.valueProperty().set(roundedValue);
+            labelSliderVal.setText(Integer.toString((int) roundedValue));
+        };
+
+        buttonSaveSettings.setOnAction(this::onActionSaveSettings);
+        avSpeedSlider.valueProperty().addListener(numberChangeListener);
+
+        initSettings();
+    }
+
+    private void initSettings() {
         radioButtonKibiByte.setSelected(true);
 
         for (Toggle toggle : toggleGorup.getToggles()) {
@@ -83,15 +108,12 @@ public class Settings implements Initializable {
             }
         }
 
-        final ChangeListener<Number> numberChangeListener = (obs, old, val) -> {
-            double roundedValue = Math.floor(val.doubleValue() / 50.0) * 50.0;
-            if (roundedValue <= 1.0) roundedValue = 1;
-            avSpeedSlider.valueProperty().set(roundedValue);
-            labelSliderVal.setText(Integer.toString((int) roundedValue));
-        };
-
-        avSpeedSlider.valueProperty().addListener(numberChangeListener);
+        checkboxSpeedPerSec.setSelected(IS_SPEED_PER_MILLI_SELECTED);
+        avSpeedSlider.setDisable(!IS_SPEED_PER_MILLI_SELECTED);
+        avSpeedSlider.setValue(AVERAGE_SPEED_PER_MILLISEC);
+        runCompareCounterSlider.setValue(GROUP_SIZE);
     }
+
 
     public void openWindow() {
         try {
@@ -114,27 +136,24 @@ public class Settings implements Initializable {
     }
 
     @FXML
-    public void onActionSaveSettings() {
-        //LOGGER.log(Level.INFO, String.format("is FileAttr set to %b", this.isFileAttr));
+    public void onActionUseSpeedPerSec(ActionEvent event) {
+        IS_SPEED_PER_MILLI_SELECTED = checkboxSpeedPerSec.isSelected();
+        LOGGER.log(Level.INFO, String.format("use Average Speed per Sec set to %b", IS_SPEED_PER_MILLI_SELECTED));
+        avSpeedSlider.setDisable(!IS_SPEED_PER_MILLI_SELECTED);
+    }
+
+
+    private void onActionSaveSettings(ActionEvent actionEvent) {
         conversion = (CONVERT) toggleGorup.getSelectedToggle().getUserData();
         CONVERSION_VALUE = CONVERT.getConvertValue(conversion);
         AVERAGE_SPEED_PER_MILLISEC = (int) avSpeedSlider.getValue();
-        RUN_TO_COMPARE_TO_SIZE = (int) runCompareCounterSlider.getValue();
+        GROUP_SIZE = (int) runCompareCounterSlider.getValue();
         Settings.HAS_CHANGED = true;
 
-        // get a handle to the stage
-        Stage stage = (Stage) buttonSaveSettings.getScene().getWindow();
-        // do what you have to do
-        stage.close();
         primaryController.update();
-
-    }
-
-    @FXML
-    public void onActionUseSpeedPerSec() {
-        boolean isSpeedPerSecSelected = checkboxSpeedPerSec.isSelected();
-        LOGGER.log(Level.INFO, String.format("use Average Speed per Sec set to %b", isSpeedPerSecSelected));
-        avSpeedSlider.setDisable(!isSpeedPerSecSelected);
+        System.out.println("Saved");
+        Stage stage = (Stage) buttonSaveSettings.getScene().getWindow();
+        stage.close();
     }
 
     public enum CONVERT {
