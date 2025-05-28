@@ -12,7 +12,4 @@ public abstract class PostHocTest {
         this.test = test;
     }
 
-    public GenericTest getTest() {
-        return test;
-    }
 }

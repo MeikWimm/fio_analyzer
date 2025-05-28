@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="633.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="498.0" prefWidth="772.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <top>
       <Label id="labelHeader" fx:id="labelHeader" text="Confidence Interval" BorderPane.alignment="CENTER" />
    </top>
@@ -23,17 +23,18 @@
                   <TableColumn id="intervalToColumn" fx:id="intervalToColumn" prefWidth="116.0" text="Interval (To)" />
                   <TableColumn id="plusMinusValue" fx:id="plusMinusValueColumn" prefWidth="116.0" text="±" />
                   <TableColumn id="standardDeviationColumn" fx:id="standardDeviationColumn" prefWidth="116.0" text="Standard Deviation" />
-                  <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="75.0" text="Compare to Run" />
-                  <TableColumn id="overlappingColumn" fx:id="overlappingColumn" prefWidth="116.0" text="Overlapping Difference (%)" />
+                  <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="75.0" text="Group" />
+                  <TableColumn id="overlappingColumn" fx:id="overlappingColumn" prefWidth="116.0" text="RCIW over Job average" />
               </columns>
             </TableView>
          </children>
       </VBox>
    </center>
    <bottom>
-      <Pane prefHeight="52.0" prefWidth="633.0" BorderPane.alignment="CENTER">
+      <Pane prefHeight="47.0" prefWidth="633.0" BorderPane.alignment="CENTER">
          <children>
-            <Button id="drawConIntDiffButton" fx:id="drawConIntDiffButton" layoutX="14.0" layoutY="9.0" mnemonicParsing="false" text="Draw overlapping difference" />
+            <Button id="drawConIntDiffButton" fx:id="drawConIntDiffButton" layoutX="14.0" layoutY="9.0" mnemonicParsing="false" text="Draw RCIW Run over Job" />
+            <Button id="drawWindowedRCIWButton" fx:id="drawWindowedRCIWButton" layoutX="177.0" layoutY="9.0" mnemonicParsing="false" text="Draw windowed RCIW" />
          </children>
       </Pane>
    </bottom>

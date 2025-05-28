@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.Slider?>
+<?import javafx.scene.effect.Blend?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Pane?>
 
@@ -25,13 +26,102 @@
             <Slider id="runCompareCounterSlider" fx:id="runCompareCounterSlider" blockIncrement="0.0" layoutX="452.0" layoutY="411.0" majorTickUnit="1.0" max="10.0" min="2.0" minorTickCount="0" prefHeight="24.0" prefWidth="190.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" />
             <Label layoutX="388.0" layoutY="415.0" text="2 (Default)" />
             <Label layoutX="452.0" layoutY="448.0" prefHeight="17.0" prefWidth="226.0" text="Number of Runs to compare for ANOVA" />
-            <Label layoutX="16.0" layoutY="172.0" prefHeight="17.0" prefWidth="215.0" text="Use adjacent Run (otherwise sequential)" />
-            <CheckBox layoutX="14.0" layoutY="195.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="130.0" text="ANOVA" />
-            <CheckBox layoutX="14.0" layoutY="225.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" text="Confidence Interval" />
-            <CheckBox layoutX="14.0" layoutY="259.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="78.0" text="T-Test" />
-            <CheckBox layoutX="14.0" layoutY="289.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="78.0" text="U-Test" />
-            <CheckBox layoutX="14.0" layoutY="319.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="78.0" text="CUSUM" />
-            <CheckBox layoutX="14.0" layoutY="349.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="78.0" text="Tukey-HSD" />
+            <Pane layoutX="23.0" layoutY="171.0" prefHeight="231.0" prefWidth="655.0">
+               <children>
+                  <Pane prefHeight="34.0" prefWidth="132.0">
+                     <children>
+                        <Label prefHeight="17.0" prefWidth="122.0" text="Use adjacent Run" />
+                        <Label layoutY="17.0" prefHeight="17.0" prefWidth="122.0" text="(otherwise sequential)" />
+                     </children>
+                  </Pane>
+                  <Pane layoutY="31.0" prefHeight="34.0" prefWidth="630.0">
+                     <children>
+                        <CheckBox layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <CheckBox layoutX="132.0" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <Pane layoutX="264.0" prefHeight="34.0" prefWidth="132.0">
+                           <children>
+                              <Label layoutY="6.0" prefHeight="17.0" prefWidth="45.0" text="ANOVA" />
+                           </children>
+                        </Pane>
+                     </children>
+                     <effect>
+                        <Blend />
+                     </effect>
+                  </Pane>
+                  <Pane layoutX="132.0" prefHeight="34.0" prefWidth="132.0">
+                     <children>
+                        <Label prefHeight="17.0" prefWidth="122.0" text="Skip first run" />
+                     </children>
+                  </Pane>
+                  <Pane layoutX="264.0" prefHeight="34.0" prefWidth="132.0">
+                     <children>
+                        <Label prefHeight="17.0" prefWidth="122.0" text="Statistical Test" />
+                     </children>
+                  </Pane>
+                  <Pane layoutY="65.0" prefHeight="34.0" prefWidth="630.0">
+                     <children>
+                        <CheckBox layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <CheckBox layoutX="132.0" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <Pane layoutX="264.0" prefHeight="34.0" prefWidth="132.0">
+                           <children>
+                              <Label layoutY="6.0" prefHeight="17.0" prefWidth="123.0" text="Confidence Interval" />
+                           </children>
+                        </Pane>
+                     </children>
+                  </Pane>
+                  <Pane layoutY="99.0" prefHeight="34.0" prefWidth="630.0">
+                     <children>
+                        <CheckBox layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <CheckBox layoutX="132.0" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <Pane layoutX="264.0" prefHeight="34.0" prefWidth="132.0">
+                           <children>
+                              <Label layoutY="6.0" prefHeight="17.0" prefWidth="45.0" text="T-Test" />
+                           </children>
+                        </Pane>
+                     </children>
+                  </Pane>
+                  <Pane layoutY="133.0" prefHeight="34.0" prefWidth="630.0">
+                     <children>
+                        <CheckBox layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <CheckBox layoutX="132.0" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <Pane layoutX="264.0" prefHeight="34.0" prefWidth="132.0">
+                           <children>
+                              <Label layoutY="6.0" prefHeight="17.0" prefWidth="45.0" text="U-Test" />
+                           </children>
+                        </Pane>
+                     </children>
+                  </Pane>
+                  <Pane layoutY="167.0" prefHeight="34.0" prefWidth="630.0">
+                     <children>
+                        <CheckBox layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <CheckBox layoutX="132.0" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <Pane layoutX="264.0" prefHeight="34.0" prefWidth="132.0">
+                           <children>
+                              <Label layoutY="6.0" prefHeight="17.0" prefWidth="84.0" text="Tukey-HSD" />
+                           </children>
+                        </Pane>
+                     </children>
+                  </Pane>
+                  <Pane layoutY="200.0" prefHeight="34.0" prefWidth="630.0">
+                     <children>
+                        <CheckBox layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <CheckBox layoutX="132.0" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <Pane layoutX="264.0" prefHeight="34.0" prefWidth="132.0">
+                           <children>
+                              <Label layoutY="6.0" prefHeight="17.0" prefWidth="84.0" text="CUSUM" />
+                           </children>
+                        </Pane>
+                     </children>
+                  </Pane>
+               </children>
+               <effect>
+                  <Blend />
+               </effect>
+            </Pane>
+            <Slider id="windowSlider" fx:id="windowSlider" blockIncrement="100.0" layoutX="455.0" layoutY="82.0" majorTickUnit="100.0" max="500.0" min="1.0" minorTickCount="5" prefHeight="24.0" prefWidth="190.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" />
+            <Label id="windowValueLabel" fx:id="windowValueLabel" layoutX="544.0" layoutY="118.0" text="1" textAlignment="CENTER" />
+            <Label layoutX="366.0" layoutY="84.0" prefHeight="17.0" prefWidth="75.0" text="100 (Default)" />
+            <Label layoutX="648.0" layoutY="84.0" text="500" />
          </children>
       </Pane>
    </center>

@@ -4,7 +4,6 @@
  */
 package de.unileipzig.atool.Analysis;
 
-import de.unileipzig.atool.Job;
 import de.unileipzig.atool.Run;
 import de.unileipzig.atool.Settings;
 import de.unileipzig.atool.Utils;
@@ -19,8 +18,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -39,8 +36,6 @@ import net.sourceforge.jdistlib.Tukey;
 public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnalyzer {
     private static final Logger LOGGER = Logger.getLogger( TukeyHSD.class.getName() );
 
-    private record TukeyDataPoint(double mean, double qHSD) {}
-    
     static {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setLevel(Level.FINEST);
@@ -60,11 +55,15 @@ public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnaly
     @FXML public TableColumn<Run, Double> QColumn;
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
     private double qHSD;
-    private final Map<Integer, TukeyDataPoint> tukeyData;
+    private final List<XYChart.Data<Number, Number>> meanData;
+    private final List<XYChart.Data<Number, Number>> qHSDData;
+    private final Charter charter;
 
     public TukeyHSD(Anova anova){
         super(anova);
-        this.tukeyData = new HashMap<>();
+        this.meanData = new ArrayList<>();
+        this.qHSDData = new ArrayList<>();
+        charter = new Charter();
     }
 
     @Override
@@ -82,49 +81,23 @@ public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnaly
 
         drawTukey.setOnAction(e -> draw());
         
-        TukeyTable.setItems(this.test.getJob().getRuns());
+        TukeyTable.setItems(this.test.getJob().getFilteredRuns());
         qCritLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.qHSD));
     }
 
     public void draw(){
-            Stage anovaGraphStage = new Stage();
-            final NumberAxis xAxis = new NumberAxis();
-            final NumberAxis yAxis = new NumberAxis();
-            xAxis.setLabel("Run");
-            yAxis.setLabel("Mean");
-            LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
-            lineChart.setTitle("Tukey-HSD Test");
-            lineChart.setHorizontalGridLinesVisible(false);
-            lineChart.setVerticalGridLinesVisible(false);
-            
-            XYChart.Series<Number, Number> overallmeanSeries = new XYChart.Series<>();
-            overallmeanSeries.setName("Mean Between Runs");
-            
-            XYChart.Series<Number, Number> qHSDSeries = new XYChart.Series<>();
-            qHSDSeries.setName("Q-HSD");
-            
-
-            for (Map.Entry<Integer, TukeyDataPoint> entry : tukeyData.entrySet()) {
-                Integer key = entry.getKey();
-                TukeyDataPoint tukeyDataPoint = entry.getValue();
-                
-                overallmeanSeries.getData().add(new XYChart.Data<>(key, tukeyDataPoint.mean()));
-                qHSDSeries.getData().add(new XYChart.Data<>(key, tukeyDataPoint.qHSD()));
-            }
-
-            lineChart.getData().add(overallmeanSeries);
-            lineChart.getData().add(qHSDSeries);
- 
-            Scene scene  = new Scene(lineChart,800,600);
-            anovaGraphStage.setScene(scene);
-            anovaGraphStage.show();
+        charter.drawGraph("U-Test","Run","Mean/Difference",new Charter.ChartData("Run mean", meanData), new Charter.ChartData("QHSD", qHSDData));
     }
 
     @Override
     public void apply(List<Run> sigRuns, List<List<Run>> result) {
-        int runDataSize = test.getJob().getData().size();
+        int totalObservations = test.getJob().getData().size();
         for (int i = 0; i < result.size() - 1; i++) {
-            Tukey tukey = new Tukey(1, 2, 2 * (runDataSize - 1));
+            double n = sigRuns.getFirst().getData().size();
+            int numberOfGroups = result.size();
+            int dfError = totalObservations - numberOfGroups;
+
+            Tukey tukey = new Tukey(result.getFirst().size(), numberOfGroups, dfError);
             List<Run> group1 = result.get(i);
             List<Run> group2 = result.get(i + 1);
             double speedSumGroup1 = 0;
@@ -143,14 +116,16 @@ public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnaly
             double averageSpeedGroup2 = speedSumGroup2 / group2.size();
 
             double sse = result.get(i).getFirst().getSSE();
+            double MSE = sse / dfError;
+            double standardError = Math.sqrt(MSE / n);
+            double qCritical = tukey.inverse_survival(test.getAlpha(), false);
             double overallMean = Math.abs(averageSpeedGroup1 - averageSpeedGroup2);
-
-            this.qHSD = tukey.inverse_survival(test.getAlpha(), false) * Math.sqrt((sse / (2.0 * (runDataSize))) / runDataSize);
+            qHSD = qCritical * standardError;
             Run run = group1.getFirst();
             run.setQ(overallMean);
 
-            tukeyData.put(run.getID(), new TukeyDataPoint(overallMean, qHSD));
-
+            meanData.add(new XYChart.Data<>(run.getID(), overallMean));
+            qHSDData.add(new XYChart.Data<>(run.getID(), qHSD));
             if(qHSD < overallMean){
                 run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
             } else {
@@ -163,7 +138,7 @@ public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnaly
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/TukeyHSD.fxml"));
             fxmlLoader.setController(this);
-            Parent root1 = (Parent) fxmlLoader.load();
+            Parent root1 = fxmlLoader.load();
 
             Stage stage = new Stage();
             stage.setMaxWidth(1200);      

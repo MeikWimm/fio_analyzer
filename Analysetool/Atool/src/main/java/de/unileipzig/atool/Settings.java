@@ -46,6 +46,8 @@ public class Settings implements Initializable {
     public static final boolean SKIP_GROUPS_CUSUM = false;
     public static final boolean SKIP_GROUPS_TUKEY_HSD = false;
 
+    public static int WINDOW_SIZE = 100; // Default window size 100
+
     public static int GROUP_SIZE = 2;
 
     private static boolean IS_SPEED_PER_MILLI_SELECTED;
@@ -62,8 +64,10 @@ public class Settings implements Initializable {
 
     @FXML public CheckBox checkboxSpeedPerSec;
     @FXML public Slider avSpeedSlider;
+    @FXML public Slider windowSlider;
     @FXML public Slider runCompareCounterSlider;
     @FXML public Label labelSliderVal;
+    @FXML public Label windowValueLabel;
     @FXML public Button buttonSaveSettings;
     @FXML public RadioButton radioButtonMebibyte;
     @FXML public RadioButton radioButtonKibiByte;
@@ -86,17 +90,21 @@ public class Settings implements Initializable {
         radioButtonKiloByte.setToggleGroup(toggleGorup);
         radioButtonMebibyte.setToggleGroup(toggleGorup);
 
-        final ChangeListener<Number> numberChangeListener = (obs, old, val) -> {
-            double roundedValue = Math.floor(val.doubleValue() / 50.0) * 50.0;
-            if (roundedValue <= 1.0) roundedValue = 1;
-            avSpeedSlider.valueProperty().set(roundedValue);
-            labelSliderVal.setText(Integer.toString((int) roundedValue));
-        };
 
         buttonSaveSettings.setOnAction(this::onActionSaveSettings);
-        avSpeedSlider.valueProperty().addListener(numberChangeListener);
+        avSpeedSlider.valueProperty().addListener(setupChangeListener(avSpeedSlider, labelSliderVal));
+        windowSlider.valueProperty().addListener(setupChangeListener(windowSlider, windowValueLabel));
 
         initSettings();
+    }
+
+    private ChangeListener<Number> setupChangeListener(Slider slider, Label label) {
+        return (obs, old, val) -> {
+            double roundedValue = Math.floor(val.doubleValue() / 50.0) * 50.0;
+            if (roundedValue <= 1.0) roundedValue = 1;
+            slider.valueProperty().set(roundedValue);
+            label.setText(Integer.toString((int) roundedValue));
+        };
     }
 
     private void initSettings() {
@@ -112,6 +120,9 @@ public class Settings implements Initializable {
         avSpeedSlider.setDisable(!IS_SPEED_PER_MILLI_SELECTED);
         avSpeedSlider.setValue(AVERAGE_SPEED_PER_MILLISEC);
         runCompareCounterSlider.setValue(GROUP_SIZE);
+        windowSlider.setValue(WINDOW_SIZE);
+        labelSliderVal.setText(Integer.toString(AVERAGE_SPEED_PER_MILLISEC));
+        windowValueLabel.setText(Integer.toString(WINDOW_SIZE));
     }
 
 
@@ -148,6 +159,8 @@ public class Settings implements Initializable {
         CONVERSION_VALUE = CONVERT.getConvertValue(conversion);
         AVERAGE_SPEED_PER_MILLISEC = (int) avSpeedSlider.getValue();
         GROUP_SIZE = (int) runCompareCounterSlider.getValue();
+        WINDOW_SIZE = (int) windowSlider.getValue();
+
         Settings.HAS_CHANGED = true;
 
         primaryController.update();

@@ -4,16 +4,14 @@
  */
 package de.unileipzig.atool.Analysis;
 
-import de.unileipzig.atool.InputModule;
-import de.unileipzig.atool.Job;
-import de.unileipzig.atool.Run;
-import de.unileipzig.atool.Utils;
+import de.unileipzig.atool.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -38,9 +36,8 @@ import java.util.logging.Logger;
  * @author meni1999
  */
 public class ConInt extends GenericTest implements Initializable {
-    private static final Logger LOGGER = Logger.getLogger(InputModule.class.getName());
-    private static final int jobRunCounter = 0;
-    private static final double jobAlpha = -1.0;
+    private static final Logger LOGGER = Logger.getLogger(ConInt.class.getName());
+    private final int WINDOW_SIZE = Settings.WINDOW_SIZE;
 
     static {
         ConsoleHandler handler = new ConsoleHandler();
@@ -50,14 +47,15 @@ public class ConInt extends GenericTest implements Initializable {
         LOGGER.addHandler(handler);
     }
 
-    private final Job job;
     private final Charter charter;
     private final List<XYChart.Data<Number, Number>> conIntData;
-    private final boolean skip;
+    private final List<XYChart.Data<Number, Number>> windowedRCIWData;
     @FXML
     public Label labelHeader;
     @FXML
     public Button drawConIntDiffButton;
+    @FXML
+    public Button drawWindowedRCIWButton;
     @FXML
     public TableView<Run> conIntTable;
     @FXML
@@ -77,12 +75,12 @@ public class ConInt extends GenericTest implements Initializable {
     @FXML
     public TableColumn<Run, Double> overlappingColumn;
 
-    public ConInt(Job job, boolean skip, double alpha) {
-        super(job, skip, 2, alpha);
+    public ConInt(Job job, double alpha) {
+        super(job, 0, Settings.SKIP_GROUPS_CON_INT, 2, alpha);
+        int dataSize = this.job.getData().size();
         charter = new Charter();
-        conIntData = new ArrayList<>();
-        this.job = job;
-        this.skip = skip;
+        conIntData = new ArrayList<>(dataSize);
+        windowedRCIWData = new ArrayList<>(dataSize);
     }
 
     @Override
@@ -102,26 +100,34 @@ public class ConInt extends GenericTest implements Initializable {
         standardDeviationColumn.setCellValueFactory(new PropertyValueFactory<>("StandardDeviation"));
         standardDeviationColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
-
+        compareToRunColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getGroup()));
         overlappingColumn.setCellValueFactory(new PropertyValueFactory<>("OverlappingDifference"));
         overlappingColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         drawConIntDiffButton.setOnAction(e -> draw());
+        drawWindowedRCIWButton.setOnAction(e -> drawWindowedRCIW());
 
         labelHeader.setText(this.job.toString());
-        conIntTable.setItems(this.job.getRuns());
+        conIntTable.setItems(this.job.getFilteredRuns());
     }
 
     public void draw() {
-        charter.drawGraph("Overlapping Differnce of confidence intervals", "Run", "Overlapping difference (%)", "Overlapping Difference", 0, this.conIntData);
+        charter.drawGraph(
+                "Per-Run Relative Confidence Interval Width (RCIW) over Job Average",
+                "Run Index",
+                "RCIW / Job Average Speed",
+                new Charter.ChartData("RCIW per Run", this.conIntData)
+        );
     }
 
-    private double calculateOverlapp(Run run1, Run run2) {
-        double overlap = Math.max(0, Math.min(run1.getIntervalTo(), run2.getIntervalTo()) - Math.max(run1.getIntervalFrom(), run2.getIntervalFrom()));
-        double length = run1.getIntervalTo() - run1.getIntervalFrom() + run2.getIntervalTo() - run2.getIntervalFrom();
-
-        return (1.0 - 2 * overlap / length) * 100;
+    private void drawWindowedRCIW() {
+        calculateSWindowedRCIW();
+        charter.drawGraph(
+                "Windowed Relative Confidence Interval Width ( = " + this.WINDOW_SIZE + " time steps)",
+                "Last time point in window",
+                "RCIW (Width / Mean)",
+                new Charter.ChartData("RCIW Value", this.windowedRCIWData)
+        );
     }
 
     @Override
@@ -140,22 +146,128 @@ public class ConInt extends GenericTest implements Initializable {
             double c2 = averageSpeed + (normDis.inverseCumulativeProbability(1.0 - alpha / 2.0) * (std / Math.sqrt(dataSize)));
             run.setIntervalTo(c2);
         }
-        List<Run> runs = this.job.getRuns();
 
-        int skipCount = 1;
-        int ignoreLast = 1;
-        if (skip) {
-            skipCount = 2;
-            ignoreLast = 2;
+        for (List<Run> runs : this.groups) {
+            for (int i = 0; i < runs.size() - 1; i++) {
+                Run run = runs.get(i);
+                double RCIW = Math.abs(run.getIntervalFrom() - run.getIntervalTo()) / run.getAverageSpeed();
+                runs.get(i).setRCIW(RCIW);
+                conIntData.add(new XYChart.Data<>(runs.get(i).getRunID(), RCIW));
+            }
+        }
+    }
+
+    public void calculateSWindowedRCIW() {
+        NormalDistribution normDis = new NormalDistribution();
+        int windowSize = WINDOW_SIZE;
+        double[] windowData = new double[windowSize];
+        List<DataPoint> data = this.job.getData();
+
+        if (data.size() < windowSize) return;
+        for (int i = 0; i < windowSize; i++) {
+            windowData[i] = data.get(i).getSpeed();
         }
 
-            for (int i = 0; i < runs.size() - ignoreLast; i += skipCount) {
-                double overlappingDiff = calculateOverlapp(runs.get(i), runs.get(i + 1));
-                runs.get(i).setOverlappingDifference(overlappingDiff);
-                runs.get(i + 1).setOverlappingDifference(Run.UNDEFINED_DOUBLE_VALUE);
-                conIntData.add(new XYChart.Data<>(runs.get(i).getRunID(), overlappingDiff));
+        double alpha = job.getAlpha();
+        double averageSpeed = average(windowData);
+        double std = standardDeviation(windowData);
+        double z = normDis.inverseCumulativeProbability(1.0 - alpha / 2.0);
 
+        double c1 = averageSpeed - (z * (std / Math.sqrt(windowSize)));
+        double c2 = averageSpeed + (z * (std / Math.sqrt(windowSize)));
+        double RCIW = Math.abs(c1 - c2) / averageSpeed;
+        windowedRCIWData.add(new XYChart.Data<>(data.getFirst().getTime(), RCIW));
+
+
+        for (int i = 0; i < data.size() - windowSize; i++) {
+            for (int j = 0; j < windowSize; j++) {
+                windowData[j] = data.get(i + j).getSpeed();
+            }
+
+            averageSpeed = average(windowData);
+            std = standardDeviation(windowData);
+            c1 = averageSpeed - (z * (std / Math.sqrt(windowSize)));
+            c2 = averageSpeed + (z * (std / Math.sqrt(windowSize)));
+            RCIW = Math.abs(c1 - c2) / averageSpeed;
+
+            windowedRCIWData.add(new XYChart.Data<>(data.get(i).getTime(), RCIW));
         }
+    }
+//
+//    public void calculateWindowedRCIWEfficient() {
+//        NormalDistribution normDis = new NormalDistribution();
+//        int windowSize = WINDOW_SIZE;
+//        List<DataPoint> data = this.job.getRuns().getFirst().getData();
+//        double alpha = job.getAlpha();
+//        double z = normDis.inverseCumulativeProbability(1.0 - alpha / 2.0);
+//
+//        if (data.size() < windowSize) return;
+//
+//        double sum = 0.0;
+//        double sumSq = 0.0;
+//
+//        for (int i = 0; i < windowSize; i++) {
+//            double speed = data.get(i).getSpeed();
+//            sum += speed;
+//            sumSq += speed * speed;
+//        }
+//
+//        for (int i = 0; i <= data.size() - windowSize; i++) {
+//            double avg = sum / windowSize;
+//            double variance = (sumSq - (sum * sum) / windowSize) / (windowSize - 1);
+//            double std = Math.sqrt(variance);
+//
+//            double c1 = avg - (z * (std / Math.sqrt(windowSize)));
+//            double c2 = avg + (z * (std / Math.sqrt(windowSize)));
+//            double RCIW = Math.abs(c1 - c2) / avg;
+//
+//            windowedRCIWData.add(new XYChart.Data<>(data.get(i).getTime(), RCIW));
+//
+//            if (i + windowSize < data.size()) {
+//                double out = data.get(i).getSpeed();
+//                double in = data.get(i + windowSize).getSpeed();
+//
+//                sum -= out;
+//                sumSq -= out * out;
+//
+//                sum += in;
+//                sumSq += in * in;
+//            }
+//        }
+//    }
+
+
+    private static double average(double[] data) {
+        if (data == null || data.length == 0) {
+            throw new IllegalArgumentException("Data array must not be null or empty.");
+        }
+
+        double sum = 0.0;
+        for (double d : data) {
+            sum += d;
+        }
+
+        return sum / data.length;
+    }
+
+    private static double standardDeviation(double[] data) {
+        if (data == null || data.length < 2) {
+            throw new IllegalArgumentException("Data array must contain at least two elements.");
+        }
+
+        double mean = 0.0;
+        for (double d : data) {
+            mean += d;
+        }
+        mean /= data.length;
+
+        double sumSquaredDiffs = 0.0;
+        for (double d : data) {
+            double diff = d - mean;
+            sumSquaredDiffs += diff * diff;
+        }
+
+        return Math.sqrt(sumSquaredDiffs / (data.length - 1));  // Sample standard deviation
     }
 
     public void openWindow() {
@@ -172,7 +284,7 @@ public class ConInt extends GenericTest implements Initializable {
             stage.setMaxHeight(600);
             stage.setMinHeight(600);
             stage.setMinWidth(800);
-            stage.setTitle("Calculate Confidence Interval");
+            stage.setTitle("Calculated Confidence Interval");
             stage.setScene(new Scene(root1));
             stage.show();
 

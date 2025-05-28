@@ -27,8 +27,10 @@ public abstract class GenericTest {
     List<List<Run>> resultGroups;
     List<Run> resultRuns;
     double alpha;
-    public GenericTest(Job job, boolean skipGroup, int groupSize, double alpha){
+
+    public GenericTest(Job job, int skipFirstRun, boolean skipGroup, int groupSize, double alpha){
         this.job = new Job(job);
+        Job.prepareSkippedData(this.job, skipFirstRun);
         this.groups = Job.setupGroups(this.job, skipGroup, groupSize);
         this.resultGroups = new ArrayList<>();
         this.resultRuns = new ArrayList<>();
@@ -50,6 +52,29 @@ public abstract class GenericTest {
                 }
             }
         }
+
+        for (List<Run> runs: this.groups){
+            if(runs.getFirst().getNullhypothesis() == Run.REJECTED_NULLHYPOTHESIS){
+                for (Run run: runs){
+                    run.setGroup("");
+                }
+            }
+        }
+
+        for (int i = 0; i < resultGroups.size() - 1; i++) {
+            var currentGroup = resultGroups.get(i).getFirst();
+            var nextGroup = resultGroups.get(i + 1).getFirst();
+            if (currentGroup != null && nextGroup != null) {
+                String currentGroupValue = currentGroup.getGroup();
+                String nextGroupValue = nextGroup.getGroup();
+                currentGroup.setGroup(currentGroupValue + " | " + nextGroupValue);
+            }
+            for (int j = 1; j < resultGroups.get(i).size(); j++) {
+                resultGroups.get(i).get(j).setGroup("");
+            }
+        }
+        resultGroups.getLast().getFirst().setGroup("");
+
 
         job.resetRuns();
         postHocAnalyzer.apply(this.resultRuns, this.resultGroups);

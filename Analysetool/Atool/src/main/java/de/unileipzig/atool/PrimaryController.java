@@ -164,19 +164,19 @@ public class PrimaryController implements Initializable {
     private void onActionDrawJobSpeed(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
         Charter charter = new Charter();
-        charter.drawGraph("Job Speed", "Time", "Speed", "Speed", 0, job.getSeries());
+        charter.drawGraph("Job Speed", "Time in (ms)", "Speed in KiBi", new Charter.ChartData("Job speed",job.getSeries()));
     }
 
     private void onActionCalcConInt(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        ConInt conInt = new ConInt(job, false, job.getAlpha());
+        ConInt conInt = new ConInt(job, job.getAlpha());
         conInt.calculate();
         conInt.openWindow();
     }
 
     private void onActionCalcAnova(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        Anova anova = new Anova(job, false, Settings.GROUP_SIZE, job.getAlpha());
+        Anova anova = new Anova(job, Settings.GROUP_SIZE, job.getAlpha());
         anova.calculate();
         anova.openWindow();
     }
@@ -194,14 +194,14 @@ public class PrimaryController implements Initializable {
 
     private void onActionCalcMannWhitneyTest(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        MannWhitney tTest = new MannWhitney(job, false, Settings.GROUP_SIZE, job.getAlpha());
+        MannWhitney tTest = new MannWhitney(job, job.getAlpha());
         tTest.calculate();
         tTest.openWindow();
     }
 
     private void onActionCalcTukeyHSD(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        Anova anova = new Anova(job, true, Settings.GROUP_SIZE, job.getAlpha());
+        Anova anova = new Anova(job, Settings.GROUP_SIZE, job.getAlpha());
         TukeyHSD tTest = new TukeyHSD(anova);
         anova.calculate();
         anova.calculatePostHoc(tTest);
@@ -211,14 +211,14 @@ public class PrimaryController implements Initializable {
 
     private void onActionCalcCusum(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        CUSUM cusum = new CUSUM(job, true, Settings.GROUP_SIZE, job.getAlpha());
+        CUSUM cusum = new CUSUM(job, Settings.GROUP_SIZE, job.getAlpha());
         cusum.calculate();
         cusum.draw();
     }
 
     private void onActionCalcCusumJob(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        CUSUM cusum = new CUSUM(job, true, Settings.GROUP_SIZE, job.getAlpha());
+        CUSUM cusum = new CUSUM(job, Settings.GROUP_SIZE, job.getAlpha());
         cusum.calculateWindowed();
         cusum.draw();
     }

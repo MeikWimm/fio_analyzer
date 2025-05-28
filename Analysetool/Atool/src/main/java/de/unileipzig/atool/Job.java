@@ -11,9 +11,7 @@ import java.io.File;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.logging.Level;
 
-import de.unileipzig.atool.Analysis.GenericTest;
 import javafx.scene.chart.XYChart;
 
 /**
@@ -52,13 +50,15 @@ public class Job {
     private double calculatedF;
     private double standardDeviation;
     private int runDataSize;
-    private final List<DataPoint> data;
+    private List<DataPoint> data;
+    private final List<DataPoint> rawData;
     private final List<XYChart.Data<Number, Number>> speedSeries;
 
     public Job(List<DataPoint> data) {
         this.frequency = new TreeMap<>();
         this.speedSeries = new ArrayList<>();
         this.data = data;
+        this.rawData = new ArrayList<>(data);
         prepareData();
         COUNTER++;
     }
@@ -68,6 +68,7 @@ public class Job {
         this.file = other.file;
         this.runs = new ArrayList<>();
         this.data = other.data;
+        this.rawData = other.rawData;
         this.speedSeries = other.speedSeries;
         for (Run run : other.runs) {
             this.runs.add(new Run(run));
@@ -86,6 +87,44 @@ public class Job {
         this.calculatedF = other.calculatedF;
         this.standardDeviation = other.standardDeviation;
         this.runDataSize = other.runDataSize;
+    }
+
+    public static void prepareSkippedData(Job job, int skipRuns) {
+        if (job == null) {
+            throw new IllegalArgumentException("Job cannot be null");
+        }
+
+        if (skipRuns < 0) {
+            throw new IllegalArgumentException("skipRuns cannot be negative");
+        }
+
+        if (skipRuns == 0) {
+            return;
+        }
+
+        List<Run> runs = job.getRuns();
+        if (runs == null || runs.isEmpty()) {
+            throw new IllegalStateException("Job has no runs");
+        }
+
+        Run firstRun = runs.getFirst();
+        if (firstRun == null) {
+            throw new IllegalStateException("First run is null");
+        }
+
+        List<DataPoint> jobData = job.getData();
+        if (jobData == null) {
+            throw new IllegalStateException("Job has no data");
+        }
+
+        int skipSize = skipRuns * firstRun.getData().size();
+        if (skipSize >= jobData.size()) {
+            System.err.println("Skipping all data");
+            return;
+        }
+
+        jobData.subList(0, skipSize).clear();
+        job.getRuns().remove(0, skipRuns);
     }
 
     public void setFileAttributes(BasicFileAttributes attr) {
@@ -188,7 +227,7 @@ public class Job {
     }
 
     public void updateRunsData() {
-        List<DataPoint> data = this.getData();
+        //List<DataPoint> data = rawData;
         runs = new ArrayList<>();
         convertedData = new ArrayList<>();
         if (runsCounter <= 0 || runsCounter > 1000) {
@@ -201,7 +240,7 @@ public class Job {
 
         final int MIN_RUN_DATA_LENGTH = 8;
         //final int MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI = (int) Math.floor(rawData.size() / (double) (MIN_RUN_DATA_LENGTH * runsCounter));
-        final int MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI = (int) Math.floor(data.size() / (double) (MIN_RUN_DATA_LENGTH * runsCounter));
+        final int MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI = (int) Math.floor(rawData.size() / (double) (MIN_RUN_DATA_LENGTH * runsCounter));
 
         if (AVERAGE_TIME_PER_MILLISEC > MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI) {
             AVERAGE_TIME_PER_MILLISEC = MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI;
@@ -215,25 +254,23 @@ public class Job {
         if (!(AVERAGE_TIME_PER_MILLISEC == 1)) {
             double speed = 0;
             boolean flag = false;
-            int counter = 0;
 
-            for (DataPoint dataPoint : data /*rawData*/) {
+            for (DataPoint dataPoint : rawData /*rawData*/) {
                 if (i % AVERAGE_TIME_PER_MILLISEC == 0 && flag) {
                     double average_speed = speed / AVERAGE_TIME_PER_MILLISEC;
                     averagedData.add(new DataPoint(average_speed, dataPoint.getTime()));
                     speed = dataPoint.getSpeed();
-                    counter = 1;
                 } else {
                     flag = true;
                     speed += dataPoint.getSpeed();
-                    counter++;
                 }
                 i++;
             }
         } else {
-            averagedData = data /*rawData*/;
+            averagedData = rawData;
         }
 
+        this.data = averagedData;
         this.runDataSize = (averagedData.size() / runsCounter);
         /*
         Split job into runs depending on run_size
@@ -250,33 +287,6 @@ public class Job {
             Run run = new Run(j, run_data);
             runs.add(run);
         }
-        
-        if(runs.size() > 20) {
-        	for (int j = 0; j < 5; j++) {
-    			//this.runs.remove(j);
-    		}
-        }
-                
-//        for (Run run : runs) {
-//        	i = 0;
-//            	ArrayList<DataPoint> updatedData = new ArrayList<>();
-//    			double std = Math.sqrt(GenericTest.variance(run));
-//    			double average = GenericTest.average(run);
-//    			double threshold = 3.5;
-//    	        double median = GenericTest.median(run);
-//    	        double madValue = GenericTest.mad(run, median);
-//    			for (DataPoint dp : run.getData()) {
-//    				double x = dp.getSpeed();
-//    	            double modifiedZScore = Math.abs(0.67449 * (x - median) / madValue);
-//
-//    				System.err.println(String.format("madValue: %f", modifiedZScore));
-//    				if(modifiedZScore < 10.0) {
-//    					updatedData.add(new DataPoint(x, dp.getTime()));
-//    				}
-//    			}
-//    			run.updateData(updatedData);
-//			i++;
-//		}
     }
 
     public List<DataPoint> getDataNormalize() {
@@ -359,9 +369,15 @@ public class Job {
         return FXCollections.observableArrayList(this.runs);
     }
 
-//    public int getRunDataSize() {
-//        return this.data.size();
-//    }
+    public ObservableList<Run> getFilteredRuns() {
+        ArrayList<Run> clearedRuns = new ArrayList<>();
+        for(Run run: this.runs){
+            if(!(Objects.equals(run.getGroup(), ""))){
+                clearedRuns.add(run);
+            }
+        }
+        return FXCollections.observableArrayList(clearedRuns);
+    }
 
     public double getStandardDeviation() {
         return this.standardDeviation;
@@ -427,5 +443,9 @@ public class Job {
         }
 
         return this.speedSeries;
+    }
+
+    public void setData(List<DataPoint> data) {
+        this.data = data;
     }
 }

@@ -6,7 +6,6 @@ package de.unileipzig.atool;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  *
@@ -132,7 +131,7 @@ public class Run {
         return this.overlappingDifference;
     }
     
-    public void setOverlappingDifference(double OverlappingDifference){
+    public void setRCIW(double OverlappingDifference){
         this.overlappingDifference = OverlappingDifference;
     } 
 

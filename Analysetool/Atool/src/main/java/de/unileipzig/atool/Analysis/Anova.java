@@ -23,7 +23,6 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.apache.commons.math3.distribution.FDistribution;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -40,6 +39,7 @@ import java.util.logging.Logger;
 public class Anova extends GenericTest implements Initializable {
     private static final Logger LOGGER = Logger.getLogger(Anova.class.getName());
     private static final boolean SKIP_GROUPS = Settings.SKIP_GROUPS_ANOVA;
+    private final int WINDOW_SIZE = Settings.WINDOW_SIZE;
 
     static {
         ConsoleHandler handler = new ConsoleHandler();
@@ -93,12 +93,13 @@ public class Anova extends GenericTest implements Initializable {
     public TableColumn<Run, Byte> hypothesisColumn;
     private double fCrit;
 
-    public Anova(Job job, boolean skip, int groupSize, double alpha) {
-        super(job, skip, groupSize, alpha);
+    public Anova(Job job,int groupSize, double alpha) {
+        super(job, 0, Settings.SKIP_GROUPS_ANOVA, groupSize, alpha);
         this.charter = new Charter();
-        this.anovaData = new ArrayList<>();
-        this.covData = new ArrayList<>();
-        this.covAveragedData = new ArrayList<>();
+        final int dataSize = job.getData().size();
+        this.anovaData = new ArrayList<>(dataSize);
+        this.covData = new ArrayList<>(dataSize);
+        this.covAveragedData = new ArrayList<>(dataSize);
     }
 
     @Override
@@ -127,11 +128,11 @@ public class Anova extends GenericTest implements Initializable {
             }
         });
 
-        showFGraphButton.setOnAction(e -> drawANOVAGraph(this.job));
-        showCoVGraph.setOnAction(e -> drawAveragedCoVGraph(this.job));
-        showWinCoVGraph.setOnAction(e -> drawCoVGraph(this.job));
+        showFGraphButton.setOnAction(e -> drawANOVAGraph());
+        showCoVGraph.setOnAction(e -> drawAveragedCoVGraph());
+        showWinCoVGraph.setOnAction(e -> drawCoVGraph());
 
-        anovaTable.setItems(this.job.getRuns());
+        anovaTable.setItems(this.job.getFilteredRuns());
 
     }
 
@@ -149,12 +150,12 @@ public class Anova extends GenericTest implements Initializable {
     @Override
     public void calculate() {
         calculateAnovaAndCoV();
-        calculateAveragedCoV();
+        calculateWindowedCoV();
     }
 
-    private void calculateAveragedCoV() {
-        int initWindow = 100;
-        int windowSize = 100;
+    private void calculateWindowedCoV() {
+        int initWindow = WINDOW_SIZE;
+        int windowSize = WINDOW_SIZE;
         double sum = 0;
         //double k = 0.5;           // Slack value
 
@@ -167,30 +168,24 @@ public class Anova extends GenericTest implements Initializable {
         double targetMean = sum / initWindow;
         //double time = data.get(i).getTime();
         double cov = Math.sqrt(GenericTest.variance(windowList, targetMean)) / targetMean;
-        covAveragedData.add(new XYChart.Data<>(0, cov));
+        covAveragedData.add(new XYChart.Data<>(data.getFirst().getTime(), cov));
 
-        boolean isInit = false;
-        int l = 1;
-        for (int i = initWindow; i < data.size(); i += windowSize) {
+        for (int i = 1; i < data.size() - windowSize; i++) {
             sum = 0;
-            int j = windowSize * l;
-            int nextWindow = windowSize * (l + 1);
-            for (; j < nextWindow; j++) {
-                if (j < data.size() - windowSize) {
+            int nextWindow = windowSize + i;
+            for (int j = i; j < nextWindow; j++) {
+                if (j < data.size()) {
                     windowList.add(data.get(j).getSpeed());
                     sum += data.get(j).getSpeed();
                 }
-                //int lastBit = j - data.size() - windowSize;
             }
-            if (sum != 0) {
                 targetMean = sum / windowSize;
                 double time = data.get(i).getTime();
                 cov = Math.sqrt(GenericTest.variance(windowList, targetMean)) / targetMean;
-                covAveragedData.add(new XYChart.Data<>(l, cov));
-            }
+                covAveragedData.add(new XYChart.Data<>(time, cov));
             windowList.clear();
-            l++;
         }
+
 
         // Using the average cov of the job and compare it to the windowed cov
 //        double sumCoV = 0;
@@ -259,34 +254,24 @@ public class Anova extends GenericTest implements Initializable {
         }
 
         // Logging
-        LOGGER.log(Level.INFO, String.format("Calculated Numerator %d and Denominator %d", num, denom));
-        for (List<Run> list : groups) {
-            Run run = list.getFirst();
-            LOGGER.log(Level.INFO, String.format("SSE, %f, SSA %f, CoV: %f, P: %f, F: %f", run.getSSE(), run.getSSA(), run.getCoV(), run.getP(), run.getF()));
-        }
+//        LOGGER.log(Level.INFO, String.format("Calculated Numerator %d and Denominator %d", num, denom));
+//        for (List<Run> list : groups) {
+//            Run run = list.getFirst();
+//            LOGGER.log(Level.INFO, String.format("SSE, %f, SSA %f, CoV: %f, P: %f, F: %f", run.getSSE(), run.getSSA(), run.getCoV(), run.getP(), run.getF()));
+//        }
     }
 
-    private void drawANOVAGraph(Job job) {
-                File file = new File("D:\\warmup_speed_log.log");
+    private void drawANOVAGraph() {
 
-        LogGenerator.generate(
-                file,
-                50,       // Total 50 runs
-                500,        //line per runs
-                5000,     //  lines per run
-                20000,     // start speed
-                2500     // warm up lines
-        );
-
-        charter.drawGraph("ANOVA", "Run", "F-Value", "calculated F", this.fCrit, anovaData);
+        charter.drawGraph("ANOVA", "Run", "F-Value", "Critical value", this.fCrit, new Charter.ChartData("calculated F", anovaData));
     }
 
-    private void drawCoVGraph(Job job) {
-        charter.drawGraph("Run CoV", "Per run", "F-Value", "calculated F", 0, covData);
+    private void drawCoVGraph() {
+        charter.drawGraph("Run CoV", "Per run", "F-Value", new Charter.ChartData("CV over Job", covData));
     }
 
-    private void drawAveragedCoVGraph(Job job) {
-        charter.drawGraph("CoV Windowed", "Job", "F-Value", "calculated F", 0, covAveragedData);
+    private void drawAveragedCoVGraph() {
+        charter.drawGraph("CoV Windowed", "Job", "F-Value", new Charter.ChartData("Windowed CV over Job", covAveragedData));
     }
 
     public double getCriticalValue() {

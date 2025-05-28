@@ -163,7 +163,7 @@ public abstract class Utils {
         private final Label labelLoadInfo;
         private final String info;
 
-        public ValidatedDoubleTableCell(Label labelLoadInfo, double maxValue, double minValue, double defaultValue, String info) {
+        public ValidatedDoubleTableCell(Label labelLoadInfo, double minValue, double maxValue, double defaultValue, String info) {
             super(new SafeDoubleStringConverter());
             this.labelLoadInfo = labelLoadInfo;
             this.maxValue = maxValue;

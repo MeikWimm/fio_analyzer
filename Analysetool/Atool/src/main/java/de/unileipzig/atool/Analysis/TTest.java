@@ -4,15 +4,13 @@
  */
 package de.unileipzig.atool.Analysis;
 
-import de.unileipzig.atool.DataPoint;
-import de.unileipzig.atool.Job;
-import de.unileipzig.atool.Run;
-import de.unileipzig.atool.Utils;
+import de.unileipzig.atool.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -56,12 +54,12 @@ public class TTest extends GenericTest implements Initializable {
 
     private double tCrit;
     private final Charter charter;
-    private final Map<Integer, Double> tData;
+    private final List<XYChart.Data<Number, Number>> tData;
 
     public TTest(Job job, boolean skip, int groupSize, double alpha) {
-        super(job, skip, groupSize, alpha);
+        super(job, 0, Settings.SKIP_GROUPS_T_TEST, groupSize, alpha);
     this.charter = new Charter();
-        this.tData = new HashMap<>();
+        this.tData = new ArrayList<>();
     }
 
     @Override
@@ -78,7 +76,7 @@ public class TTest extends GenericTest implements Initializable {
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
         drawTTest.setOnAction(e -> drawTGraph(this.job));
-        TTable.setItems(this.job.getRuns());
+        TTable.setItems(this.job.getFilteredRuns());
         setLabeling();
     }
 
@@ -107,7 +105,7 @@ public class TTest extends GenericTest implements Initializable {
             double tVal = Math.abs(nominator / denominator);
             run1.setT(tVal);
 
-            tData.put(run1.getID(), tVal);
+            tData.add(new XYChart.Data<>(run1.getID(), tVal));
 
             if (this.tCrit < tVal) {
                 run1.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
@@ -137,7 +135,7 @@ public class TTest extends GenericTest implements Initializable {
     }
 
     private void drawTGraph(Job job) {
-        charter.drawGraph("T-Test", "Run", "T-Value", "calculated T", this.tData, job.getRunsCounter(), tCrit);
+        charter.drawGraph("T-Test", "Run", "T-Value", "critical T", tCrit, new Charter.ChartData("calculated T", tData));
     }
 
     public void openWindow() {

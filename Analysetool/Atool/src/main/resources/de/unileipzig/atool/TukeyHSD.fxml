@@ -13,7 +13,7 @@
          <columns>
             <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="31.0" text="Run" />
             <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="119.0" text="Measurment" />
-            <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="119.0" text="Compare to Run" />
+            <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="119.0" text="Groups" />
             <TableColumn id="QColumn" fx:id="QColumn" prefWidth="123.0" text="Mean" />
             <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="123.0" text="Nullhypothesis" />
          </columns>

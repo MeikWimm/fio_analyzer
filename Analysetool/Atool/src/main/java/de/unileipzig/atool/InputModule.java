@@ -31,7 +31,8 @@ import java.util.logging.Logger;
  *
  * @author meni1999
  */
-public class InputModule {
+public class
+InputModule {
     private static final Logger LOGGER = Logger.getLogger(InputModule.class.getName());
 
     static {
@@ -171,12 +172,6 @@ public class InputModule {
                 value = value * 10 + (ch - '0');
             }
         }
-
-        // Only need this if line ends before second comma (just in case)
-        if (idx < 2) {
-            result[idx] = value;
-        }
-
         return result;
     }
 
