@@ -57,7 +57,7 @@ public class TTest extends GenericTest implements Initializable {
     private final List<XYChart.Data<Number, Number>> tData;
 
     public TTest(Job job, boolean skip, int groupSize, double alpha) {
-        super(job, 0, Settings.SKIP_GROUPS_T_TEST, groupSize, alpha);
+        super(job, Settings.T_TEST_SKIP_RUNS_COUNTER, Settings.T_TEST_USE_ADJACENT_RUN, groupSize, alpha);
     this.charter = new Charter();
         this.tData = new ArrayList<>();
     }

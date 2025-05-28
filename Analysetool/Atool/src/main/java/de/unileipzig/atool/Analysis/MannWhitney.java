@@ -77,7 +77,7 @@ public class MannWhitney extends GenericTest implements Initializable {
     private double zCrit;
 
     public MannWhitney(Job job, double alpha) {
-        super(job, 0, Settings.SKIP_GROUPS_U_TEST, 2, alpha);
+        super(job, Settings.U_TEST_SKIP_RUNS_COUNTER, Settings.U_TEST_USE_ADJACENT_RUN, 2, alpha);
         this.charter = new Charter();
         this.uTestData = new ArrayList<>();
     }

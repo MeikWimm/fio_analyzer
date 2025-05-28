@@ -20,7 +20,7 @@ public class CUSUM extends GenericTest{
     private final int WINDOW_SIZE = Settings.WINDOW_SIZE;
 
     public CUSUM(Job job, int groupSize, double alpha) {
-        super(job, 5, Settings.SKIP_GROUPS_CUSUM, groupSize, alpha);
+        super(job, Settings.CUSUM_SKIP_RUNS_COUNTER, Settings.CUSUM_USE_ADJACENT_RUN, groupSize, alpha);
         this.charter = new Charter();
         int dataSize = this.job.getData().size();
         this.cusumPosData = new ArrayList<>(dataSize);

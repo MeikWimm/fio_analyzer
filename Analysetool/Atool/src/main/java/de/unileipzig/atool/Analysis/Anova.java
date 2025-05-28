@@ -38,7 +38,6 @@ import java.util.logging.Logger;
  */
 public class Anova extends GenericTest implements Initializable {
     private static final Logger LOGGER = Logger.getLogger(Anova.class.getName());
-    private static final boolean SKIP_GROUPS = Settings.SKIP_GROUPS_ANOVA;
     private final int WINDOW_SIZE = Settings.WINDOW_SIZE;
 
     static {
@@ -94,7 +93,7 @@ public class Anova extends GenericTest implements Initializable {
     private double fCrit;
 
     public Anova(Job job,int groupSize, double alpha) {
-        super(job, 0, Settings.SKIP_GROUPS_ANOVA, groupSize, alpha);
+        super(job, Settings.ANOVA_SKIP_RUNS_COUNTER, Settings.ANOVA_USE_ADJACENT_RUN, groupSize, alpha);
         this.charter = new Charter();
         final int dataSize = job.getData().size();
         this.anovaData = new ArrayList<>(dataSize);

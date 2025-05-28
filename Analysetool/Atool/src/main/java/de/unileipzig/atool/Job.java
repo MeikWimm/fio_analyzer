@@ -6,13 +6,12 @@ package de.unileipzig.atool;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.chart.XYChart;
 
 import java.io.File;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
 import java.util.*;
-
-import javafx.scene.chart.XYChart;
 
 /**
  * Log files of fio are here represented as Jobs.
@@ -35,8 +34,9 @@ public class Job {
     private static int COUNTER = 1; // so that each Job has a unique ID
 
     private final int ID = COUNTER;
+    private final List<DataPoint> rawData;
+    private final List<XYChart.Data<Number, Number>> speedSeries;
     private File file;
-    //private List<DataPoint> rawData = new ArrayList<>();
     private List<DataPoint> convertedData = new ArrayList<>();
     private List<Run> runs;
     private Map<Integer, Integer> frequency;
@@ -51,13 +51,11 @@ public class Job {
     private double standardDeviation;
     private int runDataSize;
     private List<DataPoint> data;
-    private final List<DataPoint> rawData;
-    private final List<XYChart.Data<Number, Number>> speedSeries;
 
     public Job(List<DataPoint> data) {
         this.frequency = new TreeMap<>();
         this.speedSeries = new ArrayList<>();
-        this.data = data;
+        this.data = new ArrayList<>(data);
         this.rawData = new ArrayList<>(data);
         prepareData();
         COUNTER++;
@@ -67,14 +65,13 @@ public class Job {
         other.updateRunsData();
         this.file = other.file;
         this.runs = new ArrayList<>();
-        this.data = other.data;
-        this.rawData = other.rawData;
-        this.speedSeries = other.speedSeries;
         for (Run run : other.runs) {
             this.runs.add(new Run(run));
         }
+        this.data = other.data;
+        this.rawData = other.rawData;
+        this.speedSeries = other.speedSeries;
         this.file = other.file;
-        //this.rawData = new ArrayList<>(other.rawData);
         this.convertedData = new ArrayList<>(other.convertedData);
         this.frequency = new HashMap<>(other.frequency);
         this.runsCounter = other.runsCounter;
@@ -89,42 +86,66 @@ public class Job {
         this.runDataSize = other.runDataSize;
     }
 
-    public static void prepareSkippedData(Job job, int skipRuns) {
-        if (job == null) {
-            throw new IllegalArgumentException("Job cannot be null");
+    public static List<List<Run>> setupGroups(Job job, boolean skipGroups, int groupSize) {
+        if (groupSize < 2) {
+            return new ArrayList<>();
         }
 
-        if (skipRuns < 0) {
-            throw new IllegalArgumentException("skipRuns cannot be negative");
-        }
-
-        if (skipRuns == 0) {
-            return;
-        }
-
+        List<List<Run>> groups = new ArrayList<>();
         List<Run> runs = job.getRuns();
-        if (runs == null || runs.isEmpty()) {
-            throw new IllegalStateException("Job has no runs");
-        }
+        int runsCounter = runs.size();
 
-        Run firstRun = runs.getFirst();
-        if (firstRun == null) {
-            throw new IllegalStateException("First run is null");
-        }
+        if (skipGroups) {
+            // create Groups like Run 1 - Run 2, Run 3 - Run 4, Run 5 - Run 6,...
+            int groupCount = runsCounter / groupSize;
+            int runIndex = 0;
 
-        List<DataPoint> jobData = job.getData();
-        if (jobData == null) {
-            throw new IllegalStateException("Job has no data");
-        }
+            for (int i = 0; i < groupCount; i++) {
+                List<Run> group = new ArrayList<>();
+                for (int j = 0; j < groupSize; j++) {
+                    group.add(runs.get(runIndex));
+                    runIndex++;
+                }
+                group.getFirst().setGroup(String.format("Run %d - Run %d", group.getFirst().getRunID(), group.getLast().getRunID()));
 
-        int skipSize = skipRuns * firstRun.getData().size();
-        if (skipSize >= jobData.size()) {
-            System.err.println("Skipping all data");
+                groups.add(group);
+            }
+        } else {
+
+            int groupCount = runsCounter / 2;
+            groupCount = groupCount + (groupCount - 1);
+            int runIndex = 0;
+
+            for (int i = 0; i < groupCount; i++) {
+                List<Run> group = new ArrayList<>();
+                for (int j = 0; j < groupSize; j++) {
+                    if (runIndex + j < runs.size()) {
+                        group.add(runs.get(runIndex + j));
+                    }
+                }
+                if (group.size() == groupSize) {
+                    group.getFirst().setGroup(String.format("Run %d - Run %d", group.getFirst().getRunID(), group.getLast().getRunID()));
+
+                    groups.add(group);
+                }
+                runIndex++;
+            }
+        }
+        return groups;
+    }
+
+    public void prepareSkippedData(int skipRuns) {
+        if (skipRuns < 1) {
             return;
         }
+        int skipSize = this.runDataSize * skipRuns;
+        this.data.subList(0, skipSize).clear();
+        this.runs.subList(0, skipRuns).clear();
+        runsCounter = runsCounter - skipRuns;
+    }
 
-        jobData.subList(0, skipSize).clear();
-        job.getRuns().remove(0, skipRuns);
+    private List<DataPoint> getRawData() {
+        return this.rawData;
     }
 
     public void setFileAttributes(BasicFileAttributes attr) {
@@ -135,11 +156,16 @@ public class Job {
         return this.data;
     }
 
+    public void setData(List<DataPoint> data) {
+        this.data = data;
+    }
+
     private void prepareData() {
         //this.epsilon = rawData.size() / 1000.0;
         if (this.epsilon > MAX_EPSILON) {
             this.epsilon = MAX_EPSILON;
         }
+
         updateRunsData();
     }
 
@@ -246,7 +272,7 @@ public class Job {
             AVERAGE_TIME_PER_MILLISEC = MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI;
         }
 
-        if(AVERAGE_TIME_PER_MILLISEC <= 1){
+        if (AVERAGE_TIME_PER_MILLISEC <= 1) {
             AVERAGE_TIME_PER_MILLISEC = 1;
         }
 
@@ -267,7 +293,7 @@ public class Job {
                 i++;
             }
         } else {
-            averagedData = rawData;
+            averagedData = new ArrayList<>(rawData);
         }
 
         this.data = averagedData;
@@ -371,8 +397,8 @@ public class Job {
 
     public ObservableList<Run> getFilteredRuns() {
         ArrayList<Run> clearedRuns = new ArrayList<>();
-        for(Run run: this.runs){
-            if(!(Objects.equals(run.getGroup(), ""))){
+        for (Run run : this.runs) {
+            if (!(Objects.equals(run.getGroup(), ""))) {
                 clearedRuns.add(run);
             }
         }
@@ -387,65 +413,13 @@ public class Job {
         this.standardDeviation = standardDeviation;
     }
 
-    public static List<List<Run>> setupGroups(Job job, boolean skipGroups, int groupSize){
-        if(groupSize < 2){
-            return new ArrayList<>();
-        }
-
-        List<List<Run>> groups = new ArrayList<>();
-        List<Run> runs = job.getRuns();
-        int runsCounter = runs.size();
-
-        if(skipGroups){
-            // create Groups like Run 1 - Run 2, Run 3 - Run 4, Run 5 - Run 6,...
-            int groupCount = runsCounter / groupSize;
-            int runIndex = 0;
-
-            for (int i = 0; i < groupCount; i++) {
-                List<Run> group = new ArrayList<>();
-                for (int j = 0; j < groupSize; j++) {
-                    group.add(runs.get(runIndex));
-                    runIndex++;
-                }
-                group.getFirst().setGroup(String.format("Run %d - Run %d", group.getFirst().getRunID(), group.getLast().getRunID()));
-
-                groups.add(group);
-            }
-        } else {
-
-            int groupCount = runsCounter / 2;
-            groupCount = groupCount + (groupCount - 1);
-            int runIndex = 0;
-
-            for (int i = 0; i < groupCount; i++) {
-                List<Run> group = new ArrayList<>();
-                for (int j = 0; j < groupSize; j++) {
-                    if (runIndex + j < runs.size()) {
-                        group.add(runs.get(runIndex + j));
-                    }
-                }
-                if(group.size() == groupSize){
-                    group.getFirst().setGroup(String.format("Run %d - Run %d", group.getFirst().getRunID(), group.getLast().getRunID()));
-
-                    groups.add(group);
-                }
-                runIndex++;
-            }
-        }
-        return groups;
-    }
-
     public List<XYChart.Data<Number, Number>> getSeries() {
-        if(this.speedSeries.isEmpty()){
-            for(DataPoint dp: data){
+        if (this.speedSeries.isEmpty()) {
+            for (DataPoint dp : data) {
                 speedSeries.add(new XYChart.Data<>(dp.getTime(), dp.getSpeed()));
             }
         }
 
         return this.speedSeries;
-    }
-
-    public void setData(List<DataPoint> data) {
-        this.data = data;
     }
 }

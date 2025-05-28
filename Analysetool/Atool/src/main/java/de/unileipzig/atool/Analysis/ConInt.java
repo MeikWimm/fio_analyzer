@@ -76,7 +76,7 @@ public class ConInt extends GenericTest implements Initializable {
     public TableColumn<Run, Double> overlappingColumn;
 
     public ConInt(Job job, double alpha) {
-        super(job, 0, Settings.SKIP_GROUPS_CON_INT, 2, alpha);
+        super(job, Settings.CON_INT_SKIP_RUNS_COUNTER, Settings.CON_INT_USE_ADJACENT_RUN, 2, alpha);
         int dataSize = this.job.getData().size();
         charter = new Charter();
         conIntData = new ArrayList<>(dataSize);
@@ -101,7 +101,7 @@ public class ConInt extends GenericTest implements Initializable {
         standardDeviationColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         compareToRunColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getGroup()));
-        overlappingColumn.setCellValueFactory(new PropertyValueFactory<>("OverlappingDifference"));
+        overlappingColumn.setCellValueFactory(new PropertyValueFactory<>("RCIW"));
         overlappingColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         drawConIntDiffButton.setOnAction(e -> draw());

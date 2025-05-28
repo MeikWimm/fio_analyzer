@@ -25,8 +25,9 @@ import java.util.logging.Logger;
  * @author meni1999
  */
 public class Settings implements Initializable {
-    private static final Logger LOGGER = Logger.getLogger(Settings.class.getName());
 
+
+    private static final Logger LOGGER = Logger.getLogger(Settings.class.getName());
     static {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setLevel(Level.FINEST);
@@ -39,12 +40,11 @@ public class Settings implements Initializable {
     public final static int MAX_SPEED_PER_MIILI = 2000;
     public final static int MIN_SPEED_PER_MIILI = 1;
 
-    public static final boolean SKIP_GROUPS_ANOVA = false;
-    public static final boolean SKIP_GROUPS_CON_INT = false;
-    public static final boolean SKIP_GROUPS_T_TEST = false;
-    public static final boolean SKIP_GROUPS_U_TEST = false;
-    public static final boolean SKIP_GROUPS_CUSUM = false;
-    public static final boolean SKIP_GROUPS_TUKEY_HSD = false;
+
+
+    public static final int MAX_SKIP_COUNT = 3;
+    public static final int MIN_SKIP_COUNT = 0;
+    public static final int DEFAULT_SKIP_COUNT = 0;
 
     public static int WINDOW_SIZE = 100; // Default window size 100
 
@@ -60,9 +60,48 @@ public class Settings implements Initializable {
     public static int AVERAGE_SPEED_PER_MILLISEC = DEFAULT_SPEED_PER_MILLI;
     private static CONVERT conversion = CONVERT.DEFAULT;
 
+//    public static boolean ANOVA_SKIP_RUNS = false;
+//    public static boolean CON_INT_SKIP_RUNS = false;
+//    public static boolean T_TEST_SKIP_RUNS = false;
+//    public static boolean U_TEST_SKIP_RUNS = false;
+//    public static boolean TUKEY_SKIP_RUNS = false;
+//    public static boolean CUSUM_SKIP_RUNS = false;
+
+    public static int ANOVA_SKIP_RUNS_COUNTER = 0;
+    public static int CON_INT_SKIP_RUNS_COUNTER = 0;
+    public static int T_TEST_SKIP_RUNS_COUNTER = 0;
+    public static int U_TEST_SKIP_RUNS_COUNTER = 0;
+    public static int CUSUM_SKIP_RUNS_COUNTER = 0;
+
+    public static boolean ANOVA_USE_ADJACENT_RUN = false;
+    public static boolean CON_INT_USE_ADJACENT_RUN = false;
+    public static boolean T_TEST_USE_ADJACENT_RUN = false;
+    public static boolean U_TEST_USE_ADJACENT_RUN = false;
+    public static boolean CUSUM_USE_ADJACENT_RUN = false;
+    public static boolean TUKEY_USE_ADJACENT_RUN = false;
+
     public static boolean HAS_CHANGED = false;
 
     @FXML public CheckBox checkboxSpeedPerSec;
+    @FXML public CheckBox adjacentRunANOVAcheckbox;
+    @FXML public CheckBox adjacentRunConIntcheckbox;
+    @FXML public CheckBox adjacentRunTTestcheckbox;
+    @FXML public CheckBox adjacentRunUTestcheckbox;
+    @FXML public CheckBox adjacentRunCUSUMcheckbox;
+    @FXML public CheckBox adjacentRunTukeycheckbox;
+
+    @FXML public CheckBox skipRunANOVAcheckbox;
+    @FXML public CheckBox skipRunConIntcheckbox;
+    @FXML public CheckBox skipRunTTestcheckbox;
+    @FXML public CheckBox skipRunUTestcheckbox;
+    @FXML public CheckBox skipRunCUSUMcheckbox;
+
+    @FXML public Spinner<Integer> skipRunAnovaSpinner;
+    @FXML public Spinner<Integer> skipRunConIntSpinner;
+    @FXML public Spinner<Integer> skipRunTTestSpinner;
+    @FXML public Spinner<Integer> skipRunUTestSpinner;
+    @FXML public Spinner<Integer> skipRunCUSUMSpinner;
+
     @FXML public Slider avSpeedSlider;
     @FXML public Slider windowSlider;
     @FXML public Slider runCompareCounterSlider;
@@ -89,7 +128,11 @@ public class Settings implements Initializable {
         radioButtonKibiByte.setToggleGroup(toggleGorup);
         radioButtonKiloByte.setToggleGroup(toggleGorup);
         radioButtonMebibyte.setToggleGroup(toggleGorup);
-
+        skipRunAnovaSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
+        skipRunConIntSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
+        skipRunTTestSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
+        skipRunUTestSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
+        skipRunCUSUMSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
 
         buttonSaveSettings.setOnAction(this::onActionSaveSettings);
         avSpeedSlider.valueProperty().addListener(setupChangeListener(avSpeedSlider, labelSliderVal));
@@ -100,7 +143,7 @@ public class Settings implements Initializable {
 
     private ChangeListener<Number> setupChangeListener(Slider slider, Label label) {
         return (obs, old, val) -> {
-            double roundedValue = Math.floor(val.doubleValue() / 50.0) * 50.0;
+            double roundedValue = Math.floor(val.doubleValue() / 5.0) * 5.0;
             if (roundedValue <= 1.0) roundedValue = 1;
             slider.valueProperty().set(roundedValue);
             label.setText(Integer.toString((int) roundedValue));
@@ -123,6 +166,24 @@ public class Settings implements Initializable {
         windowSlider.setValue(WINDOW_SIZE);
         labelSliderVal.setText(Integer.toString(AVERAGE_SPEED_PER_MILLISEC));
         windowValueLabel.setText(Integer.toString(WINDOW_SIZE));
+
+        skipRunAnovaSpinner.getValueFactory().setValue(ANOVA_SKIP_RUNS_COUNTER);
+        skipRunConIntSpinner.getValueFactory().setValue(CON_INT_SKIP_RUNS_COUNTER);
+        skipRunTTestSpinner.getValueFactory().setValue(T_TEST_SKIP_RUNS_COUNTER);
+        skipRunUTestSpinner.getValueFactory().setValue(U_TEST_SKIP_RUNS_COUNTER);
+        skipRunCUSUMSpinner.getValueFactory().setValue(CUSUM_SKIP_RUNS_COUNTER);
+
+//        skipRunANOVAcheckbox.setSelected(ANOVA_SKIP_RUNS);
+//        skipRunConIntcheckbox.setSelected(CON_INT_SKIP_RUNS);
+//        skipRunTTestcheckbox.setSelected(T_TEST_SKIP_RUNS);
+//        skipRunUTestcheckbox.setSelected(U_TEST_SKIP_RUNS);
+//        skipRunCUSUMcheckbox.setSelected(CUSUM_SKIP_RUNS);
+        adjacentRunANOVAcheckbox.setSelected(ANOVA_USE_ADJACENT_RUN);
+        adjacentRunConIntcheckbox.setSelected(CON_INT_USE_ADJACENT_RUN);
+        adjacentRunTTestcheckbox.setSelected(T_TEST_USE_ADJACENT_RUN);
+        adjacentRunUTestcheckbox.setSelected(U_TEST_USE_ADJACENT_RUN);
+        adjacentRunCUSUMcheckbox.setSelected(CUSUM_USE_ADJACENT_RUN);
+        //adjacentRunTukeycheckbox.setSelected(TUKEY_USE_ADJACENT_RUN);
     }
 
 
@@ -160,6 +221,17 @@ public class Settings implements Initializable {
         AVERAGE_SPEED_PER_MILLISEC = (int) avSpeedSlider.getValue();
         GROUP_SIZE = (int) runCompareCounterSlider.getValue();
         WINDOW_SIZE = (int) windowSlider.getValue();
+        ANOVA_USE_ADJACENT_RUN = adjacentRunANOVAcheckbox.isSelected();
+        CON_INT_USE_ADJACENT_RUN = adjacentRunConIntcheckbox.isSelected();
+        T_TEST_USE_ADJACENT_RUN = adjacentRunTTestcheckbox.isSelected();
+        U_TEST_USE_ADJACENT_RUN = adjacentRunUTestcheckbox.isSelected();
+        CUSUM_USE_ADJACENT_RUN = adjacentRunCUSUMcheckbox.isSelected();
+        //TUKEY_USE_ADJACENT_RUN = adjacentRunTukeycheckbox.isSelected();
+        ANOVA_SKIP_RUNS_COUNTER = skipRunAnovaSpinner.getValue();
+        CON_INT_SKIP_RUNS_COUNTER = skipRunConIntSpinner.getValue();
+        T_TEST_SKIP_RUNS_COUNTER = skipRunTTestSpinner.getValue();
+        U_TEST_SKIP_RUNS_COUNTER = skipRunUTestSpinner.getValue();
+        CUSUM_SKIP_RUNS_COUNTER = skipRunCUSUMSpinner.getValue();
 
         Settings.HAS_CHANGED = true;
 

@@ -34,7 +34,7 @@ public class Run {
     private double qVal = UNDEFINED_DOUBLE_VALUE;
     private double tVal = UNDEFINED_DOUBLE_VALUE;
     private double cov = UNDEFINED_DOUBLE_VALUE;
-    private double overlappingDifference = UNDEFINED_DOUBLE_VALUE;
+    private double rciw = UNDEFINED_DOUBLE_VALUE;
     private String group = "";
     private double p;
 
@@ -64,16 +64,9 @@ public class Run {
         this.qVal = other.getQ();
         this.tVal = other.getT();
         this.cov = other.getCoV();
+        this.p = other.getP();
         this.group = other.group;
-        this.overlappingDifference = other.getOverlappingDifference();
-    }
-
-    public static String HypothesistoString(byte hypothesis) {
-        return switch (hypothesis) {
-            case ACCEPTED_NULLHYPOTHESIS -> "ACCEPTED_NULLHYPOTHESIS";
-            case REJECTED_NULLHYPOTHESIS -> "REJECTED_NULLHYPOTHESIS";
-            default -> "UNDEFINED_DOUBLE_VALUE";
-        };
+        this.rciw = other.getRCIW();
     }
 
     private void calculateRun() {
@@ -127,12 +120,12 @@ public class Run {
         return Math.abs(this.intervalTo - this.intervalFrom);
     }
     
-    public double getOverlappingDifference(){
-        return this.overlappingDifference;
+    public double getRCIW(){
+        return this.rciw;
     }
     
-    public void setRCIW(double OverlappingDifference){
-        this.overlappingDifference = OverlappingDifference;
+    public void setRCIW(double rciw){
+        this.rciw = rciw;
     } 
 
     public void setIntervalFrom(double d) {

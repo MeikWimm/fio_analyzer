@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.effect.Blend?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Pane?>
@@ -13,20 +15,18 @@
    <center>
       <Pane prefHeight="200.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
-            <CheckBox id="checkboxSpeedPerSec" fx:id="checkboxSpeedPerSec" layoutX="14.0" layoutY="17.0" mnemonicParsing="false" onAction="#onActionUseSpeedPerSec" prefHeight="17.0" prefWidth="226.0" text="use average measurement per millisec" />
-            <Slider id="avSpeedSlider" fx:id="avSpeedSlider" blockIncrement="100.0" layoutX="452.0" layoutY="14.0" majorTickUnit="100.0" max="500.0" min="1.0" minorTickCount="5" prefHeight="24.0" prefWidth="190.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" />
+            <CheckBox id="checkboxSpeedPerSec" fx:id="checkboxSpeedPerSec" layoutX="14.0" layoutY="17.0" mnemonicParsing="false" onAction="#onActionUseSpeedPerSec" prefHeight="17.0" prefWidth="346.0" text="use average measurement per millisec                      ---&gt;" />
+            <Slider id="avSpeedSlider" fx:id="avSpeedSlider" blockIncrement="1.0" layoutX="452.0" layoutY="14.0" min="1.0" minorTickCount="5" prefHeight="24.0" prefWidth="190.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" />
             <Label layoutX="388.0" layoutY="17.0" text="1 (Default)" />
-            <Label layoutX="645.0" layoutY="17.0" text="500" />
             <Label id="labelSliderVal" fx:id="labelSliderVal" layoutX="544.0" layoutY="52.0" text="1" textAlignment="CENTER" />
             <Label layoutX="14.0" layoutY="52.0" prefHeight="17.0" prefWidth="142.0" text="Use conversion for data:" />
             <RadioButton fx:id="radioButtonMebibyte" layoutX="33.0" layoutY="84.0" mnemonicParsing="false" text="MebiByte" />
             <RadioButton fx:id="radioButtonKibiByte" layoutX="33.0" layoutY="109.0" mnemonicParsing="false" text="KibiByte" />
             <RadioButton fx:id="radioButtonKiloByte" layoutX="33.0" layoutY="133.0" mnemonicParsing="false" text="KiloByte" />
             <Button id="buttonSaveSettings" fx:id="buttonSaveSettings" layoutX="620.0" layoutY="478.0" mnemonicParsing="false" text="Save &amp; Exit" />
-            <Slider id="runCompareCounterSlider" fx:id="runCompareCounterSlider" blockIncrement="0.0" layoutX="452.0" layoutY="411.0" majorTickUnit="1.0" max="10.0" min="2.0" minorTickCount="0" prefHeight="24.0" prefWidth="190.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" />
             <Label layoutX="388.0" layoutY="415.0" text="2 (Default)" />
             <Label layoutX="452.0" layoutY="448.0" prefHeight="17.0" prefWidth="226.0" text="Number of Runs to compare for ANOVA" />
-            <Pane layoutX="23.0" layoutY="171.0" prefHeight="231.0" prefWidth="655.0">
+            <Pane layoutX="33.0" layoutY="172.0">
                <children>
                   <Pane prefHeight="34.0" prefWidth="132.0">
                      <children>
@@ -36,92 +36,100 @@
                   </Pane>
                   <Pane layoutY="31.0" prefHeight="34.0" prefWidth="630.0">
                      <children>
-                        <CheckBox layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
-                        <CheckBox layoutX="132.0" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
-                        <Pane layoutX="264.0" prefHeight="34.0" prefWidth="132.0">
+                        <CheckBox id="adjacentRunANOVAcheckbox" fx:id="adjacentRunANOVAcheckbox" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <CheckBox id="skipRunANOVAcheckbox" fx:id="skipRunANOVAcheckbox" disable="true" layoutX="132.0" layoutY="2.0" mnemonicParsing="false" opacity="0.0" prefHeight="30.0" prefWidth="132.0" />
+                        <Pane layoutX="315.0" prefHeight="34.0" prefWidth="132.0">
                            <children>
                               <Label layoutY="6.0" prefHeight="17.0" prefWidth="45.0" text="ANOVA" />
                            </children>
                         </Pane>
+                        <Spinner id="skipRunAnovaSpinner" fx:id="skipRunAnovaSpinner" layoutX="168.0" layoutY="5.0" prefHeight="25.0" prefWidth="61.0" />
                      </children>
                      <effect>
                         <Blend />
                      </effect>
                   </Pane>
-                  <Pane layoutX="132.0" prefHeight="34.0" prefWidth="132.0">
+                  <Pane layoutX="167.0" prefHeight="34.0" prefWidth="132.0">
                      <children>
-                        <Label prefHeight="17.0" prefWidth="122.0" text="Skip first run" />
+                        <Label prefHeight="17.0" prefWidth="122.0" text="Skip runs" />
                      </children>
                   </Pane>
-                  <Pane layoutX="264.0" prefHeight="34.0" prefWidth="132.0">
+                  <Pane layoutX="315.0" prefHeight="34.0" prefWidth="132.0">
                      <children>
                         <Label prefHeight="17.0" prefWidth="122.0" text="Statistical Test" />
                      </children>
                   </Pane>
                   <Pane layoutY="65.0" prefHeight="34.0" prefWidth="630.0">
                      <children>
-                        <CheckBox layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
-                        <CheckBox layoutX="132.0" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
-                        <Pane layoutX="264.0" prefHeight="34.0" prefWidth="132.0">
+                        <CheckBox id="adjacentRunConIntcheckbox" fx:id="adjacentRunConIntcheckbox" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <CheckBox id="skipRunConIntcheckbox" fx:id="skipRunConIntcheckbox" disable="true" layoutX="132.0" layoutY="2.0" mnemonicParsing="false" opacity="0.0" prefHeight="30.0" prefWidth="132.0" />
+                        <Pane layoutX="315.0" prefHeight="34.0" prefWidth="132.0">
                            <children>
                               <Label layoutY="6.0" prefHeight="17.0" prefWidth="123.0" text="Confidence Interval" />
                            </children>
                         </Pane>
+                        <Spinner id="skipRunConIntSpinner" fx:id="skipRunConIntSpinner" layoutX="168.0" layoutY="5.0" prefHeight="25.0" prefWidth="61.0" />
                      </children>
                   </Pane>
                   <Pane layoutY="99.0" prefHeight="34.0" prefWidth="630.0">
                      <children>
-                        <CheckBox layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
-                        <CheckBox layoutX="132.0" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
-                        <Pane layoutX="264.0" prefHeight="34.0" prefWidth="132.0">
+                        <CheckBox id="adjacentRunTTestcheckbox" fx:id="adjacentRunTTestcheckbox" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <CheckBox id="skipRunTTestcheckbox" fx:id="skipRunTTestcheckbox" disable="true" layoutX="132.0" layoutY="2.0" mnemonicParsing="false" opacity="0.0" prefHeight="30.0" prefWidth="132.0" />
+                        <Pane layoutX="315.0" layoutY="3.0" prefHeight="34.0" prefWidth="132.0">
                            <children>
                               <Label layoutY="6.0" prefHeight="17.0" prefWidth="45.0" text="T-Test" />
                            </children>
                         </Pane>
+                        <Spinner id="skipRunTTestheckbox" fx:id="skipRunTTestSpinner" layoutX="168.0" layoutY="5.0" prefHeight="25.0" prefWidth="61.0" />
                      </children>
                   </Pane>
                   <Pane layoutY="133.0" prefHeight="34.0" prefWidth="630.0">
                      <children>
-                        <CheckBox layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
-                        <CheckBox layoutX="132.0" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
-                        <Pane layoutX="264.0" prefHeight="34.0" prefWidth="132.0">
+                        <CheckBox id="adjacentRunUTestcheckbox" fx:id="adjacentRunUTestcheckbox" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <CheckBox id="skipRunUTestcheckbox" fx:id="skipRunUTestcheckbox" disable="true" layoutX="132.0" layoutY="2.0" mnemonicParsing="false" opacity="0.0" prefHeight="30.0" prefWidth="132.0" />
+                        <Pane layoutX="315.0" prefHeight="34.0" prefWidth="132.0">
                            <children>
                               <Label layoutY="6.0" prefHeight="17.0" prefWidth="45.0" text="U-Test" />
                            </children>
                         </Pane>
+                        <Spinner id="skipRunUTestcheckbox" fx:id="skipRunUTestSpinner" layoutX="168.0" layoutY="5.0" prefHeight="25.0" prefWidth="61.0" />
                      </children>
                   </Pane>
                   <Pane layoutY="167.0" prefHeight="34.0" prefWidth="630.0">
                      <children>
-                        <CheckBox layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
-                        <CheckBox layoutX="132.0" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
-                        <Pane layoutX="264.0" prefHeight="34.0" prefWidth="132.0">
-                           <children>
-                              <Label layoutY="6.0" prefHeight="17.0" prefWidth="84.0" text="Tukey-HSD" />
-                           </children>
-                        </Pane>
-                     </children>
-                  </Pane>
-                  <Pane layoutY="200.0" prefHeight="34.0" prefWidth="630.0">
-                     <children>
-                        <CheckBox layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
-                        <CheckBox layoutX="132.0" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
-                        <Pane layoutX="264.0" prefHeight="34.0" prefWidth="132.0">
+                        <CheckBox id="adjacentRunCUSUMcheckbox" fx:id="adjacentRunCUSUMcheckbox" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <CheckBox id="skipRunCUSUMcheckbox" fx:id="skipRunCUSUMcheckbox" disable="true" layoutX="132.0" layoutY="2.0" mnemonicParsing="false" opacity="0.0" prefHeight="30.0" prefWidth="132.0" />
+                        <Pane layoutX="315.0" layoutY="-3.0" prefHeight="34.0" prefWidth="132.0">
                            <children>
                               <Label layoutY="6.0" prefHeight="17.0" prefWidth="84.0" text="CUSUM" />
                            </children>
                         </Pane>
+                        <Spinner id="skipRunCUSUMcheckbox" fx:id="skipRunCUSUMSpinner" layoutX="168.0" layoutY="5.0" prefHeight="25.0" prefWidth="61.0" />
                      </children>
                   </Pane>
                </children>
                <effect>
                   <Blend />
                </effect>
+               <padding>
+                  <Insets top="5.0" />
+               </padding>
             </Pane>
-            <Slider id="windowSlider" fx:id="windowSlider" blockIncrement="100.0" layoutX="455.0" layoutY="82.0" majorTickUnit="100.0" max="500.0" min="1.0" minorTickCount="5" prefHeight="24.0" prefWidth="190.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" />
+            <Slider id="windowSlider" fx:id="windowSlider" blockIncrement="5.0" layoutX="455.0" layoutY="82.0" majorTickUnit="100.0" max="500.0" min="1.0" minorTickCount="1" prefHeight="24.0" prefWidth="190.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" />
             <Label id="windowValueLabel" fx:id="windowValueLabel" layoutX="544.0" layoutY="118.0" text="1" textAlignment="CENTER" />
             <Label layoutX="366.0" layoutY="84.0" prefHeight="17.0" prefWidth="75.0" text="100 (Default)" />
-            <Label layoutX="648.0" layoutY="84.0" text="500" />
+            <Pane disable="true" layoutX="33.0" layoutY="378.0" opacity="0.0" prefHeight="34.0" prefWidth="630.0">
+               <children>
+                  <CheckBox id="adjacentRunTukeycheckbox" fx:id="adjacentRunTukeycheckbox" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                  <Pane layoutX="315.0" layoutY="-3.0" prefHeight="34.0" prefWidth="132.0">
+                     <children>
+                        <Label layoutY="6.0" prefHeight="17.0" prefWidth="84.0" text="Tukey-HSD" />
+                     </children>
+                  </Pane>
+               </children>
+            </Pane>
+            <Slider id="runCompareCounterSlider" fx:id="runCompareCounterSlider" blockIncrement="1.0" layoutX="455.0" layoutY="405.0" majorTickUnit="1.0" max="5.0" min="2.0" minorTickCount="0" prefHeight="24.0" prefWidth="190.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" />
+            <Label layoutX="583.0" layoutY="118.0" prefHeight="17.0" prefWidth="75.0" text="Window size" />
          </children>
       </Pane>
    </center>
