@@ -4,7 +4,6 @@ import de.unileipzig.atool.DataPoint;
 import de.unileipzig.atool.Job;
 import de.unileipzig.atool.Run;
 import de.unileipzig.atool.Settings;
-import javafx.geometry.Point2D;
 import javafx.scene.chart.XYChart;
 
 import java.util.*;
@@ -17,15 +16,16 @@ public class CUSUM extends GenericTest{
     private final List<XYChart.Data<Number, Number>> cusumNegData;
     private String title = "";
     private String label = "";
-    private final int WINDOW_SIZE = Settings.WINDOW_SIZE;
+    private final int WINDOW_SIZE;
 
-    public CUSUM(Job job, int groupSize, double alpha) {
-        super(job, Settings.CUSUM_SKIP_RUNS_COUNTER, Settings.CUSUM_USE_ADJACENT_RUN, groupSize, alpha);
+    public CUSUM(Job job, Settings settings, double alpha) {
+        super(job, settings.getCusumSkipRunsCounter(), settings.isCusumUseAdjacentRun(), 2, alpha, true);
         this.charter = new Charter();
         int dataSize = this.job.getData().size();
         this.cusumPosData = new ArrayList<>(dataSize);
         this.cusumNegData = new ArrayList<>(dataSize);
         this.cusumData = new ArrayList<>(dataSize);
+        this.WINDOW_SIZE = settings.getWindowSize();
     }
 
     @Override

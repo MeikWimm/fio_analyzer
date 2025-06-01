@@ -26,8 +26,8 @@ import java.util.logging.Level;
 
 public class Bonferroni extends PostHocTest implements PostHocAnalyzer {
 
-    public Bonferroni(Anova anova) {
-        super(anova);
+    public Bonferroni(GenericTest genericTest) {
+        super(genericTest);
     }
 
     @Override

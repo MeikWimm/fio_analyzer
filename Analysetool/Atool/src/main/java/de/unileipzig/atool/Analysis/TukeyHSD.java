@@ -13,6 +13,9 @@ import java.util.*;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -63,7 +66,7 @@ public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnaly
         super(anova);
         this.meanData = new ArrayList<>();
         this.qHSDData = new ArrayList<>();
-        charter = new Charter();
+        this.charter = new Charter();
     }
 
     @Override
@@ -81,7 +84,7 @@ public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnaly
 
         drawTukey.setOnAction(e -> draw());
         
-        TukeyTable.setItems(this.test.getJob().getFilteredRuns());
+        TukeyTable.setItems(this.test.getPostHocRuns());
         qCritLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.qHSD));
     }
 
@@ -90,46 +93,73 @@ public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnaly
     }
 
     @Override
-    public void apply(List<Run> sigRuns, List<List<Run>> result) {
+    public void apply(List<Run> postHocRuns, List<List<Run>> postHocGroups) {
         int totalObservations = test.getJob().getData().size();
-        for (int i = 0; i < result.size() - 1; i++) {
-            double n = sigRuns.getFirst().getData().size();
-            int numberOfGroups = result.size();
-            int dfError = totalObservations - numberOfGroups;
+        for (int i = 0; i < postHocGroups.size() - 1; i++) {
+            for (int j = i + 1; j < postHocGroups.size(); j++) {
+                double n = test.getJob().getRuns().getFirst().getData().size();
+                int numberOfGroups = postHocGroups.size();
+                int dfError = totalObservations - numberOfGroups;
 
-            Tukey tukey = new Tukey(result.getFirst().size(), numberOfGroups, dfError);
-            List<Run> group1 = result.get(i);
-            List<Run> group2 = result.get(i + 1);
-            double speedSumGroup1 = 0;
-            double speedSumGroup2 = 0;
+                Tukey tukey = new Tukey(postHocGroups.getFirst().size(), numberOfGroups, dfError);
+                List<Run> group1 = postHocGroups.get(i);
+                List<Run> group2 = postHocGroups.get(j);
+                double speedSumGroup1 = 0;
+                double speedSumGroup2 = 0;
 
 
-            for (int j = 0; j < group1.size(); j++) {
-                Run run1 = group1.get(j);
-                Run run2 = group2.get(j);
+                for (int k = 0; k < group1.size(); k++) {
+                    Run run1 = group1.get(k);
+                    Run run2 = group2.get(k);
 
-                speedSumGroup1 += run1.getAverageSpeed();
-                speedSumGroup2 += run2.getAverageSpeed();
-            }
+                    speedSumGroup1 += run1.getAverageSpeed();
+                    speedSumGroup2 += run2.getAverageSpeed();
+                }
 
-            double averageSpeedGroup1 = speedSumGroup1 / group1.size();
-            double averageSpeedGroup2 = speedSumGroup2 / group2.size();
+                double averageSpeedGroup1 = speedSumGroup1 / group1.size();
+                double averageSpeedGroup2 = speedSumGroup2 / group2.size();
 
-            double sse = result.get(i).getFirst().getSSE();
-            double MSE = sse / dfError;
-            double standardError = Math.sqrt(MSE / n);
-            double qCritical = tukey.inverse_survival(test.getAlpha(), false);
-            double overallMean = Math.abs(averageSpeedGroup1 - averageSpeedGroup2);
-            qHSD = qCritical * standardError;
-            Run run = group1.getFirst();
-            run.setQ(overallMean);
+                double sse = postHocGroups.get(i).getFirst().getSSE();
+                double MSE = sse / dfError;
+                double standardError = Math.sqrt(MSE / n);
+                double qCritical = tukey.inverse_survival(test.getAlpha(), false);
+                double overallMean = Math.abs(averageSpeedGroup1 - averageSpeedGroup2);
+                qHSD = qCritical * standardError;
+                Run run = group1.getFirst();
+                run.setQ(overallMean);
 
-            meanData.add(new XYChart.Data<>(run.getID(), overallMean));
-            qHSDData.add(new XYChart.Data<>(run.getID(), qHSD));
-            if(qHSD < overallMean){
-                run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
-            } else {
-                run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+                meanData.add(new XYChart.Data<>(run.getID(), overallMean));
+                qHSDData.add(new XYChart.Data<>(run.getID(), qHSD));
+                if(qHSD < overallMean){
+                    run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
+                } else {
+                    run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+
+                    List<Run> possibleRuns = this.test.getPossibleSteadyStateRuns();
+
+                    for (Run possibleRun : possibleRuns) {
+                        int ID = possibleRun.getID();
+                        boolean foundInGroup1 = false;
+                        boolean foundInGroup2 = false;
+                        for (Run run1 : group1) {
+                            if (run1.getID() == ID) {
+                                foundInGroup1 = true;
+                                break;
+                            }
+                        }
+
+                        for (Run run2 : group2) {
+                            if (run2.getID() == ID) {
+                                foundInGroup2 = true;
+                                break;
+                            }
+                        }
+
+                        if(foundInGroup1 && foundInGroup2){
+                            System.out.println("Possible steady state at run: " + possibleRun.getID());
+                        }
+                    }
+                }
             }
         }
     }

@@ -37,7 +37,7 @@ import java.util.logging.Logger;
  */
 public class ConInt extends GenericTest implements Initializable {
     private static final Logger LOGGER = Logger.getLogger(ConInt.class.getName());
-    private final int WINDOW_SIZE = Settings.WINDOW_SIZE;
+    private final int WINDOW_SIZE;
 
     static {
         ConsoleHandler handler = new ConsoleHandler();
@@ -75,12 +75,13 @@ public class ConInt extends GenericTest implements Initializable {
     @FXML
     public TableColumn<Run, Double> overlappingColumn;
 
-    public ConInt(Job job, double alpha) {
-        super(job, Settings.CON_INT_SKIP_RUNS_COUNTER, Settings.CON_INT_USE_ADJACENT_RUN, 2, alpha);
+    public ConInt(Job job,Settings settings, double alpha) {
+        super(job, settings.getConIntSkipRunsCounter(), settings.isConIntUseAdjacentRun(), 2, alpha, settings.isBonferroniConIntSelected());
         int dataSize = this.job.getData().size();
         charter = new Charter();
         conIntData = new ArrayList<>(dataSize);
         windowedRCIWData = new ArrayList<>(dataSize);
+        WINDOW_SIZE = settings.getWindowSize();
     }
 
     @Override

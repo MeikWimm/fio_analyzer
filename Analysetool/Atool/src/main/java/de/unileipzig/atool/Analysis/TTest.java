@@ -56,8 +56,8 @@ public class TTest extends GenericTest implements Initializable {
     private final Charter charter;
     private final List<XYChart.Data<Number, Number>> tData;
 
-    public TTest(Job job, boolean skip, int groupSize, double alpha) {
-        super(job, Settings.T_TEST_SKIP_RUNS_COUNTER, Settings.T_TEST_USE_ADJACENT_RUN, groupSize, alpha);
+    public TTest(Job job, Settings settings, double alpha) {
+        super(job, settings.getTTestSkipRunsCounter(), settings.isTTestUseAdjacentRun(), 2, alpha ,settings.isBonferroniTTestSelected());
     this.charter = new Charter();
         this.tData = new ArrayList<>();
     }
@@ -88,10 +88,10 @@ public class TTest extends GenericTest implements Initializable {
     public void calculate() {
         if (groups.size() <= 1) return;
         TDistribution t = new TDistribution(job.getData().size() * 2 - 2);
-        this.tCrit = t.inverseCumulativeProbability(1 - job.getAlpha() / 2.0);
+        this.tCrit = t.inverseCumulativeProbability(1 - this.alpha / 2.0);
 
 
-        for (int i = 0; i < job.getRuns().size() - 1; i += Job.DEFAULT_SKIP_COUNT) {
+        for (int i = 0; i < job.getRuns().size() - 1; i++) {
             Run run1 = job.getRuns().get(i);
             Run run2 = job.getRuns().get(i + 1);
 

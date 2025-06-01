@@ -38,9 +38,9 @@
             <Label layoutX="478.0" layoutY="65.0" prefHeight="17.0" prefWidth="108.0" text="F (calculated) = " />
             <Label id="fCalculatedLabel" fx:id="fCalculatedLabel" layoutX="586.0" layoutY="65.0" prefHeight="17.0" prefWidth="200.0" text="_" />
             <Button id="showFGraphButton" fx:id="showFGraphButton" layoutX="14.0" layoutY="90.0" mnemonicParsing="false" text="Show F-Graph" />
-            <Button id="showCoVGraph" fx:id="showCoVGraph" layoutX="122.0" layoutY="90.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="117.0" text="Show CoV Graph" />
+            <Button id="showCoVGraph" fx:id="showCoVGraph" layoutX="122.0" layoutY="90.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="174.0" text="Show windowed CoV Graph" />
             <Label layoutX="478.0" layoutY="82.0" prefHeight="17.0" prefWidth="91.0" text="Job σ =" />
-            <Button id="showWinCoVGraph" fx:id="showWinCoVGraph" layoutX="250.0" layoutY="90.0" mnemonicParsing="false" text="Show windowed CoV Graph" />
+            <Button id="showWinCoVGraph" fx:id="showWinCoVGraph" layoutX="318.0" layoutY="90.0" mnemonicParsing="false" text="Show CoV Graph over Job" />
          </children>
       </Pane>
    </children>

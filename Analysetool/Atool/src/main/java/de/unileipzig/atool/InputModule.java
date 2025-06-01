@@ -17,7 +17,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +41,6 @@ InputModule {
         LOGGER.setUseParentHandlers(false);
         LOGGER.addHandler(handler);
     }
-    //private CONVERT convertTo;
-    //private double conv = CONVERT.getConvertValue(CONVERT.DEFAULT);
 
     public File selectedDirectory;
     DirectoryChooser directoryChooser;
@@ -57,8 +54,10 @@ InputModule {
     private List<DataPoint> data;
     private Map<Integer, Integer> freq;
     private BasicFileAttributes fileAttribute;
+    private final Settings settings;
 
-    public InputModule() {
+    public InputModule(Settings settings) {
+        this.settings = settings;
         directoryChooser = new DirectoryChooser();
     }
 
@@ -85,7 +84,7 @@ InputModule {
                 return STATUS.NO_FILES_FOUND;
             } else {
                 long time = System.currentTimeMillis();
-                readFiles();
+                readFiles(files);
                 System.out.println("Time: " + ((System.currentTimeMillis() - time) / 1000.0));
 
             }
@@ -101,13 +100,13 @@ InputModule {
      *
      * @return NO_DIR_SET, if directory of this object is not set. BUFER On success it return SUCCESS.
      */
-    public STATUS readFiles(/*File[] files*/) {
+    public STATUS readFiles(File[] files) {
 
         if (selectedDirectory == null) {
             return STATUS.NO_DIR_SET;
         }
 
-        files = selectedDirectory.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
+        //files = selectedDirectory.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
 
         ArrayList<Job> temp = new ArrayList<>(jobs);
 
@@ -125,7 +124,8 @@ InputModule {
                     found_new_files = true;
                     readData(file);
 
-                    Job job = new Job(this.data);
+                    Job job = new Job(this.data, settings.averageSpeedPerMillisec);
+                    job.setFrequency(this.freq);
                     job.setFile(file);
                     job.setFileAttributes(this.fileAttribute);
                     job.setTime(this.time);
@@ -136,7 +136,8 @@ InputModule {
             } else {
                 readData(file);
 
-                Job job = new Job(this.data);
+                Job job = new Job(this.data, settings.averageSpeedPerMillisec);
+                job.setFrequency(this.freq);
                 job.setFile(file);
                 job.setFileAttributes(this.fileAttribute);
                 job.setTime(this.time);
@@ -174,12 +175,7 @@ InputModule {
         }
         return result;
     }
-
-
-    /**
-     * Reads the data of a .log file and saves the data in a job instance.
-     *
-     */
+    
     private void readData(File file) {
         List<DataPoint> data = new ArrayList<>(); // Point2D for x = time and y = speed
         Map<Integer, Integer> freq = new TreeMap<>();
@@ -194,18 +190,12 @@ InputModule {
             double average_speed_per_milli;
             double sum_speed = 0;
             int counter = 1;
-           // String[] s = line.split(", ");
-           // int old_time = Integer.parseInt(s[0]);
-            //int speed = Integer.parseInt(s[1]);
             current_speed_sum += speed;
             freq.put(speed, 1);
 
 
             while ((line = br.readLine()) != null) {
                 int[] s = parseFirstTwoValues(line);
-                //int first = s[0];
-                //int second = s[1];
-                //s = line.split(", ");
                 int new_time = s[0];
                 speed = s[1];
 
@@ -225,8 +215,6 @@ InputModule {
             }
             average_speed_per_milli = current_speed_sum / (double) counter;
             sum_speed += average_speed_per_milli;
-            //data.add(new DataPoint(average_speed_per_milli, this.time));
-            //speedSeries.getData().add(new XYChart.Data<>(average_speed_per_milli, this.time));
 
 
             this.time = old_time;
@@ -236,8 +224,7 @@ InputModule {
             this.data = data;
         } catch (IOException ex) {
             ex.printStackTrace();
-            //LOGGER.log(Level.SEVERE, (Supplier<String>) ex);
-            LOGGER.log(Level.SEVERE, String.format("Error occured while reading file: %s. App state: %s", "radate", STATUS.ERROR_WHILE_READING_FILE));
+            LOGGER.log(Level.SEVERE, String.format("Error occured while reading file: %s. App state: %s", file.toString(), STATUS.ERROR_WHILE_READING_FILE));
         }
     }
 
@@ -252,8 +239,6 @@ InputModule {
         }
         return Math.sqrt(sum / data.size());
     }
-
-
 
     public File getSelectedDir() {
         return this.selectedDirectory;

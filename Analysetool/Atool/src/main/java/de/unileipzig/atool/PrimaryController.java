@@ -74,8 +74,8 @@ public class PrimaryController implements Initializable {
 
     @Override
     public void initialize(URL arg0, ResourceBundle arg1) {
-        inputModule = new InputModule();
         settings = new Settings(this);
+        inputModule = new InputModule(settings);
 
         setupCellValueFactory();
         setupTableMenuItems();
@@ -86,7 +86,7 @@ public class PrimaryController implements Initializable {
 
     public void update() {
 
-        if (Settings.HAS_CHANGED) {
+        if (settings.hasChanged()) {
             for (Job job : table.getItems()) {
                 job.updateRunsData();
             }
@@ -95,7 +95,7 @@ public class PrimaryController implements Initializable {
         table.getColumns().getFirst().setVisible(false);
         table.getColumns().getFirst().setVisible(true);
 
-        Settings.HAS_CHANGED = false;
+        settings.updatedSettings();
     }
 
     private void setupCellValueFactory() {
@@ -133,7 +133,7 @@ public class PrimaryController implements Initializable {
     private void setupTableMenuItems() {
         Utils.CustomTableRowFactory menuItems = new Utils.CustomTableRowFactory();
         menuItems.addMenuItem("Draw Job Speed", this::onActionDrawJobSpeed);
-       // menuItems.addMenuItem("Draw Job Frequency", this::onActionDrawJobFreq);
+        menuItems.addMenuItem("Draw Job Frequency", this::onActionDrawJobFreq);
         menuItems.addMenuItem("Confidence Interval", this::onActionCalcConInt);
         menuItems.addMenuItem("Anova", this::onActionCalcAnova);
         menuItems.addMenuItem("T-Test", this::onActionCalcTTest);
@@ -169,41 +169,45 @@ public class PrimaryController implements Initializable {
 
     private void onActionCalcConInt(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        ConInt conInt = new ConInt(job, job.getAlpha());
+        ConInt conInt = new ConInt(job, settings, job.getAlpha());
         conInt.calculate();
         conInt.openWindow();
     }
 
     private void onActionCalcAnova(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        Anova anova = new Anova(job, Settings.GROUP_SIZE, job.getAlpha());
+        Anova anova = new Anova(job, settings, job.getAlpha());
         anova.calculate();
+        anova.calculateSteadyState();
         anova.openWindow();
     }
 
     private void onActionDrawJobFreq(TableRow<Job> row, TableView<Job> table) {
-
+        Job job = row.getItem();
+        Charter charter = new Charter();
+        charter.drawGraph("Speed Frequency", "Speed", "Frequency", new Charter.ChartData("Speed frequency",job.getFrequencySeries()));
     }
 
     private void onActionCalcTTest(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        TTest tTest = new TTest(job, true, Settings.GROUP_SIZE, job.getAlpha());
+        TTest tTest = new TTest(job, settings, job.getAlpha());
         tTest.calculate();
         tTest.openWindow();
     }
 
     private void onActionCalcMannWhitneyTest(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        MannWhitney tTest = new MannWhitney(job, job.getAlpha());
+        MannWhitney tTest = new MannWhitney(job, settings, job.getAlpha());
         tTest.calculate();
         tTest.openWindow();
     }
 
     private void onActionCalcTukeyHSD(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        Anova anova = new Anova(job, Settings.GROUP_SIZE, job.getAlpha());
+        Anova anova = new Anova(job, settings, job.getAlpha());
         TukeyHSD tTest = new TukeyHSD(anova);
         anova.calculate();
+        anova.calculateSteadyState();
         anova.calculatePostHoc(tTest);
         tTest.openWindow();
         System.out.println(job.getStandardDeviation());
@@ -211,14 +215,14 @@ public class PrimaryController implements Initializable {
 
     private void onActionCalcCusum(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        CUSUM cusum = new CUSUM(job, Settings.GROUP_SIZE, job.getAlpha());
+        CUSUM cusum = new CUSUM(job, settings, job.getAlpha());
         cusum.calculate();
         cusum.draw();
     }
 
     private void onActionCalcCusumJob(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        CUSUM cusum = new CUSUM(job, Settings.GROUP_SIZE, job.getAlpha());
+        CUSUM cusum = new CUSUM(job, settings, job.getAlpha());
         cusum.calculateWindowed();
         cusum.draw();
     }
@@ -243,30 +247,21 @@ public class PrimaryController implements Initializable {
                 table.setItems(inputModule.getJobs());
                 break;
         }
-
-
-        if (state != InputModule.STATUS.SUCCESS) {
-            LOGGER.log(Level.WARNING, String.format("Couldnt not load Files. App state: %s", state));
-        } else {
-            for (Job job : inputModule.getJobs()) {
-                LOGGER.log(Level.INFO, String.format("Jobs loaded: %s", job.toString()));
-            }
-        }
     }
 
     // Code Block of callback functions
 
     @FXML
     private void onActionRefreshTable() {
-        labelLoadInfo.setText("Refresh Table...");
-        InputModule.STATUS status = inputModule.readFiles();
-
-        if (status != InputModule.STATUS.SUCCESS) {
-            LOGGER.log(Level.WARNING, String.format("Coudn't refresh table! App state: %s", status));
-            labelLoadInfo.setText("Couldn't load Files!");
-        } else {
-            labelLoadInfo.setText("All files loaded!");
-        }
+//        labelLoadInfo.setText("Refresh Table...");
+//        InputModule.STATUS status = inputModule.readFiles();
+//
+//        if (status != InputModule.STATUS.SUCCESS) {
+//            LOGGER.log(Level.WARNING, String.format("Coudn't refresh table! App state: %s", status));
+//            labelLoadInfo.setText("Couldn't load Files!");
+//        } else {
+//            labelLoadInfo.setText("All files loaded!");
+//        }
     }
 
     @FXML

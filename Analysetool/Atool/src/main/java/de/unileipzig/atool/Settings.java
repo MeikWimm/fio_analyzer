@@ -46,41 +46,39 @@ public class Settings implements Initializable {
     public static final int MIN_SKIP_COUNT = 0;
     public static final int DEFAULT_SKIP_COUNT = 0;
 
-    public static int WINDOW_SIZE = 100; // Default window size 100
+    private int windowSize = 100; // Default window size 100
 
-    public static int GROUP_SIZE = 2;
+    private int groupSize = 2;
 
-    private static boolean IS_SPEED_PER_MILLI_SELECTED;
+    private boolean isSpeedPerMilliSelected;
 
     private static final int DIGIT = 3;
     public static final String DIGIT_FORMAT = "%,." + DIGIT + "f";
     public static final int FRACTION_DIGITS = DIGIT;
 
     public static double CONVERSION_VALUE = CONVERT.getConvertValue(CONVERT.DEFAULT);
-    public static int AVERAGE_SPEED_PER_MILLISEC = DEFAULT_SPEED_PER_MILLI;
+    public int averageSpeedPerMillisec = DEFAULT_SPEED_PER_MILLI;
     private static CONVERT conversion = CONVERT.DEFAULT;
 
-//    public static boolean ANOVA_SKIP_RUNS = false;
-//    public static boolean CON_INT_SKIP_RUNS = false;
-//    public static boolean T_TEST_SKIP_RUNS = false;
-//    public static boolean U_TEST_SKIP_RUNS = false;
-//    public static boolean TUKEY_SKIP_RUNS = false;
-//    public static boolean CUSUM_SKIP_RUNS = false;
+    private int anovaSkipRunsCounter = 0;
+    private int conIntSkipRunsCounter = 0;
+    private int tTestSkipRunsCounter = 0;
+    private int uTestSkipRunsCounter = 0;
+    private int cusumSkipRunsCounter = 0;
 
-    public static int ANOVA_SKIP_RUNS_COUNTER = 0;
-    public static int CON_INT_SKIP_RUNS_COUNTER = 0;
-    public static int T_TEST_SKIP_RUNS_COUNTER = 0;
-    public static int U_TEST_SKIP_RUNS_COUNTER = 0;
-    public static int CUSUM_SKIP_RUNS_COUNTER = 0;
+    private boolean anovaUseAdjacentRun = false;
+    private boolean conIntUseAdjacentRun = false;
+    private boolean tTestUseAdjacentRun = false;
+    private boolean uTestUseAdjacentRun = false;
+    private boolean cusumUseAdjacentRun = false;
+    private boolean tukeyUseAdjacentRun = false;
 
-    public static boolean ANOVA_USE_ADJACENT_RUN = false;
-    public static boolean CON_INT_USE_ADJACENT_RUN = false;
-    public static boolean T_TEST_USE_ADJACENT_RUN = false;
-    public static boolean U_TEST_USE_ADJACENT_RUN = false;
-    public static boolean CUSUM_USE_ADJACENT_RUN = false;
-    public static boolean TUKEY_USE_ADJACENT_RUN = false;
+    private boolean isBonferroniANOVASelected = false;
+    private boolean isBonferroniConIntSelected = false;
+    private boolean isBonferroniTTestSelected = false;
+    private boolean isBonferroniUTestSelected = false;
 
-    public static boolean HAS_CHANGED = false;
+    private boolean hasChanged = false;
 
     @FXML public CheckBox checkboxSpeedPerSec;
     @FXML public CheckBox adjacentRunANOVAcheckbox;
@@ -95,6 +93,11 @@ public class Settings implements Initializable {
     @FXML public CheckBox skipRunTTestcheckbox;
     @FXML public CheckBox skipRunUTestcheckbox;
     @FXML public CheckBox skipRunCUSUMcheckbox;
+
+    @FXML public CheckBox bonferroniANOVAcheckbox;
+    @FXML public CheckBox bonferroniConIntcheckbox;
+    @FXML public CheckBox bonferroniTTestcheckbox;
+    @FXML public CheckBox bonferroniUTestcheckbox;
 
     @FXML public Spinner<Integer> skipRunAnovaSpinner;
     @FXML public Spinner<Integer> skipRunConIntSpinner;
@@ -134,6 +137,11 @@ public class Settings implements Initializable {
         skipRunUTestSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
         skipRunCUSUMSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
 
+//        bonferroniUTestcheckbox.setDisable(true);
+//        bonferroniTTestcheckbox.setDisable(true);
+//        bonferroniConIntcheckbox.setDisable(true);
+//        bonferroniANOVAcheckbox.setDisable(true);
+
         buttonSaveSettings.setOnAction(this::onActionSaveSettings);
         avSpeedSlider.valueProperty().addListener(setupChangeListener(avSpeedSlider, labelSliderVal));
         windowSlider.valueProperty().addListener(setupChangeListener(windowSlider, windowValueLabel));
@@ -159,31 +167,31 @@ public class Settings implements Initializable {
             }
         }
 
-        checkboxSpeedPerSec.setSelected(IS_SPEED_PER_MILLI_SELECTED);
-        avSpeedSlider.setDisable(!IS_SPEED_PER_MILLI_SELECTED);
-        avSpeedSlider.setValue(AVERAGE_SPEED_PER_MILLISEC);
-        runCompareCounterSlider.setValue(GROUP_SIZE);
-        windowSlider.setValue(WINDOW_SIZE);
-        labelSliderVal.setText(Integer.toString(AVERAGE_SPEED_PER_MILLISEC));
-        windowValueLabel.setText(Integer.toString(WINDOW_SIZE));
+        bonferroniANOVAcheckbox.setSelected(isBonferroniANOVASelected);
+        bonferroniConIntcheckbox.setSelected(isBonferroniConIntSelected);
+        bonferroniTTestcheckbox.setSelected(isBonferroniTTestSelected);
+        bonferroniUTestcheckbox.setSelected(isBonferroniUTestSelected);
 
-        skipRunAnovaSpinner.getValueFactory().setValue(ANOVA_SKIP_RUNS_COUNTER);
-        skipRunConIntSpinner.getValueFactory().setValue(CON_INT_SKIP_RUNS_COUNTER);
-        skipRunTTestSpinner.getValueFactory().setValue(T_TEST_SKIP_RUNS_COUNTER);
-        skipRunUTestSpinner.getValueFactory().setValue(U_TEST_SKIP_RUNS_COUNTER);
-        skipRunCUSUMSpinner.getValueFactory().setValue(CUSUM_SKIP_RUNS_COUNTER);
+        checkboxSpeedPerSec.setSelected(isSpeedPerMilliSelected);
+        avSpeedSlider.setDisable(!isSpeedPerMilliSelected);
+        avSpeedSlider.setValue(averageSpeedPerMillisec);
+        runCompareCounterSlider.setValue(groupSize);
+        windowSlider.setValue(windowSize);
+        labelSliderVal.setText(Integer.toString(averageSpeedPerMillisec));
+        windowValueLabel.setText(Integer.toString(windowSize));
 
-//        skipRunANOVAcheckbox.setSelected(ANOVA_SKIP_RUNS);
-//        skipRunConIntcheckbox.setSelected(CON_INT_SKIP_RUNS);
-//        skipRunTTestcheckbox.setSelected(T_TEST_SKIP_RUNS);
-//        skipRunUTestcheckbox.setSelected(U_TEST_SKIP_RUNS);
-//        skipRunCUSUMcheckbox.setSelected(CUSUM_SKIP_RUNS);
-        adjacentRunANOVAcheckbox.setSelected(ANOVA_USE_ADJACENT_RUN);
-        adjacentRunConIntcheckbox.setSelected(CON_INT_USE_ADJACENT_RUN);
-        adjacentRunTTestcheckbox.setSelected(T_TEST_USE_ADJACENT_RUN);
-        adjacentRunUTestcheckbox.setSelected(U_TEST_USE_ADJACENT_RUN);
-        adjacentRunCUSUMcheckbox.setSelected(CUSUM_USE_ADJACENT_RUN);
-        //adjacentRunTukeycheckbox.setSelected(TUKEY_USE_ADJACENT_RUN);
+        skipRunAnovaSpinner.getValueFactory().setValue(anovaSkipRunsCounter);
+        skipRunConIntSpinner.getValueFactory().setValue(conIntSkipRunsCounter);
+        skipRunTTestSpinner.getValueFactory().setValue(tTestSkipRunsCounter);
+        skipRunUTestSpinner.getValueFactory().setValue(uTestSkipRunsCounter);
+        skipRunCUSUMSpinner.getValueFactory().setValue(cusumSkipRunsCounter);
+
+        adjacentRunANOVAcheckbox.setSelected(anovaUseAdjacentRun);
+        adjacentRunConIntcheckbox.setSelected(conIntUseAdjacentRun);
+        adjacentRunTTestcheckbox.setSelected(tTestUseAdjacentRun);
+        adjacentRunUTestcheckbox.setSelected(uTestUseAdjacentRun);
+        adjacentRunCUSUMcheckbox.setSelected(cusumUseAdjacentRun);
+        adjacentRunTukeycheckbox.setSelected(tukeyUseAdjacentRun);
     }
 
 
@@ -209,37 +217,191 @@ public class Settings implements Initializable {
 
     @FXML
     public void onActionUseSpeedPerSec(ActionEvent event) {
-        IS_SPEED_PER_MILLI_SELECTED = checkboxSpeedPerSec.isSelected();
-        LOGGER.log(Level.INFO, String.format("use Average Speed per Sec set to %b", IS_SPEED_PER_MILLI_SELECTED));
-        avSpeedSlider.setDisable(!IS_SPEED_PER_MILLI_SELECTED);
+        isSpeedPerMilliSelected = checkboxSpeedPerSec.isSelected();
+        LOGGER.log(Level.INFO, String.format("use Average Speed per Sec set to %b", isSpeedPerMilliSelected));
+        avSpeedSlider.setDisable(!isSpeedPerMilliSelected);
     }
 
 
     private void onActionSaveSettings(ActionEvent actionEvent) {
         conversion = (CONVERT) toggleGorup.getSelectedToggle().getUserData();
         CONVERSION_VALUE = CONVERT.getConvertValue(conversion);
-        AVERAGE_SPEED_PER_MILLISEC = (int) avSpeedSlider.getValue();
-        GROUP_SIZE = (int) runCompareCounterSlider.getValue();
-        WINDOW_SIZE = (int) windowSlider.getValue();
-        ANOVA_USE_ADJACENT_RUN = adjacentRunANOVAcheckbox.isSelected();
-        CON_INT_USE_ADJACENT_RUN = adjacentRunConIntcheckbox.isSelected();
-        T_TEST_USE_ADJACENT_RUN = adjacentRunTTestcheckbox.isSelected();
-        U_TEST_USE_ADJACENT_RUN = adjacentRunUTestcheckbox.isSelected();
-        CUSUM_USE_ADJACENT_RUN = adjacentRunCUSUMcheckbox.isSelected();
-        //TUKEY_USE_ADJACENT_RUN = adjacentRunTukeycheckbox.isSelected();
-        ANOVA_SKIP_RUNS_COUNTER = skipRunAnovaSpinner.getValue();
-        CON_INT_SKIP_RUNS_COUNTER = skipRunConIntSpinner.getValue();
-        T_TEST_SKIP_RUNS_COUNTER = skipRunTTestSpinner.getValue();
-        U_TEST_SKIP_RUNS_COUNTER = skipRunUTestSpinner.getValue();
-        CUSUM_SKIP_RUNS_COUNTER = skipRunCUSUMSpinner.getValue();
+        averageSpeedPerMillisec = (int) avSpeedSlider.getValue();
+        groupSize = (int) runCompareCounterSlider.getValue();
+        windowSize = (int) windowSlider.getValue();
+        anovaUseAdjacentRun = adjacentRunANOVAcheckbox.isSelected();
+        conIntUseAdjacentRun = adjacentRunConIntcheckbox.isSelected();
+        tTestUseAdjacentRun = adjacentRunTTestcheckbox.isSelected();
+        uTestUseAdjacentRun = adjacentRunUTestcheckbox.isSelected();
+        cusumUseAdjacentRun = adjacentRunCUSUMcheckbox.isSelected();
+        tukeyUseAdjacentRun = adjacentRunTukeycheckbox.isSelected();
+        anovaSkipRunsCounter = skipRunAnovaSpinner.getValue();
+        conIntSkipRunsCounter = skipRunConIntSpinner.getValue();
+        tTestSkipRunsCounter = skipRunTTestSpinner.getValue();
+        uTestSkipRunsCounter = skipRunUTestSpinner.getValue();
+        cusumSkipRunsCounter = skipRunCUSUMSpinner.getValue();
 
-        Settings.HAS_CHANGED = true;
+        isBonferroniANOVASelected = bonferroniANOVAcheckbox.isSelected();
+        isBonferroniConIntSelected = bonferroniConIntcheckbox.isSelected();
+        isBonferroniTTestSelected = bonferroniTTestcheckbox.isSelected();
+        isBonferroniUTestSelected = bonferroniUTestcheckbox.isSelected();
 
-        primaryController.update();
-        System.out.println("Saved");
+        hasChanged = true;
+
+        if(primaryController != null){
+            primaryController.update();
+        } else {
+            LOGGER.log(Level.SEVERE, "No PrimaryController set!");
+        }
+        LOGGER.log(Level.INFO, "Settings saved");
         Stage stage = (Stage) buttonSaveSettings.getScene().getWindow();
         stage.close();
     }
+
+    public boolean isBonferroniANOVASelected() {
+        return isBonferroniANOVASelected;
+    }
+
+    public boolean isBonferroniConIntSelected() {
+        return isBonferroniConIntSelected;
+    }
+
+    public boolean isBonferroniTTestSelected() {
+        return isBonferroniTTestSelected;
+    }
+
+    public boolean isBonferroniUTestSelected() {
+        return isBonferroniUTestSelected;
+    }
+
+    public boolean hasChanged() {
+        return hasChanged;
+    }
+
+    public int getAverageSpeedPerMillisec() {
+        return averageSpeedPerMillisec;
+    }
+
+    public int getWindowSize() {
+        return windowSize;
+    }
+
+    public int getGroupSize() {
+        return groupSize;
+    }
+
+    public boolean isSpeedPerMilliSelected() {
+        return isSpeedPerMilliSelected;
+    }
+
+    public boolean isAnovaUseAdjacentRun() {
+        return anovaUseAdjacentRun;
+    }
+
+    public boolean isConIntUseAdjacentRun() {
+        return conIntUseAdjacentRun;
+    }
+
+    public boolean isTTestUseAdjacentRun() {
+        return tTestUseAdjacentRun;
+    }
+
+    public boolean isUTestUseAdjacentRun() {
+        return uTestUseAdjacentRun;
+    }
+
+    public boolean isCusumUseAdjacentRun() {
+        return cusumUseAdjacentRun;
+    }
+
+    public boolean isTukeyUseAdjacentRun() {
+        return tukeyUseAdjacentRun;
+    }
+
+    public int getAnovaSkipRunsCounter() {
+        return anovaSkipRunsCounter;
+    }
+
+    public int getConIntSkipRunsCounter() {
+        return conIntSkipRunsCounter;
+    }
+
+    public int getTTestSkipRunsCounter() {
+        return tTestSkipRunsCounter;
+    }
+
+    public int getUTestSkipRunsCounter() {
+        return uTestSkipRunsCounter;
+    }
+
+    public int getCusumSkipRunsCounter() {
+        return cusumSkipRunsCounter;
+    }
+
+    public void updatedSettings() {
+        hasChanged = false;
+    }
+
+    public void setAnovaSkipRunsCounter(int anovaSkipRunsCounter) {
+        this.anovaSkipRunsCounter = anovaSkipRunsCounter;
+    }
+
+    public void setAnovaUseAdjacentRun(boolean anovaUseAdjacentRun) {
+        this.anovaUseAdjacentRun = anovaUseAdjacentRun;
+    }
+
+    public void setConIntSkipRunsCounter(int conIntSkipRunsCounter) {
+        this.conIntSkipRunsCounter = conIntSkipRunsCounter;
+    }
+
+    public void setConIntUseAdjacentRun(boolean conIntUseAdjacentRun) {
+        this.conIntUseAdjacentRun = conIntUseAdjacentRun;
+    }
+
+    public void setTTestSkipRunsCounter(int tTestSkipRunsCounter) {
+        this.tTestSkipRunsCounter = tTestSkipRunsCounter;
+    }
+
+    public void setTTestUseAdjacentRun(boolean tTestUseAdjacentRun) {
+        this.tTestUseAdjacentRun = tTestUseAdjacentRun;
+    }
+
+    public void setUTestSkipRunsCounter(int uTestSkipRunsCounter) {
+        this.uTestSkipRunsCounter = uTestSkipRunsCounter;
+    }
+
+    public void setUTestUseAdjacentRun(boolean uTestUseAdjacentRun) {
+        this.uTestUseAdjacentRun = uTestUseAdjacentRun;
+    }
+
+    public void setCusumSkipRunsCounter(int cusumSkipRunsCounter) {
+        this.cusumSkipRunsCounter = cusumSkipRunsCounter;
+    }
+
+    public void setCusumUseAdjacentRun(boolean cusumUseAdjacentRun) {
+        this.cusumUseAdjacentRun = cusumUseAdjacentRun;
+    }
+
+    public void setTukeyUseAdjacentRun(boolean tukeyUseAdjacentRun) {
+        this.tukeyUseAdjacentRun = tukeyUseAdjacentRun;
+    }
+
+    public void setWindowSize(int windowSize) {
+        this.windowSize = windowSize;
+    }
+
+    public void setGroupSize(int groupSize) {
+        this.groupSize = groupSize;
+    }
+
+    //
+//    public void setConversion(CONVERT conversion) {
+//        this.conversion = conversion;
+//    }
+//
+//    public CONVERT getConversion() {
+//        return conversion;
+//    }
 
     public enum CONVERT {
         DEFAULT, // KIBI_BYTE

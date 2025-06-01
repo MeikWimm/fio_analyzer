@@ -76,8 +76,8 @@ public class MannWhitney extends GenericTest implements Initializable {
     @FXML public Label zIntervalLabel;
     private double zCrit;
 
-    public MannWhitney(Job job, double alpha) {
-        super(job, Settings.U_TEST_SKIP_RUNS_COUNTER, Settings.U_TEST_USE_ADJACENT_RUN, 2, alpha);
+    public MannWhitney(Job job,Settings settings, double alpha) {
+        super(job, settings.getUTestSkipRunsCounter(), settings.isUTestUseAdjacentRun(), 2, alpha, settings.isBonferroniUTestSelected());
         this.charter = new Charter();
         this.uTestData = new ArrayList<>();
     }

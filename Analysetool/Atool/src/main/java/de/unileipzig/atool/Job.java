@@ -12,6 +12,7 @@ import java.io.File;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Log files of fio are here represented as Jobs.
@@ -30,33 +31,37 @@ public class Job {
     public final static Double DEFAULT_EPSILON = 1.0;
     public final static Double MAX_EPSILON = 1000.0;
     public final static Double MIN_EPSILON = 1.0;
-    public final static int DEFAULT_SKIP_COUNT = 1;
-    private static int COUNTER = 1; // so that each Job has a unique ID
 
+    private static int COUNTER = 1; // so that each Job has a unique ID
+    private Map<Integer, Integer> freq;
+    private List<XYChart.Data<Number, Number>> chartData;
     private final int ID = COUNTER;
     private final List<DataPoint> rawData;
+    private List<DataPoint> data;
     private final List<XYChart.Data<Number, Number>> speedSeries;
-    private File file;
-    private List<DataPoint> convertedData = new ArrayList<>();
+    private List<DataPoint> convertedData;
     private List<Run> runs;
-    private Map<Integer, Integer> frequency;
-    private int runsCounter = DEFAULT_RUN_COUNT;
-    private double conversion;
-    private int time;
-    private double averageSpeed;
+    private File file;
     private BasicFileAttributes attr;
-    private double epsilon = 1;
-    private double alpha = 0.05;
+    private int runsCounter = DEFAULT_RUN_COUNT;
+    private int time;
+    private int runDataSize;
+    private int averageTimePerMilliSec;
+    private double conversion;
+    private double averageSpeed;
+    private double epsilon = DEFAULT_EPSILON;
+    private double alpha = DEFAULT_ALPHA;
     private double calculatedF;
     private double standardDeviation;
-    private int runDataSize;
-    private List<DataPoint> data;
 
-    public Job(List<DataPoint> data) {
-        this.frequency = new TreeMap<>();
+    public Job(List<DataPoint> data, int averageTimePerMilliSec) {
+        this.freq = new TreeMap<>();
         this.speedSeries = new ArrayList<>();
         this.data = new ArrayList<>(data);
         this.rawData = new ArrayList<>(data);
+        this.averageTimePerMilliSec = averageTimePerMilliSec;
+        this.convertedData = new ArrayList<>();
+        this.chartData = new ArrayList<>();
         prepareData();
         COUNTER++;
     }
@@ -73,11 +78,12 @@ public class Job {
         this.speedSeries = other.speedSeries;
         this.file = other.file;
         this.convertedData = new ArrayList<>(other.convertedData);
-        this.frequency = new HashMap<>(other.frequency);
+        this.freq = new HashMap<>(other.freq);
         this.runsCounter = other.runsCounter;
         this.conversion = other.conversion;
         this.time = other.time;
         this.averageSpeed = other.averageSpeed;
+        this.averageTimePerMilliSec = other.averageTimePerMilliSec;
         this.attr = other.attr;
         this.epsilon = other.epsilon;
         this.alpha = other.alpha;
@@ -230,13 +236,13 @@ public class Job {
         this.averageSpeed = average_speed;
     }
 
-    public Map<Integer, Integer> getFrequency() {
-        return this.frequency;
-    }
-
-    public void setFrequency(Map<Integer, Integer> freq) {
-        this.frequency = freq;
-    }
+//    public Map<Integer, Integer> getFrequency() {
+//        return this.frequency;
+//    }
+//
+//    public void setFrequency(Map<Integer, Integer> freq) {
+//        this.frequency = freq;
+//    }
 
     public double getEpsilon() {
         return this.epsilon;
@@ -261,29 +267,28 @@ public class Job {
         }
 
         this.conversion = Settings.CONVERSION_VALUE;
-        int AVERAGE_TIME_PER_MILLISEC = Settings.AVERAGE_SPEED_PER_MILLISEC;
         int i = 0;
 
         final int MIN_RUN_DATA_LENGTH = 8;
         //final int MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI = (int) Math.floor(rawData.size() / (double) (MIN_RUN_DATA_LENGTH * runsCounter));
         final int MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI = (int) Math.floor(rawData.size() / (double) (MIN_RUN_DATA_LENGTH * runsCounter));
 
-        if (AVERAGE_TIME_PER_MILLISEC > MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI) {
-            AVERAGE_TIME_PER_MILLISEC = MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI;
+        if (averageTimePerMilliSec > MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI) {
+            averageTimePerMilliSec = MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI;
         }
 
-        if (AVERAGE_TIME_PER_MILLISEC <= 1) {
-            AVERAGE_TIME_PER_MILLISEC = 1;
+        if (averageTimePerMilliSec <= 1) {
+            averageTimePerMilliSec = 1;
         }
 
         List<DataPoint> averagedData = new ArrayList<>();
-        if (!(AVERAGE_TIME_PER_MILLISEC == 1)) {
+        if (!(averageTimePerMilliSec == 1)) {
             double speed = 0;
             boolean flag = false;
 
             for (DataPoint dataPoint : rawData /*rawData*/) {
-                if (i % AVERAGE_TIME_PER_MILLISEC == 0 && flag) {
-                    double average_speed = speed / AVERAGE_TIME_PER_MILLISEC;
+                if (i % averageTimePerMilliSec == 0 && flag) {
+                    double average_speed = speed / averageTimePerMilliSec;
                     averagedData.add(new DataPoint(average_speed, dataPoint.getTime()));
                     speed = dataPoint.getSpeed();
                 } else {
@@ -315,7 +320,11 @@ public class Job {
         }
     }
 
-    public List<DataPoint> getDataNormalize() {
+    public void setAverageTimePerMilliSec(int averageTimePerMilliSec) {
+        this.averageTimePerMilliSec = averageTimePerMilliSec;
+    }
+
+    public List<DataPoint> getDataNormalized() {
         if (data == null || data.size() < 2) {
             throw new IllegalArgumentException("Data list must contain at least two elements.");
         }
@@ -413,13 +422,27 @@ public class Job {
         this.standardDeviation = standardDeviation;
     }
 
+    public List<XYChart.Data<Number, Number>> getFrequencySeries() {
+        if(this.chartData.isEmpty()) {
+            this.chartData = freq.entrySet()
+                    .stream()
+                    .map(entry -> new XYChart.Data<Number, Number>(entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toList());
+        }
+        return chartData;
+    }
+
     public List<XYChart.Data<Number, Number>> getSeries() {
         if (this.speedSeries.isEmpty()) {
-            for (DataPoint dp : data) {
+            for (DataPoint dp : getData()) {
                 speedSeries.add(new XYChart.Data<>(dp.getTime(), dp.getSpeed()));
             }
         }
 
         return this.speedSeries;
+    }
+
+    public void setFrequency(Map<Integer, Integer> freq) {
+        this.freq = freq;
     }
 }

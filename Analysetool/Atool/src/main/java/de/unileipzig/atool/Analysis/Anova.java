@@ -38,7 +38,6 @@ import java.util.logging.Logger;
  */
 public class Anova extends GenericTest implements Initializable {
     private static final Logger LOGGER = Logger.getLogger(Anova.class.getName());
-    private final int WINDOW_SIZE = Settings.WINDOW_SIZE;
 
     static {
         ConsoleHandler handler = new ConsoleHandler();
@@ -48,6 +47,7 @@ public class Anova extends GenericTest implements Initializable {
         LOGGER.addHandler(handler);
     }
 
+    private final int WINDOW_SIZE;
     private final List<XYChart.Data<Number, Number>> anovaData;
     private final List<XYChart.Data<Number, Number>> covData;
     private final List<XYChart.Data<Number, Number>> covAveragedData;
@@ -92,13 +92,14 @@ public class Anova extends GenericTest implements Initializable {
     public TableColumn<Run, Byte> hypothesisColumn;
     private double fCrit;
 
-    public Anova(Job job,int groupSize, double alpha) {
-        super(job, Settings.ANOVA_SKIP_RUNS_COUNTER, Settings.ANOVA_USE_ADJACENT_RUN, groupSize, alpha);
+    public Anova(Job job, Settings settings, double alpha) {
+        super(job, settings.getAnovaSkipRunsCounter(), settings.isAnovaUseAdjacentRun(), settings.getGroupSize(), alpha, settings.isBonferroniANOVASelected());
         this.charter = new Charter();
         final int dataSize = job.getData().size();
         this.anovaData = new ArrayList<>(dataSize);
         this.covData = new ArrayList<>(dataSize);
         this.covAveragedData = new ArrayList<>(dataSize);
+        WINDOW_SIZE = settings.getWindowSize();
     }
 
     @Override
@@ -178,10 +179,10 @@ public class Anova extends GenericTest implements Initializable {
                     sum += data.get(j).getSpeed();
                 }
             }
-                targetMean = sum / windowSize;
-                double time = data.get(i).getTime();
-                cov = Math.sqrt(GenericTest.variance(windowList, targetMean)) / targetMean;
-                covAveragedData.add(new XYChart.Data<>(time, cov));
+            targetMean = sum / windowSize;
+            double time = data.get(i).getTime();
+            cov = Math.sqrt(GenericTest.variance(windowList, targetMean)) / targetMean;
+            covAveragedData.add(new XYChart.Data<>(time, cov));
             windowList.clear();
         }
 
@@ -248,16 +249,10 @@ public class Anova extends GenericTest implements Initializable {
                 resultGroups.add(group);
             }
 
+            this.resultRuns.add(run);
             anovaData.add(new XYChart.Data<>(run.getID(), fValue));
             covData.add(new XYChart.Data<>(run.getID(), cov));
         }
-
-        // Logging
-//        LOGGER.log(Level.INFO, String.format("Calculated Numerator %d and Denominator %d", num, denom));
-//        for (List<Run> list : groups) {
-//            Run run = list.getFirst();
-//            LOGGER.log(Level.INFO, String.format("SSE, %f, SSA %f, CoV: %f, P: %f, F: %f", run.getSSE(), run.getSSA(), run.getCoV(), run.getP(), run.getF()));
-//        }
     }
 
     private void drawANOVAGraph() {
