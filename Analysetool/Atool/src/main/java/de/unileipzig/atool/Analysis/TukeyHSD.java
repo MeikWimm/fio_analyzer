@@ -4,27 +4,24 @@
  */
 package de.unileipzig.atool.Analysis;
 
-import de.unileipzig.atool.DataPoint;
 import de.unileipzig.atool.Job;
 import de.unileipzig.atool.Run;
 import de.unileipzig.atool.Settings;
 import de.unileipzig.atool.Utils;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -40,36 +37,21 @@ import net.sourceforge.jdistlib.Tukey;
  *
  * @author meni1999
  */
-public class TukeyHSD implements Initializable{
+public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnalyzer {
     private static final Logger LOGGER = Logger.getLogger( TukeyHSD.class.getName() );
-    
-    private class TukeyDataPoint{
-        private double mean;
-        private double qHSD;
-        
-        public TukeyDataPoint(double mean, double qHSD){
-            this.mean = mean;
-            this.qHSD = qHSD;
-        }
-        
-        public double getQHSD(){
-            return this.qHSD;
-        }
-        
-        public double getMean(){
-            return this.mean;
-        }
-    }
-    
+
     static {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setLevel(Level.FINEST);
         handler.setFormatter(new Utils.CustomFormatter("TukeyHSD"));
         LOGGER.setUseParentHandlers(false);
         LOGGER.addHandler(handler);      
-    }    
+    }
 
     @FXML public Label qCritLabel;
+    @FXML public Label anovaSteadyStateLabel;
+    @FXML public Label tukeySteadyStateLabel;
+    @FXML public Label evalLabel;
 
     @FXML public Button drawTukey;
     
@@ -77,18 +59,18 @@ public class TukeyHSD implements Initializable{
     @FXML public TableColumn<Run,Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, Integer> compareToRunColumn;
-    @FXML public TableColumn<Run, String> QColumn;
+    @FXML public TableColumn<Run, Double> QColumn;
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
-    
-    private final Job job;
-    private Tukey tukey;
     private double qHSD;
-    private Map<Integer, TukeyDataPoint> tukeyData;
-    
-    public TukeyHSD(Job job){
-        this.job = job;
-        this.job.clearRuns();
-        this.tukeyData = new HashMap<>();
+    private final List<XYChart.Data<Number, Number>> meanData;
+    private final List<XYChart.Data<Number, Number>> qHSDData;
+    private final Charter charter;
+
+    public TukeyHSD(Anova anova){
+        super(anova);
+        this.meanData = new ArrayList<>();
+        this.qHSDData = new ArrayList<>();
+        this.charter = new Charter();
     }
 
     @Override
@@ -96,108 +78,82 @@ public class TukeyHSD implements Initializable{
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         averageSpeedColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
 
-        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("PairwiseRunToCompareToAsString"));
-        QColumn.setCellValueFactory(new PropertyValueFactory<>("QAsString"));
+        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("GroupID"));
+        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
+        QColumn.setCellValueFactory(new PropertyValueFactory<>("Q"));
+        QColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
-        drawTukey.setOnAction(e -> drawTukeyGraph(this.job));
+        drawTukey.setOnAction(e -> draw());
         
-        TukeyTable.setItems(this.job.getRuns());   
-        setLabeling();
-    }
-    
-    public void drawTukeyGraph(Job job){
-            Stage anovaGraphStage = new Stage();
-            final NumberAxis xAxis = new NumberAxis();
-            final NumberAxis yAxis = new NumberAxis();
-            xAxis.setLabel("Run");
-            yAxis.setLabel("Mean");
-            LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
-            lineChart.setTitle("Tukey-HSD Test");
-            lineChart.setHorizontalGridLinesVisible(false);
-            lineChart.setVerticalGridLinesVisible(false);
-            
-            XYChart.Series<Number, Number> overallmeanSeries = new XYChart.Series<>();
-            overallmeanSeries.setName("Mean Between Runs");
-            
-            XYChart.Series<Number, Number> qHSDSeries = new XYChart.Series<>();
-            qHSDSeries.setName("Q-HSD");
-            
-
-            for (Map.Entry<Integer, TukeyDataPoint> entry : tukeyData.entrySet()) {
-                Integer key = entry.getKey();
-                TukeyDataPoint tukeyDataPoint = entry.getValue();
-                
-                overallmeanSeries.getData().add(new XYChart.Data<>(key, tukeyDataPoint.getMean()));
-                qHSDSeries.getData().add(new XYChart.Data<>(key, tukeyDataPoint.getQHSD()));
-            }
-            
-
-
-            lineChart.getData().add(overallmeanSeries);
-            lineChart.getData().add(qHSDSeries);
-
-            
- 
-            Scene scene  = new Scene(lineChart,800,600);
-            anovaGraphStage.setScene(scene);
-            anovaGraphStage.show();
-    }
-    
-    public void calculateTukeyHSD(){
-        if(job.getRuns().size() <= 1) return;
-        for (int i = 0; i < job.getRuns().size(); i += 2) {
-            Run run1 = job.getRuns().get(i);
-            Run run2 = job.getRuns().get(i + 1);
-            double overallMean = Math.abs(run1.getAverageSpeed() - run2.getAverageSpeed());
-            double sse = calculateSSE(run1, run2);
-            
-            this.tukey = new Tukey(1, 2, 2 * (job.getRunDataSize() - 1));
-            
-            this.qHSD = tukey.inverse_survival(job.getAlpha(), false) * Math.sqrt((sse / (2.0 * (this.job.getRunDataSize()))) / job.getRunDataSize());
-            
-            run1.setQ(overallMean);
-            
-            tukeyData.put(run1.getID(), new TukeyDataPoint(overallMean, qHSD));
-            
-            run2.setQ(Run.UNDEFINED_VALUE);
-            run2.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);
-            
-            if(qHSD < overallMean){
-                run1.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
-            } else {
-                run1.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
-            }
-        }
-    }
-    
-        private double calculateSSE(Run run1, Run run2){
-        double sse = 0;
-        double averageSpeed = (run1.getAverageSpeed() + run2.getAverageSpeed()) / 2.0;
-        
-        for (DataPoint dp : run1.getData()) {
-                    sse += (Math.pow((dp.getSpeed() - averageSpeed), 2));
-        }
-    
-        for (DataPoint dp : run2.getData()) {
-                    sse += (Math.pow((dp.getSpeed() - averageSpeed), 2));
-        }
-        
-        return sse;
-    }
-    
-    private void setLabeling(){
+        TukeyTable.setItems(this.test.getPostHocRuns());
         qCritLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.qHSD));
     }
 
-    public ConInt.STATUS openWindow(){
+    public void draw(){
+        charter.drawGraph("U-Test","Group","Mean/Difference",new Charter.ChartData("Run mean", meanData), new Charter.ChartData("QHSD", qHSDData));
+    }
+
+    @Override
+    public void apply(List<Run> postHocRuns, List<List<Run>> postHocGroups) {
+        if (postHocRuns == null || postHocGroups == null) {
+            throw new IllegalArgumentException("Input lists cannot be null");
+        }
+
+        int totalObservations = test.getJob().getData().size();
+        for (int i = 0; i <= postHocGroups.size() - 2; i += 2) {
+                Job job = test.getJob();
+                double n = job.getData().size();
+                int numberOfGroups = postHocGroups.size();
+                int dfError = totalObservations - numberOfGroups;
+                Tukey tukey = new Tukey(postHocGroups.getFirst().size(), numberOfGroups, dfError);
+                List<Run> group1 = postHocGroups.get(i);
+                List<Run> group2 = postHocGroups.get(i + 1);
+
+            if (group1.isEmpty() || group2.isEmpty()) {
+                throw new IllegalArgumentException("Groups cannot be empty");
+            }
+
+            Run run = group1.getFirst();
+                double speedSumGroup1 = 0;
+                double speedSumGroup2 = 0;
+
+                for (Run r : group1) {
+                    speedSumGroup1 += r.getAverageSpeed();
+                }
+
+                for (Run r : group2) {
+                    speedSumGroup2 += r.getAverageSpeed();
+                }
+
+                double averageSpeedGroup1 = speedSumGroup1 / group1.size();
+                double averageSpeedGroup2 = speedSumGroup2 / group2.size();
+
+                double standardError = Math.sqrt(job.getMSE() / n);
+                double qCritical = tukey.inverse_survival(test.getAlpha(), false);
+                double overallMean = Math.abs(averageSpeedGroup1 - averageSpeedGroup2);
+                qHSD = qCritical * standardError;
+                run.setQ(overallMean);
+
+                meanData.add(new XYChart.Data<>(run.getGroupID(), overallMean));
+                qHSDData.add(new XYChart.Data<>(run.getGroupID(), qHSD));
+                if(qHSD < overallMean){
+                    run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
+                } else {
+                    run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+                }
+
+                checkSteadyStateRun(run, group1, group2);
+        }
+    }
+
+    public void openWindow(){
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/TukeyHSD.fxml"));
             fxmlLoader.setController(this);
-            Parent root1 = (Parent) fxmlLoader.load();
+            Parent root1 = fxmlLoader.load();
 
             Stage stage = new Stage();
             stage.setMaxWidth(1200);      
@@ -206,13 +162,33 @@ public class TukeyHSD implements Initializable{
             stage.setMinWidth(800);
             stage.setTitle("Calculated Tukey HSD");
             stage.setScene(new Scene(root1));
+            setLabeling();
             stage.show();
-            
     } catch (IOException e) {
             e.printStackTrace();
-            LOGGER.log(Level.SEVERE, String.format("Couldn't open Window for Anova! App state: %s", ConInt.STATUS.IO_EXCEPTION));
-            return ConInt.STATUS.IO_EXCEPTION;
         }
-        return ConInt.STATUS.SUCCESS;
+    }
+
+    private void setLabeling() {
+        if(steadyStateRun == null && anovaSteadyStateRun == null){
+            evalLabel.setText("No steady state run found.");
+            return;
+        }
+
+        anovaSteadyStateLabel.setText("Run " + anovaSteadyStateRun.getID());
+
+        if(steadyStateRun == null && anovaSteadyStateRun != null){
+            evalLabel.setText("Run " + anovaSteadyStateRun.getID() + " most likely in transient state.");
+        }
+
+        if(steadyStateRun != null){
+            if(steadyStateRun.getID() != anovaSteadyStateRun.getID()){
+                tukeySteadyStateLabel.setText("Run " + steadyStateRun.getID());
+                evalLabel.setText("Run " + steadyStateRun.getID() + " more likely in steady state than Run " + anovaSteadyStateRun.getID() + ".");
+            } else {
+                tukeySteadyStateLabel.setText("Run " + steadyStateRun.getID());
+                evalLabel.setText("Run " + steadyStateRun.getID() + " is in steady state.");
+            }
+        }
     }
 }

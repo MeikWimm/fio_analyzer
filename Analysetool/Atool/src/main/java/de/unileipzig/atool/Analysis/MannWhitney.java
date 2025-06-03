@@ -4,28 +4,13 @@
  */
 package de.unileipzig.atool.Analysis;
 
-import de.unileipzig.atool.DataPoint;
-import de.unileipzig.atool.Job;
-import de.unileipzig.atool.Run;
-import de.unileipzig.atool.Settings;
-import de.unileipzig.atool.Utils;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import de.unileipzig.atool.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -35,217 +20,225 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.*;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 /**
- *
  * @author meni1999
  */
-public class MannWhitney implements Initializable{
-    private static final Logger LOGGER = Logger.getLogger( MannWhitney.class.getName() );
-    
+public class MannWhitney extends GenericTest implements Initializable {
+    private static final Logger LOGGER = Logger.getLogger(MannWhitney.class.getName());
+    private static class RankedDataPoint extends DataPoint {
+        int flag;
+        double rank;
+
+        public RankedDataPoint(DataPoint dp, int rank, int flag) {
+            super(dp.getSpeed(), dp.getTime());
+            this.rank = rank;
+            this.flag = flag;
+        }
+
+        public double getRank() {
+            return rank;
+        }
+
+        public void setRank(double rank) {
+            this.rank = rank;
+        }
+
+        public int getFlag() {
+            return flag;
+        }
+    }
+
     static {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setLevel(Level.FINEST);
         handler.setFormatter(new Utils.CustomFormatter("Mann-Whitney"));
         LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);      
+        LOGGER.addHandler(handler);
     }
-    
+
+    private final List<XYChart.Data<Number, Number>> uTestData;
+    private final Charter charter;
     @FXML public TableView<Run> uTestTable;
-    @FXML public TableColumn<Run,Double> averageSpeedColumn;
+    @FXML public TableColumn<Run, Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, Integer> compareToRunColumn;
-    @FXML public TableColumn<Run, String> ZColumn;
+    @FXML public TableColumn<Run, Double> ZColumn;
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
-    
     @FXML public Button drawUTestButton;
-   
     @FXML public Label zIntervalLabel;
-    
-    NormalDistribution nDis = new NormalDistribution();
-    private double zCrit_leftside = -1;
-    private double zCrit_rightside = -1;
-    private static int jobRunCounter = 0;
-    private static double jobAlpha = -1.0;
-    private Map<Integer, Double> uTestData;
-    private Charter charter;
-    
-        private Job job;
-    public MannWhitney(Job job){
-        nDis = new NormalDistribution();
-        zCrit_leftside = nDis.inverseCumulativeProbability(job.getAlpha() / 2.0);
-        zCrit_rightside = nDis.inverseCumulativeProbability(1 - job.getAlpha() / 2.0);
-        this.job = job;
-        this.job.clearRuns();
+    @FXML public Label steadyStateLabel;
+
+    private double zCrit;
+
+    public MannWhitney(Job job,Settings settings, double alpha) {
+        super(job, settings.getUTestSkipRunsCounter(), settings.isUTestUseAdjacentRun(), 2, alpha, settings.isBonferroniUTestSelected());
         this.charter = new Charter();
-        this.uTestData = new HashMap<>();
+        this.uTestData = new ArrayList<>();
     }
-    
-        @Override
+
+    @Override
     public void initialize(URL url, ResourceBundle rb) {
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
-        averageSpeedColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
+        averageSpeedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("PairwiseRunToCompareToAsString"));
-        ZColumn.setCellValueFactory(new PropertyValueFactory<>("ZAsString"));
+        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
+        ZColumn.setCellValueFactory(new PropertyValueFactory<>("Z"));
+        ZColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
-        uTestTable.setItems(this.job.getRuns());
-        
-        drawUTestButton.setOnAction(e -> drawUTest(this.job));
-        setLabeling();
-    }
-    
-    private void setLabeling(){
-        zIntervalLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.zCrit_rightside));
-    }
-    
-    private void drawUTest(Job job){
-        charter.drawGraph(job, "U-Test", "Run", "Z-Value", "calculated Z-Value", uTestData, zCrit_rightside);
+        uTestTable.setItems(this.job.getFilteredRuns());
+
+        drawUTestButton.setOnAction(e -> draw());
     }
 
-    private void calculateMannWhitney(Run run1, Run run2) {
-        List<DataPoint> runData1 = run1.getData();
-        List<DataPoint> runData2 = run2.getData();
-        for (int i = 0; i < runData1.size(); i++) {
-            runData1.get(i).setFlag(0);
-            runData2.get(i).setFlag(1);
+    private void setLabeling() {
+        zIntervalLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.zCrit));
+        if(this.getSteadyStateRun() == null){
+            steadyStateLabel.setText("No steady state run found.");
+        } else {
+            steadyStateLabel.setText("at run " + this.getSteadyStateRun().getID());
         }
-        
-        List<DataPoint> mergedData = new ArrayList<>(runData1);
-        mergedData.addAll(runData2);
-        
-       
-        
-        Collections.sort(mergedData, new Utils.SpeedComparator());
- 
+    }
+
+    @Override
+    public void draw() {
+        charter.drawGraph("U-Test", "Run", "Z-Value","z-critical", this.zCrit, new Charter.ChartData("calculated Z", uTestData));
+    }
+
+    private void calculatePair(Run run1, Run run2) {
+        List<RankedDataPoint> rankedData1 = new ArrayList<>();
+        List<RankedDataPoint> rankedData2 = new ArrayList<>();
+        NormalDistribution n = new NormalDistribution();
+
+        int size = run1.getData().size();
+        for (int i = 0; i < size; i++) {
+            rankedData1.add(new RankedDataPoint(run1.getData().get(i), 0, 0));
+            rankedData2.add(new RankedDataPoint(run2.getData().get(i), 0, 1));
+        }
+
+        List<RankedDataPoint> mergedData = new ArrayList<>(rankedData1);
+        mergedData.addAll(rankedData2);
+
+
+        mergedData.sort(new Utils.SpeedComparator());
+
         double r = 1;
         int counter = 1;
         double new_speed, next_speed = -1;
         int index = 0;
         int jindex = 0;
-        for (DataPoint p : mergedData) {
+        for (RankedDataPoint p : mergedData) {
             new_speed = p.getSpeed();
-            if(jindex < mergedData.size() - 1) {
-                next_speed = mergedData.get(jindex+1).getSpeed();
+            if (jindex < mergedData.size() - 1) {
+                next_speed = mergedData.get(jindex + 1).getSpeed();
             }
-            
-            if(next_speed == new_speed && jindex < mergedData.size() - 1){
-                if(counter == 1){
+
+            if (next_speed == new_speed && jindex < mergedData.size() - 1) {
+                if (counter == 1) {
                     index = jindex;
                 }
                 counter++;
             } else if (counter > 1) {
+                // For ties, use average of ranks
+                double averageRank = r + (counter - 1) / 2.0;
                 for (int i = index; i < index + counter; i++) {
-                    double splitted_rank = Math.floor(((1.0 / (double) counter)) * 100.0) / 100.0;
-                    mergedData.get(i).setRank( r + splitted_rank);
+                    mergedData.get(i).setRank(averageRank);
                 }
                 counter = 1;
             } else {
                 p.setRank(r);
             }
 
-            if(counter == 1){
+            if (counter == 1) {
                 r++;
             }
             jindex++;
         }
-        
+
         double run1_ranksum = 0;
         double run2_ranksum = 0;
-        
-        for (DataPoint dataPoint : mergedData) {
-            if(dataPoint.getFlag() == 0){
+
+        for (RankedDataPoint dataPoint : mergedData) {
+            if (dataPoint.getFlag() == 0) {
                 run1_ranksum += dataPoint.getRank();
             } else {
                 run2_ranksum += dataPoint.getRank();
             }
         }
-        
+
         double m = mergedData.size() / 2.0;
-        //.err.println("Rank Sum 1: " + run1_ranksum + " m: " + m);
-        //double z_1 = (run1_ranksum - 0.5 * m * (2.0 * m + 1.0)) / (Math.sqrt((1.0/12.0) * Math.pow(m, 2) * (2.0 * m + 1.0)));
-        //double z_2 = (run2_ranksum - 0.5 * m * (2.0 * m + 1.0)) / (Math.sqrt((1.0/12.0) * Math.pow(m, 2) * (2.0 * m + 1.0)));
-        
-       // System.err.println("Z_1: " + z_1 + " | Z_2: " + z_2);
-        
         double U1 = m * m + ((m * (m + 1) / 2)) - run1_ranksum;
         double U2 = m * m + ((m * (m + 1) / 2)) - run2_ranksum;
         double mu_U = m * m * 0.5;
-        double sigma_U = Math.sqrt((m * m * (2*m + 1))/12.0);
+        double sigma_U = Math.sqrt((m * m * (2 * m + 1)) / 12.0);
         double U = Math.min(U1, U2);
         double z = Math.abs((U - mu_U) / sigma_U);
+        this.zCrit = n.inverseCumulativeProbability(1 - this.job.getAlpha() / 2.0);
 
-        
-        run1.setZ(z);
-        run2.setZ(Run.UNDEFINED_VALUE);
-        run2.setNullhypothesis(Run.UNDEFIND_NULLHYPOTHESIS);      
-        NormalDistribution n = new NormalDistribution();
-        
-        uTestData.put(run1.getID(), z);
-        
+
+
         double pCalc = n.cumulativeProbability(z);
-        
-        if(pCalc > 1 - this.job.getAlpha() / 2.0){
-                run1.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
-            } else {
-                run1.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+        double pCrit = 1 - this.job.getAlpha() / 2.0;
+        byte hypothesis;
+        if (pCalc > pCrit) {
+            hypothesis = Run.REJECTED_NULLHYPOTHESIS;
+        } else {
+            hypothesis = Run.ACCEPTED_NULLHYPOTHESIS;
         }
+
+        run1.setZ(z);
+        run1.setNullhypothesis(hypothesis);
+        uTestData.add(new XYChart.Data<>(run1.getRunID(), z));
+        this.resultRuns.add(run1);
+
+//        LOGGER.log(Level.INFO, String.format("Run %d compared to Run %d, U_1 = %f and U_2 = %f", run1.getRunID(), run2.getID(), U1, U2));
+//        LOGGER.log(Level.INFO, String.format("calculated p: %f and critical p: %f", pCalc, pCrit));
+//        LOGGER.log(Level.INFO, String.format("Null hypothesis for compared Runs -> %s", Run.HypothesistoString(hypothesis)));
     }
 
-    
-
-    
-    public void calculateMannWhitneyTest(){
-        
-        if(this.job.getRuns().size() <= 1) return;
-        /*
-        if(jobRunCounter == this.job.getRunsCounter() && jobAlpha == this.job.getAlpha()) {
-            return;
-        } else {
-            System.err.println("Job Change detected!");
-        } 
-        */
+    @Override
+    public void calculate() {
+        if (this.job.getRuns().size() <= 1) return;
         List<Run> runs = this.job.getRuns();
-        
-        for (int i = 0; i < runs.size(); i += 2) {
-            if(i < runs.size() - 1){
+
+        for (int i = 0; i < runs.size(); i ++) {
+            if (i < runs.size() - 1) {
                 Run run1 = runs.get(i);
-                Run run2 = runs.get(i+1);
-                calculateMannWhitney(run1, run2);
+                Run run2 = runs.get(i + 1);
+                calculatePair(run1, run2);
             }
         }
-
-        jobRunCounter = this.job.getRunsCounter(); // remember counter if changed, to avoid multiple calculations with the same values.
-        jobAlpha = this.job.getAlpha();
     }
-    
-        public ConInt.STATUS openWindow(){
+
+    public void openWindow() {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/MannWithney.fxml"));
             fxmlLoader.setController(this);
-            Parent root1 = (Parent) fxmlLoader.load();
-            /* 
-             * if "fx:controller" is not set in fxml
-             * fxmlLoader.setController(NewWindowController);
-             */
+            Parent root1 = fxmlLoader.load();
+
             Stage stage = new Stage();
-            stage.setMaxWidth(1200);      
+            stage.setMaxWidth(1200);
             stage.setMaxHeight(600);
             stage.setMinHeight(600);
             stage.setMinWidth(800);
             stage.setTitle("Calculated U-Test");
             stage.setScene(new Scene(root1));
+            setLabeling();
             stage.show();
-            
-    } catch (IOException e) {
-            //LOGGER.log(Level.SEVERE, (Supplier<String>) e);
-            //LOGGER.log(Level.SEVERE, String.format("Couldn't open Window for Anova! App state: %s", ConInt.STATUS.IO_EXCEPTION));
-            return ConInt.STATUS.IO_EXCEPTION;
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return ConInt.STATUS.SUCCESS;
     }
 }

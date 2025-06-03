@@ -4,177 +4,419 @@
  */
 package de.unileipzig.atool;
 
+import javafx.beans.value.ChangeListener;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.stage.Stage;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.value.ChangeListener;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.Slider;
-import javafx.scene.control.Toggle;
-import javafx.scene.control.ToggleGroup;
-import javafx.stage.Stage;
 
 /**
- *
  * @author meni1999
  */
-public class Settings implements Initializable{
-    private static final Logger LOGGER = Logger.getLogger( Settings.class.getName() );
-    private boolean isFileAttr;
-    private boolean isSpeedPerSecSelected;
-    
-    ToggleGroup toggleGorup = new ToggleGroup();
+public class Settings implements Initializable {
 
-    
-    @FXML public CheckBox checkboxSpeedPerSec;
-    @FXML public Slider avSpeedSlider;
-    @FXML public Slider runCompareCounterSlider;
-    @FXML public Label labelSliderVal;
-    @FXML public Button buttonSaveSettings;
-    @FXML public RadioButton radioButtonMebibyte;
-    @FXML public RadioButton radioButtonKibiByte;
-    @FXML public RadioButton radioButtonKiloByte;
-    
-    public final static int DEFAULT_SPEED_PER_MILLI = 1;
-    public final static int MAX_SPEED_PER_MIILI = 2000;
-    public final static int MIN_SPEED_PER_MIILI = 1;
-    public static boolean HAS_CHANGED = false;
-    private static final int DIGIT = 3;
-    public static final String DIGIT_FORMAT = "%,." + Integer.toString(DIGIT) + "f";
-    public static final int FRACTION_DIGITS = DIGIT;
 
-    private static CONVERT conversion = CONVERT.DEFAULT;
-    
-    public static double CONVERSION_VALUE = CONVERT.getConvertValue(CONVERT.DEFAULT);
-    public static int AVERAGE_SPEED_PER_MILLISEC = DEFAULT_SPEED_PER_MILLI;
-    public static int RUN_TO_COMPARE_TO_SIZE = 2;
-
-    private PrimaryController primaryController;
-    
+    private static final Logger LOGGER = Logger.getLogger(Settings.class.getName());
     static {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setLevel(Level.FINEST);
         handler.setFormatter(new Utils.CustomFormatter("Settings"));
         LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);      
+        LOGGER.addHandler(handler);
     }
-    
-    public enum CONVERT{
-          DEFAULT, // KIBI_BYTE
-          MEGA_BYTE,
-          MEBI_BYTE,
-          KILO_BYTE;
 
-          public static double getConvertValue(CONVERT hl) {
-              switch (hl) {
-            case MEGA_BYTE:
-                return 976.6;
-            case MEBI_BYTE:
-                return 1024.0;    
-            case KILO_BYTE:
-                return 1.0 / 1024.0;    
-            default: // KIBI_BYTE
-                return 1.0;
-            }
-        }
-    }
-    
-    public Settings(PrimaryController primaryController){
+    public final static int DEFAULT_SPEED_PER_MILLI = 1;
+    public final static int MAX_SPEED_PER_MIILI = 2000;
+    public final static int MIN_SPEED_PER_MIILI = 1;
+
+
+
+    public static final int MAX_SKIP_COUNT = 3;
+    public static final int MIN_SKIP_COUNT = 0;
+    public static final int DEFAULT_SKIP_COUNT = 0;
+
+    private int windowSize = 100; // Default window size 100
+
+    private int groupSize = 2;
+
+    private boolean isSpeedPerMilliSelected;
+
+    private static final int DIGIT = 3;
+    public static final String DIGIT_FORMAT = "%,." + DIGIT + "f";
+    public static final int FRACTION_DIGITS = DIGIT;
+
+    public static double CONVERSION_VALUE = CONVERT.getConvertValue(CONVERT.DEFAULT);
+    public int averageSpeedPerMillisec = DEFAULT_SPEED_PER_MILLI;
+    private static CONVERT conversion = CONVERT.DEFAULT;
+
+    private int anovaSkipRunsCounter = 0;
+    private int conIntSkipRunsCounter = 0;
+    private int tTestSkipRunsCounter = 0;
+    private int uTestSkipRunsCounter = 0;
+    private int cusumSkipRunsCounter = 0;
+
+    private boolean anovaUseAdjacentRun = false;
+    private boolean conIntUseAdjacentRun = false;
+    private boolean tTestUseAdjacentRun = false;
+    private boolean uTestUseAdjacentRun = false;
+    private boolean cusumUseAdjacentRun = false;
+    private boolean tukeyUseAdjacentRun = false;
+
+    private boolean isBonferroniANOVASelected = false;
+    private boolean isBonferroniConIntSelected = false;
+    private boolean isBonferroniTTestSelected = false;
+    private boolean isBonferroniUTestSelected = false;
+
+    private boolean hasChanged = false;
+
+    @FXML public CheckBox checkboxSpeedPerSec;
+    @FXML public CheckBox adjacentRunANOVAcheckbox;
+    @FXML public CheckBox adjacentRunConIntcheckbox;
+    @FXML public CheckBox adjacentRunTTestcheckbox;
+    @FXML public CheckBox adjacentRunUTestcheckbox;
+    @FXML public CheckBox adjacentRunCUSUMcheckbox;
+    @FXML public CheckBox adjacentRunTukeycheckbox;
+
+    @FXML public CheckBox skipRunANOVAcheckbox;
+    @FXML public CheckBox skipRunConIntcheckbox;
+    @FXML public CheckBox skipRunTTestcheckbox;
+    @FXML public CheckBox skipRunUTestcheckbox;
+    @FXML public CheckBox skipRunCUSUMcheckbox;
+
+    @FXML public CheckBox bonferroniANOVAcheckbox;
+    @FXML public CheckBox bonferroniConIntcheckbox;
+    @FXML public CheckBox bonferroniTTestcheckbox;
+    @FXML public CheckBox bonferroniUTestcheckbox;
+
+    @FXML public Spinner<Integer> skipRunAnovaSpinner;
+    @FXML public Spinner<Integer> skipRunConIntSpinner;
+    @FXML public Spinner<Integer> skipRunTTestSpinner;
+    @FXML public Spinner<Integer> skipRunUTestSpinner;
+    @FXML public Spinner<Integer> skipRunCUSUMSpinner;
+
+    @FXML public Slider avSpeedSlider;
+    @FXML public Slider windowSlider;
+    @FXML public Slider runCompareCounterSlider;
+    @FXML public Label labelSliderVal;
+    @FXML public Label windowValueLabel;
+    @FXML public Button buttonSaveSettings;
+    @FXML public RadioButton radioButtonMebibyte;
+    @FXML public RadioButton radioButtonKibiByte;
+    @FXML public RadioButton radioButtonKiloByte;
+    private final ToggleGroup toggleGorup = new ToggleGroup();
+    private final PrimaryController primaryController;
+
+    public Settings(PrimaryController primaryController) {
         this.primaryController = primaryController;
     }
-    
-    public static int NUMBER_AFTER_COMMA = 10000;
-    public static double CONVERT_SPEED_UNIT = CONVERT.getConvertValue(CONVERT.DEFAULT);
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        if(checkboxSpeedPerSec.isSelected()){
-            avSpeedSlider.setDisable(false);
-        } else {
-            avSpeedSlider.setDisable(true);
-        }
+        avSpeedSlider.setDisable(!checkboxSpeedPerSec.isSelected());
         radioButtonKibiByte.setUserData(CONVERT.DEFAULT);
         radioButtonKiloByte.setUserData(CONVERT.KILO_BYTE);
         radioButtonMebibyte.setUserData(CONVERT.MEBI_BYTE);
-        
+
         radioButtonKibiByte.setToggleGroup(toggleGorup);
         radioButtonKiloByte.setToggleGroup(toggleGorup);
         radioButtonMebibyte.setToggleGroup(toggleGorup);
+        skipRunAnovaSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
+        skipRunConIntSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
+        skipRunTTestSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
+        skipRunUTestSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
+        skipRunCUSUMSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
 
+//        bonferroniUTestcheckbox.setDisable(true);
+//        bonferroniTTestcheckbox.setDisable(true);
+//        bonferroniConIntcheckbox.setDisable(true);
+//        bonferroniANOVAcheckbox.setDisable(true);
+
+        buttonSaveSettings.setOnAction(this::onActionSaveSettings);
+        avSpeedSlider.valueProperty().addListener(setupChangeListener(avSpeedSlider, labelSliderVal));
+        windowSlider.valueProperty().addListener(setupChangeListener(windowSlider, windowValueLabel));
+
+        initSettings();
+    }
+
+    private ChangeListener<Number> setupChangeListener(Slider slider, Label label) {
+        return (obs, old, val) -> {
+            double roundedValue = Math.floor(val.doubleValue() / 5.0) * 5.0;
+            if (roundedValue <= 1.0) roundedValue = 1;
+            slider.valueProperty().set(roundedValue);
+            label.setText(Integer.toString((int) roundedValue));
+        };
+    }
+
+    private void initSettings() {
         radioButtonKibiByte.setSelected(true);
-        
+
         for (Toggle toggle : toggleGorup.getToggles()) {
-            if(((CONVERT)toggle.getUserData()).equals((conversion))){
+            if (toggle.getUserData().equals((conversion))) {
                 toggle.setSelected(true);
             }
         }
-        
-        final ChangeListener<Number> numberChangeListener = (obs, old, val) -> {
-            double roundedValue = Math.floor(val.doubleValue() / 50.0) * 50.0;
-            if(roundedValue <= 1.0) roundedValue = 1;
-            avSpeedSlider.valueProperty().set(roundedValue);
-            labelSliderVal.setText(Integer.toString((int)roundedValue));
-        };
 
-        avSpeedSlider.valueProperty().addListener(numberChangeListener);
+        bonferroniANOVAcheckbox.setSelected(isBonferroniANOVASelected);
+        bonferroniConIntcheckbox.setSelected(isBonferroniConIntSelected);
+        bonferroniTTestcheckbox.setSelected(isBonferroniTTestSelected);
+        bonferroniUTestcheckbox.setSelected(isBonferroniUTestSelected);
+
+        checkboxSpeedPerSec.setSelected(isSpeedPerMilliSelected);
+        avSpeedSlider.setDisable(!isSpeedPerMilliSelected);
+        avSpeedSlider.setValue(averageSpeedPerMillisec);
+        runCompareCounterSlider.setValue(groupSize);
+        windowSlider.setValue(windowSize);
+        labelSliderVal.setText(Integer.toString(averageSpeedPerMillisec));
+        windowValueLabel.setText(Integer.toString(windowSize));
+
+        skipRunAnovaSpinner.getValueFactory().setValue(anovaSkipRunsCounter);
+        skipRunConIntSpinner.getValueFactory().setValue(conIntSkipRunsCounter);
+        skipRunTTestSpinner.getValueFactory().setValue(tTestSkipRunsCounter);
+        skipRunUTestSpinner.getValueFactory().setValue(uTestSkipRunsCounter);
+        skipRunCUSUMSpinner.getValueFactory().setValue(cusumSkipRunsCounter);
+
+        adjacentRunANOVAcheckbox.setSelected(anovaUseAdjacentRun);
+        adjacentRunConIntcheckbox.setSelected(conIntUseAdjacentRun);
+        adjacentRunTTestcheckbox.setSelected(tTestUseAdjacentRun);
+        adjacentRunUTestcheckbox.setSelected(uTestUseAdjacentRun);
+        adjacentRunCUSUMcheckbox.setSelected(cusumUseAdjacentRun);
+        adjacentRunTukeycheckbox.setSelected(tukeyUseAdjacentRun);
     }
-    
 
-    public void openWindow(){
-    try {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/Settings.fxml"));
-        fxmlLoader.setController(this);
-        Parent root1 = (Parent) fxmlLoader.load();
-        /* 
-         * if "fx:controller" is not set in fxml
-         * fxmlLoader.setController(NewWindowController);
-         */
-        Stage stage = new Stage();
-        stage.setTitle("Settings");
-        stage.setScene(new Scene(root1));
-        stage.setResizable(false);
-        stage.show();
-    } catch (IOException e) {
-        LOGGER.log(Level.SEVERE, String.format("Coudn't open Settings Window! App state: %s", PrimaryController.STATUS.IO_EXCEPTION));
+
+    public void openWindow() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/Settings.fxml"));
+            fxmlLoader.setController(this);
+            Parent root1 = fxmlLoader.load();
+            /*
+             * if "fx:controller" is not set in fxml
+             * fxmlLoader.setController(NewWindowController);
+             */
+            Stage stage = new Stage();
+            stage.setTitle("Settings");
+            stage.setScene(new Scene(root1));
+            stage.setResizable(false);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Coudn't open Settings Window! App state");
         }
     }
-    
+
     @FXML
-    public void onActionSaveSettings(){
-        //LOGGER.log(Level.INFO, String.format("is FileAttr set to %b", this.isFileAttr));
-        conversion = (CONVERT) toggleGorup.getSelectedToggle().getUserData(); 
-        CONVERSION_VALUE = CONVERT.getConvertValue(conversion);
-        AVERAGE_SPEED_PER_MILLISEC = (int) avSpeedSlider.getValue();
-        RUN_TO_COMPARE_TO_SIZE = (int) runCompareCounterSlider.getValue();
-        Settings.HAS_CHANGED = true;
-        
-        // get a handle to the stage
-        Stage stage = (Stage) buttonSaveSettings.getScene().getWindow();
-        // do what you have to do
-        stage.close();
-        primaryController.update();
-        
+    public void onActionUseSpeedPerSec(ActionEvent event) {
+        isSpeedPerMilliSelected = checkboxSpeedPerSec.isSelected();
+        LOGGER.log(Level.INFO, String.format("use Average Speed per Sec set to %b", isSpeedPerMilliSelected));
+        avSpeedSlider.setDisable(!isSpeedPerMilliSelected);
     }
-    
-    @FXML
-    public void onActionUseSpeedPerSec(){
-        this.isSpeedPerSecSelected = checkboxSpeedPerSec.isSelected();
-        LOGGER.log(Level.INFO, String.format("use Average Speed per Sec set to %b", this.isSpeedPerSecSelected));
-        if(this.isSpeedPerSecSelected){
-            avSpeedSlider.setDisable(false);
+
+
+    private void onActionSaveSettings(ActionEvent actionEvent) {
+        conversion = (CONVERT) toggleGorup.getSelectedToggle().getUserData();
+        CONVERSION_VALUE = CONVERT.getConvertValue(conversion);
+        averageSpeedPerMillisec = (int) avSpeedSlider.getValue();
+        groupSize = (int) runCompareCounterSlider.getValue();
+        windowSize = (int) windowSlider.getValue();
+        anovaUseAdjacentRun = adjacentRunANOVAcheckbox.isSelected();
+        conIntUseAdjacentRun = adjacentRunConIntcheckbox.isSelected();
+        tTestUseAdjacentRun = adjacentRunTTestcheckbox.isSelected();
+        uTestUseAdjacentRun = adjacentRunUTestcheckbox.isSelected();
+        cusumUseAdjacentRun = adjacentRunCUSUMcheckbox.isSelected();
+        tukeyUseAdjacentRun = adjacentRunTukeycheckbox.isSelected();
+        anovaSkipRunsCounter = skipRunAnovaSpinner.getValue();
+        conIntSkipRunsCounter = skipRunConIntSpinner.getValue();
+        tTestSkipRunsCounter = skipRunTTestSpinner.getValue();
+        uTestSkipRunsCounter = skipRunUTestSpinner.getValue();
+        cusumSkipRunsCounter = skipRunCUSUMSpinner.getValue();
+
+        isBonferroniANOVASelected = bonferroniANOVAcheckbox.isSelected();
+        isBonferroniConIntSelected = bonferroniConIntcheckbox.isSelected();
+        isBonferroniTTestSelected = bonferroniTTestcheckbox.isSelected();
+        isBonferroniUTestSelected = bonferroniUTestcheckbox.isSelected();
+
+        hasChanged = true;
+
+        if(primaryController != null){
+            primaryController.update();
         } else {
-            avSpeedSlider.setDisable(true);
+            LOGGER.log(Level.SEVERE, "No PrimaryController set!");
+        }
+        LOGGER.log(Level.INFO, "Settings saved");
+        Stage stage = (Stage) buttonSaveSettings.getScene().getWindow();
+        stage.close();
+    }
+
+    public boolean isBonferroniANOVASelected() {
+        return isBonferroniANOVASelected;
+    }
+
+    public boolean isBonferroniConIntSelected() {
+        return isBonferroniConIntSelected;
+    }
+
+    public boolean isBonferroniTTestSelected() {
+        return isBonferroniTTestSelected;
+    }
+
+    public boolean isBonferroniUTestSelected() {
+        return isBonferroniUTestSelected;
+    }
+
+    public boolean hasChanged() {
+        return hasChanged;
+    }
+
+    public int getAverageSpeedPerMillisec() {
+        return averageSpeedPerMillisec;
+    }
+
+    public int getWindowSize() {
+        return windowSize;
+    }
+
+    public int getGroupSize() {
+        return groupSize;
+    }
+
+    public boolean isSpeedPerMilliSelected() {
+        return isSpeedPerMilliSelected;
+    }
+
+    public boolean isAnovaUseAdjacentRun() {
+        return anovaUseAdjacentRun;
+    }
+
+    public boolean isConIntUseAdjacentRun() {
+        return conIntUseAdjacentRun;
+    }
+
+    public boolean isTTestUseAdjacentRun() {
+        return tTestUseAdjacentRun;
+    }
+
+    public boolean isUTestUseAdjacentRun() {
+        return uTestUseAdjacentRun;
+    }
+
+    public boolean isCusumUseAdjacentRun() {
+        return cusumUseAdjacentRun;
+    }
+
+    public boolean isTukeyUseAdjacentRun() {
+        return tukeyUseAdjacentRun;
+    }
+
+    public int getAnovaSkipRunsCounter() {
+        return anovaSkipRunsCounter;
+    }
+
+    public int getConIntSkipRunsCounter() {
+        return conIntSkipRunsCounter;
+    }
+
+    public int getTTestSkipRunsCounter() {
+        return tTestSkipRunsCounter;
+    }
+
+    public int getUTestSkipRunsCounter() {
+        return uTestSkipRunsCounter;
+    }
+
+    public int getCusumSkipRunsCounter() {
+        return cusumSkipRunsCounter;
+    }
+
+    public void updatedSettings() {
+        hasChanged = false;
+    }
+
+    public void setAnovaSkipRunsCounter(int anovaSkipRunsCounter) {
+        this.anovaSkipRunsCounter = anovaSkipRunsCounter;
+    }
+
+    public void setAnovaUseAdjacentRun(boolean anovaUseAdjacentRun) {
+        this.anovaUseAdjacentRun = anovaUseAdjacentRun;
+    }
+
+    public void setConIntSkipRunsCounter(int conIntSkipRunsCounter) {
+        this.conIntSkipRunsCounter = conIntSkipRunsCounter;
+    }
+
+    public void setConIntUseAdjacentRun(boolean conIntUseAdjacentRun) {
+        this.conIntUseAdjacentRun = conIntUseAdjacentRun;
+    }
+
+    public void setTTestSkipRunsCounter(int tTestSkipRunsCounter) {
+        this.tTestSkipRunsCounter = tTestSkipRunsCounter;
+    }
+
+    public void setTTestUseAdjacentRun(boolean tTestUseAdjacentRun) {
+        this.tTestUseAdjacentRun = tTestUseAdjacentRun;
+    }
+
+    public void setUTestSkipRunsCounter(int uTestSkipRunsCounter) {
+        this.uTestSkipRunsCounter = uTestSkipRunsCounter;
+    }
+
+    public void setUTestUseAdjacentRun(boolean uTestUseAdjacentRun) {
+        this.uTestUseAdjacentRun = uTestUseAdjacentRun;
+    }
+
+    public void setCusumSkipRunsCounter(int cusumSkipRunsCounter) {
+        this.cusumSkipRunsCounter = cusumSkipRunsCounter;
+    }
+
+    public void setCusumUseAdjacentRun(boolean cusumUseAdjacentRun) {
+        this.cusumUseAdjacentRun = cusumUseAdjacentRun;
+    }
+
+    public void setTukeyUseAdjacentRun(boolean tukeyUseAdjacentRun) {
+        this.tukeyUseAdjacentRun = tukeyUseAdjacentRun;
+    }
+
+    public void setWindowSize(int windowSize) {
+        this.windowSize = windowSize;
+    }
+
+    public void setGroupSize(int groupSize) {
+        this.groupSize = groupSize;
+    }
+
+    //
+//    public void setConversion(CONVERT conversion) {
+//        this.conversion = conversion;
+//    }
+//
+//    public CONVERT getConversion() {
+//        return conversion;
+//    }
+
+    public enum CONVERT {
+        DEFAULT, // KIBI_BYTE
+        MEGA_BYTE,
+        MEBI_BYTE,
+        KILO_BYTE;
+
+        public static double getConvertValue(CONVERT hl) {
+            return switch (hl) {
+                case MEGA_BYTE -> 976.6;
+                case MEBI_BYTE -> 1024.0;
+                case KILO_BYTE -> 1.0 / 1024.0;
+                default -> // KIBI_BYTE
+                        1.0;
+            };
         }
     }
 }

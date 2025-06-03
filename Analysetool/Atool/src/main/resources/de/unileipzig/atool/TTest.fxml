@@ -20,9 +20,11 @@
       </TableView>
       <Pane prefHeight="110.0" prefWidth="600.0">
          <children>
-            <Label layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="108.0" text="critical T = " />
-            <Label id="zCritLabel" fx:id="zCritLabel" layoutX="122.0" layoutY="14.0" prefHeight="17.0" prefWidth="225.0" text="_" />
-            <Button id="drawTTest" fx:id="drawTTest" layoutX="14.0" layoutY="54.0" mnemonicParsing="false" text="draw T-Test" />
+            <Label layoutX="112.0" layoutY="22.0" prefHeight="17.0" prefWidth="108.0" text="critical T = " />
+            <Label id="zCritLabel" fx:id="zCritLabel" layoutX="220.0" layoutY="22.0" prefHeight="17.0" prefWidth="225.0" text="_" />
+            <Button id="drawTTest" fx:id="drawTTest" layoutX="14.0" layoutY="27.0" mnemonicParsing="false" text="draw T-Test" />
+            <Label layoutX="112.0" layoutY="37.0" prefHeight="17.0" prefWidth="108.0" text="Steady state:" />
+            <Label id="steadyStateLabel" fx:id="steadyStateLabel" layoutX="220.0" layoutY="37.0" prefHeight="17.0" prefWidth="225.0" text="_" />
          </children>
       </Pane>
    </children>

@@ -13,7 +13,7 @@
          <columns>
             <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="31.0" text="Run" />
             <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="119.0" text="Measurment" />
-            <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="119.0" text="Compare to Run" />
+            <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="119.0" text="Groups" />
             <TableColumn id="QColumn" fx:id="QColumn" prefWidth="123.0" text="Mean" />
             <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="123.0" text="Nullhypothesis" />
          </columns>
@@ -22,7 +22,13 @@
          <children>
             <Label layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="108.0" text="Q-HSD = " />
             <Label id="qCritLabel" fx:id="qCritLabel" layoutX="122.0" layoutY="14.0" prefHeight="17.0" prefWidth="225.0" text="_" />
-            <Button id="drawTukey" fx:id="drawTukey" layoutX="14.0" layoutY="41.0" mnemonicParsing="false" text="Draw Tukey-HSD Test" />
+            <Button id="drawTukey" fx:id="drawTukey" layoutX="14.0" layoutY="54.0" mnemonicParsing="false" text="Draw Tukey-HSD Test" />
+            <Label layoutX="214.0" layoutY="14.0" prefHeight="17.0" prefWidth="131.0" text="ANOVA Steady state at:" />
+            <Label layoutX="214.0" layoutY="33.0" prefHeight="17.0" prefWidth="131.0" text="Tukey steady state at:" />
+            <Label id="anovaSteadyStateLabel" fx:id="anovaSteadyStateLabel" layoutX="347.0" layoutY="14.0" prefHeight="17.0" prefWidth="265.0" text="_" />
+            <Label id="tukeySteadyStateLabel" fx:id="tukeySteadyStateLabel" layoutX="347.0" layoutY="33.0" prefHeight="17.0" prefWidth="265.0" text="_" />
+            <Label layoutX="214.0" layoutY="50.0" prefHeight="17.0" prefWidth="131.0" text="Evaluation:" />
+            <Label id="evalLabel" fx:id="evalLabel" layoutX="347.0" layoutY="50.0" prefHeight="17.0" prefWidth="265.0" text="_" />
          </children>
       </Pane>
    </children>
