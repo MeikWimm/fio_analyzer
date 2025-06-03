@@ -8,7 +8,7 @@ Ein Analysewerkzeug für `fio`-Benchmark-Logs mit grafischer Oberfläche und sta
 
 - **JavaFX Library**  
   [https://gluonhq.com/products/javafx/](https://gluonhq.com/products/javafx/)  - verwendete version 21.0.7 (LTS) SDK
-  → Den Inhalt (außer die .zip Datei) aus `/javafx-sdk-21.0.7` ins `target/`-Verzeichnis kopieren nicht den `javafx-sdk-21.0.7` selbst.
+  → Den Inhalt (außer die .zip Datei) aus `/javafx-sdk-21.0.7` ins `target/`-Verzeichnis kopieren nicht den `javafx-sdk-21.0.7` Ordner selbst.
 
 - **OpenJDK 21**
 
@@ -16,13 +16,13 @@ Ein Analysewerkzeug für `fio`-Benchmark-Logs mit grafischer Oberfläche und sta
 
 ## Building and Running ATool
 - Die Commands  werden unter /Atool ausgeführt
-- /Atool soll den /src Ordner beinhalten sowie die beiden Dateien pom.xml und nbactions.xml
+- wenn noch nicht gebaut wurde sollte der /Atool Ordner den /src Ordner beinhalten sowie die beiden Dateien pom.xml und nbactions.xml
 
 # Projekt bauen
-- Command: mvn package 
+- mvn package
 
 # Anwendung starten
-- mvn exec:exec@run-javafx (oder:)
+- mvn exec:exec@run-javafx (alternativ:)
 - java --module-path ./lib --add-modules javafx.controls,javafx.fxml -jar ./Atool-1.0-SNAPSHOT.jar
     - diesen Command im /target Verzeichnis ausführen
 
@@ -67,8 +67,8 @@ Diese Dokumentation beschreibt die verfügbaren Einstellungen und deren Bedeutun
 
 ## Run-Einstellungen
 
-### Use adjacent Run (otherwise sequential)
-- **HINWEIS**: für Atool v0.2.1 (sowie die vorherigen Versionen) ist das Labeling vertauscht! ->  Use sequential run (otherwise adjacent)
+### Use sequential Run (otherwise adjacent)
+- **HINWEIS**: für Atool v0.2.1 (sowie die vorherigen Versionen) ist das Labeling vertauscht! ->  "Use adjacent run (otherwise sequential)"
 - **Beschreibung**: Aktiviert die Verwendung von benachbarten Durchläufen, anstelle einer sequenziellen Verarbeitung.
 - **Standardwert**: Deaktiviert.
 
@@ -105,7 +105,7 @@ Diese Dokumentation beschreibt die verfügbaren Einstellungen und deren Bedeutun
 
 ## Speichern der Einstellungen
 
-- Klicken Sie auf **Save & Exit**, um die Änderungen zu speichern und das Fenster zu schließen.
+- Auf **Save & Exit** klicken, um die Änderungen zu speichern und das Fenster zu schließen.
 
 ---
 
