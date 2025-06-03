@@ -35,6 +35,7 @@ public class Run {
     private double tVal = UNDEFINED_DOUBLE_VALUE;
     private double cov = UNDEFINED_DOUBLE_VALUE;
     private double rciw = UNDEFINED_DOUBLE_VALUE;
+    private int groupID = UNDEFINED_INTEGER;
     private String group = "";
     private double p;
 
@@ -209,15 +210,15 @@ public class Run {
     }
 
     public void reset() {
-        //this.intervalFrom = UNDEFINED_DOUBLE_VALUE;
-       // this.intervalTo = UNDEFINED_DOUBLE_VALUE;
         this.isNullhypothesis = UNDEFIND_NULLHYPOTHESIS;
-        //this.F = UNDEFINED_DOUBLE_VALUE;
-        //this.zVal = UNDEFINED_DOUBLE_VALUE;
-        //this.qVal = UNDEFINED_DOUBLE_VALUE;
-        //this.tVal = UNDEFINED_DOUBLE_VALUE;
-        //this.cov = UNDEFINED_DOUBLE_VALUE;
-       // this.overlappingDifference = UNDEFINED_DOUBLE_VALUE;
+    }
+
+    public int getGroupID() {
+        return groupID;
+    }
+
+    public void setGroupID(int groupID) {
+        this.groupID = groupID;
     }
 
     public void setGroup(String group) {

@@ -74,6 +74,8 @@ public class MannWhitney extends GenericTest implements Initializable {
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
     @FXML public Button drawUTestButton;
     @FXML public Label zIntervalLabel;
+    @FXML public Label steadyStateLabel;
+
     private double zCrit;
 
     public MannWhitney(Job job,Settings settings, double alpha) {
@@ -98,11 +100,15 @@ public class MannWhitney extends GenericTest implements Initializable {
         uTestTable.setItems(this.job.getFilteredRuns());
 
         drawUTestButton.setOnAction(e -> draw());
-        setLabeling();
     }
 
     private void setLabeling() {
         zIntervalLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.zCrit));
+        if(this.getSteadyStateRun() == null){
+            steadyStateLabel.setText("No steady state run found.");
+        } else {
+            steadyStateLabel.setText("at run " + this.getSteadyStateRun().getID());
+        }
     }
 
     @Override
@@ -194,6 +200,7 @@ public class MannWhitney extends GenericTest implements Initializable {
         run1.setZ(z);
         run1.setNullhypothesis(hypothesis);
         uTestData.add(new XYChart.Data<>(run1.getRunID(), z));
+        this.resultRuns.add(run1);
 
 //        LOGGER.log(Level.INFO, String.format("Run %d compared to Run %d, U_1 = %f and U_2 = %f", run1.getRunID(), run2.getID(), U1, U2));
 //        LOGGER.log(Level.INFO, String.format("calculated p: %f and critical p: %f", pCalc, pCrit));
@@ -227,6 +234,7 @@ public class MannWhitney extends GenericTest implements Initializable {
             stage.setMinWidth(800);
             stage.setTitle("Calculated U-Test");
             stage.setScene(new Scene(root1));
+            setLabeling();
             stage.show();
 
         } catch (IOException e) {

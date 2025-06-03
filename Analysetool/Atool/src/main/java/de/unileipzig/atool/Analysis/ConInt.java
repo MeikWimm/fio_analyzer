@@ -37,6 +37,7 @@ import java.util.logging.Logger;
  */
 public class ConInt extends GenericTest implements Initializable {
     private static final Logger LOGGER = Logger.getLogger(ConInt.class.getName());
+    private static final double STEADY_STATE_RCIW_THRESHOLD = .02;
     private final int WINDOW_SIZE;
 
     static {
@@ -74,6 +75,8 @@ public class ConInt extends GenericTest implements Initializable {
     public TableColumn<Run, String> compareToRunColumn;
     @FXML
     public TableColumn<Run, Double> overlappingColumn;
+    @FXML public Label steadyStateLabel;
+
 
     public ConInt(Job job,Settings settings, double alpha) {
         super(job, settings.getConIntSkipRunsCounter(), settings.isConIntUseAdjacentRun(), 2, alpha, settings.isBonferroniConIntSelected());
@@ -117,6 +120,8 @@ public class ConInt extends GenericTest implements Initializable {
                 "Per-Run Relative Confidence Interval Width (RCIW) over Job Average",
                 "Run Index",
                 "RCIW / Job Average Speed",
+                "Threshold",
+                this.job.getRciwThreshold(),
                 new Charter.ChartData("RCIW per Run", this.conIntData)
         );
     }
@@ -152,9 +157,26 @@ public class ConInt extends GenericTest implements Initializable {
             for (int i = 0; i < runs.size() - 1; i++) {
                 Run run = runs.get(i);
                 double RCIW = Math.abs(run.getIntervalFrom() - run.getIntervalTo()) / run.getAverageSpeed();
-                runs.get(i).setRCIW(RCIW);
+                run.setRCIW(RCIW);
+                this.resultRuns.add(run);
                 conIntData.add(new XYChart.Data<>(runs.get(i).getRunID(), RCIW));
             }
+        }
+
+        for (Run run : this.resultRuns) {
+            calculateSteadyStateInterval(run, run.getRCIW());
+        }
+    }
+
+    private void calculateSteadyStateInterval(Run run, double value) {
+        if (value < this.job.getRciwThreshold()) {
+            possibleSteadyStateRuns.add(run);
+        }
+
+        if (possibleSteadyStateRuns.isEmpty()) {
+            LOGGER.log(Level.WARNING, String.format("No steady state found for value %s", value));
+        } else {
+            LOGGER.log(Level.INFO, String.format("Found steady state at Run %d for value %s", possibleSteadyStateRuns.getFirst().getID(), value));
         }
     }
 
@@ -177,8 +199,11 @@ public class ConInt extends GenericTest implements Initializable {
         double c1 = averageSpeed - (z * (std / Math.sqrt(windowSize)));
         double c2 = averageSpeed + (z * (std / Math.sqrt(windowSize)));
         double RCIW = Math.abs(c1 - c2) / averageSpeed;
+        int windowCount = 1 + this.job.getRunDataSize() * job.getSkippedRuns();
+        int windowStartPoint = 0;
+        int windowEndPoint = 0;
         windowedRCIWData.add(new XYChart.Data<>(data.getFirst().getTime(), RCIW));
-
+        boolean isSteadyStateFound = false;
 
         for (int i = 0; i < data.size() - windowSize; i++) {
             for (int j = 0; j < windowSize; j++) {
@@ -191,7 +216,24 @@ public class ConInt extends GenericTest implements Initializable {
             c2 = averageSpeed + (z * (std / Math.sqrt(windowSize)));
             RCIW = Math.abs(c1 - c2) / averageSpeed;
 
+            if(RCIW < 0.03 && !isSteadyStateFound){
+                isSteadyStateFound = true;
+                windowStartPoint = windowCount;
+                windowEndPoint = windowSize + windowCount;
+            }
             windowedRCIWData.add(new XYChart.Data<>(data.get(i).getTime(), RCIW));
+            windowCount++;
+        }
+
+        if(isSteadyStateFound){
+            for(Run run: this.job.getRuns()){
+                int startPoint = run.getData().size() * (run.getID() - 1);
+                int endPoint = startPoint + run.getData().size();
+
+                if(windowStartPoint < endPoint && windowEndPoint > startPoint){
+                    System.out.println("Run should be " + run.getID());
+                }
+            }
         }
     }
 //
@@ -287,10 +329,20 @@ public class ConInt extends GenericTest implements Initializable {
             stage.setMinWidth(800);
             stage.setTitle("Calculated Confidence Interval");
             stage.setScene(new Scene(root1));
+            setLabeling();
             stage.show();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void setLabeling() {
+        if(possibleSteadyStateRuns.isEmpty()){
+            steadyStateLabel.setText("No steady state found");
+            return;
+        }
+
+        steadyStateLabel.setText("Run " + possibleSteadyStateRuns.getFirst().getID());
     }
 }

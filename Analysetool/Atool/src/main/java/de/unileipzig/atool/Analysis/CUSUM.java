@@ -192,15 +192,15 @@ public class CUSUM extends GenericTest{
         }
 
         this.title = String.format("Step-wise CUSUM compared each data point to the mean of its corresponding %d-point segment", windowSize);
-        this.label = "Run";
+        this.label = "Timestep";
     }
 
 
     public void draw(){
-        Charter.ChartData cusumChartData = new Charter.ChartData("Cusum", this.cusumData);
+        //Charter.ChartData cusumChartData = new Charter.ChartData("Cusum", this.cusumData);
         Charter.ChartData cusumPosChartData = new Charter.ChartData("Cusum (+)", this.cusumPosData);
         Charter.ChartData cusumNegChartData = new Charter.ChartData("Cusum (-)", this.cusumNegData);
-        charter.drawGraph(this.title, this.label, "Cusum", cusumChartData, cusumPosChartData, cusumNegChartData);
+        charter.drawGraph(this.title, this.label, "Cusum", cusumPosChartData, cusumNegChartData);
     }
 
 }

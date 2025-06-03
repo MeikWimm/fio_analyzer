@@ -42,6 +42,7 @@ public class TTest extends GenericTest implements Initializable {
     }
 
     @FXML public Label zCritLabel;
+    @FXML public Label steadyStateLabel;
 
     @FXML public Button drawTTest;
 
@@ -77,11 +78,15 @@ public class TTest extends GenericTest implements Initializable {
 
         drawTTest.setOnAction(e -> drawTGraph(this.job));
         TTable.setItems(this.job.getFilteredRuns());
-        setLabeling();
     }
 
     private void setLabeling() {
         zCritLabel.setText(String.format(Locale.ENGLISH, "%,.5f", this.tCrit));
+        if(this.getSteadyStateRun() == null){
+            steadyStateLabel.setText("No steady state run found.");
+        } else {
+            steadyStateLabel.setText("at run " + this.getSteadyStateRun().getID());
+        }
     }
 
     @Override
@@ -92,26 +97,28 @@ public class TTest extends GenericTest implements Initializable {
 
 
         for (int i = 0; i < job.getRuns().size() - 1; i++) {
-            Run run1 = job.getRuns().get(i);
+            Run run = job.getRuns().get(i);
             Run run2 = job.getRuns().get(i + 1);
 
-            double sse = calculateSSE(run1, run2);
-            double runVariance1 = calculateVariance(run1, sse);
+            double sse = calculateSSE(run, run2);
+            double runVariance1 = calculateVariance(run, sse);
             double runVariance2 = calculateVariance(run2, sse);
             double runSize = this.job.getData().size();
 
-            double nominator = (run1.getAverageSpeed() - run2.getAverageSpeed());
+            double nominator = (run.getAverageSpeed() - run2.getAverageSpeed());
             double denominator = Math.sqrt((runVariance1 / runSize) + (runVariance2 / runSize));
             double tVal = Math.abs(nominator / denominator);
-            run1.setT(tVal);
+            run.setT(tVal);
 
-            tData.add(new XYChart.Data<>(run1.getID(), tVal));
+            tData.add(new XYChart.Data<>(run.getID(), tVal));
 
             if (this.tCrit < tVal) {
-                run1.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
+                run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
             } else {
-                run1.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+                run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
             }
+
+            this.resultRuns.add(run);
         }
     }
 
@@ -154,6 +161,7 @@ public class TTest extends GenericTest implements Initializable {
             stage.setMinWidth(800);
             stage.setTitle("Calculated T-Test");
             stage.setScene(new Scene(root1));
+            setLabeling();
             stage.show();
 
         } catch (IOException e) {

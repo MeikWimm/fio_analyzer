@@ -4,6 +4,7 @@
  */
 package de.unileipzig.atool.Analysis;
 
+import de.unileipzig.atool.Job;
 import de.unileipzig.atool.Run;
 import de.unileipzig.atool.Settings;
 import de.unileipzig.atool.Utils;
@@ -45,9 +46,12 @@ public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnaly
         handler.setFormatter(new Utils.CustomFormatter("TukeyHSD"));
         LOGGER.setUseParentHandlers(false);
         LOGGER.addHandler(handler);      
-    }    
+    }
 
     @FXML public Label qCritLabel;
+    @FXML public Label anovaSteadyStateLabel;
+    @FXML public Label tukeySteadyStateLabel;
+    @FXML public Label evalLabel;
 
     @FXML public Button drawTukey;
     
@@ -74,7 +78,7 @@ public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnaly
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         averageSpeedColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
 
-        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
+        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("GroupID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
         QColumn.setCellValueFactory(new PropertyValueFactory<>("Q"));
         QColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));
@@ -89,78 +93,59 @@ public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnaly
     }
 
     public void draw(){
-        charter.drawGraph("U-Test","Run","Mean/Difference",new Charter.ChartData("Run mean", meanData), new Charter.ChartData("QHSD", qHSDData));
+        charter.drawGraph("U-Test","Group","Mean/Difference",new Charter.ChartData("Run mean", meanData), new Charter.ChartData("QHSD", qHSDData));
     }
 
     @Override
     public void apply(List<Run> postHocRuns, List<List<Run>> postHocGroups) {
+        if (postHocRuns == null || postHocGroups == null) {
+            throw new IllegalArgumentException("Input lists cannot be null");
+        }
+
         int totalObservations = test.getJob().getData().size();
-        for (int i = 0; i < postHocGroups.size() - 1; i++) {
-            for (int j = i + 1; j < postHocGroups.size(); j++) {
-                double n = test.getJob().getRuns().getFirst().getData().size();
+        for (int i = 0; i <= postHocGroups.size() - 2; i += 2) {
+                Job job = test.getJob();
+                double n = job.getData().size();
                 int numberOfGroups = postHocGroups.size();
                 int dfError = totalObservations - numberOfGroups;
-
                 Tukey tukey = new Tukey(postHocGroups.getFirst().size(), numberOfGroups, dfError);
                 List<Run> group1 = postHocGroups.get(i);
-                List<Run> group2 = postHocGroups.get(j);
+                List<Run> group2 = postHocGroups.get(i + 1);
+
+            if (group1.isEmpty() || group2.isEmpty()) {
+                throw new IllegalArgumentException("Groups cannot be empty");
+            }
+
+            Run run = group1.getFirst();
                 double speedSumGroup1 = 0;
                 double speedSumGroup2 = 0;
 
+                for (Run r : group1) {
+                    speedSumGroup1 += r.getAverageSpeed();
+                }
 
-                for (int k = 0; k < group1.size(); k++) {
-                    Run run1 = group1.get(k);
-                    Run run2 = group2.get(k);
-
-                    speedSumGroup1 += run1.getAverageSpeed();
-                    speedSumGroup2 += run2.getAverageSpeed();
+                for (Run r : group2) {
+                    speedSumGroup2 += r.getAverageSpeed();
                 }
 
                 double averageSpeedGroup1 = speedSumGroup1 / group1.size();
                 double averageSpeedGroup2 = speedSumGroup2 / group2.size();
 
-                double sse = postHocGroups.get(i).getFirst().getSSE();
-                double MSE = sse / dfError;
-                double standardError = Math.sqrt(MSE / n);
+                double standardError = Math.sqrt(job.getMSE() / n);
                 double qCritical = tukey.inverse_survival(test.getAlpha(), false);
                 double overallMean = Math.abs(averageSpeedGroup1 - averageSpeedGroup2);
                 qHSD = qCritical * standardError;
-                Run run = group1.getFirst();
                 run.setQ(overallMean);
 
-                meanData.add(new XYChart.Data<>(run.getID(), overallMean));
-                qHSDData.add(new XYChart.Data<>(run.getID(), qHSD));
+                meanData.add(new XYChart.Data<>(run.getGroupID(), overallMean));
+                qHSDData.add(new XYChart.Data<>(run.getGroupID(), qHSD));
                 if(qHSD < overallMean){
                     run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
                 } else {
                     run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
-
-                    List<Run> possibleRuns = this.test.getPossibleSteadyStateRuns();
-
-                    for (Run possibleRun : possibleRuns) {
-                        int ID = possibleRun.getID();
-                        boolean foundInGroup1 = false;
-                        boolean foundInGroup2 = false;
-                        for (Run run1 : group1) {
-                            if (run1.getID() == ID) {
-                                foundInGroup1 = true;
-                                break;
-                            }
-                        }
-
-                        for (Run run2 : group2) {
-                            if (run2.getID() == ID) {
-                                foundInGroup2 = true;
-                                break;
-                            }
-                        }
-
-                        if(foundInGroup1 && foundInGroup2){
-                            System.out.println("Possible steady state at run: " + possibleRun.getID());
-                        }
-                    }
                 }
-            }
+
+                checkSteadyStateRun(run, group1, group2);
         }
     }
 
@@ -177,10 +162,33 @@ public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnaly
             stage.setMinWidth(800);
             stage.setTitle("Calculated Tukey HSD");
             stage.setScene(new Scene(root1));
+            setLabeling();
             stage.show();
-            
     } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void setLabeling() {
+        if(steadyStateRun == null && anovaSteadyStateRun == null){
+            evalLabel.setText("No steady state run found.");
+            return;
+        }
+
+        anovaSteadyStateLabel.setText("Run " + anovaSteadyStateRun.getID());
+
+        if(steadyStateRun == null && anovaSteadyStateRun != null){
+            evalLabel.setText("Run " + anovaSteadyStateRun.getID() + " most likely in transient state.");
+        }
+
+        if(steadyStateRun != null){
+            if(steadyStateRun.getID() != anovaSteadyStateRun.getID()){
+                tukeySteadyStateLabel.setText("Run " + steadyStateRun.getID());
+                evalLabel.setText("Run " + steadyStateRun.getID() + " more likely in steady state than Run " + anovaSteadyStateRun.getID() + ".");
+            } else {
+                tukeySteadyStateLabel.setText("Run " + steadyStateRun.getID());
+                evalLabel.setText("Run " + steadyStateRun.getID() + " is in steady state.");
+            }
         }
     }
 }

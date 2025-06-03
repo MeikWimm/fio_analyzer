@@ -44,6 +44,8 @@
                   <TableColumn id="fileCreatedColumn" fx:id="fileCreatedColumn" prefWidth="168.0" text="File Created" />
                   <TableColumn id="fileCreatedColumn" fx:id="epsilonColumn" prefWidth="119.0" sortable="false" text="Epsilon for RDP" visible="false" />
                   <TableColumn id="fileCreatedColumn" fx:id="alphaColumn" prefWidth="87.0" text="Alpha" />
+                  <TableColumn id="cvColumn" fx:id="cvColumn" prefWidth="75.0" text="CV Threshold" />
+                  <TableColumn id="rciwColumn" fx:id="rciwColumn" prefWidth="75.0" text="RCIW Threshold" />
               </columns>
             </TableView>
             <Pane prefHeight="150.0" prefWidth="1080.0">

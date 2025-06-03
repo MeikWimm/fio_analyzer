@@ -31,10 +31,12 @@
       </VBox>
    </center>
    <bottom>
-      <Pane prefHeight="47.0" prefWidth="633.0" BorderPane.alignment="CENTER">
+      <Pane prefHeight="69.0" prefWidth="772.0" BorderPane.alignment="CENTER">
          <children>
             <Button id="drawConIntDiffButton" fx:id="drawConIntDiffButton" layoutX="14.0" layoutY="9.0" mnemonicParsing="false" text="Draw RCIW Run over Job" />
-            <Button id="drawWindowedRCIWButton" fx:id="drawWindowedRCIWButton" layoutX="177.0" layoutY="9.0" mnemonicParsing="false" text="Draw windowed RCIW" />
+            <Button id="drawWindowedRCIWButton" fx:id="drawWindowedRCIWButton" disable="true" layoutX="624.0" layoutY="11.0" mnemonicParsing="false" text="Draw windowed RCIW" visible="false" />
+            <Label layoutX="175.0" layoutY="13.0" prefHeight="17.0" prefWidth="84.0" text="Steady state at:" />
+            <Label id="steadyStateLabel" fx:id="steadyStateLabel" layoutX="266.0" layoutY="13.0" prefHeight="17.0" prefWidth="163.0" text="_" />
          </children>
       </Pane>
    </bottom>

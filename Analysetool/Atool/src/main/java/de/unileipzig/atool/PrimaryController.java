@@ -63,8 +63,9 @@ public class PrimaryController implements Initializable {
     public TableColumn<Job, String> fileCreatedColumn;
     @FXML
     public TableColumn<Job, Double> epsilonColumn;
-    @FXML
-    public TableColumn<Job, Double> alphaColumn;
+    @FXML public TableColumn<Job, Double> alphaColumn;
+    @FXML public TableColumn<Job, Double> cvColumn;
+    @FXML public TableColumn<Job, Double> rciwColumn;
 
     public MenuItem helloItem;
 
@@ -108,6 +109,8 @@ public class PrimaryController implements Initializable {
         fileCreatedColumn.setCellValueFactory(new PropertyValueFactory<>("FileCreationDate"));
         epsilonColumn.setCellValueFactory(new PropertyValueFactory<>("Epsilon"));
         alphaColumn.setCellValueFactory(new PropertyValueFactory<>("Alpha"));
+        cvColumn.setCellValueFactory(new PropertyValueFactory<>("cvThreshold"));
+        rciwColumn.setCellValueFactory(new PropertyValueFactory<>("RciwThreshold"));
     }
 
     // Code block setup for editing on a table row
@@ -128,6 +131,17 @@ public class PrimaryController implements Initializable {
                 labelLoadInfo, Job.MIN_EPSILON, Job.MAX_EPSILON, Job.DEFAULT_RUN_COUNT,
                 String.format("Epsilon count must be a value between %f and %f", Job.MIN_EPSILON, Job.MAX_EPSILON)
         ));
+
+        cvColumn.setCellFactory(tc -> new Utils.ValidatedDoubleTableCell<>(
+                labelLoadInfo, Job.MIN_CV_THRESHOLD, Job.MAX_CV_THRESHOLD, Job.DEFAULT_CV_THRESHOLD,
+                String.format("CV threshold must be a value between %f and %f", Job.MIN_CV_THRESHOLD, Job.MAX_CV_THRESHOLD)
+        ));
+
+        rciwColumn.setCellFactory(tc -> new Utils.ValidatedDoubleTableCell<>(
+                labelLoadInfo, Job.MIN_RCIW_THRESHOLD, Job.MAX_RCIW_THRESHOLD, Job.DEFAULT_RCIW_THRESHOLD,
+                String.format("RCIW threshold must be a value between %f and %f", Job.MIN_RCIW_THRESHOLD, Job.MAX_RCIW_THRESHOLD)
+        ));
+
     }
 
     private void setupTableMenuItems() {
@@ -158,6 +172,14 @@ public class PrimaryController implements Initializable {
 
         epsilonColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {
             t.getRowValue().setEpsilon(t.getNewValue());
+        });
+
+        cvColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {
+            t.getRowValue().setCvThreshold(t.getNewValue());
+        });
+
+        rciwColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {
+            t.getRowValue().setRciwThreshold(t.getNewValue());
         });
     }
 
@@ -192,14 +214,16 @@ public class PrimaryController implements Initializable {
         Job job = row.getItem();
         TTest tTest = new TTest(job, settings, job.getAlpha());
         tTest.calculate();
+        tTest.calculateSteadyState();
         tTest.openWindow();
     }
 
     private void onActionCalcMannWhitneyTest(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        MannWhitney tTest = new MannWhitney(job, settings, job.getAlpha());
-        tTest.calculate();
-        tTest.openWindow();
+        MannWhitney uTest = new MannWhitney(job, settings, job.getAlpha());
+        uTest.calculate();
+        uTest.calculateSteadyState();
+        uTest.openWindow();
     }
 
     private void onActionCalcTukeyHSD(TableRow<Job> row, TableView<Job> table) {
@@ -210,7 +234,6 @@ public class PrimaryController implements Initializable {
         anova.calculateSteadyState();
         anova.calculatePostHoc(tTest);
         tTest.openWindow();
-        System.out.println(job.getStandardDeviation());
     }
 
     private void onActionCalcCusum(TableRow<Job> row, TableView<Job> table) {

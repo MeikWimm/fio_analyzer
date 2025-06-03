@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="625.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <TableView id="anovaTable" fx:id="uTestTable" prefHeight="547.0" prefWidth="800.0">
          <columns>
@@ -20,9 +20,11 @@
       </TableView>
       <Pane prefHeight="125.0" prefWidth="800.0">
          <children>
-            <Label layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="225.0" text="Calcluated Z = " />
-            <Label id="zIntervalLabel" fx:id="zIntervalLabel" layoutX="104.0" layoutY="14.0" prefHeight="17.0" prefWidth="142.0" text="_" />
-            <Button id="drawUTestButton" fx:id="drawUTestButton" layoutX="14.0" layoutY="43.0" mnemonicParsing="false" text="Draw U-Test" />
+            <Label layoutX="127.0" layoutY="14.0" prefHeight="17.0" prefWidth="225.0" text="Calcluated Z = " />
+            <Label id="zIntervalLabel" fx:id="zIntervalLabel" layoutX="217.0" layoutY="14.0" prefHeight="17.0" prefWidth="142.0" text="_" />
+            <Button id="drawUTestButton" fx:id="drawUTestButton" layoutX="14.0" layoutY="19.0" mnemonicParsing="false" text="Draw U-Test" />
+            <Label layoutX="127.0" layoutY="31.0" prefHeight="17.0" prefWidth="225.0" text="Steady state:" />
+            <Label id="steadyStateLabel" fx:id="steadyStateLabel" layoutX="217.0" layoutY="31.0" prefHeight="17.0" prefWidth="142.0" text="_" />
          </children>
       </Pane>
    </children>

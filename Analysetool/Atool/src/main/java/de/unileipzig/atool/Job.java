@@ -32,6 +32,14 @@ public class Job {
     public final static Double MAX_EPSILON = 1000.0;
     public final static Double MIN_EPSILON = 1.0;
 
+    public final static Double DEFAULT_CV_THRESHOLD = .2;
+    public final static Double MAX_CV_THRESHOLD = .3;
+    public final static Double MIN_CV_THRESHOLD = .1;
+
+    public final static Double DEFAULT_RCIW_THRESHOLD = .02;
+    public final static Double MAX_RCIW_THRESHOLD = .05;
+    public final static Double MIN_RCIW_THRESHOLD = .01;
+
     private static int COUNTER = 1; // so that each Job has a unique ID
     private Map<Integer, Integer> freq;
     private List<XYChart.Data<Number, Number>> chartData;
@@ -51,8 +59,14 @@ public class Job {
     private double averageSpeed;
     private double epsilon = DEFAULT_EPSILON;
     private double alpha = DEFAULT_ALPHA;
+    private double cvThreshold = DEFAULT_CV_THRESHOLD;
+    private double rciwThreshold = DEFAULT_RCIW_THRESHOLD;
     private double calculatedF;
     private double standardDeviation;
+    private double SSE;
+    private double MSE;
+    private int skipSize;
+
 
     public Job(List<DataPoint> data, int averageTimePerMilliSec) {
         this.freq = new TreeMap<>();
@@ -89,6 +103,12 @@ public class Job {
         this.alpha = other.alpha;
         this.calculatedF = other.calculatedF;
         this.standardDeviation = other.standardDeviation;
+        this.MSE = other.MSE;
+        this.SSE = other.SSE;
+        this.cvThreshold = other.cvThreshold;
+        this.rciwThreshold = other.rciwThreshold;
+        this.chartData = other.chartData;
+        this.skipSize = other.skipSize;
         this.runDataSize = other.runDataSize;
     }
 
@@ -141,6 +161,7 @@ public class Job {
     }
 
     public void prepareSkippedData(int skipRuns) {
+        this.skipSize = skipRuns;
         if (skipRuns < 1) {
             return;
         }
@@ -205,6 +226,22 @@ public class Job {
 
     void setAlpha(Double alpha) {
         this.alpha = alpha;
+    }
+
+    public double getCvThreshold() {
+        return this.cvThreshold;
+    }
+
+    public void setCvThreshold(Double cvThreshold) {
+        this.cvThreshold = cvThreshold;
+    }
+
+    public double getRciwThreshold() {
+        return this.rciwThreshold;
+    }
+
+    public void setRciwThreshold(Double rciwThreshold) {
+        this.rciwThreshold = rciwThreshold;
     }
 
     public int getID() {
@@ -442,7 +479,39 @@ public class Job {
         return this.speedSeries;
     }
 
+    public int getDataStartPoint(Run run){
+        return run.getData().size();
+    }
+
+    public int getDataEndPoint(Run run){
+        return this.data.size() - run.getData().size();
+    }
+
+    public void setSSE(double SSE) {
+        this.SSE = SSE;
+    }
+
+    public double getSSE() {
+        return SSE;
+    }
+
+    public double getMSE() {
+        return MSE;
+    }
+
+    public void setMSE(double MSE) {
+        this.MSE = MSE;
+    }
+
     public void setFrequency(Map<Integer, Integer> freq) {
         this.freq = freq;
+    }
+
+    public int getRunDataSize() {
+        return this.runDataSize;
+    }
+
+    public int getSkippedRuns() {
+        return this.skipSize;
     }
 }
