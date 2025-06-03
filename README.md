@@ -8,7 +8,7 @@ Ein Analysewerkzeug für `fio`-Benchmark-Logs mit grafischer Oberfläche und sta
 
 - **JavaFX Library**  
   [https://gluonhq.com/products/javafx/](https://gluonhq.com/products/javafx/)  
-  → Den Ordner `lib` aus `javafx-sdk-21.0.1/lib` ins `target/`-Verzeichnis kopieren.
+  → NUR den Ordner `lib` aus `javafx-sdk-21.0.1/lib` ins `target/`-Verzeichnis kopieren nicht `javafx-sdk-21.0.1`.
 
 - **OpenJDK 21**
 
