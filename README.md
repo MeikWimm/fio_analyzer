@@ -81,7 +81,7 @@ Diese Dokumentation beschreibt die verfügbaren Einstellungen und deren Bedeutun
 - **Standardwert**: Deaktiviert.
 
 ### Required runs for steady state
-- **Beschreibung**: Aktiviert die Bonferroni-Korrektur zur statistischen Analyse.
+- **Beschreibung**: Mindestanzahl aufeinanderfolgender Runs, die erforderlich sind, um einen stabilen Zustand festzulegen.
 - **Standardwert**: 5.
 - **Maximal Wert**: 10.
 - **Minimal Wert**: 2.
