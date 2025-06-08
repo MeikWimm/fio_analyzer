@@ -34,7 +34,7 @@ public class Run /*Section*/ {
     private double qVal = UNDEFINED_DOUBLE_VALUE;
     private double tVal = UNDEFINED_DOUBLE_VALUE;
     private double cov = UNDEFINED_DOUBLE_VALUE;
-    private double rciw = UNDEFINED_DOUBLE_VALUE;
+    private byte isOverlapping = Run.UNDEFIND_NULLHYPOTHESIS; // TODO make a different byte declaration
     private double startTime = UNDEFINED_DOUBLE_VALUE;
     private double endTime = UNDEFINED_DOUBLE_VALUE;
     private double duration = UNDEFINED_DOUBLE_VALUE;
@@ -74,7 +74,7 @@ public class Run /*Section*/ {
         this.cov = other.getCoV();
         this.p = other.getP();
         this.group = other.group;
-        this.rciw = other.getRCIW();
+        this.isOverlapping = other.getOverlap();
     }
 
     private void calculateRun() {
@@ -133,12 +133,12 @@ public class Run /*Section*/ {
         return Math.abs(this.intervalTo - this.intervalFrom);
     }
     
-    public double getRCIW(){
-        return this.rciw;
+    public byte getOverlap(){
+        return this.isOverlapping;
     }
     
-    public void setRCIW(double rciw){
-        this.rciw = rciw;
+    public void setOverlap(byte isOverlapping){
+        this.isOverlapping = isOverlapping;
     }
 
     public double getStartTime() {

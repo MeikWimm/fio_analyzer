@@ -45,6 +45,25 @@ public abstract class Utils {
         };
     }
 
+    public static Callback<TableColumn<Run, Byte>, TableCell<Run, Byte>> getBooleanCellFactory() {
+        return (TableColumn<Run, Byte> col) -> new TableCell<Run, Byte>() {
+            @Override
+            public void updateItem(Byte item, boolean empty) {
+                super.updateItem(item, empty);
+                if (Objects.equals(item, Run.UNDEFIND_NULLHYPOTHESIS) || item == null) {
+                    setText("");
+                    setStyle("");
+                } else if (item.equals(Run.REJECTED_NULLHYPOTHESIS)) {
+                    //setStyle("-fx-background-color: tomato;");
+                    setText("No");
+                } else {
+                    //setStyle("-fx-background-color: green;");
+                    setText("Yes");
+                }
+            }
+        };
+    }
+
     /**
      * Formatter for Logger
      *
