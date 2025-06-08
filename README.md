@@ -80,6 +80,12 @@ Diese Dokumentation beschreibt die verfügbaren Einstellungen und deren Bedeutun
 - **Beschreibung**: Aktiviert die Bonferroni-Korrektur zur statistischen Analyse.
 - **Standardwert**: Deaktiviert.
 
+### Required runs for steady state
+- **Beschreibung**: Aktiviert die Bonferroni-Korrektur zur statistischen Analyse.
+- **Standardwert**: 5.
+- **Maximal Wert**: 10.
+- **Minimal Wert**: 2.
+
 ---
 
 ## Statistische Tests
