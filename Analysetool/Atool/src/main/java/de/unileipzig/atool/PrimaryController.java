@@ -47,8 +47,7 @@ public class PrimaryController implements Initializable {
     public Label labelLoadInfo;
     @FXML
     public TableView<Job> table;
-    @FXML
-    public TableColumn<Job, String> IDColumn;
+    @FXML public TableColumn<Job, String> IDColumn;
     @FXML
     public TableColumn<Job, String> fileNameColumn;
     @FXML
@@ -61,8 +60,7 @@ public class PrimaryController implements Initializable {
     public TableColumn<Job, String> lastModifiedColumn;
     @FXML
     public TableColumn<Job, String> fileCreatedColumn;
-    @FXML
-    public TableColumn<Job, Double> epsilonColumn;
+    @FXML public TableColumn<Job, Double> epsilonColumn;
     @FXML public TableColumn<Job, Double> alphaColumn;
     @FXML public TableColumn<Job, Double> cvColumn;
     @FXML public TableColumn<Job, Double> rciwColumn;
@@ -193,6 +191,7 @@ public class PrimaryController implements Initializable {
         Job job = row.getItem();
         ConInt conInt = new ConInt(job, settings, job.getAlpha());
         conInt.calculate();
+        conInt.calculateSteadyState();
         conInt.openWindow();
     }
 

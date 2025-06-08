@@ -24,6 +24,7 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.ConsoleHandler;
@@ -51,35 +52,23 @@ public class ConInt extends GenericTest implements Initializable {
     private final Charter charter;
     private final List<XYChart.Data<Number, Number>> conIntData;
     private final List<XYChart.Data<Number, Number>> windowedRCIWData;
-    @FXML
-    public Label labelHeader;
-    @FXML
-    public Button drawConIntDiffButton;
-    @FXML
-    public Button drawWindowedRCIWButton;
-    @FXML
-    public TableView<Run> conIntTable;
-    @FXML
-    public TableColumn<Run, Integer> runsColumn;
-    @FXML
-    public TableColumn<Run, Double> averageSpeedColumn;
-    @FXML
-    public TableColumn<Run, Double> intervalFromColumn;
-    @FXML
-    public TableColumn<Run, Double> intervalToColumn;
-    @FXML
-    public TableColumn<Run, Double> plusMinusValueColumn;
-    @FXML
-    public TableColumn<Run, Double> standardDeviationColumn;
-    @FXML
-    public TableColumn<Run, String> compareToRunColumn;
-    @FXML
-    public TableColumn<Run, Double> overlappingColumn;
+    @FXML public Label labelHeader;
+    @FXML public Button drawConIntDiffButton;
+    @FXML public Button drawWindowedRCIWButton;
+    @FXML public TableView<Run> conIntTable;
+    @FXML public TableColumn<Run, Integer> runsColumn;
+    @FXML public TableColumn<Run, Double> averageSpeedColumn;
+    @FXML public TableColumn<Run, Double> intervalFromColumn;
+    @FXML public TableColumn<Run, Double> intervalToColumn;
+    @FXML public TableColumn<Run, Double> plusMinusValueColumn;
+    @FXML public TableColumn<Run, Double> standardDeviationColumn;
+    @FXML public TableColumn<Run, String> compareToRunColumn;
+    @FXML public TableColumn<Run, Double> overlappingColumn;
     @FXML public Label steadyStateLabel;
 
 
     public ConInt(Job job,Settings settings, double alpha) {
-        super(job, settings.getConIntSkipRunsCounter(), settings.isConIntUseAdjacentRun(), 2, alpha, settings.isBonferroniConIntSelected());
+        super(job, settings.getConIntSkipRunsCounter(), settings.isConIntUseAdjacentRun(), 2, alpha, settings.isBonferroniConIntSelected(), settings.getRequiredRunsForSteadyState());
         int dataSize = this.job.getData().size();
         charter = new Charter();
         conIntData = new ArrayList<>(dataSize);
@@ -156,28 +145,23 @@ public class ConInt extends GenericTest implements Initializable {
         for (List<Run> runs : this.groups) {
             for (int i = 0; i < runs.size() - 1; i++) {
                 Run run = runs.get(i);
+                //TODO job average verwenden nicht run average. Auch Labeling sagt job Average
                 double RCIW = Math.abs(run.getIntervalFrom() - run.getIntervalTo()) / run.getAverageSpeed();
                 run.setRCIW(RCIW);
                 this.resultRuns.add(run);
                 conIntData.add(new XYChart.Data<>(runs.get(i).getRunID(), RCIW));
             }
         }
-
-        for (Run run : this.resultRuns) {
-            calculateSteadyStateInterval(run, run.getRCIW());
-        }
     }
 
-    private void calculateSteadyStateInterval(Run run, double value) {
-        if (value < this.job.getRciwThreshold()) {
-            possibleSteadyStateRuns.add(run);
-        }
+    @Override
+    protected double extractValue(Run run) {
+        return run.getRCIW();
+    }
 
-        if (possibleSteadyStateRuns.isEmpty()) {
-            LOGGER.log(Level.WARNING, String.format("No steady state found for value %s", value));
-        } else {
-            LOGGER.log(Level.INFO, String.format("Found steady state at Run %d for value %s", possibleSteadyStateRuns.getFirst().getID(), value));
-        }
+    @Override
+    protected boolean isWithinThreshold(double value) {
+        return value < this.job.getRciwThreshold();
     }
 
     public void calculateSWindowedRCIW() {
@@ -192,8 +176,8 @@ public class ConInt extends GenericTest implements Initializable {
         }
 
         double alpha = job.getAlpha();
-        double averageSpeed = average(windowData);
-        double std = standardDeviation(windowData);
+        double averageSpeed = MathUtils.average(windowData);
+        double std = MathUtils.standardDeviation(windowData);
         double z = normDis.inverseCumulativeProbability(1.0 - alpha / 2.0);
 
         double c1 = averageSpeed - (z * (std / Math.sqrt(windowSize)));
@@ -210,8 +194,8 @@ public class ConInt extends GenericTest implements Initializable {
                 windowData[j] = data.get(i + j).getSpeed();
             }
 
-            averageSpeed = average(windowData);
-            std = standardDeviation(windowData);
+            averageSpeed = MathUtils.average(windowData);
+            std = MathUtils.standardDeviation(windowData);
             c1 = averageSpeed - (z * (std / Math.sqrt(windowSize)));
             c2 = averageSpeed + (z * (std / Math.sqrt(windowSize)));
             RCIW = Math.abs(c1 - c2) / averageSpeed;
@@ -235,82 +219,6 @@ public class ConInt extends GenericTest implements Initializable {
                 }
             }
         }
-    }
-//
-//    public void calculateWindowedRCIWEfficient() {
-//        NormalDistribution normDis = new NormalDistribution();
-//        int windowSize = WINDOW_SIZE;
-//        List<DataPoint> data = this.job.getRuns().getFirst().getData();
-//        double alpha = job.getAlpha();
-//        double z = normDis.inverseCumulativeProbability(1.0 - alpha / 2.0);
-//
-//        if (data.size() < windowSize) return;
-//
-//        double sum = 0.0;
-//        double sumSq = 0.0;
-//
-//        for (int i = 0; i < windowSize; i++) {
-//            double speed = data.get(i).getSpeed();
-//            sum += speed;
-//            sumSq += speed * speed;
-//        }
-//
-//        for (int i = 0; i <= data.size() - windowSize; i++) {
-//            double avg = sum / windowSize;
-//            double variance = (sumSq - (sum * sum) / windowSize) / (windowSize - 1);
-//            double std = Math.sqrt(variance);
-//
-//            double c1 = avg - (z * (std / Math.sqrt(windowSize)));
-//            double c2 = avg + (z * (std / Math.sqrt(windowSize)));
-//            double RCIW = Math.abs(c1 - c2) / avg;
-//
-//            windowedRCIWData.add(new XYChart.Data<>(data.get(i).getTime(), RCIW));
-//
-//            if (i + windowSize < data.size()) {
-//                double out = data.get(i).getSpeed();
-//                double in = data.get(i + windowSize).getSpeed();
-//
-//                sum -= out;
-//                sumSq -= out * out;
-//
-//                sum += in;
-//                sumSq += in * in;
-//            }
-//        }
-//    }
-
-
-    private static double average(double[] data) {
-        if (data == null || data.length == 0) {
-            throw new IllegalArgumentException("Data array must not be null or empty.");
-        }
-
-        double sum = 0.0;
-        for (double d : data) {
-            sum += d;
-        }
-
-        return sum / data.length;
-    }
-
-    private static double standardDeviation(double[] data) {
-        if (data == null || data.length < 2) {
-            throw new IllegalArgumentException("Data array must contain at least two elements.");
-        }
-
-        double mean = 0.0;
-        for (double d : data) {
-            mean += d;
-        }
-        mean /= data.length;
-
-        double sumSquaredDiffs = 0.0;
-        for (double d : data) {
-            double diff = d - mean;
-            sumSquaredDiffs += diff * diff;
-        }
-
-        return Math.sqrt(sumSquaredDiffs / (data.length - 1));  // Sample standard deviation
     }
 
     public void openWindow() {
@@ -338,11 +246,12 @@ public class ConInt extends GenericTest implements Initializable {
     }
 
     private void setLabeling() {
-        if(possibleSteadyStateRuns.isEmpty()){
+        Run run = this.getSteadyStateRun();
+        if(run == null){
             steadyStateLabel.setText("No steady state found");
             return;
         }
 
-        steadyStateLabel.setText("Run " + possibleSteadyStateRuns.getFirst().getID());
+        steadyStateLabel.setText("at run " + getSteadyStateRun().getID() + " | time: " + getSteadyStateRun().getStartTime());
     }
 }

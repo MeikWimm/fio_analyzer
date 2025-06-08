@@ -19,7 +19,7 @@ public class CUSUM extends GenericTest{
     private final int WINDOW_SIZE;
 
     public CUSUM(Job job, Settings settings, double alpha) {
-        super(job, settings.getCusumSkipRunsCounter(), settings.isCusumUseAdjacentRun(), 2, alpha, true);
+        super(job, settings.getCusumSkipRunsCounter(), settings.isCusumUseAdjacentRun(), 2, alpha, true, settings.getRequiredRunsForSteadyState());
         this.charter = new Charter();
         int dataSize = this.job.getData().size();
         this.cusumPosData = new ArrayList<>(dataSize);
@@ -65,6 +65,16 @@ public class CUSUM extends GenericTest{
 
         this.title = "The CUSUM method involved comparing the average of each run to the overall job average";
         this.label = "Run";
+    }
+
+    @Override
+    protected double extractValue(Run run) {
+        return 0;
+    }
+
+    @Override
+    protected boolean isWithinThreshold(double value) {
+        return false;
     }
 
     public void calculateWindowedRuns() {

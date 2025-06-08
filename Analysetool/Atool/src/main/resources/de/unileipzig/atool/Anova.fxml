@@ -11,12 +11,13 @@
    <children>
       <TableView id="anovaTable" fx:id="anovaTable" prefHeight="426.0" prefWidth="800.0">
          <columns>
-            <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="31.0" text="Run" />
-            <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="192.0" text="Measurment" />
-            <TableColumn id="covColumn" fx:id="covColumn" prefWidth="75.0" text="CoV (%)" />
-            <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="180.0" text="Compare to Run" />
-            <TableColumn id="FColumn" fx:id="FColumn" prefWidth="173.0" text="F (calculated)" />
-            <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="223.0" text="Nullhypothesis" />
+            <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="38.0" text="Run" />
+            <TableColumn id="startTimeColumn" fx:id="startTimeColumn" prefWidth="119.0" text="Start time" />
+            <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="137.0" text="Measurment" />
+            <TableColumn id="covColumn" fx:id="covColumn" prefWidth="78.0" text="CoV (%)" />
+            <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="207.0" text="Compare to Run" />
+            <TableColumn id="FColumn" fx:id="FColumn" prefWidth="77.0" text="F (calculated)" />
+            <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="285.0" text="Nullhypothesis" />
          </columns>
       </TableView>
       <Pane id="anovaPane" fx:id="anovaPane" prefHeight="158.0" prefWidth="800.0">

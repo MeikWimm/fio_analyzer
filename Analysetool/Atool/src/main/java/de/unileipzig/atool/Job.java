@@ -33,11 +33,11 @@ public class Job {
     public final static Double MIN_EPSILON = 1.0;
 
     public final static Double DEFAULT_CV_THRESHOLD = .2;
-    public final static Double MAX_CV_THRESHOLD = .3;
-    public final static Double MIN_CV_THRESHOLD = .1;
+    public final static Double MAX_CV_THRESHOLD = .6;
+    public final static Double MIN_CV_THRESHOLD = .05;
 
     public final static Double DEFAULT_RCIW_THRESHOLD = .02;
-    public final static Double MAX_RCIW_THRESHOLD = .05;
+    public final static Double MAX_RCIW_THRESHOLD = .08;
     public final static Double MIN_RCIW_THRESHOLD = .01;
 
     private static int COUNTER = 1; // so that each Job has a unique ID

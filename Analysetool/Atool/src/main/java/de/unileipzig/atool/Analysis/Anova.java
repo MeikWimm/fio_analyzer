@@ -25,10 +25,7 @@ import org.apache.commons.math3.distribution.FDistribution;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,7 +35,6 @@ import java.util.logging.Logger;
  */
 public class Anova extends GenericTest implements Initializable {
     private static final Logger LOGGER = Logger.getLogger(Anova.class.getName());
-    private static final double STEADY_STATE_COV_THRESHOLD = .3;
 
     static {
         ConsoleHandler handler = new ConsoleHandler();
@@ -48,57 +44,40 @@ public class Anova extends GenericTest implements Initializable {
         LOGGER.addHandler(handler);
     }
 
-    private final int WINDOW_SIZE;
     private final List<XYChart.Data<Number, Number>> anovaData;
-    private final List<XYChart.Data<Number, Number>> covData;
-    private final List<XYChart.Data<Number, Number>> covAveragedData;
     private final Charter charter;
-    @FXML
-    public Label averageSpeedLabel;
-    @FXML
-    public Label sseLabel;
-    @FXML
-    public Label ssaLabel;
-    @FXML
-    public Label sstLabel;
-    @FXML
-    public Label ssaSstLabel;
+    @FXML public Label averageSpeedLabel;
+    @FXML public Label sseLabel;
+    @FXML public Label ssaLabel;
+    @FXML public Label sstLabel;
+    @FXML public Label ssaSstLabel;
     @FXML public Label sseSstLabel;
-    @FXML
-    public Label fCriticalLabel;
-    @FXML
-    public Label fCalculatedLabel;
-    @FXML
-    public Button showFGraphButton;
-    @FXML
-    public Button showCoVGraph;
+    @FXML public Label fCriticalLabel;
+    @FXML public Label fCalculatedLabel;
+    @FXML public Button showFGraphButton;
+    @FXML public Button showCoVGraph;
     @FXML public Button showWinCoVGraph;
     @FXML public Label sigmaJobLabel;
     @FXML public Label steadyStateLabel;
     @FXML public Label steadyStateCVLabel;
-    @FXML
-    public Pane anovaPane;
-    @FXML
-    public TableView<Run> anovaTable;
-    @FXML
-    public TableColumn<Run, Double> averageSpeedColumn;
+    @FXML public Pane anovaPane;
+    @FXML public TableView<Run> anovaTable;
+    @FXML public TableColumn<Run, Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, Double> covColumn;
+    @FXML public TableColumn<Run, Double> startTimeColumn;
     @FXML public TableColumn<Run, String> compareToRunColumn;
     @FXML public TableColumn<Run, Double> FColumn;
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
+    private final CoV cov;
     private double fCrit;
-    private final List<Run> possibleCVSteadyStateRuns;
 
     public Anova(Job job, Settings settings, double alpha) {
-        super(job, settings.getAnovaSkipRunsCounter(), settings.isAnovaUseAdjacentRun(), settings.getGroupSize(), alpha, settings.isBonferroniANOVASelected());
-        this.charter = new Charter();
+        super(job, settings.getAnovaSkipRunsCounter(), settings.isAnovaUseAdjacentRun(), settings.getGroupSize(), alpha, settings.isBonferroniANOVASelected() , settings.getRequiredRunsForSteadyState());
         final int dataSize = job.getData().size();
+        this.cov = new CoV(job, settings);
+        this.charter = new Charter();
         this.anovaData = new ArrayList<>(dataSize);
-        this.covData = new ArrayList<>(dataSize);
-        this.covAveragedData = new ArrayList<>(dataSize);
-        this.possibleCVSteadyStateRuns = new ArrayList<>();
-        WINDOW_SIZE = settings.getWindowSize();
     }
 
     @Override
@@ -110,6 +89,7 @@ public class Anova extends GenericTest implements Initializable {
         covColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
+        startTimeColumn.setCellValueFactory(new PropertyValueFactory<>("StartTime"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
 
         FColumn.setCellValueFactory(new PropertyValueFactory<>("F"));
@@ -128,8 +108,8 @@ public class Anova extends GenericTest implements Initializable {
         });
 
         showFGraphButton.setOnAction(e -> drawANOVAGraph());
-        showCoVGraph.setOnAction(e -> drawAveragedCoVGraph());
-        showWinCoVGraph.setOnAction(e -> drawCoVGraph());
+        showCoVGraph.setOnAction(e -> cov.drawAveragedCoVGraph());
+        showWinCoVGraph.setOnAction(e -> cov.drawCoVGraph());
 
         anovaTable.setItems(this.job.getFilteredRuns());
 
@@ -159,70 +139,33 @@ public class Anova extends GenericTest implements Initializable {
             steadyStateLabel.setText("at run " + this.possibleSteadyStateRuns.getFirst().getID());
         }
 
-        if(this.possibleCVSteadyStateRuns.isEmpty()){
+        if(cov.getSteadyStateRun() == null){
             steadyStateCVLabel.setText("No steady state CV found.");
         } else {
-            steadyStateCVLabel.setText("at run " + this.possibleCVSteadyStateRuns.getFirst().getID());
+            steadyStateCVLabel.setText("at run " + cov.getSteadyStateRun().getID() + " | time: " + cov.getSteadyStateRun().getStartTime());
         }
 
     }
-
-
 
     @Override
     public void calculate() {
-        calculateAnovaAndCoV();
-        calculateWindowedCoV();
+        calculateAnova();
+        CoV.calculateCoVGroups(this.groups);
+        cov.calculate();
+        cov.calculateSteadyState();
     }
 
-    private void calculateWindowedCoV() {
-        int initWindow = WINDOW_SIZE;
-        int windowSize = WINDOW_SIZE;
-        double sum = 0;
-        //double k = 0.5;           // Slack value
-
-        List<DataPoint> data = this.job.getData();
-        List<Double> windowList = new ArrayList<>();
-        for (int i = 0; i < initWindow; i++) {
-            sum += data.get(i).getSpeed();
-            windowList.add(data.get(i).getSpeed());
-        }
-        double targetMean = sum / initWindow;
-        //double time = data.get(i).getTime();
-        double cov = Math.sqrt(GenericTest.variance(windowList, targetMean)) / targetMean;
-        covAveragedData.add(new XYChart.Data<>(data.getFirst().getTime(), cov));
-
-        for (int i = 1; i < data.size() - windowSize; i++) {
-            sum = 0;
-            int nextWindow = windowSize + i;
-            for (int j = i; j < nextWindow; j++) {
-                if (j < data.size()) {
-                    windowList.add(data.get(j).getSpeed());
-                    sum += data.get(j).getSpeed();
-                }
-            }
-            targetMean = sum / windowSize;
-            double time = data.get(i).getTime();
-            cov = Math.sqrt(GenericTest.variance(windowList, targetMean)) / targetMean;
-            covAveragedData.add(new XYChart.Data<>(time, cov));
-            windowList.clear();
-        }
-
-
-        // Using the average cov of the job and compare it to the windowed cov
-//        double sumCoV = 0;
-//        for (XYChart.Data<Number, Number> covDatum : covData) {
-//            sumCoV += (double) covDatum.getYValue();
-//        }
-//        double averageCoV = sumCoV / covData.size();
-
-//        for (XYChart.Data<Number, Number> covDatum : covData) {
-//            double cov = (double) covDatum.getYValue();
-//            covAveragedData.add(new XYChart.Data<>(covDatum.getXValue(), cov));
-//        }
+    @Override
+    protected double extractValue(Run run) {
+        return run.getF();
     }
 
-    private void calculateAnovaAndCoV() {
+    @Override
+    protected boolean isWithinThreshold(double value) {
+        return value < this.fCrit;
+    }
+
+    private void calculateAnova() {
         int num = this.groups.size() - 1;
         int denom = (num + 1) * (this.job.getData().size() - 1);
 
@@ -245,7 +188,7 @@ public class Anova extends GenericTest implements Initializable {
         for (List<Run> group : this.groups) {
             for (Run run : group) {
                 double averageSpeedOfRun = run.getAverageSpeed();
-                ssa += Math.pow(averageSpeedOfRun - GenericTest.average(group), 2);
+                ssa += Math.pow(averageSpeedOfRun - MathUtils.average(group), 2);
                 ssa *= run.getData().size();
                 run.setSSA(ssa);
                 ssa = 0;
@@ -256,7 +199,7 @@ public class Anova extends GenericTest implements Initializable {
         for (List<Run> group : this.groups) {
             for (Run run : group) {
                 for (DataPoint dp : run.getData()) {
-                    sse += (Math.pow((dp.getSpeed() - GenericTest.average(group)), 2));
+                    sse += (Math.pow((dp.getSpeed() - MathUtils.average(group)), 2));
                 }
                 run.setSSE(sse);
                 sse = 0;
@@ -264,15 +207,11 @@ public class Anova extends GenericTest implements Initializable {
         }
 
         double fValue;
-        double cov;
         for (List<Run> group : this.groups) {
             Run run = group.getFirst();
-            //cov = GenericTest.calculateCoVOverStd(this.job.getStandardDeviation(), group);
-            cov = GenericTest.calculateCoV(group);
             double s_2_a = run.getSSA() / (this.groups.size() - 1);
             double s_2_e = run.getSSE() / (this.groups.size() * (run.getData().size() - 1));
             fValue = s_2_a / s_2_e;
-            run.setCoV(cov);
             run.setF(fValue);
             run.setP(1.0 - fDistribution.cumulativeProbability(fValue));
 
@@ -285,12 +224,10 @@ public class Anova extends GenericTest implements Initializable {
 
             this.resultRuns.add(run);
             anovaData.add(new XYChart.Data<>(run.getID(), fValue));
-            covData.add(new XYChart.Data<>(run.getID(), cov));
         }
 
         double totalSSE = 0;
         for (Run run : this.resultRuns) {
-            calculateSteadyStateInterval(run, run.getCoV());
             totalSSE += run.getSSE();
         }
 
@@ -298,29 +235,8 @@ public class Anova extends GenericTest implements Initializable {
         this.job.setMSE(totalSSE / denom);
     }
 
-    private void calculateSteadyStateInterval(Run run, double value) {
-        if (value < this.job.getCvThreshold()) {
-            possibleCVSteadyStateRuns.add(run);
-        }
-
-        if (possibleCVSteadyStateRuns.isEmpty()) {
-            LOGGER.log(Level.WARNING, String.format("No steady state found for value %s", value));
-        } else {
-            LOGGER.log(Level.INFO, String.format("Found steady state at Run %d for value %s", possibleCVSteadyStateRuns.getFirst().getID(), value));
-        }
-    }
-
     private void drawANOVAGraph() {
-
         charter.drawGraph("ANOVA", "Run", "F-Value", "Critical value", this.fCrit, new Charter.ChartData("calculated F", anovaData));
-    }
-
-    private void drawCoVGraph() {
-        charter.drawGraph("Run CoV", "Per run", "F-Value", "Threshold", this.job.getCvThreshold(), new Charter.ChartData("CV over Job", covData));
-    }
-
-    private void drawAveragedCoVGraph() {
-        charter.drawGraph("CoV Windowed", "Job", "F-Value", new Charter.ChartData("Windowed CV over Job", covAveragedData));
     }
 
     public double getCriticalValue() {

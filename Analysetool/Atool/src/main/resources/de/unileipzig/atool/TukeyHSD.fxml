@@ -11,8 +11,8 @@
    <children>
       <TableView id="TukeyTable" fx:id="TukeyTable" prefHeight="499.0" prefWidth="800.0">
          <columns>
-            <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="31.0" text="Run" />
-            <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="119.0" text="Measurment" />
+            <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="54.0" text="Group" />
+            <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="96.0" text="Measurment" />
             <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="119.0" text="Groups" />
             <TableColumn id="QColumn" fx:id="QColumn" prefWidth="123.0" text="Mean" />
             <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="123.0" text="Nullhypothesis" />
