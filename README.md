@@ -33,7 +33,6 @@ Ein Analysewerkzeug für `fio`-Benchmark-Logs mit grafischer Oberfläche und sta
   - **Runs** (zwischen `1` und `1000`)
   - **Alpha** (zwischen `0.0001` und `0.9999`)
   - **CV Threshold** (zwischen `0.1` und `0.3`)
-  - **RCIW Threshold** (zwischen `0.01` und `0.05`)  
     → Einfach auf die jeweilige Zahl klicken und bearbeiten und mit [Enter] bestätigen.
 - Sobald das Verzeichnis gesetzt ist, können mit dem **Refresh-Button** neue Logs geladen werden, wenn neue Dateien im Verzeichnis auftauchen.
 - Mit **Rechtsklick** auf die Items in der Tabelle können statistische Tests ausgewählt werden.
