@@ -24,7 +24,6 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.ConsoleHandler;
@@ -63,7 +62,8 @@ public class ConInt extends GenericTest implements Initializable {
     @FXML public TableColumn<Run, Double> plusMinusValueColumn;
     @FXML public TableColumn<Run, Double> standardDeviationColumn;
     @FXML public TableColumn<Run, String> compareToRunColumn;
-    @FXML public TableColumn<Run, Double> overlappingColumn;
+    @FXML public TableColumn<Run, Byte> overlappingColumn;
+    @FXML public TableColumn<Run, Byte> hypothesisColumn;
     @FXML public Label steadyStateLabel;
 
 
@@ -94,8 +94,10 @@ public class ConInt extends GenericTest implements Initializable {
         standardDeviationColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         compareToRunColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getGroup()));
-        overlappingColumn.setCellValueFactory(new PropertyValueFactory<>("RCIW"));
-        overlappingColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
+        overlappingColumn.setCellValueFactory(new PropertyValueFactory<>("Overlap"));
+        overlappingColumn.setCellFactory(Utils.getBooleanCellFactory()); //TODO currently workaround and bad name
+        hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
+        hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
         drawConIntDiffButton.setOnAction(e -> draw());
         drawWindowedRCIWButton.setOnAction(e -> drawWindowedRCIW());
@@ -128,8 +130,11 @@ public class ConInt extends GenericTest implements Initializable {
     @Override
     public void calculate() {
         NormalDistribution normDis = new NormalDistribution();
-        double dataSize = this.job.getRuns().getFirst().getData().size();
+        double dataSize = this.job.getRunDataSize();
 
+        /*
+        Calculate first the intervals
+         */
         for (Run run : this.job.getRuns()) {
             double averageSpeed = run.getAverageSpeed();
             double alpha = job.getAlpha();
@@ -140,28 +145,70 @@ public class ConInt extends GenericTest implements Initializable {
 
             double c2 = averageSpeed + (normDis.inverseCumulativeProbability(1.0 - alpha / 2.0) * (std / Math.sqrt(dataSize)));
             run.setIntervalTo(c2);
+
+           // double RCIW = Math.abs(run.getIntervalFrom() - run.getIntervalTo()) / this.job.getAverageSpeed();
+           // run.setRCIW(RCIW);
         }
 
+        /*
+        Look for overlapping intervals
+         */
         for (List<Run> runs : this.groups) {
-            for (int i = 0; i < runs.size() - 1; i++) {
-                Run run = runs.get(i);
-                //TODO job average verwenden nicht run average. Auch Labeling sagt job Average
-                double RCIW = Math.abs(run.getIntervalFrom() - run.getIntervalTo()) / run.getAverageSpeed();
-                run.setRCIW(RCIW);
-                this.resultRuns.add(run);
-                conIntData.add(new XYChart.Data<>(runs.get(i).getRunID(), RCIW));
-            }
+            Run run1 = runs.get(0);
+            Run run2 = runs.get(1);
+            double a1 = run1.getIntervalFrom();
+            double a2 = run2.getIntervalFrom();
+            double b1 = run1.getIntervalTo();
+            double b2 = run2.getIntervalTo();
+            run1.setOverlap(doConfidenceIntervalsOverlap(a1, b1, a2, b2));
+
+            double averageSpeed1 = run1.getAverageSpeed();
+            double averageSpeed2 = run2.getAverageSpeed();
+            double alpha = job.getAlpha();
+            double std1 = run1.getStandardDeviation();
+            double dataSize1 = run1.getData().size();
+            double std2 = run2.getStandardDeviation();
+            double dataSize2 = run1.getData().size();
+            /*
+            Calculate new interval
+             */
+            double s_x = Math.sqrt((Math.pow(std1, 2) / dataSize1) + (Math.pow(std2, 2)  / dataSize2));
+            double x = averageSpeed1 - averageSpeed2;
+            double y = s_x * normDis.inverseCumulativeProbability(1.0 - alpha / 2.0);
+            double c1 = x - y;
+            double c2 = x + y;
+
+            run1.setNullhypothesis(doesIntervalContainZero(c1, c2));
+            this.resultRuns.add(run1);
+        }
+    }
+
+    private byte doConfidenceIntervalsOverlap(double a1, double b1, double a2, double b2) {
+        //TODO add extra byte type
+        if(Math.max(a1, a2) <= Math.min(b1, b2)){
+            return Run.ACCEPTED_NULLHYPOTHESIS;
+        } else {
+            return Run.REJECTED_NULLHYPOTHESIS;
+        }
+    }
+
+    private byte doesIntervalContainZero(double lowerBound, double upperBound) {
+        //TODO add extra byte type
+        if(lowerBound <= 0 && upperBound >= 0){
+            return Run.ACCEPTED_NULLHYPOTHESIS;
+        } else {
+            return Run.REJECTED_NULLHYPOTHESIS;
         }
     }
 
     @Override
     protected double extractValue(Run run) {
-        return run.getRCIW();
+        return run.getNullhypothesis();
     }
 
     @Override
     protected boolean isWithinThreshold(double value) {
-        return value < this.job.getRciwThreshold();
+        return value == Run.ACCEPTED_NULLHYPOTHESIS;
     }
 
     public void calculateSWindowedRCIW() {
