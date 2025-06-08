@@ -175,6 +175,40 @@ InputModule {
         }
         return result;
     }
+
+//    private void readWholeData(File file) {
+//        List<DataPoint> data = new ArrayList<>(); // Point2D for x = time and y = speed
+//        Map<Integer, Integer> freq = new TreeMap<>();
+//        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+//            this.fileAttribute = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+//            String line = br.readLine();
+//            int[] values = parseFirstTwoValues(line);
+//            int old_time = values[0];
+//            int speed = values[1];
+//            freq.put(speed, 1);
+//            int counter = 1;
+//
+//            while ((line = br.readLine()) != null) {
+//                int[] s = parseFirstTwoValues(line);
+//                int new_time = s[0];
+//                speed = s[1];
+//                old_time = values[0];
+//
+//                freq.merge(speed, 1, Integer::sum);
+//                data.add(new DataPoint(speed, counter));
+//                counter++;
+//
+//            }
+//
+//            this.time = old_time;
+//            this.standardDeviation = calculateDeviation(data, this.averageSpeed);
+//            this.freq = freq;
+//            this.data = data;
+//        } catch (IOException ex) {
+//            ex.printStackTrace();
+//            LOGGER.log(Level.SEVERE, String.format("Error occured while reading file: %s. App state: %s", file.toString(), STATUS.ERROR_WHILE_READING_FILE));
+//        }
+//    }
     
     private void readData(File file) {
         List<DataPoint> data = new ArrayList<>(); // Point2D for x = time and y = speed

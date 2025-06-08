@@ -40,12 +40,20 @@ public class Settings implements Initializable {
     public final static int MAX_SPEED_PER_MIILI = 2000;
     public final static int MIN_SPEED_PER_MIILI = 1;
 
-
-
     public static final int MAX_SKIP_COUNT = 3;
     public static final int MIN_SKIP_COUNT = 0;
     public static final int DEFAULT_SKIP_COUNT = 0;
 
+    public static final int MAX_WINDOW_SIZE = 1000;
+    public static final int MIN_WINDOW_SIZE = 1;
+    public static final int DEFAULT_WINDOW_SIZE = 100;
+
+    public static final int MAX_REQUIRED_RUNS_FOR_STEADY_STATE = 10;
+    public static final int MIN_REQUIRED_RUNS_FOR_STEADY_STATE = 2;
+    public static final int DEFAULT_REQUIRED_RUNS_FOR_STEADY_STATE = 5;
+
+    private double covThreshold = Job.DEFAULT_CV_THRESHOLD;
+    private int requiredRunsForSteadyState = DEFAULT_REQUIRED_RUNS_FOR_STEADY_STATE;
     private int windowSize = 100; // Default window size 100
 
     private int groupSize = 2;
@@ -104,6 +112,7 @@ public class Settings implements Initializable {
     @FXML public Spinner<Integer> skipRunTTestSpinner;
     @FXML public Spinner<Integer> skipRunUTestSpinner;
     @FXML public Spinner<Integer> skipRunCUSUMSpinner;
+    @FXML public Spinner<Integer> requiredRunsForSteadyStateSpinner;
 
     @FXML public Slider avSpeedSlider;
     @FXML public Slider windowSlider;
@@ -136,6 +145,7 @@ public class Settings implements Initializable {
         skipRunTTestSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
         skipRunUTestSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
         skipRunCUSUMSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
+        requiredRunsForSteadyStateSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_REQUIRED_RUNS_FOR_STEADY_STATE, MAX_REQUIRED_RUNS_FOR_STEADY_STATE, DEFAULT_REQUIRED_RUNS_FOR_STEADY_STATE));
 
 //        bonferroniUTestcheckbox.setDisable(true);
 //        bonferroniTTestcheckbox.setDisable(true);
@@ -185,6 +195,7 @@ public class Settings implements Initializable {
         skipRunTTestSpinner.getValueFactory().setValue(tTestSkipRunsCounter);
         skipRunUTestSpinner.getValueFactory().setValue(uTestSkipRunsCounter);
         skipRunCUSUMSpinner.getValueFactory().setValue(cusumSkipRunsCounter);
+        requiredRunsForSteadyStateSpinner.getValueFactory().setValue(requiredRunsForSteadyState);
 
         adjacentRunANOVAcheckbox.setSelected(anovaUseAdjacentRun);
         adjacentRunConIntcheckbox.setSelected(conIntUseAdjacentRun);
@@ -240,6 +251,7 @@ public class Settings implements Initializable {
         tTestSkipRunsCounter = skipRunTTestSpinner.getValue();
         uTestSkipRunsCounter = skipRunUTestSpinner.getValue();
         cusumSkipRunsCounter = skipRunCUSUMSpinner.getValue();
+        requiredRunsForSteadyState = requiredRunsForSteadyStateSpinner.getValue();
 
         isBonferroniANOVASelected = bonferroniANOVAcheckbox.isSelected();
         isBonferroniConIntSelected = bonferroniConIntcheckbox.isSelected();
@@ -338,6 +350,14 @@ public class Settings implements Initializable {
         return cusumSkipRunsCounter;
     }
 
+    public int getRequiredRunsForSteadyState() {
+        return requiredRunsForSteadyState;
+    }
+
+    public void setRequiredRunsForSteadyState(int requiredRunsForSteadyState) {
+        this.requiredRunsForSteadyState = requiredRunsForSteadyState;
+    }
+
     public void updatedSettings() {
         hasChanged = false;
     }
@@ -394,14 +414,13 @@ public class Settings implements Initializable {
         this.groupSize = groupSize;
     }
 
-    //
-//    public void setConversion(CONVERT conversion) {
-//        this.conversion = conversion;
-//    }
-//
-//    public CONVERT getConversion() {
-//        return conversion;
-//    }
+    public double getCovThreshold() {
+        return covThreshold;
+    }
+
+    public void setCovThreshold(double covThreshold) {
+        this.covThreshold = covThreshold;
+    }
 
     public enum CONVERT {
         DEFAULT, // KIBI_BYTE

@@ -37,7 +37,7 @@ import net.sourceforge.jdistlib.Tukey;
  *
  * @author meni1999
  */
-public class TukeyHSD extends PostHocTest implements Initializable, PostHocAnalyzer {
+public class TukeyHSD extends PostHocTest implements Initializable {
     private static final Logger LOGGER = Logger.getLogger( TukeyHSD.class.getName() );
 
     static {

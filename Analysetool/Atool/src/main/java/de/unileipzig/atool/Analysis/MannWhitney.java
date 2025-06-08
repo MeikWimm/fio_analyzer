@@ -79,7 +79,7 @@ public class MannWhitney extends GenericTest implements Initializable {
     private double zCrit;
 
     public MannWhitney(Job job,Settings settings, double alpha) {
-        super(job, settings.getUTestSkipRunsCounter(), settings.isUTestUseAdjacentRun(), 2, alpha, settings.isBonferroniUTestSelected());
+        super(job, settings.getUTestSkipRunsCounter(), settings.isUTestUseAdjacentRun(), 2, alpha, settings.isBonferroniUTestSelected(), settings.getRequiredRunsForSteadyState());
         this.charter = new Charter();
         this.uTestData = new ArrayList<>();
     }
@@ -107,11 +107,10 @@ public class MannWhitney extends GenericTest implements Initializable {
         if(this.getSteadyStateRun() == null){
             steadyStateLabel.setText("No steady state run found.");
         } else {
-            steadyStateLabel.setText("at run " + this.getSteadyStateRun().getID());
+            steadyStateLabel.setText("at run " + getSteadyStateRun().getID() + " | time: " + getSteadyStateRun().getStartTime());
         }
     }
 
-    @Override
     public void draw() {
         charter.drawGraph("U-Test", "Run", "Z-Value","z-critical", this.zCrit, new Charter.ChartData("calculated Z", uTestData));
     }
@@ -202,9 +201,6 @@ public class MannWhitney extends GenericTest implements Initializable {
         uTestData.add(new XYChart.Data<>(run1.getRunID(), z));
         this.resultRuns.add(run1);
 
-//        LOGGER.log(Level.INFO, String.format("Run %d compared to Run %d, U_1 = %f and U_2 = %f", run1.getRunID(), run2.getID(), U1, U2));
-//        LOGGER.log(Level.INFO, String.format("calculated p: %f and critical p: %f", pCalc, pCrit));
-//        LOGGER.log(Level.INFO, String.format("Null hypothesis for compared Runs -> %s", Run.HypothesistoString(hypothesis)));
     }
 
     @Override
@@ -219,6 +215,16 @@ public class MannWhitney extends GenericTest implements Initializable {
                 calculatePair(run1, run2);
             }
         }
+    }
+
+    @Override
+    protected double extractValue(Run run) {
+        return run.getZ();
+    }
+
+    @Override
+    protected boolean isWithinThreshold(double value) {
+        return value < this.zCrit;
     }
 
     public void openWindow() {

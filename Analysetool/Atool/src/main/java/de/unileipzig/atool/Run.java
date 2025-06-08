@@ -11,7 +11,7 @@ import java.util.List;
  *
  * @author meni1999
  */
-public class Run {
+public class Run /*Section*/ {
     public static final byte ACCEPTED_NULLHYPOTHESIS = 1;
     public static final byte REJECTED_NULLHYPOTHESIS = 0;
     public static final byte UNDEFIND_NULLHYPOTHESIS = -1;
@@ -35,6 +35,9 @@ public class Run {
     private double tVal = UNDEFINED_DOUBLE_VALUE;
     private double cov = UNDEFINED_DOUBLE_VALUE;
     private double rciw = UNDEFINED_DOUBLE_VALUE;
+    private double startTime = UNDEFINED_DOUBLE_VALUE;
+    private double endTime = UNDEFINED_DOUBLE_VALUE;
+    private double duration = UNDEFINED_DOUBLE_VALUE;
     private int groupID = UNDEFINED_INTEGER;
     private String group = "";
     private double p;
@@ -53,6 +56,10 @@ public class Run {
         for (DataPoint dataPoint: other.getData()){
             this.data.add(new DataPoint(dataPoint));
         }
+        this.startTime = other.getStartTime();
+        this.endTime = other.getEndTime();
+        this.duration = other.getDuration();
+        this.groupID = other.getGroupID();
         this.intervalFrom = other.getIntervalFrom();
         this.intervalTo = other.getIntervalTo();
         this.averageSpeed = other.getAverageSpeed();
@@ -83,6 +90,11 @@ public class Run {
         }
         
         this.standardDeviation = (Math.sqrt((nominator / data.size())));
+
+
+        this.startTime = this.data.getFirst().time;
+        this.endTime = this.data.getLast().time;
+        this.duration = this.endTime - this.startTime;
     }
 
     public List<DataPoint> getData(){      
@@ -127,7 +139,19 @@ public class Run {
     
     public void setRCIW(double rciw){
         this.rciw = rciw;
-    } 
+    }
+
+    public double getStartTime() {
+        return startTime;
+    }
+
+    public double getEndTime() {
+        return endTime;
+    }
+
+    public double getDuration() {
+        return duration;
+    }
 
     public void setIntervalFrom(double d) {
         this.intervalFrom = d;

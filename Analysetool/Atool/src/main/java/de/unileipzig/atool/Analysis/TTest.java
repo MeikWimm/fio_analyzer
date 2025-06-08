@@ -58,7 +58,7 @@ public class TTest extends GenericTest implements Initializable {
     private final List<XYChart.Data<Number, Number>> tData;
 
     public TTest(Job job, Settings settings, double alpha) {
-        super(job, settings.getTTestSkipRunsCounter(), settings.isTTestUseAdjacentRun(), 2, alpha ,settings.isBonferroniTTestSelected());
+        super(job, settings.getTTestSkipRunsCounter(), settings.isTTestUseAdjacentRun(), 2, alpha ,settings.isBonferroniTTestSelected(), settings.getRequiredRunsForSteadyState());
     this.charter = new Charter();
         this.tData = new ArrayList<>();
     }
@@ -85,7 +85,7 @@ public class TTest extends GenericTest implements Initializable {
         if(this.getSteadyStateRun() == null){
             steadyStateLabel.setText("No steady state run found.");
         } else {
-            steadyStateLabel.setText("at run " + this.getSteadyStateRun().getID());
+            steadyStateLabel.setText("at run " + getSteadyStateRun().getID() + " | time: " + getSteadyStateRun().getStartTime());
         }
     }
 
@@ -120,6 +120,16 @@ public class TTest extends GenericTest implements Initializable {
 
             this.resultRuns.add(run);
         }
+    }
+
+    @Override
+    protected double extractValue(Run run) {
+        return run.getT();
+    }
+
+    @Override
+    protected boolean isWithinThreshold(double value) {
+        return value < this.tCrit;
     }
 
     private double calculateVariance(Run run, double sse) {

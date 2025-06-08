@@ -41,6 +41,8 @@ public abstract class PostHocTest {
         }
     }
 
+    public abstract void apply(List<Run> resultWithRuns, List<List<Run>> resultWithGroups);
+
     private static boolean isFound(List<Run> group1, List<Run> group2, Run possibleRun) {
         int ID = possibleRun.getID();
         boolean found = false;
@@ -50,13 +52,13 @@ public abstract class PostHocTest {
         Run lastOfGroup2 = group2.getLast();
 
         // Found if the last run of group1 is the same as the first run of group2
-        // i.e., 4-5 | 5-6 -> 5 possible steady state
-        if(lastOfGroup1.getID() == ID && firstOfGroup2.getID() == ID){
+        // i.e., 4-5 | 5-6 -> 4 possible steady state
+        if(lastOfGroup1.getID() == ID + 1 && firstOfGroup2.getID() == ID + 1){
             found = true;
         }
         // Found if the last run of group1 is the same as the second run of group2
-        // i.e., 4-5 | 6-7 -> 5 possible steady state
-        if(lastOfGroup1.getID() == ID && firstOfGroup2.getID() - 1 == ID){
+        // i.e., 4-5 | 6-7 -> 4 possible steady state
+        if(lastOfGroup1.getID() == ID + 1 && firstOfGroup2.getID() - 1 == ID + 1){
             found = true;
         }
 

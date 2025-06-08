@@ -8,6 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -30,12 +31,12 @@ public abstract class GenericTest {
     protected List<Run> resultRuns;
     protected List<List<Run>> postHocGroups;
     protected List<Run> postHocRuns;
-    //protected Run steadyStateRun;
     protected List<Run> possibleSteadyStateRuns;
     protected double alpha;
     protected boolean skipGroup;
+    protected int thresholdSectionsForSteadyState;
 
-    public GenericTest(Job job, int skipFirstRun, boolean skipGroup, int groupSize, double alpha, boolean applyBonferroni) {
+    public GenericTest(Job job, int skipFirstRun, boolean skipGroup, int groupSize, double alpha, boolean applyBonferroni, int thresholdSectionsForSteadyState) {
         this.job = new Job(job);
         this.job.prepareSkippedData(skipFirstRun);
         this.groups = Job.setupGroups(this.job, skipGroup, groupSize);
@@ -46,165 +47,63 @@ public abstract class GenericTest {
         this.possibleSteadyStateRuns = new ArrayList<>();
         this.skipGroup = skipGroup;
         this.alpha = alpha;
+        this.thresholdSectionsForSteadyState = thresholdSectionsForSteadyState;
         if (applyBonferroni) {
             recalculateAlpha();
         }
     }
 
-    protected static double calculateCoV(List<Run> group) {
-        if (group == null || group.isEmpty()) {
-            throw new IllegalArgumentException("Group cannot be null or empty");
-        }
-
-        double average = average(group);
-        if (average == 0) {
-            throw new IllegalArgumentException("Cannot calculate CoV when mean is zero");
-        }
-
-        double n = 0;
-        double sum = 0;
-
-        for (Run run : group) {
-            if (run == null || run.getData() == null) {
-                throw new IllegalArgumentException("Invalid run data");
-            }
-            for (DataPoint dp : run.getData()) {
-                sum += Math.pow(dp.getSpeed() - average, 2);
-                n++;
-            }
-        }
-
-        if (n <= 1) {
-            throw new IllegalArgumentException("Need at least two data points to calculate CoV");
-        }
-
-        double std = Math.sqrt(sum / (n - 1));
-        return (std / average);
-    }
-
-    public static double average(Run run) {
-        double sum = 0;
-        double n = run.getData().size();
-        for (DataPoint dp : run.getData()) {
-            sum += dp.getSpeed();
-        }
-        return sum / n;
-    }
-
-    public static double average(List<Run> group) {
-        double sum = 0;
-        double n = 0;
-        for (Run run : group) {
-            for (DataPoint dp : run.getData()) {
-                sum += dp.getSpeed();
-                n++;
-            }
-        }
-        return sum / n;
-    }
-
-    // Calculate the median of a sorted list
-    public static double median(Run run) {
-        ArrayList<DataPoint> sorted = new ArrayList<DataPoint>(run.getData());
-        sorted.sort(new Utils.SpeedComparator());
-        int n = sorted.size();
-        if (n % 2 == 1) {
-            return sorted.get(n / 2).getSpeed();
-        } else {
-            return (sorted.get(n / 2 - 1).getSpeed() + sorted.get(n / 2).getSpeed()) / 2.0;
-        }
-    }
-
-    // Calculate the median of a sorted list
-    public static double median(List<DataPoint> data) {
-        ArrayList<DataPoint> sorted = new ArrayList<DataPoint>(data);
-        sorted.sort(new Utils.SpeedComparator());
-        int n = sorted.size();
-        if (n % 2 == 1) {
-            return sorted.get(n / 2).getSpeed();
-        } else {
-            return (sorted.get(n / 2 - 1).getSpeed() + sorted.get(n / 2).getSpeed()) / 2.0;
-        }
-    }
-
-    // Calculate MAD
-    public static double mad(Run run, double median) {
-        List<DataPoint> deviations = new ArrayList<>();
-        for (DataPoint dp : run.getData()) {
-            deviations.add(new DataPoint(Math.abs(dp.getSpeed() - median), dp.getTime()));
-        }
-        deviations.sort(new Utils.SpeedComparator());
-        return median(deviations);
-    }
-
-    public static double variance(Run run) {
-        double sum = 0;
-        double average = average(run);
-        double n = run.getData().size();
-        for (DataPoint dp : run.getData()) {
-            sum += Math.pow(dp.getSpeed() - average, 2);
-        }
-        return sum / (n - 1);
-    }
-
-    public static double variance(List<Double> list, double average) {
-        double sum = 0;
-        double n = list.size();
-        for (Double d : list) {
-            sum += Math.pow(d - average, 2);
-        }
-        return sum / (n - 1);
-    }
-
-    public static double standardError(Run run1, Run run2) {
-        double std = 0;
-        std = Math.sqrt(0.5 * (GenericTest.variance(run1) / run1.getData().size() + GenericTest.variance(run2) / run2.getData().size()));
-        return std;
-    }
-
-    public static double calcualteCoVOverStd(double std, List<Run> group) {
-        return std / average(group);
-    }
-
-    public void recalculateAlpha() {
+    private void recalculateAlpha() {
         this.alpha = this.alpha / this.groups.size();
     }
 
-    public void calculate() {
-    }
+    public abstract void calculate();
+
+    protected abstract double extractValue(Run run);
+
+    protected abstract boolean isWithinThreshold(double value);
 
     public void calculateSteadyState() {
-        Run steadyStateRun;
-        possibleSteadyStateRuns = new ArrayList<>();
-        for (int i = 0; i < this.resultRuns.size() - 2; i++) {
-            boolean found = false;
-            if (i < this.resultRuns.size() - 2) {
-                found = true;
-                if (!skipGroup) {
-                    for (int j = i; j < i + 2; j++) { // Compare 3 groups
-                        steadyStateRun = this.resultRuns.get(j);
-                        if (steadyStateRun.getNullhypothesis() == Run.REJECTED_NULLHYPOTHESIS) {
-                            found = false;
-                        }
+        possibleSteadyStateRuns = new ArrayList<>(thresholdSectionsForSteadyState);
+        boolean isSteadyStateFound = false;
+
+        for (int j = 0; j < this.resultRuns.size(); j++) {
+            isSteadyStateFound = true;
+            int counter = 0;
+            for (int i = j; i < j + thresholdSectionsForSteadyState; i++) {
+                if(i < this.resultRuns.size()){
+                    Run run = this.resultRuns.get(i);
+                    double VALUE = extractValue(run);
+                    if (isWithinThreshold(VALUE)) {
+                        possibleSteadyStateRuns.add(run);
+                    } else {
+                        isSteadyStateFound = false;
+                        j = j + counter;
+                        possibleSteadyStateRuns.clear();
+                        break;
                     }
-                } else {
-                    for (int j = i; j < i + 3; j++) { // Compare 2 groups
-                        steadyStateRun = this.resultRuns.get(j);
-                        if (steadyStateRun.getNullhypothesis() == Run.REJECTED_NULLHYPOTHESIS) {
-                            found = false;
-                        }
-                    }
+                    counter++;
                 }
             }
-            if (found) {
-                possibleSteadyStateRuns.add(this.resultRuns.get(i + 1));
+
+            if(isSteadyStateFound){
+                break;
             }
         }
 
-        if (possibleSteadyStateRuns != null) {
-            for (Run run : possibleSteadyStateRuns) {
-                System.out.println("[ANOVA] Found at: " + run.getID());
-            }
+        if(isSteadyStateFound && possibleSteadyStateRuns.size() >= thresholdSectionsForSteadyState){
+            LOGGER.log(Level.INFO, String.format("Found steady state at Time %f and Section ID: %d", possibleSteadyStateRuns.getFirst().getStartTime(), possibleSteadyStateRuns.getFirst().getID()));
+        } else {
+            possibleSteadyStateRuns.clear();
+            LOGGER.log(Level.INFO, "No steady state found");
+        }
+    }
+
+    public Run getSteadyStateRun(){
+        if(this.possibleSteadyStateRuns.isEmpty()){
+            return null;
+        } else {
+            return this.possibleSteadyStateRuns.getFirst();
         }
     }
 
@@ -212,16 +111,8 @@ public abstract class GenericTest {
         return possibleSteadyStateRuns;
     }
 
-    public Run getSteadyStateRun() {
-        if (possibleSteadyStateRuns.isEmpty()) {
-            return null;
-        } else {
-            return possibleSteadyStateRuns.getFirst();
-        }
-    }
-
-    public void calculatePostHoc(PostHocAnalyzer postHocAnalyzer) {
-        if (postHocAnalyzer == null) {
+    public void calculatePostHoc(PostHocTest postHocTest) {
+        if (postHocTest == null) {
             LOGGER.log(Level.WARNING, "PostHocAnalyzer is null");
             return;
         }
@@ -238,20 +129,9 @@ public abstract class GenericTest {
                 }
             }
         }
-
-//        for (int i = 0; i < resultGroups.size() - 1; i++) {
-//            var currentGroup = resultGroups.get(i).getFirst();
-//            var nextGroup = resultGroups.get(i + 1).getFirst();
-//            if (currentGroup != null && nextGroup != null) {
-//                String currentGroupValue = currentGroup.getGroup();
-//                String nextGroupValue = nextGroup.getGroup();
-//                currentGroup.setGroup(currentGroupValue + " | " + nextGroupValue);
-//            }
-//        }
-//        resultGroups.getLast().getFirst().setGroup("");
         job.resetRuns();
         setupGroups();
-        postHocAnalyzer.apply(this.postHocRuns, this.postHocGroups);
+        postHocTest.apply(this.postHocRuns, this.postHocGroups);
     }
 
     private void setupGroups() {
@@ -291,10 +171,6 @@ public abstract class GenericTest {
         return FXCollections.observableArrayList(postHocRuns);
     }
 
-    protected void draw() {
-
-    }
-
     public Job getJob() {
         return this.job;
     }
@@ -322,6 +198,4 @@ public abstract class GenericTest {
     public List<List<Run>> getResultGroups() {
         return resultGroups;
     }
-
-
 }

@@ -27,62 +27,6 @@ public class Charter {
 
     public record ChartData(String label, List<XYChart.Data<Number, Number>> data) {}
 
-    private boolean isJobSpeedStageInitialized;
-    private boolean isJobFreqStageInitialized;
-    private Stage stageJobSpeed;
-    private Stage stageJobFreq;
-
-//    public void drawJobFreqeuncy(Job job) {
-//        boolean proceedDrawing = true;
-//
-//        // Warnung bei großen Datenmengen
-//        if (job.getFrequency().size() > 10000) {
-//            ButtonType goodButton = new ButtonType("Ok");
-//            ButtonType badButton = new ButtonType("Cancel");
-//            Alert alert = new Alert(Alert.AlertType.INFORMATION,
-//                    "This could take a while because of more than 10000 data points from this job.",
-//                    goodButton, badButton);
-//            Window window = alert.getDialogPane().getScene().getWindow();
-//            window.setOnCloseRequest(e -> alert.hide());
-//            Optional<ButtonType> result = alert.showAndWait();
-//
-//            if (result.isPresent()) {
-//                proceedDrawing = (result.get() == goodButton);
-//            }
-//        }
-//
-//        if (!proceedDrawing) return;
-//
-//        if (!isJobFreqStageInitialized) {
-//            stageJobFreq = new Stage();
-//
-//            final NumberAxis xAxis = new NumberAxis();
-//            final NumberAxis yAxis = new NumberAxis();
-//            xAxis.setLabel("I/O-Speed in Kibibytes");
-//            yAxis.setLabel("Frequency");
-//
-//            LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
-//            lineChart.setTitle("Job Frequency");
-//
-//            XYChart.Series<Number, Number> series = new XYChart.Series<>();
-//
-//            // Frequenzdaten
-//            Map<Integer, Integer> data = job.getFrequency();
-//            for (Map.Entry<Integer, Integer> entry : data.entrySet()) {
-//                Integer key = entry.getKey();
-//                Integer value = entry.getValue();
-//                series.getData().add(new XYChart.Data<>(key, value));
-//            }
-//
-//            Scene scene = new Scene(lineChart, 800, 600);
-//            lineChart.getData().add(series);
-//            stageJobFreq.setScene(scene);
-//            isJobFreqStageInitialized = true;
-//        }
-//
-//        stageJobFreq.show();
-//    }
-
     public final void drawGraph(String title, String xAxisLabel, String yAxisLabel, String constantLabel, double constant, ChartData... chartDataList) {
         Stage graphStage = new Stage();
 
