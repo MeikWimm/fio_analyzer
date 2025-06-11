@@ -33,7 +33,7 @@ books
 *.auxlock
 *.dpth
 *.dep
-/Analysetool/Atool/target/
+/Atool/target/
 papers/
 .idea/
 *.iml

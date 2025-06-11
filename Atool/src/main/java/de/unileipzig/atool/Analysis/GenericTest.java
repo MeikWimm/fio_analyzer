@@ -121,7 +121,7 @@ public abstract class GenericTest {
             LOGGER.log(Level.WARNING, String.format("%s group size of test result is 1", this.getClass().getName()));
             return;
         }
-
+        //TODO andere Tests brauchen doch kein this.result.add
         for (List<Run> runs : this.resultGroups) {
             for (Run run : runs) {
                 if (run.getNullhypothesis() == Run.ACCEPTED_NULLHYPOTHESIS) {
