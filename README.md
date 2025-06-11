@@ -9,7 +9,7 @@ Ein Analysewerkzeug für `fio`-Benchmark-Logs mit grafischer Oberfläche und sta
 - **JavaFX Library**  
   [https://gluonhq.com/products/javafx/](https://gluonhq.com/products/javafx/)  - verwendete version 21.0.7 (LTS) SDK
   → Den Inhalt (außer die .zip Datei) aus `/javafx-sdk-21.0.7` ins `target/`-Verzeichnis kopieren nicht den `javafx-sdk-21.0.7` Ordner selbst.
-
+  JavaFX wird nur für das Ausführen und nicht zum Bauen des Source Codes benötigt.
 - **OpenJDK 21**
 
 ---
@@ -27,7 +27,7 @@ Ein Analysewerkzeug für `fio`-Benchmark-Logs mit grafischer Oberfläche und sta
     - diesen Command im /target Verzeichnis ausführen
 
 ## Verwendung
-
+- Um mit dem fio-Tool Logs zu erzeugen, wird der Parameter `--write_bw_log=[logname]` verwendet.
 - Wähle das Verzeichnis aus, in dem sich die `fio`-Logdateien befinden.
 - In der Tabelle können folgende Werte angepasst werden:
   - **Runs** (zwischen `1` und `1000`)
@@ -36,8 +36,14 @@ Ein Analysewerkzeug für `fio`-Benchmark-Logs mit grafischer Oberfläche und sta
     → Einfach auf die jeweilige Zahl klicken und bearbeiten und mit [Enter] bestätigen.
 - Sobald das Verzeichnis gesetzt ist, können mit dem **Refresh-Button** neue Logs geladen werden, wenn neue Dateien im Verzeichnis auftauchen.
 - Mit **Rechtsklick** auf die Items in der Tabelle können statistische Tests ausgewählt werden.
-
 ---
+
+# Anwendungsbeispiel für das Tool
+1. **Job mit fio ausführen:**`./fio --rw=write --loop=10 --write_bw_log=mytest --name=test --size=1024m`
+2. **Analysetool starten** und den Pfad auswählen, wo sich die Logs befinden.
+3. **Run-Anzahl anpassen**, je nachdem wie oft geloopt wurde (im Beispiel: 10).
+4. **Optionale Anpassungen**: Alpha-Wert und weitere Einstellungen nach Bedarf ändern.
+5. **Test auswählen**: Mit **Rechtsklick** einen Test auswählen.
 
 # Einstellungen für die Anwendung
 
