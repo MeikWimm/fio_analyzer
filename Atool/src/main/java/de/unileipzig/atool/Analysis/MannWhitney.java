@@ -183,12 +183,12 @@ public class MannWhitney extends GenericTest implements Initializable {
         double sigma_U = Math.sqrt((m * m * (2 * m + 1)) / 12.0);
         double U = Math.min(U1, U2);
         double z = Math.abs((U - mu_U) / sigma_U);
-        this.zCrit = n.inverseCumulativeProbability(1 - this.job.getAlpha() / 2.0);
+        this.zCrit = n.inverseCumulativeProbability(1 - this.getAlpha() / 2.0);
 
 
 
         double pCalc = n.cumulativeProbability(z);
-        double pCrit = 1 - this.job.getAlpha() / 2.0;
+        double pCrit = 1 - this.getAlpha() / 2.0;
         byte hypothesis;
         if (pCalc > pCrit) {
             hypothesis = Run.REJECTED_NULLHYPOTHESIS;
