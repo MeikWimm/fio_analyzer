@@ -11,6 +11,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -30,36 +31,23 @@ public class PrimaryController implements Initializable {
     }
 
     // FXML Items
-    @FXML
-    public MenuItem menuItem_open;
-    @FXML
-    public MenuItem menuItem_ANOVA;
+    @FXML public MenuItem menuItem_open;
+    @FXML public MenuItem menuItem_ANOVA;
     //private Anova anova = new Anova();
-    @FXML
-    public MenuItem menuItem_Info;
-    @FXML
-    public MenuItem menuItem_generalSettings;
-    @FXML
-    public Button button_refreshTable;
-    @FXML
-    public Button button_settings;
-    @FXML
-    public Label labelLoadInfo;
-    @FXML
-    public TableView<Job> table;
+    @FXML public MenuItem menuItem_Info;
+    @FXML public MenuItem menuItem_generalSettings;
+    @FXML public Button button_refreshTable;
+    @FXML public Button calcSteadySateButton;
+    @FXML public Button button_settings;
+    @FXML public Label labelLoadInfo;
+    @FXML public TableView<Job> table;
     @FXML public TableColumn<Job, String> IDColumn;
-    @FXML
-    public TableColumn<Job, String> fileNameColumn;
-    @FXML
-    public TableColumn<Job, Integer> runsCounterColumn;
-    @FXML
-    public TableColumn<Job, String> speedColumn;
-    @FXML
-    public TableColumn<Job, String> timeColumn;
-    @FXML
-    public TableColumn<Job, String> lastModifiedColumn;
-    @FXML
-    public TableColumn<Job, String> fileCreatedColumn;
+    @FXML public TableColumn<Job, String> fileNameColumn;
+    @FXML public TableColumn<Job, Integer> runsCounterColumn;
+    @FXML public TableColumn<Job, String> speedColumn;
+    @FXML public TableColumn<Job, String> timeColumn;
+    @FXML public TableColumn<Job, String> lastModifiedColumn;
+    @FXML public TableColumn<Job, String> fileCreatedColumn;
     @FXML public TableColumn<Job, Double> epsilonColumn;
     @FXML public TableColumn<Job, Double> alphaColumn;
     @FXML public TableColumn<Job, Double> cvColumn;
@@ -285,6 +273,31 @@ public class PrimaryController implements Initializable {
 //            labelLoadInfo.setText("All files loaded!");
 //        }
     }
+    @FXML
+    private void onActionCalcualteSteadyState() {
+        List<Job> jobs = table.getItems();
+
+        if(!jobs.isEmpty()){
+            Job job = jobs.get(0);
+            GenericTest[] tests = new GenericTest[4];
+            tests[0] = new Anova(job, settings, job.getAlpha());
+            tests[1] = new ConInt(job, settings, job.getAlpha());
+            tests[2] = new TTest(job, settings, job.getAlpha());
+            tests[3] = new MannWhitney(job, settings, job.getAlpha());
+
+            for(GenericTest test: tests){
+                test.calculate();
+                test.calculateSteadyState();
+                if(test.getSteadyStateRun() != null){
+                    System.out.println("Class: " + test.getClass().getName() + " Run: " +test.getSteadyStateRun().getID());
+                } else {
+                    System.out.println("Class: " + test.getClass().getName() + " no run found");
+                }
+            }
+        }
+
+
+    }
 
     @FXML
     private void openGeneralSettings() {
@@ -300,11 +313,6 @@ public class PrimaryController implements Initializable {
             LOGGER.log(Level.INFO, String.format("Removed Job -> %s", removedJob.toString()));
         }
     }
-
-    public void onActionHello(ActionEvent event) {
-        System.out.println("ITEMS SE");
-    }
-
 }
 
 

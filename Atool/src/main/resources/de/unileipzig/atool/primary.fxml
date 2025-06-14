@@ -51,6 +51,7 @@
             <Pane prefHeight="150.0" prefWidth="1080.0">
                <children>
                   <Button fx:id="button_refreshTable" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#onActionRefreshTable" text="Refresh Table" />
+                  <Button id="calcSteadySateButton" fx:id="calcSteadySateButton" layoutX="120.0" layoutY="14.0" mnemonicParsing="false" onAction="#onActionCalcualteSteadyState" text="Calculate steady state" />
                </children>
             </Pane>
          </children></VBox>
