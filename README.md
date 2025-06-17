@@ -51,15 +51,6 @@ Diese Dokumentation beschreibt die verfügbaren Einstellungen und deren Bedeutun
 
 ---
 
-## Allgemeine Optionen
-
-### Use average measurement per millisecond
-- **Beschreibung**: Aktiviert die Durchschnittsmessung pro Millisekunde.
-- **Standardwert**: Deaktiviert (1).
-- **Schieberegler**: Werte von 1 bis 100.
-
----
-
 ## Datenkonvertierung
 - **Optionen**:
   - **MebiByte**
@@ -100,7 +91,6 @@ Diese Dokumentation beschreibt die verfügbaren Einstellungen und deren Bedeutun
   - Confidence Interval
   - T-Test
   - U-Test
-  - CUSUM
   - Tukey HSD
 
 ---
