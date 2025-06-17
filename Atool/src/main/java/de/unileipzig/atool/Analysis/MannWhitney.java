@@ -78,8 +78,8 @@ public class MannWhitney extends GenericTest implements Initializable {
 
     private double zCrit;
 
-    public MannWhitney(Job job,Settings settings, double alpha) {
-        super(job, settings.getUTestSkipRunsCounter(), settings.isUTestUseAdjacentRun(), 2, alpha, settings.isBonferroniUTestSelected(), settings.getRequiredRunsForSteadyState());
+    public MannWhitney(Job job,Settings settings) {
+        super(job, settings.getUTestSkipRunsCounter(), settings.isUTestUseAdjacentRun(), 2, job.getAlpha(), settings.isBonferroniUTestSelected(), settings.getRequiredRunsForSteadyState());
         this.charter = new Charter();
         this.uTestData = new ArrayList<>();
     }
@@ -113,6 +113,11 @@ public class MannWhitney extends GenericTest implements Initializable {
 
     public void draw() {
         charter.drawGraph("U-Test", "Run", "Z-Value","z-critical", this.zCrit, new Charter.ChartData("calculated Z", uTestData));
+    }
+
+    @Override
+    public String getTestName() {
+        return "Mann-Whitney";
     }
 
     private void calculatePair(Run run1, Run run2) {
@@ -204,7 +209,7 @@ public class MannWhitney extends GenericTest implements Initializable {
     }
 
     @Override
-    public void calculate() {
+    public void calculateTest() {
         if (this.job.getRuns().size() <= 1) return;
         List<Run> runs = this.job.getRuns();
 

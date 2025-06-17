@@ -2,16 +2,16 @@ package de.unileipzig.atool;
 
 
 import de.unileipzig.atool.Analysis.*;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 
 import java.net.URL;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -36,9 +36,8 @@ public class PrimaryController implements Initializable {
     //private Anova anova = new Anova();
     @FXML public MenuItem menuItem_Info;
     @FXML public MenuItem menuItem_generalSettings;
-    @FXML public Button button_refreshTable;
-    @FXML public Button calcSteadySateButton;
-    @FXML public Button button_settings;
+    @FXML public MenuItem refreshTableMenuItem;
+    @FXML public Button steadyStateEvalButton;
     @FXML public Label labelLoadInfo;
     @FXML public TableView<Job> table;
     @FXML public TableColumn<Job, String> IDColumn;
@@ -57,6 +56,7 @@ public class PrimaryController implements Initializable {
 
     private InputModule inputModule;
     private Settings settings;
+    private Job job;
 
 
     @Override
@@ -128,6 +128,14 @@ public class PrimaryController implements Initializable {
                 String.format("RCIW threshold must be a value between %f and %f", Job.MIN_RCIW_THRESHOLD, Job.MAX_RCIW_THRESHOLD)
         ));
 
+        table.setOnMouseClicked((MouseEvent event) -> {
+            if (event.getButton().equals(MouseButton.PRIMARY)) {
+                Job job = table.getSelectionModel().getSelectedItem();
+                if (job != null) {
+                    this.job = job;
+                }
+            }
+        });
     }
 
     private void setupTableMenuItems() {
@@ -139,8 +147,8 @@ public class PrimaryController implements Initializable {
         menuItems.addMenuItem("T-Test", this::onActionCalcTTest);
         menuItems.addMenuItem("U-Test", this::onActionCalcMannWhitneyTest);
         menuItems.addMenuItem("Tukey-HSD", this::onActionCalcTukeyHSD);
-        menuItems.addMenuItem("CUSUM Runs", this::onActionCalcCusum);
-        menuItems.addMenuItem("CUSUM Job", this::onActionCalcCusumJob);
+        //menuItems.addMenuItem("CUSUM Runs", this::onActionCalcCusum);
+        //menuItems.addMenuItem("CUSUM Job", this::onActionCalcCusumJob);
 
 
         table.setRowFactory(menuItems);
@@ -177,17 +185,15 @@ public class PrimaryController implements Initializable {
 
     private void onActionCalcConInt(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        ConInt conInt = new ConInt(job, settings, job.getAlpha());
+        ConInt conInt = new ConInt(job, settings);
         conInt.calculate();
-        conInt.calculateSteadyState();
         conInt.openWindow();
     }
 
     private void onActionCalcAnova(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        Anova anova = new Anova(job, settings, job.getAlpha());
+        Anova anova = new Anova(job, settings);
         anova.calculate();
-        anova.calculateSteadyState();
         anova.openWindow();
     }
 
@@ -199,27 +205,24 @@ public class PrimaryController implements Initializable {
 
     private void onActionCalcTTest(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        TTest tTest = new TTest(job, settings, job.getAlpha());
+        TTest tTest = new TTest(job, settings);
         tTest.calculate();
-        tTest.calculateSteadyState();
         tTest.openWindow();
     }
 
     private void onActionCalcMannWhitneyTest(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        MannWhitney uTest = new MannWhitney(job, settings, job.getAlpha());
+        MannWhitney uTest = new MannWhitney(job, settings);
         uTest.calculate();
-        uTest.calculateSteadyState();
         uTest.openWindow();
     }
 
     private void onActionCalcTukeyHSD(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        Anova anova = new Anova(job, settings, job.getAlpha());
+        Anova anova = new Anova(job, settings);
         TukeyHSD tukey = new TukeyHSD(anova);
+        anova.setPostHocTest(tukey);
         anova.calculate();
-        anova.calculateSteadyState();
-        anova.calculatePostHoc(tukey);
         tukey.openWindow();
     }
 
@@ -272,31 +275,17 @@ public class PrimaryController implements Initializable {
 //        } else {
 //            labelLoadInfo.setText("All files loaded!");
 //        }
+        LOGGER.info("Refreshing table...");
     }
+
     @FXML
     private void onActionCalcualteSteadyState() {
-        List<Job> jobs = table.getItems();
-
-        if(!jobs.isEmpty()){
-            Job job = jobs.get(0);
-            GenericTest[] tests = new GenericTest[4];
-            tests[0] = new Anova(job, settings, job.getAlpha());
-            tests[1] = new ConInt(job, settings, job.getAlpha());
-            tests[2] = new TTest(job, settings, job.getAlpha());
-            tests[3] = new MannWhitney(job, settings, job.getAlpha());
-
-            for(GenericTest test: tests){
-                test.calculate();
-                test.calculateSteadyState();
-                if(test.getSteadyStateRun() != null){
-                    System.out.println("Class: " + test.getClass().getName() + " Run: " +test.getSteadyStateRun().getID());
-                } else {
-                    System.out.println("Class: " + test.getClass().getName() + " no run found");
-                }
-            }
+        if(this.job != null && this.settings != null) {
+            SteadyStateEval eval = new SteadyStateEval(this.job, this.settings);
+            eval.openWindow();
+        } else {
+            LOGGER.info("Error: job or settings are null!");
         }
-
-
     }
 
     @FXML

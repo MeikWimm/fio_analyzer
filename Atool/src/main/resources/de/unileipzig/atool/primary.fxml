@@ -22,6 +22,7 @@
           <Menu mnemonicParsing="false" text="Settings">
             <items>
                   <MenuItem fx:id="menuItem_generalSettings" mnemonicParsing="false" onAction="#openGeneralSettings" text="General" />
+                  <MenuItem id="refreshTableMenuItem" fx:id="refreshTableMenuItem" mnemonicParsing="false" onAction="#onActionRefreshTable" text="Refresh table" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help" visible="false">
@@ -48,10 +49,9 @@
                   <TableColumn id="rciwColumn" fx:id="rciwColumn" prefWidth="75.0" text="RCIW Threshold" visible="false" />
               </columns>
             </TableView>
-            <Pane prefHeight="150.0" prefWidth="1080.0">
+            <Pane prefHeight="93.0" prefWidth="1080.0">
                <children>
-                  <Button fx:id="button_refreshTable" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#onActionRefreshTable" text="Refresh Table" />
-                  <Button id="calcSteadySateButton" fx:id="calcSteadySateButton" layoutX="120.0" layoutY="14.0" mnemonicParsing="false" onAction="#onActionCalcualteSteadyState" text="Calculate steady state" />
+                  <Button id="steadyStateEvalButton" fx:id="steadyStateEvalButton" layoutX="14.0" layoutY="13.0" mnemonicParsing="false" onAction="#onActionCalcualteSteadyState" prefHeight="25.0" prefWidth="129.0" text="Evaluate steady state" />
                </children>
             </Pane>
          </children></VBox>

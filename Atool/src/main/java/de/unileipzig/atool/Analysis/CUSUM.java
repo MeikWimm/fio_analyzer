@@ -29,7 +29,7 @@ public class CUSUM extends GenericTest{
     }
 
     @Override
-    public void calculate() {
+    public void calculateTest() {
         List<DataPoint> data = this.job.getData();
        // int initWindow = 1000;
        // int windowSize = 1000;
@@ -75,6 +75,11 @@ public class CUSUM extends GenericTest{
     @Override
     protected boolean isWithinThreshold(double value) {
         return false;
+    }
+
+    @Override
+    public String getTestName() {
+        return "CUSUM";
     }
 
     public void calculateWindowedRuns() {

@@ -18,7 +18,7 @@ public class CoV extends GenericTest {
 
 
     public CoV(Job job, Settings settings) {
-        super(job, settings.getAnovaSkipRunsCounter(), settings.isAnovaUseAdjacentRun(), settings.getGroupSize(), job.getAlpha(), settings.isBonferroniANOVASelected(), settings.getRequiredRunsForSteadyState());
+        super(job, settings.getCovSkipRunsCounter(), settings.isCovUseAdjacentRun(), settings.getGroupSize(), job.getAlpha(), false, settings.getRequiredRunsForSteadyState());
         final int dataSize = job.getData().size();
         final int dataSizeWithRuns = job.getRuns().size() * 2;
         this.WINDOW_SIZE = settings.getWindowSize();
@@ -28,7 +28,7 @@ public class CoV extends GenericTest {
         this.STEADY_STATE_COV_THRESHOLD = this.job.getCvThreshold();
     }
     @Override
-    public void calculate() {
+    public void calculateTest() {
         calculateCoV();
         calculateWindowedCoV();
     }
@@ -82,6 +82,10 @@ public class CoV extends GenericTest {
         return (std / average);
     }
 
+    @Override
+    public String getTestName() {
+        return "Coefficient of Variation";
+    }
 
     private double calculateCoVGroup(List<Run> group) {
         if (group == null || group.isEmpty()) {

@@ -14,6 +14,7 @@ public abstract class PostHocTest {
     private boolean isFirst = true;
 
     public PostHocTest(GenericTest test){
+        super();
         this.test = test;
     }
 
@@ -40,6 +41,12 @@ public abstract class PostHocTest {
             }
         }
     }
+
+    public Run getSteadyStateRun() {
+        return steadyStateRun;
+    }
+
+    public abstract String getTestName();
 
     public abstract void apply(List<Run> resultWithRuns, List<List<Run>> resultWithGroups);
 

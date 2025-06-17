@@ -57,8 +57,8 @@ public class TTest extends GenericTest implements Initializable {
     private final Charter charter;
     private final List<XYChart.Data<Number, Number>> tData;
 
-    public TTest(Job job, Settings settings, double alpha) {
-        super(job, settings.getTTestSkipRunsCounter(), settings.isTTestUseAdjacentRun(), 2, alpha ,settings.isBonferroniTTestSelected(), settings.getRequiredRunsForSteadyState());
+    public TTest(Job job, Settings settings) {
+        super(job, settings.getTTestSkipRunsCounter(), settings.isTTestUseAdjacentRun(), 2, job.getAlpha() ,settings.isBonferroniTTestSelected(), settings.getRequiredRunsForSteadyState());
     this.charter = new Charter();
         this.tData = new ArrayList<>();
     }
@@ -90,7 +90,7 @@ public class TTest extends GenericTest implements Initializable {
     }
 
     @Override
-    public void calculate() {
+    public void calculateTest() {
         if (groups.size() <= 1) return;
         TDistribution t = new TDistribution(job.getData().size() * 2 - 2);
         this.tCrit = t.inverseCumulativeProbability(1 - this.alpha / 2.0);
@@ -149,6 +149,11 @@ public class TTest extends GenericTest implements Initializable {
         }
 
         return sse;
+    }
+
+    @Override
+    public String getTestName() {
+        return "T-Test";
     }
 
     private void drawTGraph(Job job) {
