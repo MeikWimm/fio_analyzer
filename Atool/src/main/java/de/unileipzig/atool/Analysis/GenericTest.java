@@ -1,6 +1,5 @@
 package de.unileipzig.atool.Analysis;
 
-import de.unileipzig.atool.DataPoint;
 import de.unileipzig.atool.Job;
 import de.unileipzig.atool.Run;
 import de.unileipzig.atool.Utils;
@@ -8,7 +7,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -20,7 +18,7 @@ public abstract class GenericTest {
     static {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("GenericTest"));
+        handler.setFormatter(new Utils.CustomFormatter(GenericTest.class.getName()));
         LOGGER.setUseParentHandlers(false);
         LOGGER.addHandler(handler);
     }
@@ -35,6 +33,11 @@ public abstract class GenericTest {
     protected double alpha;
     protected boolean skipGroup;
     protected int thresholdSectionsForSteadyState;
+    protected boolean applyBonferroni;
+    protected int averageTimePerMillisec;
+    protected boolean sequentialCompareType;
+    protected int skipCounter;
+    private PostHocTest postHocTest;
 
     public GenericTest(Job job, int skipFirstRun, boolean skipGroup, int groupSize, double alpha, boolean applyBonferroni, int thresholdSectionsForSteadyState) {
         this.job = new Job(job);
@@ -48,6 +51,10 @@ public abstract class GenericTest {
         this.skipGroup = skipGroup;
         this.alpha = alpha;
         this.thresholdSectionsForSteadyState = thresholdSectionsForSteadyState;
+        this.applyBonferroni = applyBonferroni;
+        this.averageTimePerMillisec = 1; //TODO
+        this.sequentialCompareType = false; // TODO
+        this.skipCounter = 0; // TODO
         if (applyBonferroni) {
             recalculateAlpha();
         }
@@ -57,10 +64,18 @@ public abstract class GenericTest {
         this.alpha = this.alpha / this.groups.size();
     }
 
-    public abstract void calculate();
+    protected abstract void calculateTest();
 
     protected abstract double extractValue(Run run);
 
+    public void setPostHocTest(PostHocTest postHocTest) {
+        this.postHocTest = postHocTest;
+    }
+
+    public PostHocTest getPostHocTest() {
+        return this.postHocTest;
+    }
+    
     protected abstract boolean isWithinThreshold(double value);
 
     public void calculateSteadyState() {
@@ -107,11 +122,17 @@ public abstract class GenericTest {
         }
     }
 
+    public void calculate(){
+        this.calculateTest();
+        this.calculateSteadyState();
+        this.calculatePostHoc();
+    }
+
     public List<Run> getPossibleSteadyStateRuns() {
         return possibleSteadyStateRuns;
     }
 
-    public void calculatePostHoc(PostHocTest postHocTest) {
+    public void calculatePostHoc() {
         if (postHocTest == null) {
             LOGGER.log(Level.WARNING, "PostHocAnalyzer is null");
             return;
@@ -198,4 +219,24 @@ public abstract class GenericTest {
     public List<List<Run>> getResultGroups() {
         return resultGroups;
     }
+
+    public boolean isApplyBonferroni() {
+        return applyBonferroni;
+    }
+
+    public boolean isSkipGroup() {
+        return skipGroup;
+    }
+
+    public int getAverageTimePerMillisec() {
+        return averageTimePerMillisec;
+    }
+
+    public int getSkipCounter() {
+        return skipCounter;
+    }
+
+
+    public abstract String getTestName();
+
 }

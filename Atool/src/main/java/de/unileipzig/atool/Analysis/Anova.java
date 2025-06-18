@@ -72,8 +72,8 @@ public class Anova extends GenericTest implements Initializable {
     private final CoV cov;
     private double fCrit;
 
-    public Anova(Job job, Settings settings, double alpha) {
-        super(job, settings.getAnovaSkipRunsCounter(), settings.isAnovaUseAdjacentRun(), settings.getGroupSize(), alpha, settings.isBonferroniANOVASelected() , settings.getRequiredRunsForSteadyState());
+    public Anova(Job job, Settings settings) {
+        super(job, settings.getAnovaSkipRunsCounter(), settings.isAnovaUseAdjacentRun(), settings.getGroupSize(), job.getAlpha(), settings.isBonferroniANOVASelected() , settings.getRequiredRunsForSteadyState());
         final int dataSize = job.getData().size();
         this.cov = new CoV(job, settings);
         this.charter = new Charter();
@@ -148,10 +148,10 @@ public class Anova extends GenericTest implements Initializable {
     }
 
     @Override
-    public void calculate() {
+    public void calculateTest() {
         calculateAnova();
         CoV.calculateCoVGroups(this.groups);
-        cov.calculate();
+        cov.calculateTest();
         cov.calculateSteadyState();
     }
 
@@ -241,6 +241,11 @@ public class Anova extends GenericTest implements Initializable {
 
     public double getCriticalValue() {
         return fCrit;
+    }
+
+    @Override
+    public String getTestName() {
+        return "ANOVA";
     }
 
     public final void openWindow() {

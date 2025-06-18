@@ -97,6 +97,11 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     }
 
     @Override
+    public String getTestName() {
+        return "Tukey-HSD";
+    }
+
+    @Override
     public void apply(List<Run> postHocRuns, List<List<Run>> postHocGroups) {
         if (postHocRuns == null || postHocGroups == null) {
             throw new IllegalArgumentException("Input lists cannot be null");

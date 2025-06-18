@@ -37,13 +37,13 @@ class GenericTypeTest {
     void testInitialization() {
         for(Job job: jobs){
             List<GenericTest> tests = Arrays.asList(
-                    new TTest(job, settings, job.getAlpha()),
-                    new ConInt(job, settings, job.getAlpha()),
-                    new Anova(job, settings, job.getAlpha()),
-                    new MannWhitney(job, settings, job.getAlpha())
+                    new TTest(job, settings),
+                    new ConInt(job, settings),
+                    new Anova(job, settings),
+                    new MannWhitney(job, settings)
             );
             for (GenericTest test: tests){
-                test = new Anova(job, settings, job.getAlpha());
+                test = new Anova(job, settings);
                 assertNotNull(test, "Anova instance should be initialized.");
                 assertEquals(0.05, test.getAlpha(), "Alpha value should be set correctly.");
                 assertEquals(5, settings.getWindowSize(), "Settings window size should match initialization.");
@@ -55,14 +55,14 @@ class GenericTypeTest {
     void testCalculate() {
         for(Job job: jobs){
             List<GenericTest> tests = Arrays.asList(
-                    new TTest(job, settings, job.getAlpha()),
-                    new ConInt(job, settings, job.getAlpha()),
-                    new Anova(job, settings, job.getAlpha()),
-                    new MannWhitney(job, settings, job.getAlpha())
+                    new TTest(job, settings),
+                    new ConInt(job, settings),
+                    new Anova(job, settings),
+                    new MannWhitney(job, settings)
             );
 
             for (GenericTest test: tests){
-                test.calculate();
+                test.calculateTest();
                 Job calculatedJob = test.getJob();
                 assertNotNull(calculatedJob, "Calculated job should not be null.");
                 assertEquals(job.getData().size(), calculatedJob.getData().size(), "Data size should match the original data size.");

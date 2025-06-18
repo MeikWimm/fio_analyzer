@@ -34,7 +34,7 @@ Ein Analysewerkzeug für `fio`-Benchmark-Logs mit grafischer Oberfläche und sta
   - **Alpha** (zwischen `0.0001` und `0.9999`)
   - **CV Threshold** (zwischen `0.1` und `0.3`)
     → Einfach auf die jeweilige Zahl klicken und bearbeiten und mit [Enter] bestätigen.
-- Sobald das Verzeichnis gesetzt ist, können mit dem **Refresh-Button** neue Logs geladen werden, wenn neue Dateien im Verzeichnis auftauchen.
+- Sobald das Verzeichnis gesetzt ist, ist es möglich mit dem **Refresh-MenuItem** in der Menüleiste unter `File` neue Logs zu laden, wenn neue Dateien im Verzeichnis auftauchen.
 - Mit **Rechtsklick** auf die Items in der Tabelle können statistische Tests ausgewählt werden.
 ---
 
@@ -43,20 +43,15 @@ Ein Analysewerkzeug für `fio`-Benchmark-Logs mit grafischer Oberfläche und sta
 2. **Analysetool starten** und den Pfad auswählen, wo sich die Logs befinden.
 3. **Run-Anzahl anpassen**, je nachdem wie oft geloopt wurde (im Beispiel: 10).
 4. **Optionale Anpassungen**: Alpha-Wert und weitere Einstellungen nach Bedarf ändern.
-5. **Test auswählen**: Mit **Rechtsklick** einen Test auswählen.
+5. **Evaluate steady state klicken**: Mit diesem Button werden alle Tests ausgeführt und in einer Tabelle dargestellt.
+6. **Test auswählen**: Mit **Rechtsklick** einen Test auswählen, um mehr zu erfahren.
+
+- Das Beispiel wird genauer unter dem Verzeichnis /ExampleLog erklärt
+
 
 # Einstellungen für die Anwendung
 
 Diese Dokumentation beschreibt die verfügbaren Einstellungen und deren Bedeutung in der Anwendung.
-
----
-
-## Allgemeine Optionen
-
-### Use average measurement per millisecond
-- **Beschreibung**: Aktiviert die Durchschnittsmessung pro Millisekunde.
-- **Standardwert**: Deaktiviert (1).
-- **Schieberegler**: Werte von 1 bis 100.
 
 ---
 
@@ -100,7 +95,6 @@ Diese Dokumentation beschreibt die verfügbaren Einstellungen und deren Bedeutun
   - Confidence Interval
   - T-Test
   - U-Test
-  - CUSUM
   - Tukey HSD
 
 ---

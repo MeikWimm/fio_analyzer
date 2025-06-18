@@ -69,12 +69,14 @@ public class Settings implements Initializable {
     private static CONVERT conversion = CONVERT.DEFAULT;
 
     private int anovaSkipRunsCounter = 0;
+    private int covSkipRunsCounter = 0;
     private int conIntSkipRunsCounter = 0;
     private int tTestSkipRunsCounter = 0;
     private int uTestSkipRunsCounter = 0;
     private int cusumSkipRunsCounter = 0;
 
     private boolean anovaUseAdjacentRun = false;
+    private boolean covUseAdjacentRun = false;
     private boolean conIntUseAdjacentRun = false;
     private boolean tTestUseAdjacentRun = false;
     private boolean uTestUseAdjacentRun = false;
@@ -90,11 +92,11 @@ public class Settings implements Initializable {
 
     @FXML public CheckBox checkboxSpeedPerSec;
     @FXML public CheckBox adjacentRunANOVAcheckbox;
+    @FXML public CheckBox adjacentRunCoVcheckbox;
     @FXML public CheckBox adjacentRunConIntcheckbox;
     @FXML public CheckBox adjacentRunTTestcheckbox;
     @FXML public CheckBox adjacentRunUTestcheckbox;
     @FXML public CheckBox adjacentRunCUSUMcheckbox;
-    @FXML public CheckBox adjacentRunTukeycheckbox;
 
     @FXML public CheckBox skipRunANOVAcheckbox;
     @FXML public CheckBox skipRunConIntcheckbox;
@@ -108,6 +110,7 @@ public class Settings implements Initializable {
     @FXML public CheckBox bonferroniUTestcheckbox;
 
     @FXML public Spinner<Integer> skipRunAnovaSpinner;
+    @FXML public Spinner<Integer> skipRunCoVSpinner;
     @FXML public Spinner<Integer> skipRunConIntSpinner;
     @FXML public Spinner<Integer> skipRunTTestSpinner;
     @FXML public Spinner<Integer> skipRunUTestSpinner;
@@ -141,6 +144,7 @@ public class Settings implements Initializable {
         radioButtonKiloByte.setToggleGroup(toggleGorup);
         radioButtonMebibyte.setToggleGroup(toggleGorup);
         skipRunAnovaSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
+        skipRunCoVSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
         skipRunConIntSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
         skipRunTTestSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
         skipRunUTestSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
@@ -191,6 +195,7 @@ public class Settings implements Initializable {
         windowValueLabel.setText(Integer.toString(windowSize));
 
         skipRunAnovaSpinner.getValueFactory().setValue(anovaSkipRunsCounter);
+        skipRunCoVSpinner.getValueFactory().setValue(covSkipRunsCounter);
         skipRunConIntSpinner.getValueFactory().setValue(conIntSkipRunsCounter);
         skipRunTTestSpinner.getValueFactory().setValue(tTestSkipRunsCounter);
         skipRunUTestSpinner.getValueFactory().setValue(uTestSkipRunsCounter);
@@ -198,11 +203,11 @@ public class Settings implements Initializable {
         requiredRunsForSteadyStateSpinner.getValueFactory().setValue(requiredRunsForSteadyState);
 
         adjacentRunANOVAcheckbox.setSelected(anovaUseAdjacentRun);
+        adjacentRunCoVcheckbox.setSelected(covUseAdjacentRun);
         adjacentRunConIntcheckbox.setSelected(conIntUseAdjacentRun);
         adjacentRunTTestcheckbox.setSelected(tTestUseAdjacentRun);
         adjacentRunUTestcheckbox.setSelected(uTestUseAdjacentRun);
         adjacentRunCUSUMcheckbox.setSelected(cusumUseAdjacentRun);
-        adjacentRunTukeycheckbox.setSelected(tukeyUseAdjacentRun);
     }
 
 
@@ -241,16 +246,19 @@ public class Settings implements Initializable {
         groupSize = (int) runCompareCounterSlider.getValue();
         windowSize = (int) windowSlider.getValue();
         anovaUseAdjacentRun = adjacentRunANOVAcheckbox.isSelected();
+        covUseAdjacentRun = adjacentRunCoVcheckbox.isSelected();
         conIntUseAdjacentRun = adjacentRunConIntcheckbox.isSelected();
         tTestUseAdjacentRun = adjacentRunTTestcheckbox.isSelected();
         uTestUseAdjacentRun = adjacentRunUTestcheckbox.isSelected();
         cusumUseAdjacentRun = adjacentRunCUSUMcheckbox.isSelected();
-        tukeyUseAdjacentRun = adjacentRunTukeycheckbox.isSelected();
+
         anovaSkipRunsCounter = skipRunAnovaSpinner.getValue();
+        covSkipRunsCounter = skipRunCoVSpinner.getValue();
         conIntSkipRunsCounter = skipRunConIntSpinner.getValue();
         tTestSkipRunsCounter = skipRunTTestSpinner.getValue();
         uTestSkipRunsCounter = skipRunUTestSpinner.getValue();
         cusumSkipRunsCounter = skipRunCUSUMSpinner.getValue();
+
         requiredRunsForSteadyState = requiredRunsForSteadyStateSpinner.getValue();
 
         isBonferroniANOVASelected = bonferroniANOVAcheckbox.isSelected();
@@ -310,6 +318,10 @@ public class Settings implements Initializable {
         return anovaUseAdjacentRun;
     }
 
+    public boolean isCovUseAdjacentRun() {
+        return covUseAdjacentRun;
+    }
+
     public boolean isConIntUseAdjacentRun() {
         return conIntUseAdjacentRun;
     }
@@ -332,6 +344,10 @@ public class Settings implements Initializable {
 
     public int getAnovaSkipRunsCounter() {
         return anovaSkipRunsCounter;
+    }
+
+    public int getCovSkipRunsCounter() {
+        return covSkipRunsCounter;
     }
 
     public int getConIntSkipRunsCounter() {

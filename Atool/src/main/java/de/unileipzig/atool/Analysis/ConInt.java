@@ -67,8 +67,8 @@ public class ConInt extends GenericTest implements Initializable {
     @FXML public Label steadyStateLabel;
 
 
-    public ConInt(Job job,Settings settings, double alpha) {
-        super(job, settings.getConIntSkipRunsCounter(), settings.isConIntUseAdjacentRun(), 2, alpha, settings.isBonferroniConIntSelected(), settings.getRequiredRunsForSteadyState());
+    public ConInt(Job job,Settings settings) {
+        super(job, settings.getConIntSkipRunsCounter(), settings.isConIntUseAdjacentRun(), 2, job.getAlpha(), settings.isBonferroniConIntSelected(), settings.getRequiredRunsForSteadyState());
         int dataSize = this.job.getData().size();
         charter = new Charter();
         conIntData = new ArrayList<>(dataSize);
@@ -128,7 +128,7 @@ public class ConInt extends GenericTest implements Initializable {
     }
 
     @Override
-    public void calculate() {
+    public void calculateTest() {
         NormalDistribution normDis = new NormalDistribution();
         double dataSize = this.job.getRunDataSize();
 
@@ -266,6 +266,11 @@ public class ConInt extends GenericTest implements Initializable {
                 }
             }
         }
+    }
+
+    @Override
+    public String getTestName() {
+        return "Confidence Interval";
     }
 
     public void openWindow() {

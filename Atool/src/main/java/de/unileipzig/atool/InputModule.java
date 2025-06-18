@@ -66,6 +66,7 @@ InputModule {
      *
      */
     public STATUS loadFile() {
+        STATUS state;
         if (!isDirChooserOpen) {
             isDirChooserOpen = true;
             this.selectedDirectory = directoryChooser.showDialog(new Stage());
@@ -83,14 +84,73 @@ InputModule {
                 alert.show();
                 return STATUS.NO_FILES_FOUND;
             } else {
-                long time = System.currentTimeMillis();
-                readFiles(files);
-                System.out.println("Time: " + ((System.currentTimeMillis() - time) / 1000.0));
-
+                state = readFiles(files);
             }
         } else {
             return STATUS.NO_DIR_SET;
         }
+        return state;
+    }
+
+    public STATUS checkForNewLogs(){
+        if (selectedDirectory == null) {
+            return STATUS.NO_DIR_SET;
+        }
+
+        File[] newFiles = selectedDirectory.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
+
+        if (newFiles == null || newFiles.length == 0) {
+            LOGGER.log(Level.WARNING, "No new files found!");
+            return STATUS.NO_FILES_FOUND;
+        }
+
+        if(files.length == 0){
+            LOGGER.log(Level.WARNING, "No files found!");
+            return STATUS.NO_FILES_FOUND;
+        }
+
+
+
+        ArrayList<Job> temp = new ArrayList<>();
+
+        boolean found_new_files = false;
+        for (File newFile : newFiles) {
+            boolean exists = true;
+
+            for (File file : files) {
+                exists = file.toPath().equals(newFile.toPath());
+                if(exists){
+                    break;
+                }
+            }
+
+            if(!exists){
+                found_new_files = true;
+                readData(newFile);
+
+                Job job = new Job(this.data, settings.averageSpeedPerMillisec);
+                job.setFrequency(this.freq);
+                job.setFile(newFile);
+                job.setFileAttributes(this.fileAttribute);
+                job.setTime(this.time);
+                job.setAverageSpeed(this.averageSpeed);
+                job.setStandardDeviation(this.standardDeviation);
+                jobs.add(job);
+                temp.add(job);
+            }
+        }
+
+
+        if (!found_new_files) {
+            LOGGER.log(Level.INFO, "Nothing to refresh in Table.");
+        } else {
+            for (Job job : temp) {
+                LOGGER.log(Level.INFO, String.format("Added new found job -> %s", job));
+                this.files = newFiles;
+
+            }
+        }
+
         return STATUS.SUCCESS;
     }
 
@@ -98,7 +158,7 @@ InputModule {
      * Reads all files listed in directoryChooser with the extension type ".log".
      * If a specific file is already loaded, it'll be ignored.
      *
-     * @return NO_DIR_SET, if directory of this object is not set. BUFER On success it return SUCCESS.
+     * @return NO_DIR_SET, if directory of this object is not set. BUFFER On success it return SUCCESS.
      */
     public STATUS readFiles(File[] files) {
 
@@ -106,55 +166,23 @@ InputModule {
             return STATUS.NO_DIR_SET;
         }
 
-        //files = selectedDirectory.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
+        if(files.length == 0){
+            LOGGER.log(Level.WARNING, "No files found!");
+            return STATUS.NO_FILES_FOUND;
+        }
 
-        ArrayList<Job> temp = new ArrayList<>(jobs);
-
-        boolean found_new_files = false;
-        assert files != null;
         for (File file : files) {
-            boolean is_file_already_added = false;
-            if (!temp.isEmpty()) {
-                for (Job j : temp) {
-                    if (file.toString().equals(j.getFile().toString())) {
-                        is_file_already_added = true;
-                    }
-                }
-                if (!is_file_already_added) {
-                    found_new_files = true;
-                    readData(file);
+            readData(file);
 
-                    Job job = new Job(this.data, settings.averageSpeedPerMillisec);
-                    job.setFrequency(this.freq);
-                    job.setFile(file);
-                    job.setFileAttributes(this.fileAttribute);
-                    job.setTime(this.time);
-                    job.setAverageSpeed(this.averageSpeed);
-                    job.setStandardDeviation(this.standardDeviation);
-                    jobs.add(job);
-                }
-            } else {
-                readData(file);
-
-                Job job = new Job(this.data, settings.averageSpeedPerMillisec);
-                job.setFrequency(this.freq);
-                job.setFile(file);
-                job.setFileAttributes(this.fileAttribute);
-                job.setTime(this.time);
-                job.setAverageSpeed(this.averageSpeed);
-                job.setStandardDeviation(this.standardDeviation);
-                jobs.add(job);
-            }
+            Job job = new Job(this.data, settings.averageSpeedPerMillisec);
+            job.setFrequency(this.freq);
+            job.setFile(file);
+            job.setFileAttributes(this.fileAttribute);
+            job.setTime(this.time);
+            job.setAverageSpeed(this.averageSpeed);
+            job.setStandardDeviation(this.standardDeviation);
+            jobs.add(job);
         }
-
-        if (!found_new_files && !temp.isEmpty()) {
-            LOGGER.log(Level.INFO, "Nothing to refresh in Table.");
-        } else {
-        	for (Job job : temp) {
-                LOGGER.log(Level.INFO, String.format("Added new found job -> %s", job));
-			}
-        }
-
         return STATUS.SUCCESS;
     }
 
@@ -175,40 +203,6 @@ InputModule {
         }
         return result;
     }
-
-//    private void readWholeData(File file) {
-//        List<DataPoint> data = new ArrayList<>(); // Point2D for x = time and y = speed
-//        Map<Integer, Integer> freq = new TreeMap<>();
-//        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-//            this.fileAttribute = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-//            String line = br.readLine();
-//            int[] values = parseFirstTwoValues(line);
-//            int old_time = values[0];
-//            int speed = values[1];
-//            freq.put(speed, 1);
-//            int counter = 1;
-//
-//            while ((line = br.readLine()) != null) {
-//                int[] s = parseFirstTwoValues(line);
-//                int new_time = s[0];
-//                speed = s[1];
-//                old_time = values[0];
-//
-//                freq.merge(speed, 1, Integer::sum);
-//                data.add(new DataPoint(speed, counter));
-//                counter++;
-//
-//            }
-//
-//            this.time = old_time;
-//            this.standardDeviation = calculateDeviation(data, this.averageSpeed);
-//            this.freq = freq;
-//            this.data = data;
-//        } catch (IOException ex) {
-//            ex.printStackTrace();
-//            LOGGER.log(Level.SEVERE, String.format("Error occured while reading file: %s. App state: %s", file.toString(), STATUS.ERROR_WHILE_READING_FILE));
-//        }
-//    }
     
     private void readData(File file) {
         List<DataPoint> data = new ArrayList<>(); // Point2D for x = time and y = speed

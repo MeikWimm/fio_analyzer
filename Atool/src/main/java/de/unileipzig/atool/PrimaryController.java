@@ -2,13 +2,14 @@ package de.unileipzig.atool;
 
 
 import de.unileipzig.atool.Analysis.*;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -30,36 +31,22 @@ public class PrimaryController implements Initializable {
     }
 
     // FXML Items
-    @FXML
-    public MenuItem menuItem_open;
-    @FXML
-    public MenuItem menuItem_ANOVA;
+    @FXML public MenuItem menuItem_open;
+    @FXML public MenuItem menuItem_ANOVA;
     //private Anova anova = new Anova();
-    @FXML
-    public MenuItem menuItem_Info;
-    @FXML
-    public MenuItem menuItem_generalSettings;
-    @FXML
-    public Button button_refreshTable;
-    @FXML
-    public Button button_settings;
-    @FXML
-    public Label labelLoadInfo;
-    @FXML
-    public TableView<Job> table;
+    @FXML public MenuItem menuItem_Info;
+    @FXML public MenuItem menuItem_generalSettings;
+    @FXML public MenuItem refreshTableMenuItem;
+    @FXML public Button steadyStateEvalButton;
+    @FXML public Label labelLoadInfo;
+    @FXML public TableView<Job> table;
     @FXML public TableColumn<Job, String> IDColumn;
-    @FXML
-    public TableColumn<Job, String> fileNameColumn;
-    @FXML
-    public TableColumn<Job, Integer> runsCounterColumn;
-    @FXML
-    public TableColumn<Job, String> speedColumn;
-    @FXML
-    public TableColumn<Job, String> timeColumn;
-    @FXML
-    public TableColumn<Job, String> lastModifiedColumn;
-    @FXML
-    public TableColumn<Job, String> fileCreatedColumn;
+    @FXML public TableColumn<Job, String> fileNameColumn;
+    @FXML public TableColumn<Job, Integer> runsCounterColumn;
+    @FXML public TableColumn<Job, String> speedColumn;
+    @FXML public TableColumn<Job, String> timeColumn;
+    @FXML public TableColumn<Job, String> lastModifiedColumn;
+    @FXML public TableColumn<Job, String> fileCreatedColumn;
     @FXML public TableColumn<Job, Double> epsilonColumn;
     @FXML public TableColumn<Job, Double> alphaColumn;
     @FXML public TableColumn<Job, Double> cvColumn;
@@ -69,6 +56,7 @@ public class PrimaryController implements Initializable {
 
     private InputModule inputModule;
     private Settings settings;
+    private Job job;
 
 
     @Override
@@ -140,6 +128,14 @@ public class PrimaryController implements Initializable {
                 String.format("RCIW threshold must be a value between %f and %f", Job.MIN_RCIW_THRESHOLD, Job.MAX_RCIW_THRESHOLD)
         ));
 
+        table.setOnMouseClicked((MouseEvent event) -> {
+            if (event.getButton().equals(MouseButton.PRIMARY)) {
+                Job job = table.getSelectionModel().getSelectedItem();
+                if (job != null) {
+                    this.job = job;
+                }
+            }
+        });
     }
 
     private void setupTableMenuItems() {
@@ -151,8 +147,8 @@ public class PrimaryController implements Initializable {
         menuItems.addMenuItem("T-Test", this::onActionCalcTTest);
         menuItems.addMenuItem("U-Test", this::onActionCalcMannWhitneyTest);
         menuItems.addMenuItem("Tukey-HSD", this::onActionCalcTukeyHSD);
-        menuItems.addMenuItem("CUSUM Runs", this::onActionCalcCusum);
-        menuItems.addMenuItem("CUSUM Job", this::onActionCalcCusumJob);
+        //menuItems.addMenuItem("CUSUM Runs", this::onActionCalcCusum);
+        //menuItems.addMenuItem("CUSUM Job", this::onActionCalcCusumJob);
 
 
         table.setRowFactory(menuItems);
@@ -189,17 +185,15 @@ public class PrimaryController implements Initializable {
 
     private void onActionCalcConInt(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        ConInt conInt = new ConInt(job, settings, job.getAlpha());
+        ConInt conInt = new ConInt(job, settings);
         conInt.calculate();
-        conInt.calculateSteadyState();
         conInt.openWindow();
     }
 
     private void onActionCalcAnova(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        Anova anova = new Anova(job, settings, job.getAlpha());
+        Anova anova = new Anova(job, settings);
         anova.calculate();
-        anova.calculateSteadyState();
         anova.openWindow();
     }
 
@@ -211,27 +205,24 @@ public class PrimaryController implements Initializable {
 
     private void onActionCalcTTest(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        TTest tTest = new TTest(job, settings, job.getAlpha());
+        TTest tTest = new TTest(job, settings);
         tTest.calculate();
-        tTest.calculateSteadyState();
         tTest.openWindow();
     }
 
     private void onActionCalcMannWhitneyTest(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        MannWhitney uTest = new MannWhitney(job, settings, job.getAlpha());
+        MannWhitney uTest = new MannWhitney(job, settings);
         uTest.calculate();
-        uTest.calculateSteadyState();
         uTest.openWindow();
     }
 
     private void onActionCalcTukeyHSD(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        Anova anova = new Anova(job, settings, job.getAlpha());
+        Anova anova = new Anova(job, settings);
         TukeyHSD tukey = new TukeyHSD(anova);
+        anova.setPostHocTest(tukey);
         anova.calculate();
-        anova.calculateSteadyState();
-        anova.calculatePostHoc(tukey);
         tukey.openWindow();
     }
 
@@ -275,15 +266,25 @@ public class PrimaryController implements Initializable {
 
     @FXML
     private void onActionRefreshTable() {
-//        labelLoadInfo.setText("Refresh Table...");
-//        InputModule.STATUS status = inputModule.readFiles();
-//
-//        if (status != InputModule.STATUS.SUCCESS) {
-//            LOGGER.log(Level.WARNING, String.format("Coudn't refresh table! App state: %s", status));
-//            labelLoadInfo.setText("Couldn't load Files!");
-//        } else {
-//            labelLoadInfo.setText("All files loaded!");
-//        }
+        labelLoadInfo.setText("Refresh Table...");
+        InputModule.STATUS status = inputModule.checkForNewLogs();
+
+        if (status != InputModule.STATUS.SUCCESS) {
+            LOGGER.log(Level.WARNING, String.format("Coudn't refresh table! App state: %s", status));
+            labelLoadInfo.setText("Couldn't load Files!");
+        } else {
+            labelLoadInfo.setText("All files loaded!");
+        }
+    }
+
+    @FXML
+    private void onActionCalcualteSteadyState() {
+        if(this.job != null && this.settings != null) {
+            SteadyStateEval eval = new SteadyStateEval(this.job, this.settings);
+            eval.openWindow();
+        } else {
+            LOGGER.info("Error: job or settings are null!");
+        }
     }
 
     @FXML
@@ -300,11 +301,6 @@ public class PrimaryController implements Initializable {
             LOGGER.log(Level.INFO, String.format("Removed Job -> %s", removedJob.toString()));
         }
     }
-
-    public void onActionHello(ActionEvent event) {
-        System.out.println("ITEMS SE");
-    }
-
 }
 
 

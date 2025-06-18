@@ -9,4 +9,5 @@ module de.unileipzig.atool {
     opens de.unileipzig.atool to javafx.fxml;
     opens de.unileipzig.atool.Analysis to javafx.fxml;
     exports de.unileipzig.atool;
+    exports de.unileipzig.atool.Analysis;
 }
