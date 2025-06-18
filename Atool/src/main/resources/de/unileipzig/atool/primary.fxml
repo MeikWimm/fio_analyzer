@@ -18,11 +18,11 @@
           <Menu mnemonicParsing="false" text="File">
                <items>
                   <MenuItem id="menuItem_open" fx:id="menuItem_open" mnemonicParsing="false" onAction="#openLogfile" text="Open" />
+                  <MenuItem id="refreshTableMenuItem" fx:id="refreshTableMenuItem" mnemonicParsing="false" onAction="#onActionRefreshTable" text="Refresh table" />
                </items></Menu>
           <Menu mnemonicParsing="false" text="Settings">
             <items>
                   <MenuItem fx:id="menuItem_generalSettings" mnemonicParsing="false" onAction="#openGeneralSettings" text="General" />
-                  <MenuItem id="refreshTableMenuItem" fx:id="refreshTableMenuItem" mnemonicParsing="false" onAction="#onActionRefreshTable" text="Refresh table" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help" visible="false">

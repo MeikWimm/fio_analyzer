@@ -266,16 +266,15 @@ public class PrimaryController implements Initializable {
 
     @FXML
     private void onActionRefreshTable() {
-//        labelLoadInfo.setText("Refresh Table...");
-//        InputModule.STATUS status = inputModule.readFiles();
-//
-//        if (status != InputModule.STATUS.SUCCESS) {
-//            LOGGER.log(Level.WARNING, String.format("Coudn't refresh table! App state: %s", status));
-//            labelLoadInfo.setText("Couldn't load Files!");
-//        } else {
-//            labelLoadInfo.setText("All files loaded!");
-//        }
-        LOGGER.info("Refreshing table...");
+        labelLoadInfo.setText("Refresh Table...");
+        InputModule.STATUS status = inputModule.checkForNewLogs();
+
+        if (status != InputModule.STATUS.SUCCESS) {
+            LOGGER.log(Level.WARNING, String.format("Coudn't refresh table! App state: %s", status));
+            labelLoadInfo.setText("Couldn't load Files!");
+        } else {
+            labelLoadInfo.setText("All files loaded!");
+        }
     }
 
     @FXML
