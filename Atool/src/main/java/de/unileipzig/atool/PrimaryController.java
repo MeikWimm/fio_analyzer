@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
@@ -43,7 +44,7 @@ public class PrimaryController implements Initializable {
     @FXML public TableColumn<Job, String> IDColumn;
     @FXML public TableColumn<Job, String> fileNameColumn;
     @FXML public TableColumn<Job, Integer> runsCounterColumn;
-    @FXML public TableColumn<Job, String> speedColumn;
+    @FXML public TableColumn<Job, Double> speedColumn;
     @FXML public TableColumn<Job, String> timeColumn;
     @FXML public TableColumn<Job, String> lastModifiedColumn;
     @FXML public TableColumn<Job, String> fileCreatedColumn;
@@ -79,6 +80,7 @@ public class PrimaryController implements Initializable {
             }
         }
 
+        speedColumn.setText("Average Speed " + Settings.getConversion());
         table.getColumns().getFirst().setVisible(false);
         table.getColumns().getFirst().setVisible(true);
 
@@ -90,6 +92,9 @@ public class PrimaryController implements Initializable {
         fileNameColumn.setCellValueFactory(new PropertyValueFactory<>("File"));
         runsCounterColumn.setCellValueFactory(new PropertyValueFactory<>("RunsCounter"));
         speedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
+        speedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
+        speedColumn.setText("Average Speed " + Settings.getConversion());
+
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("TimeInSec"));
         lastModifiedColumn.setCellValueFactory(new PropertyValueFactory<>("FileLastModifiedDate"));
         fileCreatedColumn.setCellValueFactory(new PropertyValueFactory<>("FileCreationDate"));
@@ -177,6 +182,7 @@ public class PrimaryController implements Initializable {
         });
     }
 
+    // Code block callback functions for table menu items
     private void onActionDrawJobSpeed(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
         Charter charter = new Charter();

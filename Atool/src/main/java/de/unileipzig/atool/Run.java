@@ -19,7 +19,6 @@ public class Run /*Section*/ {
     public static Double UNDEFINED_DOUBLE_VALUE = Double.MIN_VALUE;
     public static Float UNDEFINED_FLOAT_VALUE = Float.MIN_VALUE;
     public static Integer UNDEFINED_INTEGER = Integer.MIN_VALUE;
-    public static final String UNDEFINED = "UNDEFINED";
     private List<DataPoint> data = new ArrayList<>();
     private final int runID;
     private double intervalFrom = UNDEFINED_DOUBLE_VALUE;

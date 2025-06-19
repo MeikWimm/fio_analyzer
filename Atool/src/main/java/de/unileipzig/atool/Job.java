@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * @author meni1999
  */
 public class Job {
-    public final static Integer MAX_RUN_COUNT = 1000;
+    public final static Integer MAX_RUN_COUNT = 100;
     public final static Integer MIN_RUN_COUNT = 4;
     public final static Integer DEFAULT_RUN_COUNT = 4;
 

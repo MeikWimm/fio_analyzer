@@ -66,7 +66,7 @@ public class Settings implements Initializable {
 
     public static double CONVERSION_VALUE = CONVERT.getConvertValue(CONVERT.DEFAULT);
     public int averageSpeedPerMillisec = DEFAULT_SPEED_PER_MILLI;
-    private static CONVERT conversion = CONVERT.DEFAULT;
+    public static CONVERT CONVERSION = CONVERT.DEFAULT;
 
     private int anovaSkipRunsCounter = 0;
     private int covSkipRunsCounter = 0;
@@ -133,6 +133,15 @@ public class Settings implements Initializable {
         this.primaryController = primaryController;
     }
 
+    public static String getConversion() {
+        return switch (CONVERSION) {
+            case CONVERT.MEBI_BYTE -> "(MebiByte)";
+            case CONVERT.MEGA_BYTE -> "(MegaByte)";
+            case CONVERT.KILO_BYTE -> "(KiloByte)";
+            default -> "(KibiByte)";
+        };
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         avSpeedSlider.setDisable(!checkboxSpeedPerSec.isSelected());
@@ -176,7 +185,7 @@ public class Settings implements Initializable {
         radioButtonKibiByte.setSelected(true);
 
         for (Toggle toggle : toggleGorup.getToggles()) {
-            if (toggle.getUserData().equals((conversion))) {
+            if (toggle.getUserData().equals((CONVERSION))) {
                 toggle.setSelected(true);
             }
         }
@@ -240,8 +249,8 @@ public class Settings implements Initializable {
 
 
     private void onActionSaveSettings(ActionEvent actionEvent) {
-        conversion = (CONVERT) toggleGorup.getSelectedToggle().getUserData();
-        CONVERSION_VALUE = CONVERT.getConvertValue(conversion);
+        CONVERSION = (CONVERT) toggleGorup.getSelectedToggle().getUserData();
+        CONVERSION_VALUE = CONVERT.getConvertValue(CONVERSION);
         averageSpeedPerMillisec = (int) avSpeedSlider.getValue();
         groupSize = (int) runCompareCounterSlider.getValue();
         windowSize = (int) windowSlider.getValue();
