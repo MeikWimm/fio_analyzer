@@ -10,6 +10,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -65,28 +66,44 @@ InputModule {
      * DirectoryChooser gets all log files from a choosen directory.
      *
      */
-    public STATUS loadFile() {
+    public STATUS loadFile(Window ownerWindow) {
         STATUS state;
         if (!isDirChooserOpen) {
             isDirChooserOpen = true;
-            this.selectedDirectory = directoryChooser.showDialog(new Stage());
-            isDirChooserOpen = false;
+            try {
+                this.selectedDirectory = directoryChooser.showDialog(ownerWindow);
+            } finally {
+                isDirChooserOpen = false;
+            }
         } else {
             return STATUS.DIR_CHOOSER_ALREADY_OPEN;
         }
 
         if (selectedDirectory != null) {
+            LOGGER.log(Level.INFO, "Selected directory: " + selectedDirectory.getAbsolutePath());
+            LOGGER.log(Level.INFO, "Can read Dir: " + selectedDirectory.canRead());
+            LOGGER.log(Level.INFO, "Is directory: " + selectedDirectory.isDirectory());
             files = selectedDirectory.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
+
 
             if (files == null || files.length == 0) {
                 Alert alert = new Alert(AlertType.INFORMATION);
                 alert.setContentText("No logs found!");
                 alert.show();
+
+
+                if(files == null){
+                    LOGGER.log(Level.WARNING, "files is Null!");
+                } else {
+                    LOGGER.log(Level.WARNING, "files array length is 0!");
+                }
+
                 return STATUS.NO_FILES_FOUND;
             } else {
                 state = readFiles(files);
             }
         } else {
+            LOGGER.log(Level.WARNING, "Dir chooser is null!");
             return STATUS.NO_DIR_SET;
         }
         return state;

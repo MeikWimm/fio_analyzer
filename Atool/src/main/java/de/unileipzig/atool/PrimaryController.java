@@ -249,7 +249,7 @@ public class PrimaryController implements Initializable {
     @FXML
     private void openLogfile() {
         labelLoadInfo.setText("trying to open files...");
-        InputModule.STATUS state = inputModule.loadFile();
+        InputModule.STATUS state = inputModule.loadFile(steadyStateEvalButton.getScene().getWindow());
 
         switch (state) {
             case NO_DIR_SET:
