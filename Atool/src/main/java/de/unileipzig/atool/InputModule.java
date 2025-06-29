@@ -4,6 +4,7 @@
  */
 package de.unileipzig.atool;
 
+import de.unileipzig.atool.Analysis.MathUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
@@ -67,11 +68,14 @@ InputModule {
      *
      */
     public STATUS loadFile(Window ownerWindow) {
+        LOGGER.log(Level.INFO, "Loading input module...");
+
         STATUS state;
         if (!isDirChooserOpen) {
             isDirChooserOpen = true;
             try {
-                this.selectedDirectory = directoryChooser.showDialog(ownerWindow);
+                //this.selectedDirectory = directoryChooser.showDialog(ownerWindow);
+                this.selectedDirectory = directoryChooser.showDialog(new Stage());
             } finally {
                 isDirChooserOpen = false;
             }
@@ -80,9 +84,18 @@ InputModule {
         }
 
         if (selectedDirectory != null) {
+            boolean isDirReadable = selectedDirectory.canRead();
+            LOGGER.log(Level.INFO, "Is directory selected: " + selectedDirectory.isDirectory());
             LOGGER.log(Level.INFO, "Selected directory: " + selectedDirectory.getAbsolutePath());
-            LOGGER.log(Level.INFO, "Can read Dir: " + selectedDirectory.canRead());
-            LOGGER.log(Level.INFO, "Is directory: " + selectedDirectory.isDirectory());
+            LOGGER.log(Level.INFO, "Is directory readable: " + isDirReadable);
+
+            if(!isDirReadable){
+                Alert alert = new Alert(AlertType.WARNING);
+                alert.setContentText("Directory is not readable!");
+                alert.show();
+                return STATUS.DIR_NOT_READABLE;
+            }
+
             files = selectedDirectory.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
 
 
@@ -264,12 +277,12 @@ InputModule {
 
             this.time = old_time;
             this.averageSpeed = sum_speed / data.size();
-            this.standardDeviation = calculateDeviation(data, this.averageSpeed);
+            this.standardDeviation = MathUtils.calculateDeviation(data, this.averageSpeed);
             this.freq = freq;
             this.data = data;
         } catch (IOException ex) {
             ex.printStackTrace();
-            LOGGER.log(Level.SEVERE, String.format("Error occured while reading file: %s. App state: %s", file.toString(), STATUS.ERROR_WHILE_READING_FILE));
+            LOGGER.log(Level.SEVERE, String.format("Error occured while reading file: %s. App state: %s", file, STATUS.ERROR_WHILE_READING_FILE));
         }
     }
 
@@ -277,22 +290,11 @@ InputModule {
         return jobs;
     }
 
-    private double calculateDeviation(List<DataPoint> data, double average_speed) {
-        double sum = 0.0;
-        for (DataPoint dataPoint : data) {
-            sum += Math.pow(dataPoint.getSpeed() - average_speed, 2);
-        }
-        return Math.sqrt(sum / data.size());
-    }
-
-    public File getSelectedDir() {
-        return this.selectedDirectory;
-    }
-
     public enum STATUS {
         SUCCESS,
         NO_FILES_FOUND,
         NO_DIR_SET,
+        DIR_NOT_READABLE,
         ERROR_WHILE_READING_FILE,
         DIR_CHOOSER_ALREADY_OPEN,
         FAILURE

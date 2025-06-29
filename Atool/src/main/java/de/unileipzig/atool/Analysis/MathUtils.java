@@ -104,13 +104,11 @@ public class MathUtils {
         return Math.sqrt(sumSquaredDiffs / (data.length - 1));  // Sample standard deviation
     }
 
-    public static double standardError(Run run1, Run run2) {
-        double std = 0;
-        std = Math.sqrt(0.5 * (variance(run1) / run1.getData().size() + variance(run2) / run2.getData().size()));
-        return std;
-    }
-
-    public static double calcualteCoVOverStd(double std, List<Run> group) {
-        return std / average(group);
+    public static double calculateDeviation(List<DataPoint> data, double average_speed) {
+        double sum = 0.0;
+        for (DataPoint dataPoint : data) {
+            sum += Math.pow(dataPoint.getSpeed() - average_speed, 2);
+        }
+        return Math.sqrt(sum / data.size());
     }
 }

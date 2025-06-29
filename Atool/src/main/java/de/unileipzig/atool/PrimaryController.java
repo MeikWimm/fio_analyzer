@@ -261,6 +261,9 @@ public class PrimaryController implements Initializable {
             case DIR_CHOOSER_ALREADY_OPEN:
                 labelLoadInfo.setText("Directory chooser already open!");
                 break;
+            case DIR_NOT_READABLE:
+                labelLoadInfo.setText("Directory is not readable!");
+                break;
             case SUCCESS:
                 labelLoadInfo.setText("All files loaded!");
                 table.setItems(inputModule.getJobs());
