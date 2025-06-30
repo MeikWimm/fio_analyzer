@@ -10,7 +10,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,18 +37,18 @@ class InputModuleTest {
     private List<Job> jobs;
 
     @BeforeEach
-    void setUp() {
-        File[] files = new File[3];
-        files[0] = new File("src/test/resources/empty.log");
-        files[1] = new File("src/test/resources/broken.log");
-        files[2] = new File("src/test/resources/broken2.log");
+    void setUp() throws URISyntaxException {
+        File logfilesDir = new File(Objects.requireNonNull(this.getClass().getResource("/logfiles")).toURI());
+        File[] files = logfilesDir.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
+        assertNotNull(files);
+
 
         Settings settings = new Settings(null);
         InputModule inputModule = new InputModule(settings);
-
         inputModule.readFiles(files);
-        jobs = inputModule.getJobs();
 
+        jobs = inputModule.getJobs();
+        assertEquals(2, jobs.size());
     }
 
     @Test
