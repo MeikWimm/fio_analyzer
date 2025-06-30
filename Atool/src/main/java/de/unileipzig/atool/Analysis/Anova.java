@@ -60,6 +60,7 @@ public class Anova extends GenericTest implements Initializable {
     @FXML public Label sigmaJobLabel;
     @FXML public Label steadyStateLabel;
     @FXML public Label steadyStateCVLabel;
+    @FXML public Label steadyStateCVWinLabel;
     @FXML public Pane anovaPane;
     @FXML public TableView<Run> anovaTable;
     @FXML public TableColumn<Run, Double> averageSpeedColumn;
@@ -69,13 +70,11 @@ public class Anova extends GenericTest implements Initializable {
     @FXML public TableColumn<Run, String> compareToRunColumn;
     @FXML public TableColumn<Run, Double> FColumn;
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
-    private final CoV cov;
     private double fCrit;
 
     public Anova(Job job, Settings settings) {
         super(job, settings.getAnovaSkipRunsCounter(), settings.isAnovaUseAdjacentRun(), settings.getGroupSize(), job.getAlpha(), settings.isBonferroniANOVASelected() , settings.getRequiredRunsForSteadyState());
         final int dataSize = job.getData().size();
-        this.cov = new CoV(job, settings);
         this.charter = new Charter();
         this.anovaData = new ArrayList<>(dataSize);
     }
@@ -108,8 +107,6 @@ public class Anova extends GenericTest implements Initializable {
         });
 
         showFGraphButton.setOnAction(e -> drawANOVAGraph());
-        showCoVGraph.setOnAction(e -> cov.drawAveragedCoVGraph());
-        showWinCoVGraph.setOnAction(e -> cov.drawCoVGraph());
 
         anovaTable.setItems(this.job.getFilteredRuns());
 
@@ -138,21 +135,11 @@ public class Anova extends GenericTest implements Initializable {
         } else {
             steadyStateLabel.setText("at run " + this.possibleSteadyStateRuns.getFirst().getID());
         }
-
-        if(cov.getSteadyStateRun() == null){
-            steadyStateCVLabel.setText("No steady state CV found.");
-        } else {
-            steadyStateCVLabel.setText("at run " + cov.getSteadyStateRun().getID() + " | time: " + cov.getSteadyStateRun().getStartTime());
-        }
-
     }
 
     @Override
     public void calculateTest() {
         calculateAnova();
-        CoV.calculateCoVGroups(this.groups);
-        cov.calculateTest();
-        cov.calculateSteadyState();
     }
 
     @Override
@@ -199,7 +186,7 @@ public class Anova extends GenericTest implements Initializable {
         for (List<Run> group : this.groups) {
             for (Run run : group) {
                 for (DataPoint dp : run.getData()) {
-                    sse += (Math.pow((dp.getSpeed() - MathUtils.average(group)), 2));
+                    sse += (Math.pow((dp.getData() - MathUtils.average(group)), 2));
                 }
                 run.setSSE(sse);
                 sse = 0;
@@ -254,10 +241,7 @@ public class Anova extends GenericTest implements Initializable {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/Anova.fxml"));
             fxmlLoader.setController(this);
             Parent root1 = fxmlLoader.load();
-            /*
-             * if "fx:controller" is not set in fxml
-             * fxmlLoader.setController(NewWindowController);
-             */
+
             Stage stage = new Stage();
             stage.setMaxWidth(1200);
             stage.setMaxHeight(600);

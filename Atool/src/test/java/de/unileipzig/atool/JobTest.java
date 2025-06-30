@@ -10,7 +10,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,16 +36,12 @@ class JobTest {
     private List<Job> jobs;
 
     @BeforeEach
-    void setUp() {
-        File[] files = new File[1];
-        files[0] = new File("src/test/resources/loop_40_512m.log");
+    void setUp() throws URISyntaxException {
+        File logfilesDir = new File(Objects.requireNonNull(this.getClass().getResource("/logfiles")).toURI());
+        File[] files = logfilesDir.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
+        assertNotNull(files);
 
         Settings settings = new Settings(null);
-//        settings.setAnovaSkipRunsCounter(2);
-//        settings.setAnovaUseAdjacentRun(true);
-//        settings.setGroupSize(3);
-//        settings.setWindowSize(5);
-
         InputModule inputModule = new InputModule(settings);
 
         inputModule.readFiles(files);

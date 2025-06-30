@@ -9,26 +9,26 @@ package de.unileipzig.atool;
  * @author meni1999
  */
 public class DataPoint {
-    protected double speed;
+    protected double data;
     protected double time;
 
     public DataPoint(double speed, double time) {
-        this.speed = speed;
+        this.data = speed;
         this.time = time;
     }
 
     public DataPoint(DataPoint other){
-        this.speed = other.speed;
+        this.data = other.data;
         this.time = other.time;
     }
 
     @Override
     public String toString() {
-        return String.format("Speed: %f, Time: %f", speed, time);
+        return String.format("Speed: %f, Time: %f", data, time);
     }
 
-    public double getSpeed() {
-        return this.speed;
+    public double getData() {
+        return this.data;
     }
 
     public double getTime() {

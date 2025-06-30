@@ -6,10 +6,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Window;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -43,7 +45,7 @@ public class PrimaryController implements Initializable {
     @FXML public TableColumn<Job, String> IDColumn;
     @FXML public TableColumn<Job, String> fileNameColumn;
     @FXML public TableColumn<Job, Integer> runsCounterColumn;
-    @FXML public TableColumn<Job, String> speedColumn;
+    @FXML public TableColumn<Job, Double> speedColumn;
     @FXML public TableColumn<Job, String> timeColumn;
     @FXML public TableColumn<Job, String> lastModifiedColumn;
     @FXML public TableColumn<Job, String> fileCreatedColumn;
@@ -63,7 +65,6 @@ public class PrimaryController implements Initializable {
     public void initialize(URL arg0, ResourceBundle arg1) {
         settings = new Settings(this);
         inputModule = new InputModule(settings);
-
         setupCellValueFactory();
         setupTableMenuItems();
         setupColumnTextField();
@@ -79,6 +80,7 @@ public class PrimaryController implements Initializable {
             }
         }
 
+        speedColumn.setText("Average Speed " + Settings.getConversion());
         table.getColumns().getFirst().setVisible(false);
         table.getColumns().getFirst().setVisible(true);
 
@@ -90,6 +92,9 @@ public class PrimaryController implements Initializable {
         fileNameColumn.setCellValueFactory(new PropertyValueFactory<>("File"));
         runsCounterColumn.setCellValueFactory(new PropertyValueFactory<>("RunsCounter"));
         speedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
+        speedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
+        speedColumn.setText("Average Speed " + Settings.getConversion());
+
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("TimeInSec"));
         lastModifiedColumn.setCellValueFactory(new PropertyValueFactory<>("FileLastModifiedDate"));
         fileCreatedColumn.setCellValueFactory(new PropertyValueFactory<>("FileCreationDate"));
@@ -123,11 +128,6 @@ public class PrimaryController implements Initializable {
                 String.format("CV threshold must be a value between %f and %f", Job.MIN_CV_THRESHOLD, Job.MAX_CV_THRESHOLD)
         ));
 
-        rciwColumn.setCellFactory(tc -> new Utils.ValidatedDoubleTableCell<>(
-                labelLoadInfo, Job.MIN_RCIW_THRESHOLD, Job.MAX_RCIW_THRESHOLD, Job.DEFAULT_RCIW_THRESHOLD,
-                String.format("RCIW threshold must be a value between %f and %f", Job.MIN_RCIW_THRESHOLD, Job.MAX_RCIW_THRESHOLD)
-        ));
-
         table.setOnMouseClicked((MouseEvent event) -> {
             if (event.getButton().equals(MouseButton.PRIMARY)) {
                 Job job = table.getSelectionModel().getSelectedItem();
@@ -144,6 +144,7 @@ public class PrimaryController implements Initializable {
         menuItems.addMenuItem("Draw Job Frequency", this::onActionDrawJobFreq);
         menuItems.addMenuItem("Confidence Interval", this::onActionCalcConInt);
         menuItems.addMenuItem("Anova", this::onActionCalcAnova);
+        menuItems.addMenuItem("CV", this::onActionCalcCV);
         menuItems.addMenuItem("T-Test", this::onActionCalcTTest);
         menuItems.addMenuItem("U-Test", this::onActionCalcMannWhitneyTest);
         menuItems.addMenuItem("Tukey-HSD", this::onActionCalcTukeyHSD);
@@ -171,12 +172,9 @@ public class PrimaryController implements Initializable {
         cvColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {
             t.getRowValue().setCvThreshold(t.getNewValue());
         });
-
-        rciwColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {
-            t.getRowValue().setRciwThreshold(t.getNewValue());
-        });
     }
 
+    // Code block callback functions for table menu items
     private void onActionDrawJobSpeed(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
         Charter charter = new Charter();
@@ -195,6 +193,13 @@ public class PrimaryController implements Initializable {
         Anova anova = new Anova(job, settings);
         anova.calculate();
         anova.openWindow();
+    }
+
+    private void onActionCalcCV(TableRow<Job> row, TableView<Job> table) {
+        Job job = row.getItem();
+        CoV cov = new CoV(job, settings);
+        cov.calculate();
+        cov.openWindow();
     }
 
     private void onActionDrawJobFreq(TableRow<Job> row, TableView<Job> table) {
@@ -243,38 +248,18 @@ public class PrimaryController implements Initializable {
     @FXML
     private void openLogfile() {
         labelLoadInfo.setText("trying to open files...");
+        Window ownerWindow = steadyStateEvalButton.getScene().getWindow();
+        inputModule.openDirectoryChooser(ownerWindow);
         InputModule.STATUS state = inputModule.loadFile();
-
-        switch (state) {
-            case NO_DIR_SET:
-                labelLoadInfo.setText("No directory set!");
-                break;
-            case NO_FILES_FOUND:
-                labelLoadInfo.setText("No files found!");
-                break;
-            case DIR_CHOOSER_ALREADY_OPEN:
-                labelLoadInfo.setText("Directory chooser already open!");
-                break;
-            case SUCCESS:
-                labelLoadInfo.setText("All files loaded!");
-                table.setItems(inputModule.getJobs());
-                break;
-        }
+        checkInputModuleStatus(state);
     }
 
     // Code Block of callback functions
 
     @FXML
     private void onActionRefreshTable() {
-        labelLoadInfo.setText("Refresh Table...");
-        InputModule.STATUS status = inputModule.checkForNewLogs();
-
-        if (status != InputModule.STATUS.SUCCESS) {
-            LOGGER.log(Level.WARNING, String.format("Coudn't refresh table! App state: %s", status));
-            labelLoadInfo.setText("Couldn't load Files!");
-        } else {
-            labelLoadInfo.setText("All files loaded!");
-        }
+        InputModule.STATUS state = inputModule.loadFile();
+        checkInputModuleStatus(state);
     }
 
     @FXML
@@ -283,7 +268,8 @@ public class PrimaryController implements Initializable {
             SteadyStateEval eval = new SteadyStateEval(this.job, this.settings);
             eval.openWindow();
         } else {
-            LOGGER.info("Error: job or settings are null!");
+            labelLoadInfo.setText("Please select a Job!");
+            LOGGER.log(Level.WARNING, "Error in opening SteadyStateEvalButton");
         }
     }
 
@@ -299,6 +285,27 @@ public class PrimaryController implements Initializable {
             int pos = table.getSelectionModel().getSelectedIndex();
             Job removedJob = table.getItems().remove(pos);
             LOGGER.log(Level.INFO, String.format("Removed Job -> %s", removedJob.toString()));
+        }
+    }
+
+    private void checkInputModuleStatus(InputModule.STATUS state) {
+        switch (state) {
+            case NO_DIR_SET:
+                labelLoadInfo.setText("No directory set!");
+                break;
+            case NO_FILES_FOUND:
+                labelLoadInfo.setText("No files found!");
+                break;
+            case DIR_CHOOSER_ALREADY_OPEN:
+                labelLoadInfo.setText("Directory chooser already open!");
+                break;
+            case DIR_NOT_READABLE:
+                labelLoadInfo.setText("Directory is not readable!");
+                break;
+            case SUCCESS:
+                labelLoadInfo.setText("All files loaded!");
+                table.setItems(inputModule.getJobs());
+                break;
         }
     }
 }

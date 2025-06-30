@@ -19,7 +19,6 @@ public class Run /*Section*/ {
     public static Double UNDEFINED_DOUBLE_VALUE = Double.MIN_VALUE;
     public static Float UNDEFINED_FLOAT_VALUE = Float.MIN_VALUE;
     public static Integer UNDEFINED_INTEGER = Integer.MIN_VALUE;
-    public static final String UNDEFINED = "UNDEFINED";
     private List<DataPoint> data = new ArrayList<>();
     private final int runID;
     private double intervalFrom = UNDEFINED_DOUBLE_VALUE;
@@ -80,13 +79,13 @@ public class Run /*Section*/ {
     private void calculateRun() {
         double ioSpeed = 0;
         for (DataPoint p : data) {
-            ioSpeed += p.getSpeed();
+            ioSpeed += p.getData();
         }
         this.averageSpeed = ioSpeed / data.size();
         
         double nominator = 0;
         for (DataPoint p : data) {
-            nominator += Math.pow(p.getSpeed() - averageSpeed, 2);
+            nominator += Math.pow(p.getData() - averageSpeed, 2);
         }
         
         this.standardDeviation = (Math.sqrt((nominator / data.size())));

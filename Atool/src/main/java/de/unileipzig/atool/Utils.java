@@ -7,7 +7,6 @@ package de.unileipzig.atool;
 import javafx.beans.binding.Bindings;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
@@ -18,13 +17,22 @@ import javafx.util.converter.IntegerStringConverter;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.logging.*;
 import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
 
 /**
  * @author meni1999
  */
 public abstract class Utils {
+    private static final Logger LOGGER = Logger.getLogger(Utils.class.getName());
+
+    static {
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setLevel(Level.FINEST);
+        handler.setFormatter(new Utils.CustomFormatter("ANOVA"));
+        LOGGER.setUseParentHandlers(false);
+        LOGGER.addHandler(handler);
+    }
 
     public static Callback<TableColumn<Run, Byte>, TableCell<Run, Byte>> getHypothesisCellFactory() {
         return (TableColumn<Run, Byte> col) -> new TableCell<Run, Byte>() {
@@ -54,10 +62,8 @@ public abstract class Utils {
                     setText("");
                     setStyle("");
                 } else if (item.equals(Run.REJECTED_NULLHYPOTHESIS)) {
-                    //setStyle("-fx-background-color: tomato;");
                     setText("No");
                 } else {
-                    //setStyle("-fx-background-color: green;");
                     setText("Yes");
                 }
             }
@@ -117,7 +123,7 @@ public abstract class Utils {
             try {
                 val = Integer.valueOf(value);
             } catch (NumberFormatException e) {
-                e.printStackTrace();
+                LOGGER.log(Level.WARNING, e.getMessage(), e);
             }
             return val;
         }
@@ -130,7 +136,7 @@ public abstract class Utils {
             try {
                 val = Double.valueOf(value);
             } catch (NumberFormatException e) {
-                e.printStackTrace();
+                LOGGER.log(Level.WARNING, e.getMessage(), e);
             }
             return val;
         }
@@ -140,7 +146,7 @@ public abstract class Utils {
 
         @Override
         public int compare(DataPoint lhs, DataPoint rhs) {
-            return Double.compare(lhs.getSpeed(), rhs.getSpeed());
+            return Double.compare(lhs.getData(), rhs.getData());
         }
     }
 

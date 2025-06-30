@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * @author meni1999
  */
 public class Job {
-    public final static Integer MAX_RUN_COUNT = 1000;
+    public final static Integer MAX_RUN_COUNT = 100;
     public final static Integer MIN_RUN_COUNT = 4;
     public final static Integer DEFAULT_RUN_COUNT = 4;
 
@@ -35,10 +35,6 @@ public class Job {
     public final static Double DEFAULT_CV_THRESHOLD = .2;
     public final static Double MAX_CV_THRESHOLD = .6;
     public final static Double MIN_CV_THRESHOLD = .05;
-
-    public final static Double DEFAULT_RCIW_THRESHOLD = .02;
-    public final static Double MAX_RCIW_THRESHOLD = .08;
-    public final static Double MIN_RCIW_THRESHOLD = .01;
 
     private static int COUNTER = 1; // so that each Job has a unique ID
     private Map<Integer, Integer> freq;
@@ -60,7 +56,6 @@ public class Job {
     private double epsilon = DEFAULT_EPSILON;
     private double alpha = DEFAULT_ALPHA;
     private double cvThreshold = DEFAULT_CV_THRESHOLD;
-    private double rciwThreshold = DEFAULT_RCIW_THRESHOLD;
     private double calculatedF;
     private double standardDeviation;
     private double SSE;
@@ -106,7 +101,6 @@ public class Job {
         this.MSE = other.MSE;
         this.SSE = other.SSE;
         this.cvThreshold = other.cvThreshold;
-        this.rciwThreshold = other.rciwThreshold;
         this.chartData = other.chartData;
         this.skipSize = other.skipSize;
         this.runDataSize = other.runDataSize;
@@ -236,14 +230,6 @@ public class Job {
         this.cvThreshold = cvThreshold;
     }
 
-    public double getRciwThreshold() {
-        return this.rciwThreshold;
-    }
-
-    public void setRciwThreshold(Double rciwThreshold) {
-        this.rciwThreshold = rciwThreshold;
-    }
-
     public int getID() {
         return this.ID;
     }
@@ -307,7 +293,6 @@ public class Job {
         int i = 0;
 
         final int MIN_RUN_DATA_LENGTH = 8;
-        //final int MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI = (int) Math.floor(rawData.size() / (double) (MIN_RUN_DATA_LENGTH * runsCounter));
         final int MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI = (int) Math.floor(rawData.size() / (double) (MIN_RUN_DATA_LENGTH * runsCounter));
 
         if (averageTimePerMilliSec > MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI) {
@@ -327,10 +312,10 @@ public class Job {
                 if (i % averageTimePerMilliSec == 0 && flag) {
                     double average_speed = speed / averageTimePerMilliSec;
                     averagedData.add(new DataPoint(average_speed, dataPoint.getTime()));
-                    speed = dataPoint.getSpeed();
+                    speed = dataPoint.getData();
                 } else {
                     flag = true;
-                    speed += dataPoint.getSpeed();
+                    speed += dataPoint.getData();
                 }
                 i++;
             }
@@ -348,7 +333,7 @@ public class Job {
         for (int j = 1; j <= runsCounter; j++) {
             run_data = new ArrayList<>();
             for (; i < this.runDataSize * j; i++) {
-                DataPoint dp = new DataPoint(averagedData.get(i).getSpeed() / Settings.CONVERSION_VALUE, averagedData.get(i).getTime());
+                DataPoint dp = new DataPoint(averagedData.get(i).getData() / Settings.CONVERSION_VALUE, averagedData.get(i).getTime());
                 run_data.add(dp);
                 convertedData.add(dp);
             }
@@ -370,20 +355,20 @@ public class Job {
         double sum = 0.0;
 
         for (DataPoint value : data) {
-            sum += value.getSpeed();
+            sum += value.getData();
         }
         double mean = sum / n;
 
         double squaredDiffSum = 0.0;
         for (DataPoint value : data) {
-            double diff = value.getSpeed() - mean;
+            double diff = value.getData() - mean;
             squaredDiffSum += diff * diff;
         }
         double stdDev = Math.sqrt(squaredDiffSum / (n - 1)); // Sample standard deviation
 
         List<DataPoint> normalized = new ArrayList<>();
         for (DataPoint value : data) {
-            double z = (value.getSpeed() - mean) / stdDev;
+            double z = (value.getData() - mean) / stdDev;
             normalized.add(new DataPoint(z, value.getTime()));
         }
 
@@ -404,7 +389,7 @@ public class Job {
         // Step 2: Compute the absolute deviations from the median
         List<DataPoint> absDeviations = new ArrayList<>();
         for (DataPoint value : data) {
-            absDeviations.add(new DataPoint(Math.abs(value.getSpeed() - median), value.time));
+            absDeviations.add(new DataPoint(Math.abs(value.getData() - median), value.time));
         }
 
         // Step 3: Compute MAD (Median Absolute Deviation)
@@ -420,7 +405,7 @@ public class Job {
         double madScale = mad * 1.4826;  // Consistency constant for normal distribution
         List<DataPoint> normalized = new ArrayList<>();
         for (DataPoint value : data) {
-            double z = (value.getSpeed() - median) / madScale;
+            double z = (value.getData() - median) / madScale;
             normalized.add(new DataPoint(z, value.time));
         }
 
@@ -431,9 +416,9 @@ public class Job {
     private double computeMedian(List<DataPoint> sorted) {
         int n = sorted.size();
         if (n % 2 == 0) {
-            return (sorted.get(n / 2 - 1).getSpeed() + sorted.get(n / 2).getSpeed()) / 2.0;
+            return (sorted.get(n / 2 - 1).getData() + sorted.get(n / 2).getData()) / 2.0;
         } else {
-            return sorted.get(n / 2).getSpeed();
+            return sorted.get(n / 2).getData();
         }
     }
 
@@ -472,7 +457,7 @@ public class Job {
     public List<XYChart.Data<Number, Number>> getSeries() {
         if (this.speedSeries.isEmpty()) {
             for (DataPoint dp : getData()) {
-                speedSeries.add(new XYChart.Data<>(dp.getTime(), dp.getSpeed()));
+                speedSeries.add(new XYChart.Data<>(dp.getTime(), dp.getData()));
             }
         }
 

@@ -1,6 +1,7 @@
 module de.unileipzig.atool {
     requires javafx.controls;
     requires javafx.fxml;
+    requires javafx.graphics;
     requires commons.math3;
     requires java.logging;
     requires jdistlib;

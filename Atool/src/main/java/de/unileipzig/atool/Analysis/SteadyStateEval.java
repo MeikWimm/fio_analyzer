@@ -65,6 +65,7 @@ public class SteadyStateEval implements Initializable {
 
         test[1] = new ConInt(job, settings);
         test[2] = new CoV(job, settings);
+        //test[3] = new CoVWindowed(job, settings);
         test[3] = new MannWhitney(job, settings);
         test[4] = new TTest(job, settings);
         testEvals = new ArrayList<>();
