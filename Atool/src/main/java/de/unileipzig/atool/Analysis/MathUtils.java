@@ -13,7 +13,7 @@ public class MathUtils {
         double sum = 0;
         double n = run.getData().size();
         for (DataPoint dp : run.getData()) {
-            sum += dp.getSpeed();
+            sum += dp.getData();
         }
         return sum / n;
     }
@@ -23,7 +23,7 @@ public class MathUtils {
         double n = 0;
         for (Run run : group) {
             for (DataPoint dp : run.getData()) {
-                sum += dp.getSpeed();
+                sum += dp.getData();
                 n++;
             }
         }
@@ -36,9 +36,9 @@ public class MathUtils {
         sorted.sort(new Utils.SpeedComparator());
         int n = sorted.size();
         if (n % 2 == 1) {
-            return sorted.get(n / 2).getSpeed();
+            return sorted.get(n / 2).getData();
         } else {
-            return (sorted.get(n / 2 - 1).getSpeed() + sorted.get(n / 2).getSpeed()) / 2.0;
+            return (sorted.get(n / 2 - 1).getData() + sorted.get(n / 2).getData()) / 2.0;
         }
     }
 
@@ -46,7 +46,7 @@ public class MathUtils {
     public static double mad(Run run, double median) {
         List<DataPoint> deviations = new ArrayList<>();
         for (DataPoint dp : run.getData()) {
-            deviations.add(new DataPoint(Math.abs(dp.getSpeed() - median), dp.getTime()));
+            deviations.add(new DataPoint(Math.abs(dp.getData() - median), dp.getTime()));
         }
         deviations.sort(new Utils.SpeedComparator());
         return median(deviations);
@@ -57,7 +57,7 @@ public class MathUtils {
         double average = average(run);
         double n = run.getData().size();
         for (DataPoint dp : run.getData()) {
-            sum += Math.pow(dp.getSpeed() - average, 2);
+            sum += Math.pow(dp.getData() - average, 2);
         }
         return sum / (n - 1);
     }
@@ -66,6 +66,15 @@ public class MathUtils {
         double sum = 0;
         double n = list.size();
         for (Double d : list) {
+            sum += Math.pow(d - average, 2);
+        }
+        return sum / (n - 1);
+    }
+
+    public static double variance(double[] list, double average) {
+        double sum = 0;
+        double n = list.length;
+        for (double d : list) {
             sum += Math.pow(d - average, 2);
         }
         return sum / (n - 1);
@@ -107,7 +116,7 @@ public class MathUtils {
     public static double calculateDeviation(List<DataPoint> data, double average_speed) {
         double sum = 0.0;
         for (DataPoint dataPoint : data) {
-            sum += Math.pow(dataPoint.getSpeed() - average_speed, 2);
+            sum += Math.pow(dataPoint.getData() - average_speed, 2);
         }
         return Math.sqrt(sum / data.size());
     }

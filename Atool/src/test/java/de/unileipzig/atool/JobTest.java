@@ -35,15 +35,12 @@ class JobTest {
 
     @BeforeEach
     void setUp() {
-        File[] files = new File[1];
-        files[0] = new File("src/test/resources/loop_40_512m.log");
+        File[] files = new File[3];
+        files[0] = new File("src/test/resources/empty.log");
+        files[1] = new File("src/test/resources/broken.log");
+        files[2] = new File("src/test/resources/broken2.log");
 
         Settings settings = new Settings(null);
-//        settings.setAnovaSkipRunsCounter(2);
-//        settings.setAnovaUseAdjacentRun(true);
-//        settings.setGroupSize(3);
-//        settings.setWindowSize(5);
-
         InputModule inputModule = new InputModule(settings);
 
         inputModule.readFiles(files);

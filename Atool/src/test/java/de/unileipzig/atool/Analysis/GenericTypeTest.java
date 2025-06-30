@@ -19,7 +19,7 @@ class GenericTypeTest {
     void setUp() {
         File[] files = new File[3];
 
-        files[0] = new File("src/test/resources/loop_40_512m.log");
+        files[0] = new File("src/test/resources/logfiles/empty.log");
         files[1] = new File("src/test/resources/generated_50_loops.log");
         files[2] = new File("src/test/resources/100_lines");
         settings = new Settings(null);
@@ -46,7 +46,6 @@ class GenericTypeTest {
                 test = new Anova(job, settings);
                 assertNotNull(test, "Anova instance should be initialized.");
                 assertEquals(0.05, test.getAlpha(), "Alpha value should be set correctly.");
-                assertEquals(5, settings.getWindowSize(), "Settings window size should match initialization.");
             }
         }
     }

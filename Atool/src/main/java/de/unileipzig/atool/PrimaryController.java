@@ -11,6 +11,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Window;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -64,7 +65,6 @@ public class PrimaryController implements Initializable {
     public void initialize(URL arg0, ResourceBundle arg1) {
         settings = new Settings(this);
         inputModule = new InputModule(settings);
-
         setupCellValueFactory();
         setupTableMenuItems();
         setupColumnTextField();
@@ -128,11 +128,6 @@ public class PrimaryController implements Initializable {
                 String.format("CV threshold must be a value between %f and %f", Job.MIN_CV_THRESHOLD, Job.MAX_CV_THRESHOLD)
         ));
 
-        rciwColumn.setCellFactory(tc -> new Utils.ValidatedDoubleTableCell<>(
-                labelLoadInfo, Job.MIN_RCIW_THRESHOLD, Job.MAX_RCIW_THRESHOLD, Job.DEFAULT_RCIW_THRESHOLD,
-                String.format("RCIW threshold must be a value between %f and %f", Job.MIN_RCIW_THRESHOLD, Job.MAX_RCIW_THRESHOLD)
-        ));
-
         table.setOnMouseClicked((MouseEvent event) -> {
             if (event.getButton().equals(MouseButton.PRIMARY)) {
                 Job job = table.getSelectionModel().getSelectedItem();
@@ -149,6 +144,7 @@ public class PrimaryController implements Initializable {
         menuItems.addMenuItem("Draw Job Frequency", this::onActionDrawJobFreq);
         menuItems.addMenuItem("Confidence Interval", this::onActionCalcConInt);
         menuItems.addMenuItem("Anova", this::onActionCalcAnova);
+        menuItems.addMenuItem("CV", this::onActionCalcCV);
         menuItems.addMenuItem("T-Test", this::onActionCalcTTest);
         menuItems.addMenuItem("U-Test", this::onActionCalcMannWhitneyTest);
         menuItems.addMenuItem("Tukey-HSD", this::onActionCalcTukeyHSD);
@@ -176,10 +172,6 @@ public class PrimaryController implements Initializable {
         cvColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {
             t.getRowValue().setCvThreshold(t.getNewValue());
         });
-
-        rciwColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {
-            t.getRowValue().setRciwThreshold(t.getNewValue());
-        });
     }
 
     // Code block callback functions for table menu items
@@ -201,6 +193,13 @@ public class PrimaryController implements Initializable {
         Anova anova = new Anova(job, settings);
         anova.calculate();
         anova.openWindow();
+    }
+
+    private void onActionCalcCV(TableRow<Job> row, TableView<Job> table) {
+        Job job = row.getItem();
+        CoV cov = new CoV(job, settings);
+        cov.calculate();
+        cov.openWindow();
     }
 
     private void onActionDrawJobFreq(TableRow<Job> row, TableView<Job> table) {
@@ -249,8 +248,47 @@ public class PrimaryController implements Initializable {
     @FXML
     private void openLogfile() {
         labelLoadInfo.setText("trying to open files...");
-        InputModule.STATUS state = inputModule.loadFile(steadyStateEvalButton.getScene().getWindow());
+        Window ownerWindow = steadyStateEvalButton.getScene().getWindow();
+        inputModule.openDirectoryChooser(ownerWindow);
+        InputModule.STATUS state = inputModule.loadFile();
+        checkInputModuleStatus(state);
+    }
 
+    // Code Block of callback functions
+
+    @FXML
+    private void onActionRefreshTable() {
+        InputModule.STATUS state = inputModule.loadFile();
+        checkInputModuleStatus(state);
+    }
+
+    @FXML
+    private void onActionCalcualteSteadyState() {
+        if(this.job != null && this.settings != null) {
+            SteadyStateEval eval = new SteadyStateEval(this.job, this.settings);
+            eval.openWindow();
+        } else {
+            labelLoadInfo.setText("Please select a Job!");
+            LOGGER.log(Level.WARNING, "Error in opening SteadyStateEvalButton");
+        }
+    }
+
+    @FXML
+    private void openGeneralSettings() {
+        settings.openWindow();
+    }
+
+    // Handling keyboard input
+    @FXML
+    private void onActionKey(KeyEvent e) {
+        if (e.getCode() == KeyCode.DELETE) {
+            int pos = table.getSelectionModel().getSelectedIndex();
+            Job removedJob = table.getItems().remove(pos);
+            LOGGER.log(Level.INFO, String.format("Removed Job -> %s", removedJob.toString()));
+        }
+    }
+
+    private void checkInputModuleStatus(InputModule.STATUS state) {
         switch (state) {
             case NO_DIR_SET:
                 labelLoadInfo.setText("No directory set!");
@@ -268,46 +306,6 @@ public class PrimaryController implements Initializable {
                 labelLoadInfo.setText("All files loaded!");
                 table.setItems(inputModule.getJobs());
                 break;
-        }
-    }
-
-    // Code Block of callback functions
-
-    @FXML
-    private void onActionRefreshTable() {
-        labelLoadInfo.setText("Refresh Table...");
-        InputModule.STATUS status = inputModule.checkForNewLogs();
-
-        if (status != InputModule.STATUS.SUCCESS) {
-            LOGGER.log(Level.WARNING, String.format("Coudn't refresh table! App state: %s", status));
-            labelLoadInfo.setText("Couldn't load Files!");
-        } else {
-            labelLoadInfo.setText("All files loaded!");
-        }
-    }
-
-    @FXML
-    private void onActionCalcualteSteadyState() {
-        if(this.job != null && this.settings != null) {
-            SteadyStateEval eval = new SteadyStateEval(this.job, this.settings);
-            eval.openWindow();
-        } else {
-            LOGGER.info("Error: job or settings are null!");
-        }
-    }
-
-    @FXML
-    private void openGeneralSettings() {
-        settings.openWindow();
-    }
-
-    // Handling keyboard input
-    @FXML
-    private void onActionKey(KeyEvent e) {
-        if (e.getCode() == KeyCode.DELETE) {
-            int pos = table.getSelectionModel().getSelectedIndex();
-            Job removedJob = table.getItems().remove(pos);
-            LOGGER.log(Level.INFO, String.format("Removed Job -> %s", removedJob.toString()));
         }
     }
 }

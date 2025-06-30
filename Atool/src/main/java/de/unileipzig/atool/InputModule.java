@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 public class
 InputModule {
     private static final Logger LOGGER = Logger.getLogger(InputModule.class.getName());
-
+    public static final int MIN_POSSIBLE_DATA_SIZE = 100;
     static {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setLevel(Level.FINEST);
@@ -63,19 +63,24 @@ InputModule {
         directoryChooser = new DirectoryChooser();
     }
 
+    public void openDirectoryChooser(Window ownerWindow) {
+        this.selectedDirectory = directoryChooser.showDialog(ownerWindow);
+    }
+
     /**
      * DirectoryChooser gets all log files from a choosen directory.
      *
      */
-    public STATUS loadFile(Window ownerWindow) {
+    public STATUS loadFile() {
         LOGGER.log(Level.INFO, "Loading input module...");
 
         STATUS state;
         if (!isDirChooserOpen) {
             isDirChooserOpen = true;
             try {
-                //this.selectedDirectory = directoryChooser.showDialog(ownerWindow);
-                this.selectedDirectory = directoryChooser.showDialog(new Stage());
+                if(this.selectedDirectory != null && this.selectedDirectory.isDirectory()) {
+                    files = selectedDirectory.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
+                }
             } finally {
                 isDirChooserOpen = false;
             }
@@ -122,68 +127,6 @@ InputModule {
         return state;
     }
 
-    public STATUS checkForNewLogs(){
-        if (selectedDirectory == null) {
-            return STATUS.NO_DIR_SET;
-        }
-
-        File[] newFiles = selectedDirectory.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
-
-        if (newFiles == null || newFiles.length == 0) {
-            LOGGER.log(Level.WARNING, "No new files found!");
-            return STATUS.NO_FILES_FOUND;
-        }
-
-        if(files.length == 0){
-            LOGGER.log(Level.WARNING, "No files found!");
-            return STATUS.NO_FILES_FOUND;
-        }
-
-
-
-        ArrayList<Job> temp = new ArrayList<>();
-
-        boolean found_new_files = false;
-        for (File newFile : newFiles) {
-            boolean exists = true;
-
-            for (File file : files) {
-                exists = file.toPath().equals(newFile.toPath());
-                if(exists){
-                    break;
-                }
-            }
-
-            if(!exists){
-                found_new_files = true;
-                readData(newFile);
-
-                Job job = new Job(this.data, settings.averageSpeedPerMillisec);
-                job.setFrequency(this.freq);
-                job.setFile(newFile);
-                job.setFileAttributes(this.fileAttribute);
-                job.setTime(this.time);
-                job.setAverageSpeed(this.averageSpeed);
-                job.setStandardDeviation(this.standardDeviation);
-                jobs.add(job);
-                temp.add(job);
-            }
-        }
-
-
-        if (!found_new_files) {
-            LOGGER.log(Level.INFO, "Nothing to refresh in Table.");
-        } else {
-            for (Job job : temp) {
-                LOGGER.log(Level.INFO, String.format("Added new found job -> %s", job));
-                this.files = newFiles;
-
-            }
-        }
-
-        return STATUS.SUCCESS;
-    }
-
     /**
      * Reads all files listed in directoryChooser with the extension type ".log".
      * If a specific file is already loaded, it'll be ignored.
@@ -191,34 +134,51 @@ InputModule {
      * @return NO_DIR_SET, if directory of this object is not set. BUFFER On success it return SUCCESS.
      */
     public STATUS readFiles(File[] files) {
-
-        if (selectedDirectory == null) {
-            return STATUS.NO_DIR_SET;
-        }
-
-        if(files.length == 0){
-            LOGGER.log(Level.WARNING, "No files found!");
-            return STATUS.NO_FILES_FOUND;
-        }
-
+        boolean foundNewFile = false;
         for (File file : files) {
-            readData(file);
+            boolean exists = false;
+            for (Job job: jobs) {
+                if (file.equals(job.getFile())) {
+                    exists = true;
+                    break;
+                }
+            }
 
-            Job job = new Job(this.data, settings.averageSpeedPerMillisec);
-            job.setFrequency(this.freq);
-            job.setFile(file);
-            job.setFileAttributes(this.fileAttribute);
-            job.setTime(this.time);
-            job.setAverageSpeed(this.averageSpeed);
-            job.setStandardDeviation(this.standardDeviation);
-            jobs.add(job);
+            if(!exists){
+                foundNewFile =  true;
+                if(readData(file) != STATUS.SUCCESS){
+                    LOGGER.log(Level.WARNING, String.format("Error while reading file -> %s", file.getAbsolutePath()));
+                } else {
+                    if(this.data.size() < MIN_POSSIBLE_DATA_SIZE){
+                        LOGGER.log(Level.WARNING, String.format("file -> %s is to small!", file.getAbsolutePath()));
+                    } else {
+                        Job job = new Job(this.data, settings.averageSpeedPerMillisec);
+                        job.setFrequency(this.freq);
+                        job.setFile(file);
+                        job.setFileAttributes(this.fileAttribute);
+                        job.setTime(this.time);
+                        job.setAverageSpeed(this.averageSpeed);
+                        job.setStandardDeviation(this.standardDeviation);
+                        jobs.add(job);
+                    }
+                }
+            }
         }
+
+        if(foundNewFile){
+            LOGGER.log(Level.INFO, "New file\\s found.");
+        }
+        LOGGER.log(Level.INFO, "Finished reading files!");
         return STATUS.SUCCESS;
     }
 
     public static int[] parseFirstTwoValues(String line) {
         int[] result = new int[2];
         int value = 0, idx = 0;
+
+        if(line == null){
+            return null;
+        }
 
         for (int i = 0; i < line.length() && idx < 2; i++) {
             char ch = line.charAt(i);
@@ -234,13 +194,16 @@ InputModule {
         return result;
     }
     
-    private void readData(File file) {
+    private STATUS readData(File file) {
         List<DataPoint> data = new ArrayList<>(); // Point2D for x = time and y = speed
         Map<Integer, Integer> freq = new TreeMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             this.fileAttribute = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
             String line = br.readLine();
             int[] values = parseFirstTwoValues(line);
+            if (values == null) {
+                return STATUS.ERROR_WHILE_READING_FILE;
+            }
 
             int old_time = values[0];
             int speed = values[1];
@@ -254,6 +217,9 @@ InputModule {
 
             while ((line = br.readLine()) != null) {
                 int[] s = parseFirstTwoValues(line);
+                if (s == null) {
+                    return STATUS.ERROR_WHILE_READING_FILE;
+                }
                 int new_time = s[0];
                 speed = s[1];
 
@@ -284,6 +250,7 @@ InputModule {
             ex.printStackTrace();
             LOGGER.log(Level.SEVERE, String.format("Error occured while reading file: %s. App state: %s", file, STATUS.ERROR_WHILE_READING_FILE));
         }
+        return STATUS.SUCCESS;
     }
 
     public ObservableList<Job> getJobs() {

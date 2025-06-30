@@ -40,7 +40,6 @@ public class TestEval{
             steadyStateRunString = "No steady state run found";
         }
 
-        averageTimePerMilliVal = "1"; //TODO
         if(test.isSkipGroup()){
             typeOfComparedRuns = "sequential";
         } else {
@@ -52,8 +51,8 @@ public class TestEval{
         } else {
             bonferroniVal = "No";
         }
-        skippedRunVal = "0"; //TODO
-        comparedRunsVal = "2"; //TODO
+        skippedRunVal = Integer.toString(test.getSkippedRunCount());
+        comparedRunsVal = Integer.toString(test.getGroupSize());
     }
 
     public String getSteadyStateRun() {
@@ -84,7 +83,6 @@ public class TestEval{
         test.calculate();
         Run steadyStateRun = test.getSteadyStateRun();
         testName = test.getTestName();
-        averageTimePerMilliVal = "1"; //TODO
 
         if(steadyStateRun != null){
             steadyStateRunString = String.format("Run %s", steadyStateRun.getID());
@@ -93,10 +91,15 @@ public class TestEval{
             steadyStateRunString = "No steady state run found";
         }
 
-        if(test.isSkipGroup()){
-            typeOfComparedRuns = "sequential";
+        //a Workaround for windowed CoV
+        if(test instanceof CoVWindowed){
+            typeOfComparedRuns = "-";
         } else {
-            typeOfComparedRuns = "adjacent";
+            if(test.isSkipGroup()){
+                typeOfComparedRuns = "sequential";
+            } else {
+                typeOfComparedRuns = "adjacent";
+            }
         }
 
         if(test.isApplyBonferroni()){
@@ -104,8 +107,8 @@ public class TestEval{
         } else {
             bonferroniVal = "No";
         }
-        skippedRunVal = "0"; //TODO
-        comparedRunsVal = "2"; //TODO
+        skippedRunVal = Integer.toString(test.getSkippedRunCount());
+        comparedRunsVal = Integer.toString(test.getGroupSize());
     }
 
     public String getBonferroniVal() {

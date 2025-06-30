@@ -99,22 +99,8 @@ public class ConInt extends GenericTest implements Initializable {
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
-        drawConIntDiffButton.setOnAction(e -> draw());
-        drawWindowedRCIWButton.setOnAction(e -> drawWindowedRCIW());
-
         labelHeader.setText(this.job.toString());
         conIntTable.setItems(this.job.getFilteredRuns());
-    }
-
-    public void draw() {
-        charter.drawGraph(
-                "Per-Run Relative Confidence Interval Width (RCIW) over Job Average",
-                "Run Index",
-                "RCIW / Job Average Speed",
-                "Threshold",
-                this.job.getRciwThreshold(),
-                new Charter.ChartData("RCIW per Run", this.conIntData)
-        );
     }
 
     private void drawWindowedRCIW() {
@@ -219,7 +205,7 @@ public class ConInt extends GenericTest implements Initializable {
 
         if (data.size() < windowSize) return;
         for (int i = 0; i < windowSize; i++) {
-            windowData[i] = data.get(i).getSpeed();
+            windowData[i] = data.get(i).getData();
         }
 
         double alpha = job.getAlpha();
@@ -238,7 +224,7 @@ public class ConInt extends GenericTest implements Initializable {
 
         for (int i = 0; i < data.size() - windowSize; i++) {
             for (int j = 0; j < windowSize; j++) {
-                windowData[j] = data.get(i + j).getSpeed();
+                windowData[j] = data.get(i + j).getData();
             }
 
             averageSpeed = MathUtils.average(windowData);

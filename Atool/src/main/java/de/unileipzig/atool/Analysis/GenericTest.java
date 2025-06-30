@@ -37,12 +37,14 @@ public abstract class GenericTest {
     protected int averageTimePerMillisec;
     protected boolean sequentialCompareType;
     protected int skipCounter;
+    protected int groupSize;
     private PostHocTest postHocTest;
 
     public GenericTest(Job job, int skipFirstRun, boolean skipGroup, int groupSize, double alpha, boolean applyBonferroni, int thresholdSectionsForSteadyState) {
         this.job = new Job(job);
         this.job.prepareSkippedData(skipFirstRun);
         this.groups = Job.setupGroups(this.job, skipGroup, groupSize);
+        this.groupSize = groupSize;
         this.resultGroups = new ArrayList<>();
         this.resultRuns = new ArrayList<>();
         this.postHocRuns = new ArrayList<>();
@@ -52,12 +54,18 @@ public abstract class GenericTest {
         this.alpha = alpha;
         this.thresholdSectionsForSteadyState = thresholdSectionsForSteadyState;
         this.applyBonferroni = applyBonferroni;
-        this.averageTimePerMillisec = 1; //TODO
-        this.sequentialCompareType = false; // TODO
-        this.skipCounter = 0; // TODO
+        this.skipCounter = skipFirstRun;
         if (applyBonferroni) {
             recalculateAlpha();
         }
+    }
+
+    public int getSkippedRunCount(){
+        return skipCounter;
+    }
+
+    public int getGroupSize() {
+        return groupSize;
     }
 
     private void recalculateAlpha() {

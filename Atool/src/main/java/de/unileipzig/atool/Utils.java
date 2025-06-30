@@ -4,11 +4,9 @@
  */
 package de.unileipzig.atool;
 
-import de.unileipzig.atool.Analysis.Anova;
 import javafx.beans.binding.Bindings;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.Callback;
@@ -148,7 +146,7 @@ public abstract class Utils {
 
         @Override
         public int compare(DataPoint lhs, DataPoint rhs) {
-            return Double.compare(lhs.getSpeed(), rhs.getSpeed());
+            return Double.compare(lhs.getData(), rhs.getData());
         }
     }
 

@@ -40,13 +40,13 @@ public class Settings implements Initializable {
     public final static int MAX_SPEED_PER_MIILI = 2000;
     public final static int MIN_SPEED_PER_MIILI = 1;
 
-    public static final int MAX_SKIP_COUNT = 3;
+    public static final int MAX_SKIP_COUNT = 5;
     public static final int MIN_SKIP_COUNT = 0;
     public static final int DEFAULT_SKIP_COUNT = 0;
 
-    public static final int MAX_WINDOW_SIZE = 1000;
+    public static final int MAX_WINDOW_SIZE = 5000;
     public static final int MIN_WINDOW_SIZE = 1;
-    public static final int DEFAULT_WINDOW_SIZE = 100;
+    public static final int DEFAULT_WINDOW_SIZE = 5000;
 
     public static final int MAX_REQUIRED_RUNS_FOR_STEADY_STATE = 10;
     public static final int MIN_REQUIRED_RUNS_FOR_STEADY_STATE = 2;
