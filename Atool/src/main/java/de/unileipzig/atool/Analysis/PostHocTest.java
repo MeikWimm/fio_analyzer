@@ -3,7 +3,13 @@ package de.unileipzig.atool.Analysis;
 import de.unileipzig.atool.Run;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,10 +18,13 @@ public abstract class PostHocTest {
     protected Run steadyStateRun;
     protected Run anovaSteadyStateRun;
     private boolean isFirst = true;
+    private Scene scene;
+    protected final Charter charter;
 
     public PostHocTest(GenericTest test){
         super();
         this.test = test;
+        this.charter = new Charter();
     }
 
     protected void checkSteadyStateRun(Run savedHypothesisRun, List<Run> group1, List<Run> group2){
@@ -77,4 +86,42 @@ public abstract class PostHocTest {
 
         return found;
     }
+
+
+    // Optional method for setting labels, can be overridden
+    protected void setLabeling() {
+        // Default implementation can be empty or include common labeling logic
+    }
+
+    protected abstract URL getFXMLPath();
+
+    protected abstract String getWindowTitle();
+
+    public final void openWindow() {
+        scene = getScene();
+        Stage stage = new Stage();
+        stage.setMaxWidth(1200);
+        stage.setMaxHeight(600);
+        stage.setMinHeight(600);
+        stage.setMinWidth(800);
+        stage.setTitle(getWindowTitle());
+        stage.setScene(scene);
+        setLabeling();
+        stage.show();
+    }
+
+    public Scene getScene() {
+        FXMLLoader fxmlLoader = new FXMLLoader(getFXMLPath());
+        fxmlLoader.setController(this);
+        Parent root1 = null;
+        try {
+            root1 = fxmlLoader.load();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        scene = new Scene(root1);
+        return scene;
+    }
+
+    public abstract Scene getCharterScene();
 }

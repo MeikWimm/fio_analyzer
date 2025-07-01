@@ -65,7 +65,6 @@ public class MannWhitney extends GenericTest implements Initializable {
     }
 
     private final List<XYChart.Data<Number, Number>> uTestData;
-    private final Charter charter;
     @FXML public TableView<Run> uTestTable;
     @FXML public TableColumn<Run, Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
@@ -80,7 +79,6 @@ public class MannWhitney extends GenericTest implements Initializable {
 
     public MannWhitney(Job job,Settings settings) {
         super(job, settings.getUTestSkipRunsCounter(), settings.isUTestUseAdjacentRun(), 2, job.getAlpha(), settings.isBonferroniUTestSelected(), settings.getRequiredRunsForSteadyState());
-        this.charter = new Charter();
         this.uTestData = new ArrayList<>();
     }
 
@@ -102,7 +100,8 @@ public class MannWhitney extends GenericTest implements Initializable {
         drawUTestButton.setOnAction(e -> draw());
     }
 
-    private void setLabeling() {
+    @Override
+    protected void setLabeling() {
         zIntervalLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.zCrit));
         if(this.getSteadyStateRun() == null){
             steadyStateLabel.setText("No steady state run found.");
@@ -111,8 +110,19 @@ public class MannWhitney extends GenericTest implements Initializable {
         }
     }
 
+    @Override
+    protected URL getFXMLPath() {
+        return getClass().getResource("/de/unileipzig/atool/MannWithney.fxml");
+    }
+
+    @Override
+    protected String getWindowTitle() {
+        return "Calculated U-Test";
+    }
+
     public void draw() {
         charter.drawGraph("U-Test", "Run", "Z-Value","z-critical", this.zCrit, new Charter.ChartData("calculated Z", uTestData));
+        charter.openWindow();
     }
 
     @Override
@@ -232,24 +242,8 @@ public class MannWhitney extends GenericTest implements Initializable {
         return value < this.zCrit;
     }
 
-    public void openWindow() {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/MannWithney.fxml"));
-            fxmlLoader.setController(this);
-            Parent root1 = fxmlLoader.load();
-
-            Stage stage = new Stage();
-            stage.setMaxWidth(1200);
-            stage.setMaxHeight(600);
-            stage.setMinHeight(600);
-            stage.setMinWidth(800);
-            stage.setTitle("Calculated U-Test");
-            stage.setScene(new Scene(root1));
-            setLabeling();
-            stage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    @Override
+    public Scene getCharterScene() {
+        return charter.drawGraph("U-Test", "Run", "Z-Value","z-critical", this.zCrit, new Charter.ChartData("calculated Z", uTestData));
     }
 }

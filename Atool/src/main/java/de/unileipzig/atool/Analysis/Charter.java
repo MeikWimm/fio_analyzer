@@ -4,15 +4,22 @@
 package de.unileipzig.atool.Analysis;
 
 import de.unileipzig.atool.*;
+import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.image.WritableImage;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,10 +33,9 @@ import java.util.Optional;
 public class Charter {
 
     public record ChartData(String label, List<XYChart.Data<Number, Number>> data) {}
-
-    public final void drawGraph(String title, String xAxisLabel, String yAxisLabel, String constantLabel, double constant, ChartData... chartDataList) {
-        Stage graphStage = new Stage();
-
+    private Utils.CustomLineChart<Number, Number> lineChart;
+    private Scene scene;
+    public final Scene drawGraph(String title, String xAxisLabel, String yAxisLabel, String constantLabel, double constant, ChartData... chartDataList) {
         if (chartDataList.length == 0) {
             throw new IllegalArgumentException("Chart data list cannot be empty");
         }
@@ -39,7 +45,7 @@ public class Charter {
         xAxis.setLabel(xAxisLabel);
         yAxis.setLabel(yAxisLabel);
 
-        Utils.CustomLineChart<Number, Number> lineChart = new Utils.CustomLineChart<>(xAxis, yAxis);
+        lineChart = new Utils.CustomLineChart<>(xAxis, yAxis);
         lineChart.setTitle(title);
         lineChart.setCreateSymbols(false);
 
@@ -55,14 +61,12 @@ public class Charter {
         XYChart.Series<Number, Number> constantSeries = createConstantSeries(constant, dataList);
         constantSeries.setName(constantLabel);
         lineChart.getData().add(constantSeries);
-        Scene scene = new Scene(lineChart, 800, 600);
-        graphStage.setScene(scene);
-        graphStage.show();
+        scene = new Scene(lineChart, 800, 600);
+
+        return scene;
     }
 
-    public final void drawGraph(String title, String xAxisLabel, String yAxisLabel, ChartData... chartDataList) {
-        Stage graphStage = new Stage();
-
+    public final Scene drawGraph(String title, String xAxisLabel, String yAxisLabel, ChartData... chartDataList) {
         if (chartDataList.length == 0) {
             throw new IllegalArgumentException("Chart data list cannot be empty");
         }
@@ -72,7 +76,7 @@ public class Charter {
         xAxis.setLabel(xAxisLabel);
         yAxis.setLabel(yAxisLabel);
 
-        Utils.CustomLineChart<Number, Number> lineChart = new Utils.CustomLineChart<>(xAxis, yAxis);
+        lineChart = new Utils.CustomLineChart<>(xAxis, yAxis);
         lineChart.setTitle(title);
         lineChart.setCreateSymbols(false);
 
@@ -83,7 +87,13 @@ public class Charter {
             lineChart.getData().add(series);
         }
 
-        Scene scene = new Scene(lineChart, 800, 600);
+        scene = new Scene(lineChart, 800, 600);
+
+        return scene;
+    }
+
+    public void openWindow(){
+        Stage graphStage = new Stage();
         graphStage.setScene(scene);
         graphStage.show();
     }
@@ -130,5 +140,4 @@ public class Charter {
 
         return (maxX == Double.NEGATIVE_INFINITY) ? Double.NaN : maxX;
     }
-
 }

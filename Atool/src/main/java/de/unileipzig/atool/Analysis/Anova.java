@@ -45,7 +45,6 @@ public class Anova extends GenericTest implements Initializable {
     }
 
     private final List<XYChart.Data<Number, Number>> anovaData;
-    private final Charter charter;
     @FXML public Label averageSpeedLabel;
     @FXML public Label sseLabel;
     @FXML public Label ssaLabel;
@@ -65,7 +64,6 @@ public class Anova extends GenericTest implements Initializable {
     @FXML public TableView<Run> anovaTable;
     @FXML public TableColumn<Run, Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
-    @FXML public TableColumn<Run, Double> covColumn;
     @FXML public TableColumn<Run, Double> startTimeColumn;
     @FXML public TableColumn<Run, String> compareToRunColumn;
     @FXML public TableColumn<Run, Double> FColumn;
@@ -75,7 +73,7 @@ public class Anova extends GenericTest implements Initializable {
     public Anova(Job job, Settings settings) {
         super(job, settings.getAnovaSkipRunsCounter(), settings.isAnovaUseAdjacentRun(), settings.getGroupSize(), job.getAlpha(), settings.isBonferroniANOVASelected() , settings.getRequiredRunsForSteadyState());
         final int dataSize = job.getData().size();
-        this.charter = new Charter();
+
         this.anovaData = new ArrayList<>(dataSize);
     }
 
@@ -83,9 +81,6 @@ public class Anova extends GenericTest implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         averageSpeedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
-
-        covColumn.setCellValueFactory(new PropertyValueFactory<>("CoV"));
-        covColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         startTimeColumn.setCellValueFactory(new PropertyValueFactory<>("StartTime"));
@@ -127,7 +122,8 @@ public class Anova extends GenericTest implements Initializable {
         }
     }
 
-    private void setLabeling() {
+    @Override
+    protected void setLabeling() {
         fCriticalLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.fCrit));
         sigmaJobLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.job.getStandardDeviation()));
         if(this.possibleSteadyStateRuns.isEmpty()){
@@ -224,6 +220,7 @@ public class Anova extends GenericTest implements Initializable {
 
     private void drawANOVAGraph() {
         charter.drawGraph("ANOVA", "Run", "F-Value", "Critical value", this.fCrit, new Charter.ChartData("calculated F", anovaData));
+        charter.openWindow();
     }
 
     public double getCriticalValue() {
@@ -231,28 +228,26 @@ public class Anova extends GenericTest implements Initializable {
     }
 
     @Override
+    public Scene getCharterScene() {
+        return charter.drawGraph("ANOVA", "Run", "F-Value", "Critical value", this.fCrit, new Charter.ChartData("calculated F", anovaData));
+    }
+
+    @Override
+    protected URL getFXMLPath() {
+        return getClass().getResource("/de/unileipzig/atool/Anova.fxml");
+    }
+
+    @Override
+    protected String getWindowTitle() {
+        return "Calculated Anova";
+    }
+
+    @Override
     public String getTestName() {
         return "ANOVA";
     }
 
-    public final void openWindow() {
-        try {
-
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/Anova.fxml"));
-            fxmlLoader.setController(this);
-            Parent root1 = fxmlLoader.load();
-
-            Stage stage = new Stage();
-            stage.setMaxWidth(1200);
-            stage.setMaxHeight(600);
-            stage.setMinHeight(600);
-            stage.setMinWidth(800);
-            stage.setTitle("Calculated ANOVA");
-            stage.setScene(new Scene(root1));
-            setLabeling();
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public TableView<Run> getAnovaTable() {
+        return anovaTable;
     }
 }

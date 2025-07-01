@@ -64,13 +64,11 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     private double qHSD;
     private final List<XYChart.Data<Number, Number>> meanData;
     private final List<XYChart.Data<Number, Number>> qHSDData;
-    private final Charter charter;
 
     public TukeyHSD(Anova anova){
         super(anova);
         this.meanData = new ArrayList<>();
         this.qHSDData = new ArrayList<>();
-        this.charter = new Charter();
     }
 
     @Override
@@ -94,6 +92,7 @@ public class TukeyHSD extends PostHocTest implements Initializable {
 
     public void draw(){
         charter.drawGraph("U-Test","Group","Mean/Difference",new Charter.ChartData("Run mean", meanData), new Charter.ChartData("QHSD", qHSDData));
+        charter.openWindow();
     }
 
     @Override
@@ -154,27 +153,8 @@ public class TukeyHSD extends PostHocTest implements Initializable {
         }
     }
 
-    public void openWindow(){
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/TukeyHSD.fxml"));
-            fxmlLoader.setController(this);
-            Parent root1 = fxmlLoader.load();
-
-            Stage stage = new Stage();
-            stage.setMaxWidth(1200);      
-            stage.setMaxHeight(600);
-            stage.setMinHeight(600);
-            stage.setMinWidth(800);
-            stage.setTitle("Calculated Tukey HSD");
-            stage.setScene(new Scene(root1));
-            setLabeling();
-            stage.show();
-    } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void setLabeling() {
+    @Override
+    protected void setLabeling() {
         if(steadyStateRun == null && anovaSteadyStateRun == null){
             evalLabel.setText("No steady state run found.");
             return;
@@ -195,5 +175,20 @@ public class TukeyHSD extends PostHocTest implements Initializable {
                 evalLabel.setText("Run " + steadyStateRun.getID() + " is in steady state.");
             }
         }
+    }
+
+    @Override
+    protected URL getFXMLPath() {
+        return getClass().getResource("/de/unileipzig/atool/TukeyHSD.fxml");
+    }
+
+    @Override
+    protected String getWindowTitle() {
+        return "Calculated Tukey HSD";
+    }
+
+    @Override
+    public Scene getCharterScene() {
+        return charter.drawGraph("U-Test","Group","Mean/Difference",new Charter.ChartData("Run mean", meanData), new Charter.ChartData("QHSD", qHSDData));
     }
 }

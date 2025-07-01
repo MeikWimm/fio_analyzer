@@ -48,7 +48,6 @@ public class ConInt extends GenericTest implements Initializable {
         LOGGER.addHandler(handler);
     }
 
-    private final Charter charter;
     private final List<XYChart.Data<Number, Number>> conIntData;
     private final List<XYChart.Data<Number, Number>> windowedRCIWData;
     @FXML public Label labelHeader;
@@ -70,7 +69,6 @@ public class ConInt extends GenericTest implements Initializable {
     public ConInt(Job job,Settings settings) {
         super(job, settings.getConIntSkipRunsCounter(), settings.isConIntUseAdjacentRun(), 2, job.getAlpha(), settings.isBonferroniConIntSelected(), settings.getRequiredRunsForSteadyState());
         int dataSize = this.job.getData().size();
-        charter = new Charter();
         conIntData = new ArrayList<>(dataSize);
         windowedRCIWData = new ArrayList<>(dataSize);
         WINDOW_SIZE = settings.getWindowSize();
@@ -197,6 +195,21 @@ public class ConInt extends GenericTest implements Initializable {
         return value == Run.ACCEPTED_NULLHYPOTHESIS;
     }
 
+    @Override
+    public Scene getCharterScene() {
+        return null;
+    }
+
+    @Override
+    protected URL getFXMLPath() {
+        return getClass().getResource("/de/unileipzig/atool/ConInt.fxml");
+    }
+
+    @Override
+    protected String getWindowTitle() {
+        return "Calculated Confidence Interval";
+    }
+
     public void calculateSWindowedRCIW() {
         NormalDistribution normDis = new NormalDistribution();
         int windowSize = WINDOW_SIZE;
@@ -259,31 +272,8 @@ public class ConInt extends GenericTest implements Initializable {
         return "Confidence Interval";
     }
 
-    public void openWindow() {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/ConInt.fxml"));
-            fxmlLoader.setController(this);
-            Parent root1 = fxmlLoader.load();
-            /*
-             * if "fx:controller" is not set in fxml
-             * fxmlLoader.setController(NewWindowController);
-             */
-            Stage stage = new Stage();
-            stage.setMaxWidth(1200);
-            stage.setMaxHeight(600);
-            stage.setMinHeight(600);
-            stage.setMinWidth(800);
-            stage.setTitle("Calculated Confidence Interval");
-            stage.setScene(new Scene(root1));
-            setLabeling();
-            stage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void setLabeling() {
+    @Override
+    protected void setLabeling() {
         Run run = this.getSteadyStateRun();
         if(run == null){
             steadyStateLabel.setText("No steady state found");

@@ -4,7 +4,7 @@ import de.unileipzig.atool.Job;
 import de.unileipzig.atool.Run;
 
 public class TestEval{
-    private GenericTest test;
+    private final GenericTest test;
     private PostHocTest postHoctest;
     private final Job job;
     private String testName;

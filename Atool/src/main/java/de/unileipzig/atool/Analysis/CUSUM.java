@@ -4,13 +4,14 @@ import de.unileipzig.atool.DataPoint;
 import de.unileipzig.atool.Job;
 import de.unileipzig.atool.Run;
 import de.unileipzig.atool.Settings;
+import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
 
+import java.net.URL;
 import java.util.*;
 import java.util.List;
 
 public class CUSUM extends GenericTest{
-    private final Charter charter;
     private final List<XYChart.Data<Number, Number>> cusumData;
     private final List<XYChart.Data<Number, Number>> cusumPosData;
     private final List<XYChart.Data<Number, Number>> cusumNegData;
@@ -20,7 +21,6 @@ public class CUSUM extends GenericTest{
 
     public CUSUM(Job job, Settings settings, double alpha) {
         super(job, settings.getCusumSkipRunsCounter(), settings.isCusumUseAdjacentRun(), 2, alpha, true, settings.getRequiredRunsForSteadyState());
-        this.charter = new Charter();
         int dataSize = this.job.getData().size();
         this.cusumPosData = new ArrayList<>(dataSize);
         this.cusumNegData = new ArrayList<>(dataSize);
@@ -75,6 +75,23 @@ public class CUSUM extends GenericTest{
     @Override
     protected boolean isWithinThreshold(double value) {
         return false;
+    }
+
+    @Override
+    public Scene getCharterScene() {
+        Charter.ChartData cusumPosChartData = new Charter.ChartData("Cusum (+)", this.cusumPosData);
+        Charter.ChartData cusumNegChartData = new Charter.ChartData("Cusum (-)", this.cusumNegData);
+        return charter.drawGraph(this.title, this.label, "Cusum", cusumPosChartData, cusumNegChartData);
+    }
+
+    @Override
+    protected URL getFXMLPath() {
+        return null;
+    }
+
+    @Override
+    protected String getWindowTitle() {
+        return "CUSUM";
     }
 
     @Override
@@ -212,10 +229,10 @@ public class CUSUM extends GenericTest{
 
 
     public void draw(){
-        //Charter.ChartData cusumChartData = new Charter.ChartData("Cusum", this.cusumData);
         Charter.ChartData cusumPosChartData = new Charter.ChartData("Cusum (+)", this.cusumPosData);
         Charter.ChartData cusumNegChartData = new Charter.ChartData("Cusum (-)", this.cusumNegData);
         charter.drawGraph(this.title, this.label, "Cusum", cusumPosChartData, cusumNegChartData);
+        charter.openWindow();
     }
 
 }

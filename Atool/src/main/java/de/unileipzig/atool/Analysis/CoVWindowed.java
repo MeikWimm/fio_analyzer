@@ -4,8 +4,10 @@ import de.unileipzig.atool.DataPoint;
 import de.unileipzig.atool.Job;
 import de.unileipzig.atool.Run;
 import de.unileipzig.atool.Settings;
+import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +15,6 @@ public class CoVWindowed extends GenericTest {
     private final List<XYChart.Data<Number, Number>> covWindowedData;
     private final List<DataPoint> windowedPossibleCoVSteadyState;
     private final int WINDOW_SIZE;
-    private final Charter charter;
     private final double STEADY_STATE_COV_THRESHOLD;
 
 
@@ -23,7 +24,6 @@ public class CoVWindowed extends GenericTest {
         this.WINDOW_SIZE = settings.getWindowSize();
         this.covWindowedData = new ArrayList<>(dataSize);
         this.windowedPossibleCoVSteadyState = new ArrayList<>(1000);
-        this.charter = new Charter();
         this.STEADY_STATE_COV_THRESHOLD = this.job.getCvThreshold();
     }
     @Override
@@ -39,6 +39,21 @@ public class CoVWindowed extends GenericTest {
                 possibleSteadyStateRuns.add(run);
             }
         }
+    }
+
+    @Override
+    public Scene getCharterScene() {
+        return charter.drawGraph("CoV Windowed", "Job", "F-Value", "Threshold", this.job.getCvThreshold(), new Charter.ChartData("Windowed CV over Job", covWindowedData));
+    }
+
+    @Override
+    protected URL getFXMLPath() {
+        return null;
+    }
+
+    @Override
+    protected String getWindowTitle() {
+        return "";
     }
 
     @Override
@@ -102,5 +117,6 @@ public class CoVWindowed extends GenericTest {
 
     public void drawWindowedCoV() {
         charter.drawGraph("CoV Windowed", "Job", "F-Value", "Threshold", this.job.getCvThreshold(), new Charter.ChartData("Windowed CV over Job", covWindowedData));
+        charter.openWindow();
     }
 }

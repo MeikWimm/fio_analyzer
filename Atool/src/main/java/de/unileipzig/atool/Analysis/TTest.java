@@ -54,12 +54,10 @@ public class TTest extends GenericTest implements Initializable {
     @FXML public TableColumn<Run, Byte> hypothesisColumn;
 
     private double tCrit;
-    private final Charter charter;
     private final List<XYChart.Data<Number, Number>> tData;
 
     public TTest(Job job, Settings settings) {
         super(job, settings.getTTestSkipRunsCounter(), settings.isTTestUseAdjacentRun(), 2, job.getAlpha() ,settings.isBonferroniTTestSelected(), settings.getRequiredRunsForSteadyState());
-    this.charter = new Charter();
         this.tData = new ArrayList<>();
     }
 
@@ -80,13 +78,24 @@ public class TTest extends GenericTest implements Initializable {
         TTable.setItems(this.job.getFilteredRuns());
     }
 
-    private void setLabeling() {
+    @Override
+    protected void setLabeling() {
         zCritLabel.setText(String.format(Locale.ENGLISH, "%,.5f", this.tCrit));
         if(this.getSteadyStateRun() == null){
             steadyStateLabel.setText("No steady state run found.");
         } else {
             steadyStateLabel.setText("at run " + getSteadyStateRun().getID() + " | time: " + getSteadyStateRun().getStartTime());
         }
+    }
+
+    @Override
+    protected URL getFXMLPath() {
+        return getClass().getResource("/de/unileipzig/atool/TTest.fxml");
+    }
+
+    @Override
+    protected String getWindowTitle() {
+        return "Calculated T-Test";
     }
 
     @Override
@@ -132,6 +141,11 @@ public class TTest extends GenericTest implements Initializable {
         return value < this.tCrit;
     }
 
+    @Override
+    public Scene getCharterScene() {
+        return charter.drawGraph("T-Test", "Run", "T-Value", "critical T", tCrit, new Charter.ChartData("calculated T", tData));
+    }
+
     private double calculateVariance(Run run, double sse) {
         return (1.0 / (run.getData().size() - 1.0)) * sse;
     }
@@ -158,32 +172,7 @@ public class TTest extends GenericTest implements Initializable {
 
     private void drawTGraph(Job job) {
         charter.drawGraph("T-Test", "Run", "T-Value", "critical T", tCrit, new Charter.ChartData("calculated T", tData));
-    }
-
-    public void openWindow() {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/TTest.fxml"));
-            fxmlLoader.setController(this);
-            Parent root1 = fxmlLoader.load();
-            /*
-             * if "fx:controller" is not set in fxml
-             * fxmlLoader.setController(NewWindowController);
-             */
-            Stage stage = new Stage();
-            stage.setMaxWidth(1200);
-            stage.setMaxHeight(600);
-            stage.setMinHeight(600);
-            stage.setMinWidth(800);
-            stage.setTitle("Calculated T-Test");
-            stage.setScene(new Scene(root1));
-            setLabeling();
-            stage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            //LOGGER.log(Level.SEVERE, (Supplier<String>) e);
-            //LOGGER.log(Level.SEVERE, String.format("Couldn't open Window for Anova! App state: %s", ConInt.STATUS.IO_EXCEPTION));
-        }
+        charter.openWindow();
     }
 
 }

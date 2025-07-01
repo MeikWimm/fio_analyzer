@@ -7,20 +7,19 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="800.0" maxWidth="1200.0" minHeight="400.0" minWidth="600.0" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox maxHeight="800.0" maxWidth="1200.0" minHeight="400.0" minWidth="600.0" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <TableView id="anovaTable" fx:id="anovaTable" prefHeight="426.0" prefWidth="800.0">
+      <TableView id="anovaTable" fx:id="anovaTable" prefHeight="450.0" prefWidth="1000.0">
          <columns>
-            <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="38.0" text="Run" />
+            <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="52.0" text="Run" />
             <TableColumn id="startTimeColumn" fx:id="startTimeColumn" prefWidth="119.0" text="Start time" />
-            <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="137.0" text="Measurment" />
-            <TableColumn id="covColumn" fx:id="covColumn" prefWidth="78.0" text="CoV (%)" />
+            <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="123.0" text="Measurment" />
             <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="207.0" text="Compare to Run" />
-            <TableColumn id="FColumn" fx:id="FColumn" prefWidth="77.0" text="F (calculated)" />
-            <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="285.0" text="Nullhypothesis" />
+            <TableColumn id="FColumn" fx:id="FColumn" prefWidth="146.0" text="F (calculated)" />
+            <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="216.0" text="Nullhypothesis" />
          </columns>
       </TableView>
-      <Pane id="anovaPane" fx:id="anovaPane" prefHeight="158.0" prefWidth="800.0">
+      <Pane id="anovaPane" fx:id="anovaPane" prefHeight="150.0" prefWidth="1000.0">
          <children>
             <Label layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="108.0" text="Average Speed =" />
             <Label layoutX="14.0" layoutY="31.0" prefHeight="17.0" prefWidth="108.0" text="SSE =" />
@@ -38,7 +37,7 @@
             <Label id="fCriticalLabel" fx:id="fCriticalLabel" layoutX="593.0" layoutY="48.0" prefHeight="17.0" prefWidth="187.0" text="_" />
             <Label layoutX="478.0" layoutY="65.0" prefHeight="17.0" prefWidth="108.0" text="F (calculated) = " />
             <Label id="fCalculatedLabel" fx:id="fCalculatedLabel" layoutX="593.0" layoutY="65.0" prefHeight="17.0" prefWidth="187.0" text="_" />
-            <Button id="showFGraphButton" fx:id="showFGraphButton" layoutX="14.0" layoutY="125.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="132.0" text="Show F-Graph" />
+            <Button id="showFGraphButton" fx:id="showFGraphButton" layoutX="14.0" layoutY="111.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="132.0" text="Show F-Graph" />
             <Label layoutX="14.0" layoutY="82.0" prefHeight="17.0" prefWidth="108.0" text="Job σ =" />
             <Label id="sigmaJobLabel" fx:id="sigmaJobLabel" layoutX="122.0" layoutY="82.0" prefHeight="17.0" prefWidth="200.0" text="_" />
             <Label layoutX="478.0" layoutY="82.0" prefHeight="17.0" prefWidth="108.0" text="Steady state:" />

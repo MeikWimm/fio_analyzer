@@ -236,7 +236,7 @@ public class Job {
 
     @Override
     public String toString() {
-        return String.format("Job ID: %d | Average Speed %s | Runs: %d | Alpha: %f", this.ID, new DecimalFormat("#.##").format(this.averageSpeed), this.runsCounter, this.alpha);
+        return String.format("Job ID: %d | Average Speed %s | Runs: %d | Alpha: %f | File: %s", this.ID, new DecimalFormat("#.##").format(this.averageSpeed), this.runsCounter, this.alpha, this.file);
     }
 
     void setTime(int time) {

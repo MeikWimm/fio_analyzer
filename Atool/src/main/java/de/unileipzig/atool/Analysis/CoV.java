@@ -23,7 +23,6 @@ import java.util.ResourceBundle;
 
 public class CoV extends GenericTest implements Initializable {
     private final List<XYChart.Data<Number, Number>> covData;
-    private final Charter charter;
     private final CoVWindowed covWindowed;
     private final double STEADY_STATE_COV_THRESHOLD;
 
@@ -44,7 +43,6 @@ public class CoV extends GenericTest implements Initializable {
         final int dataSizeWithRuns = job.getRuns().size() * 2;
         this.covData = new ArrayList<>(dataSizeWithRuns);
         this.covWindowed = new CoVWindowed(job, settings);
-        this.charter = new Charter();
         this.STEADY_STATE_COV_THRESHOLD = this.job.getCvThreshold();
     }
 
@@ -68,7 +66,8 @@ public class CoV extends GenericTest implements Initializable {
 
     }
 
-    private void setLabeling() {
+    @Override
+    protected void setLabeling() {
         if(getSteadyStateRun() == null){
             steadyStateLabel.setText("No steady state CV found.");
         } else {
@@ -81,6 +80,16 @@ public class CoV extends GenericTest implements Initializable {
             steadyStateLabelWindowed.setText("at run " + covWindowed.getSteadyStateRun().getID() + " | time: " + covWindowed.getSteadyStateRun().getStartTime());
         }
 
+    }
+
+    @Override
+    protected URL getFXMLPath() {
+        return getClass().getResource("/de/unileipzig/atool/CoV.fxml");
+    }
+
+    @Override
+    protected String getWindowTitle() {
+        return "Calculated CoV";
     }
 
     @Override
@@ -145,28 +154,13 @@ public class CoV extends GenericTest implements Initializable {
         return value < STEADY_STATE_COV_THRESHOLD;
     }
 
+    @Override
+    public Scene getCharterScene() {
+        return charter.drawGraph("Run CoV", "Per run", "F-Value", "Threshold", this.job.getCvThreshold(), new Charter.ChartData("CV over Job", covData));
+    }
+
     public void drawCoV() {
         charter.drawGraph("Run CoV", "Per run", "F-Value", "Threshold", this.job.getCvThreshold(), new Charter.ChartData("CV over Job", covData));
+        charter.openWindow();
     }
-
-    public final void openWindow() {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/CoV.fxml"));
-            fxmlLoader.setController(this);
-            Parent root1 = fxmlLoader.load();
-
-            Stage stage = new Stage();
-            stage.setMaxWidth(1200);
-            stage.setMaxHeight(600);
-            stage.setMinHeight(600);
-            stage.setMinWidth(800);
-            stage.setTitle("Calculated CoV");
-            stage.setScene(new Scene(root1));
-            setLabeling();
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 }

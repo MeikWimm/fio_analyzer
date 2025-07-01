@@ -5,7 +5,13 @@ import de.unileipzig.atool.Run;
 import de.unileipzig.atool.Utils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.ConsoleHandler;
@@ -35,10 +41,11 @@ public abstract class GenericTest {
     protected int thresholdSectionsForSteadyState;
     protected boolean applyBonferroni;
     protected int averageTimePerMillisec;
-    protected boolean sequentialCompareType;
     protected int skipCounter;
     protected int groupSize;
     private PostHocTest postHocTest;
+    private Scene scene;
+    protected final Charter charter;
 
     public GenericTest(Job job, int skipFirstRun, boolean skipGroup, int groupSize, double alpha, boolean applyBonferroni, int thresholdSectionsForSteadyState) {
         this.job = new Job(job);
@@ -50,6 +57,7 @@ public abstract class GenericTest {
         this.postHocRuns = new ArrayList<>();
         this.postHocGroups = new ArrayList<>();
         this.possibleSteadyStateRuns = new ArrayList<>();
+        this.charter = new Charter();
         this.skipGroup = skipGroup;
         this.alpha = alpha;
         this.thresholdSectionsForSteadyState = thresholdSectionsForSteadyState;
@@ -195,8 +203,6 @@ public abstract class GenericTest {
     }
 
     public ObservableList<Run> getPostHocRuns() {
-        // postHocRuns.removeIf(run -> run.getNullhypothesis() == Run.REJECTED_NULLHYPOTHESIS);
-        //postHocRuns.removeIf(run -> run.getNullhypothesis() == Run.REJECTED_NULLHYPOTHESIS);
         return FXCollections.observableArrayList(postHocRuns);
     }
 
@@ -244,6 +250,42 @@ public abstract class GenericTest {
         return skipCounter;
     }
 
+    public abstract Scene getCharterScene();
+
+    // Optional method for setting labels, can be overridden
+    protected void setLabeling() {
+        // Default implementation can be empty or include common labeling logic
+    }
+
+    protected abstract URL getFXMLPath();
+
+    protected abstract String getWindowTitle();
+
+    public final void openWindow() {
+        scene = getScene();
+        Stage stage = new Stage();
+        stage.setMaxWidth(1200);
+        stage.setMaxHeight(600);
+        stage.setMinHeight(600);
+        stage.setMinWidth(800);
+        stage.setTitle("Calculated ANOVA");
+        stage.setScene(scene);
+        setLabeling();
+        stage.show();
+    }
+
+    public Scene getScene() {
+        FXMLLoader fxmlLoader = new FXMLLoader(getFXMLPath());
+        fxmlLoader.setController(this);
+        Parent root1 = null;
+        try {
+            root1 = fxmlLoader.load();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        scene = new Scene(root1);
+        return scene;
+    }
 
     public abstract String getTestName();
 
