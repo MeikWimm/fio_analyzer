@@ -8,6 +8,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.TableView;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -94,7 +95,17 @@ public abstract class GenericTest {
     
     protected abstract boolean isWithinThreshold(double value);
 
-    public void calculateSteadyState() {
+    protected void checkForHypothesis(){
+        for (Run run : this.resultRuns) {
+            if(isWithinThreshold(extractValue(run))){
+                run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+            } else {
+                run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
+            }
+        }
+    }
+
+    protected void calculateSteadyState() {
         possibleSteadyStateRuns = new ArrayList<>(thresholdSectionsForSteadyState);
         boolean isSteadyStateFound = false;
 
@@ -140,6 +151,7 @@ public abstract class GenericTest {
 
     public void calculate(){
         this.calculateTest();
+        this.checkForHypothesis();
         this.calculateSteadyState();
         this.calculatePostHoc();
     }
@@ -288,5 +300,7 @@ public abstract class GenericTest {
     }
 
     public abstract String getTestName();
+
+    public abstract TableView<Run> getTable();
 
 }

@@ -23,7 +23,6 @@
                   <TableColumn id="typeOfComparedRunsColumn" fx:id="typeOfComparedRunsColumn" prefWidth="200.0" text="sequential/adjacent" />
                   <TableColumn id="skippedRunColumn" fx:id="skippedRunColumn" minWidth="9.0" prefWidth="100.0" text="Runs skipped" />
                   <TableColumn id="bonferroniColumn" fx:id="bonferroniColumn" minWidth="0.0" prefWidth="100.0" text="Bonferroni" />
-                  <TableColumn id="comparedRunsColumn" fx:id="comparedRunsColumn" minWidth="0.0" prefWidth="122.0" text="Compared Runs " visible="false" />
               </columns>
             </TableView>
             <Pane prefHeight="100.0" prefWidth="1000.0">

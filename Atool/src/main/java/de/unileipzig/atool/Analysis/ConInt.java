@@ -48,8 +48,6 @@ public class ConInt extends GenericTest implements Initializable {
         LOGGER.addHandler(handler);
     }
 
-    private final List<XYChart.Data<Number, Number>> conIntData;
-    private final List<XYChart.Data<Number, Number>> windowedRCIWData;
     @FXML public Label labelHeader;
     @FXML public Button drawConIntDiffButton;
     @FXML public Button drawWindowedRCIWButton;
@@ -69,8 +67,6 @@ public class ConInt extends GenericTest implements Initializable {
     public ConInt(Job job,Settings settings) {
         super(job, settings.getConIntSkipRunsCounter(), settings.isConIntUseAdjacentRun(), 2, job.getAlpha(), settings.isBonferroniConIntSelected(), settings.getRequiredRunsForSteadyState());
         int dataSize = this.job.getData().size();
-        conIntData = new ArrayList<>(dataSize);
-        windowedRCIWData = new ArrayList<>(dataSize);
         WINDOW_SIZE = settings.getWindowSize();
     }
 
@@ -101,16 +97,6 @@ public class ConInt extends GenericTest implements Initializable {
         conIntTable.setItems(this.job.getFilteredRuns());
     }
 
-    private void drawWindowedRCIW() {
-        calculateSWindowedRCIW();
-        charter.drawGraph(
-                "Windowed Relative Confidence Interval Width ( = " + this.WINDOW_SIZE + " time steps)",
-                "Last time point in window",
-                "RCIW (Width / Mean)",
-                new Charter.ChartData("RCIW Value", this.windowedRCIWData)
-        );
-    }
-
     @Override
     public void calculateTest() {
         NormalDistribution normDis = new NormalDistribution();
@@ -129,9 +115,6 @@ public class ConInt extends GenericTest implements Initializable {
 
             double c2 = averageSpeed + (normDis.inverseCumulativeProbability(1.0 - alpha / 2.0) * (std / Math.sqrt(dataSize)));
             run.setIntervalTo(c2);
-
-           // double RCIW = Math.abs(run.getIntervalFrom() - run.getIntervalTo()) / this.job.getAverageSpeed();
-           // run.setRCIW(RCIW);
         }
 
         /*
@@ -165,6 +148,14 @@ public class ConInt extends GenericTest implements Initializable {
             run1.setNullhypothesis(doesIntervalContainZero(c1, c2));
             this.resultRuns.add(run1);
         }
+    }
+
+    /**
+     * Replaced with doConfidenceIntervalsOverlap() function
+     */
+    @Override
+    protected void checkForHypothesis() {
+        //NO-OP
     }
 
     private byte doConfidenceIntervalsOverlap(double a1, double b1, double a2, double b2) {
@@ -210,63 +201,6 @@ public class ConInt extends GenericTest implements Initializable {
         return "Calculated Confidence Interval";
     }
 
-    public void calculateSWindowedRCIW() {
-        NormalDistribution normDis = new NormalDistribution();
-        int windowSize = WINDOW_SIZE;
-        double[] windowData = new double[windowSize];
-        List<DataPoint> data = this.job.getData();
-
-        if (data.size() < windowSize) return;
-        for (int i = 0; i < windowSize; i++) {
-            windowData[i] = data.get(i).getData();
-        }
-
-        double alpha = job.getAlpha();
-        double averageSpeed = MathUtils.average(windowData);
-        double std = MathUtils.standardDeviation(windowData);
-        double z = normDis.inverseCumulativeProbability(1.0 - alpha / 2.0);
-
-        double c1 = averageSpeed - (z * (std / Math.sqrt(windowSize)));
-        double c2 = averageSpeed + (z * (std / Math.sqrt(windowSize)));
-        double RCIW = Math.abs(c1 - c2) / averageSpeed;
-        int windowCount = 1 + this.job.getRunDataSize() * job.getSkippedRuns();
-        int windowStartPoint = 0;
-        int windowEndPoint = 0;
-        windowedRCIWData.add(new XYChart.Data<>(data.getFirst().getTime(), RCIW));
-        boolean isSteadyStateFound = false;
-
-        for (int i = 0; i < data.size() - windowSize; i++) {
-            for (int j = 0; j < windowSize; j++) {
-                windowData[j] = data.get(i + j).getData();
-            }
-
-            averageSpeed = MathUtils.average(windowData);
-            std = MathUtils.standardDeviation(windowData);
-            c1 = averageSpeed - (z * (std / Math.sqrt(windowSize)));
-            c2 = averageSpeed + (z * (std / Math.sqrt(windowSize)));
-            RCIW = Math.abs(c1 - c2) / averageSpeed;
-
-            if(RCIW < 0.03 && !isSteadyStateFound){
-                isSteadyStateFound = true;
-                windowStartPoint = windowCount;
-                windowEndPoint = windowSize + windowCount;
-            }
-            windowedRCIWData.add(new XYChart.Data<>(data.get(i).getTime(), RCIW));
-            windowCount++;
-        }
-
-        if(isSteadyStateFound){
-            for(Run run: this.job.getRuns()){
-                int startPoint = run.getData().size() * (run.getID() - 1);
-                int endPoint = startPoint + run.getData().size();
-
-                if(windowStartPoint < endPoint && windowEndPoint > startPoint){
-                    System.out.println("Run should be " + run.getID());
-                }
-            }
-        }
-    }
-
     @Override
     public String getTestName() {
         return "Confidence Interval";
@@ -281,5 +215,10 @@ public class ConInt extends GenericTest implements Initializable {
         }
 
         steadyStateLabel.setText("at run " + getSteadyStateRun().getID() + " | time: " + getSteadyStateRun().getStartTime());
+    }
+
+    @Override
+    public TableView<Run> getTable() {
+        return conIntTable;
     }
 }

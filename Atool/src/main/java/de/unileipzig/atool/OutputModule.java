@@ -8,6 +8,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.GridPane;
@@ -97,15 +98,13 @@ public class OutputModule {
 
 
                 for (GenericTest test : eval.getTests()) {
-                    //Saving all test tables as .png
-//                    scene = test.getScene();
-//                    if(scene != null) {
-//                        scene.snapshot(img);
-//                        File testFile = new File(Paths.get(path.toString(), "/" + test.getTestName()  + ".png").toString());
-//                        saveSnapshot(img, testFile);
-//                        savePostHocTests(img, path, test);
-//                    }
-                    saveTable(eval.getEvalTable());
+                    test.getScene();
+                    saveTable(test.getTestName(), test.getTable());
+                    PostHocTest postHocTest = test.getPostHocTest();
+                    if(postHocTest != null){
+                        postHocTest.getScene();
+                        saveTable(postHocTest.getTestName(), postHocTest.getTable());
+                    }
 
                     // Saving graphs of all Tests
                     Scene testCharterScene = test.getCharterScene();
@@ -127,41 +126,66 @@ public class OutputModule {
         });
     }
 
-    private void saveTable(TableView<?> table) {
-        GridPane gPane = new GridPane();
-        gPane.setSnapToPixel(true);
-        String style =  "-fx-background-color: WHITE; -fx-padding: 5;"+
-                        "-fx-hgap: 5; -fx-vgap: 5;";
-        gPane.setStyle(style);
-
-        int columnCounter = 0;
-        boolean isColumnSet = false;
-        for(int i= 0; i < table.getItems().size(); i++){ // rows
-            for(int j = 0; j < table.getColumns().size(); j++){ //columns
-                if(!isColumnSet){
-                    String columnName = table.getColumns().get(columnCounter).getText();
-                    Label label = new Label(columnName);
-                    label.setStyle("-fx-border-color: black;");
-                    gPane.add(label, i, j);
-                    isColumnSet = true;
-                }
-                    String value = getValueAt(table, i, j);
-                    Label label = new Label(value);
-                label.setStyle("-fx-border-color: black;");
-                gPane.add(label, i, j + 1);
-            }
-
-            if(columnCounter < table.getColumns().size()) {
-                columnCounter++;
-                isColumnSet = false;
-            }
+        private void saveTable(String title, TableView<?> table) {
+        if(table == null) {
+            LOGGER.log(Level.WARNING, "TableView equals null for test " + title);
+            return;
         }
-        new Scene(gPane);
-        WritableImage image = gPane.snapshot(new SnapshotParameters(), null);
-        saveSnapshot(image, new File(InputModule.SELECTED_DIRECTORY.toString() + "/" + "TEST" + "_table.png"));
+        StringBuilder sb = new StringBuilder();
+        //sb.append("<table border=\"1\">\n");
+            sb.append("[").append(title).append("]").append("\n").append("\n");
+        for (int i = 0; i < table.getColumns().size(); i++) {
+            String columnText = table.getColumns().get(i).getText();
+            sb.append(String.format("%-30s", columnText));
+        }
+            sb.append("\n");
+            sb.append("------------------------------".repeat(table.getColumns().size())).append("\n"); // 30 characters
+
+            for(int i= 0; i < table.getItems().size(); i++){ // rows
+            for(int j = 0; j < table.getColumns().size() ; j++){ //columns
+                String value = getValueAt(table, i, j); // table cell value
+                sb.append(String.format("%-30s", value));
+            }
+            sb.append("\n");
+        }
+        System.out.println(sb);
     }
 
-    private String getValueAt(TableView<?> table, int column, int row) {
+//    private void saveTableAsImage(TableView<?> table) {
+//        GridPane gPane = new GridPane();
+//        gPane.setSnapToPixel(true);
+//        String style =  "-fx-background-color: WHITE; -fx-padding: 5;"+
+//                        "-fx-hgap: 5; -fx-vgap: 5;";
+//        gPane.setStyle(style);
+//
+//        int columnCounter = 0;
+//        boolean isColumnSet = false;
+//        for(int i= 0; i < table.getItems().size(); i++){ // rows
+//            for(int j = 0; j < table.getColumns().size(); j++){ //columns
+//                if(!isColumnSet){
+//                    String columnName = table.getColumns().get(columnCounter).getText();
+//                    Label label = new Label(columnName);
+//                    label.setStyle("-fx-border-color: black;");
+//                    gPane.add(label, i, j);
+//                    isColumnSet = true;
+//                }
+//                    String value = getValueAt(table, i, j);
+//                    Label label = new Label(value);
+//                label.setStyle("-fx-border-color: black;");
+//                gPane.add(label, i, j + 1);
+//            }
+//
+//            if(columnCounter < table.getColumns().size()) {
+//                columnCounter++;
+//                isColumnSet = false;
+//            }
+//        }
+//        new Scene(gPane);
+//        WritableImage image = gPane.snapshot(new SnapshotParameters(), null);
+//        saveSnapshot(image, new File(InputModule.SELECTED_DIRECTORY.toString() + "/" + "TEST" + "_table.png"));
+//    }
+
+    private String getValueAt(TableView<?> table, int row, int column) {
         var r = table.getColumns().get(column).getCellObservableValue(row);
         if(r == null) {
             return "";

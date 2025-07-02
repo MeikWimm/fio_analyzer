@@ -6,6 +6,7 @@ import de.unileipzig.atool.Run;
 import de.unileipzig.atool.Settings;
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.TableView;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -118,5 +119,10 @@ public class CoVWindowed extends GenericTest {
     public void drawWindowedCoV() {
         charter.drawGraph("CoV Windowed", "Job", "F-Value", "Threshold", this.job.getCvThreshold(), new Charter.ChartData("Windowed CV over Job", covWindowedData));
         charter.openWindow();
+    }
+
+    @Override
+    public TableView<Run> getTable() {
+        return null;
     }
 }

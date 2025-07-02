@@ -6,6 +6,7 @@ import de.unileipzig.atool.Run;
 import de.unileipzig.atool.Settings;
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.TableView;
 
 import java.net.URL;
 import java.util.*;
@@ -235,4 +236,8 @@ public class CUSUM extends GenericTest{
         charter.openWindow();
     }
 
+    @Override
+    public TableView<Run> getTable() {
+        return null;
+    }
 }

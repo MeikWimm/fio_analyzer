@@ -46,7 +46,6 @@ public class SteadyStateEval implements Initializable {
     @FXML private TableColumn<TestEval, String> typeOfComparedRunsColumn;
     @FXML private TableColumn<TestEval, Integer> skippedRunColumn;
     @FXML private TableColumn<TestEval, Boolean> bonferroniColumn;
-    @FXML private TableColumn<TestEval, Integer> comparedRunsColumn;
     @FXML Button saveEvalButton;
     private final Job job;
     private final List<TestEval> testEvals;
@@ -97,7 +96,6 @@ public class SteadyStateEval implements Initializable {
         typeOfComparedRunsColumn.setCellValueFactory(new PropertyValueFactory<>("TypeOfComparedRuns"));
         skippedRunColumn.setCellValueFactory(new PropertyValueFactory<>("SkippedRunVal"));
         bonferroniColumn.setCellValueFactory(new PropertyValueFactory<>("BonferroniVal"));
-        comparedRunsColumn.setCellValueFactory(new PropertyValueFactory<>("ComparedRunsVal"));
 
         saveEvalButton.setOnAction(e -> onActionSaveEval());
 

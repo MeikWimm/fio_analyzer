@@ -100,7 +100,7 @@ public class TTest extends GenericTest implements Initializable {
 
     @Override
     public void calculateTest() {
-        if (groups.size() <= 1) return;
+        //if (groups.size() <= 1) return;
         TDistribution t = new TDistribution(job.getData().size() * 2 - 2);
         this.tCrit = t.inverseCumulativeProbability(1 - this.alpha / 2.0);
 
@@ -120,13 +120,6 @@ public class TTest extends GenericTest implements Initializable {
             run.setT(tVal);
 
             tData.add(new XYChart.Data<>(run.getID(), tVal));
-
-            if (this.tCrit < tVal) {
-                run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
-            } else {
-                run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
-            }
-
             this.resultRuns.add(run);
         }
     }
@@ -175,4 +168,8 @@ public class TTest extends GenericTest implements Initializable {
         charter.openWindow();
     }
 
+    @Override
+    public TableView<Run> getTable() {
+        return TTable;
+    }
 }

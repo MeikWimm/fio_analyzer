@@ -6,6 +6,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.TableView;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -124,4 +125,6 @@ public abstract class PostHocTest {
     }
 
     public abstract Scene getCharterScene();
+
+    public abstract TableView<Run> getTable();
 }

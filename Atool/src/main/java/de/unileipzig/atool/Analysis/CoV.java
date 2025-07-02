@@ -114,31 +114,31 @@ public class CoV extends GenericTest implements Initializable {
     }
 
     private double calculateCoVGroup(List<Run> group) {
-        if (group == null || group.isEmpty()) {
-            throw new IllegalArgumentException("Group cannot be null or empty");
-        }
+//        if (group == null || group.isEmpty()) {
+//            throw new IllegalArgumentException("Group cannot be null or empty");
+//        }
 
         double average = MathUtils.average(group);
-        if (average == 0) {
-            throw new IllegalArgumentException("Cannot calculate CoV when mean is zero");
-        }
+//        if (average == 0) {
+//            throw new IllegalArgumentException("Cannot calculate CoV when mean is zero");
+//        }
 
         double n = 0;
         double sum = 0;
 
         for (Run run : group) {
-            if (run == null || run.getData() == null) {
-                throw new IllegalArgumentException("Invalid run data");
-            }
+//            if (run == null || run.getData() == null) {
+//                throw new IllegalArgumentException("Invalid run data");
+//            }
             for (DataPoint dp : run.getData()) {
                 sum += Math.pow(dp.getData() - average, 2);
                 n++;
             }
         }
 
-        if (n <= 1) {
-            throw new IllegalArgumentException("Need at least two data points to calculate CoV");
-        }
+//        if (n <= 1) {
+//            throw new IllegalArgumentException("Need at least two data points to calculate CoV");
+//        }
 
         double std = Math.sqrt(sum / (n - 1));
         return (std / average);
@@ -162,5 +162,10 @@ public class CoV extends GenericTest implements Initializable {
     public void drawCoV() {
         charter.drawGraph("Run CoV", "Per run", "F-Value", "Threshold", this.job.getCvThreshold(), new Charter.ChartData("CV over Job", covData));
         charter.openWindow();
+    }
+
+    @Override
+    public TableView<Run> getTable() {
+        return covTable;
     }
 }

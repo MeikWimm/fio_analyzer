@@ -199,20 +199,10 @@ public class MannWhitney extends GenericTest implements Initializable {
         double U = Math.min(U1, U2);
         double z = Math.abs((U - mu_U) / sigma_U);
         this.zCrit = n.inverseCumulativeProbability(1 - this.getAlpha() / 2.0);
-
-
-
         double pCalc = n.cumulativeProbability(z);
-        double pCrit = 1 - this.getAlpha() / 2.0;
-        byte hypothesis;
-        if (pCalc > pCrit) {
-            hypothesis = Run.REJECTED_NULLHYPOTHESIS;
-        } else {
-            hypothesis = Run.ACCEPTED_NULLHYPOTHESIS;
-        }
 
+        run1.setP(pCalc);
         run1.setZ(z);
-        run1.setNullhypothesis(hypothesis);
         uTestData.add(new XYChart.Data<>(run1.getRunID(), z));
         this.resultRuns.add(run1);
 
@@ -245,5 +235,10 @@ public class MannWhitney extends GenericTest implements Initializable {
     @Override
     public Scene getCharterScene() {
         return charter.drawGraph("U-Test", "Run", "Z-Value","z-critical", this.zCrit, new Charter.ChartData("calculated Z", uTestData));
+    }
+
+    @Override
+    public TableView<Run> getTable() {
+        return uTestTable;
     }
 }

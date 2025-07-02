@@ -102,9 +102,9 @@ public class TukeyHSD extends PostHocTest implements Initializable {
 
     @Override
     public void apply(List<Run> postHocRuns, List<List<Run>> postHocGroups) {
-        if (postHocRuns == null || postHocGroups == null) {
-            throw new IllegalArgumentException("Input lists cannot be null");
-        }
+//        if (postHocRuns == null || postHocGroups == null) {
+//            throw new IllegalArgumentException("Input lists cannot be null");
+//        }
 
         int totalObservations = test.getJob().getData().size();
         for (int i = 0; i <= postHocGroups.size() - 2; i += 2) {
@@ -116,9 +116,9 @@ public class TukeyHSD extends PostHocTest implements Initializable {
                 List<Run> group1 = postHocGroups.get(i);
                 List<Run> group2 = postHocGroups.get(i + 1);
 
-            if (group1.isEmpty() || group2.isEmpty()) {
-                throw new IllegalArgumentException("Groups cannot be empty");
-            }
+//            if (group1.isEmpty() || group2.isEmpty()) {
+//                throw new IllegalArgumentException("Groups cannot be empty");
+//            }
 
             Run run = group1.getFirst();
                 double speedSumGroup1 = 0;
@@ -143,11 +143,7 @@ public class TukeyHSD extends PostHocTest implements Initializable {
 
                 meanData.add(new XYChart.Data<>(run.getGroupID(), overallMean));
                 qHSDData.add(new XYChart.Data<>(run.getGroupID(), qHSD));
-                if(qHSD < overallMean){
-                    run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
-                } else {
-                    run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
-                }
+
 
                 checkSteadyStateRun(run, group1, group2);
         }
@@ -190,5 +186,10 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     @Override
     public Scene getCharterScene() {
         return charter.drawGraph("U-Test","Group","Mean/Difference",new Charter.ChartData("Run mean", meanData), new Charter.ChartData("QHSD", qHSDData));
+    }
+
+    @Override
+    public TableView<Run> getTable() {
+        return TukeyTable;
     }
 }

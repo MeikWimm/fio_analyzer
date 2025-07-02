@@ -152,15 +152,15 @@ public class Anova extends GenericTest implements Initializable {
         int num = this.groups.size() - 1;
         int denom = (num + 1) * (this.job.getData().size() - 1);
 
-        if (this.groups.isEmpty()) {
-            LOGGER.log(Level.WARNING, "Groups list cannot be empty");
-            return;
-        }
-
-        if (this.groups.size() < 2) {
-            LOGGER.log(Level.WARNING, "Groups list must contain at least two groups");
-            return;
-        }
+//        if (this.groups.isEmpty()) {
+//            LOGGER.log(Level.WARNING, "Groups list cannot be empty");
+//            return;
+//        }
+//
+//        if (this.groups.size() < 2) {
+//            LOGGER.log(Level.WARNING, "Groups list must contain at least two groups");
+//            return;
+//        }
 
         FDistribution fDistribution = new FDistribution(num, denom);
         fCrit = fDistribution.inverseCumulativeProbability(1.0 - alpha);
@@ -197,14 +197,6 @@ public class Anova extends GenericTest implements Initializable {
             fValue = s_2_a / s_2_e;
             run.setF(fValue);
             run.setP(1.0 - fDistribution.cumulativeProbability(fValue));
-
-            if (this.fCrit < fValue) {
-                run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
-            } else {
-                run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
-                resultGroups.add(group);
-            }
-
             this.resultRuns.add(run);
             anovaData.add(new XYChart.Data<>(run.getID(), fValue));
         }
@@ -247,7 +239,7 @@ public class Anova extends GenericTest implements Initializable {
         return "ANOVA";
     }
 
-    public TableView<Run> getAnovaTable() {
+    public TableView<Run> getTable() {
         return anovaTable;
     }
 }
