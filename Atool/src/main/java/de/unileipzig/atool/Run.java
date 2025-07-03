@@ -33,6 +33,7 @@ public class Run /*Section*/ {
     private double qVal = UNDEFINED_DOUBLE_VALUE;
     private double tVal = UNDEFINED_DOUBLE_VALUE;
     private double cov = UNDEFINED_DOUBLE_VALUE;
+    private double qHSD = UNDEFINED_DOUBLE_VALUE;
     private byte isOverlapping = Run.UNDEFIND_NULLHYPOTHESIS; // TODO make a different byte declaration
     private double startTime = UNDEFINED_DOUBLE_VALUE;
     private double endTime = UNDEFINED_DOUBLE_VALUE;
@@ -71,6 +72,7 @@ public class Run /*Section*/ {
         this.qVal = other.getQ();
         this.tVal = other.getT();
         this.cov = other.getCoV();
+        this.qHSD = other.getQHSD();
         this.p = other.getP();
         this.group = other.group;
         this.isOverlapping = other.getOverlap();
@@ -258,5 +260,13 @@ public class Run /*Section*/ {
 
     public void setP(double p) {
         this.p = p;
+    }
+
+    public void setqHSD(double qHSD) {
+        this.qHSD = qHSD;
+    }
+
+    public double getQHSD() {
+        return qHSD;
     }
 }

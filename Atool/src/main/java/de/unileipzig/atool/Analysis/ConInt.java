@@ -36,21 +36,9 @@ import java.util.logging.Logger;
  * @author meni1999
  */
 public class ConInt extends GenericTest implements Initializable {
-    private static final Logger LOGGER = Logger.getLogger(ConInt.class.getName());
     private static final double STEADY_STATE_RCIW_THRESHOLD = .02;
     private final int WINDOW_SIZE;
 
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("Settings"));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);
-    }
-
-    private final Charter charter;
-    private final List<XYChart.Data<Number, Number>> conIntData;
-    private final List<XYChart.Data<Number, Number>> windowedRCIWData;
     @FXML public Label labelHeader;
     @FXML public Button drawConIntDiffButton;
     @FXML public Button drawWindowedRCIWButton;
@@ -70,9 +58,6 @@ public class ConInt extends GenericTest implements Initializable {
     public ConInt(Job job,Settings settings) {
         super(job, settings.getConIntSkipRunsCounter(), settings.isConIntUseAdjacentRun(), 2, job.getAlpha(), settings.isBonferroniConIntSelected(), settings.getRequiredRunsForSteadyState());
         int dataSize = this.job.getData().size();
-        charter = new Charter();
-        conIntData = new ArrayList<>(dataSize);
-        windowedRCIWData = new ArrayList<>(dataSize);
         WINDOW_SIZE = settings.getWindowSize();
     }
 
@@ -100,21 +85,11 @@ public class ConInt extends GenericTest implements Initializable {
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
         labelHeader.setText(this.job.toString());
-        conIntTable.setItems(this.job.getFilteredRuns());
-    }
-
-    private void drawWindowedRCIW() {
-        calculateSWindowedRCIW();
-        charter.drawGraph(
-                "Windowed Relative Confidence Interval Width ( = " + this.WINDOW_SIZE + " time steps)",
-                "Last time point in window",
-                "RCIW (Width / Mean)",
-                new Charter.ChartData("RCIW Value", this.windowedRCIWData)
-        );
+        conIntTable.setItems(getResultRuns());
     }
 
     @Override
-    public void calculateTest() {
+    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
         NormalDistribution normDis = new NormalDistribution();
         double dataSize = this.job.getRunDataSize();
 
@@ -131,15 +106,12 @@ public class ConInt extends GenericTest implements Initializable {
 
             double c2 = averageSpeed + (normDis.inverseCumulativeProbability(1.0 - alpha / 2.0) * (std / Math.sqrt(dataSize)));
             run.setIntervalTo(c2);
-
-           // double RCIW = Math.abs(run.getIntervalFrom() - run.getIntervalTo()) / this.job.getAverageSpeed();
-           // run.setRCIW(RCIW);
         }
 
         /*
         Look for overlapping intervals
          */
-        for (List<Run> runs : this.groups) {
+        for (List<Run> runs : groups) {
             Run run1 = runs.get(0);
             Run run2 = runs.get(1);
             double a1 = run1.getIntervalFrom();
@@ -165,8 +137,16 @@ public class ConInt extends GenericTest implements Initializable {
             double c2 = x + y;
 
             run1.setNullhypothesis(doesIntervalContainZero(c1, c2));
-            this.resultRuns.add(run1);
+            resultRuns.add(run1);
         }
+    }
+
+    /**
+     * Replaced with doConfidenceIntervalsOverlap() function
+     */
+    @Override
+    protected void checkForHypothesis() {
+        //NO-OP
     }
 
     private byte doConfidenceIntervalsOverlap(double a1, double b1, double a2, double b2) {
@@ -197,61 +177,19 @@ public class ConInt extends GenericTest implements Initializable {
         return value == Run.ACCEPTED_NULLHYPOTHESIS;
     }
 
-    public void calculateSWindowedRCIW() {
-        NormalDistribution normDis = new NormalDistribution();
-        int windowSize = WINDOW_SIZE;
-        double[] windowData = new double[windowSize];
-        List<DataPoint> data = this.job.getData();
+    @Override
+    public Scene getCharterScene() {
+        return null;
+    }
 
-        if (data.size() < windowSize) return;
-        for (int i = 0; i < windowSize; i++) {
-            windowData[i] = data.get(i).getData();
-        }
+    @Override
+    protected URL getFXMLPath() {
+        return getClass().getResource("/de/unileipzig/atool/ConInt.fxml");
+    }
 
-        double alpha = job.getAlpha();
-        double averageSpeed = MathUtils.average(windowData);
-        double std = MathUtils.standardDeviation(windowData);
-        double z = normDis.inverseCumulativeProbability(1.0 - alpha / 2.0);
-
-        double c1 = averageSpeed - (z * (std / Math.sqrt(windowSize)));
-        double c2 = averageSpeed + (z * (std / Math.sqrt(windowSize)));
-        double RCIW = Math.abs(c1 - c2) / averageSpeed;
-        int windowCount = 1 + this.job.getRunDataSize() * job.getSkippedRuns();
-        int windowStartPoint = 0;
-        int windowEndPoint = 0;
-        windowedRCIWData.add(new XYChart.Data<>(data.getFirst().getTime(), RCIW));
-        boolean isSteadyStateFound = false;
-
-        for (int i = 0; i < data.size() - windowSize; i++) {
-            for (int j = 0; j < windowSize; j++) {
-                windowData[j] = data.get(i + j).getData();
-            }
-
-            averageSpeed = MathUtils.average(windowData);
-            std = MathUtils.standardDeviation(windowData);
-            c1 = averageSpeed - (z * (std / Math.sqrt(windowSize)));
-            c2 = averageSpeed + (z * (std / Math.sqrt(windowSize)));
-            RCIW = Math.abs(c1 - c2) / averageSpeed;
-
-            if(RCIW < 0.03 && !isSteadyStateFound){
-                isSteadyStateFound = true;
-                windowStartPoint = windowCount;
-                windowEndPoint = windowSize + windowCount;
-            }
-            windowedRCIWData.add(new XYChart.Data<>(data.get(i).getTime(), RCIW));
-            windowCount++;
-        }
-
-        if(isSteadyStateFound){
-            for(Run run: this.job.getRuns()){
-                int startPoint = run.getData().size() * (run.getID() - 1);
-                int endPoint = startPoint + run.getData().size();
-
-                if(windowStartPoint < endPoint && windowEndPoint > startPoint){
-                    System.out.println("Run should be " + run.getID());
-                }
-            }
-        }
+    @Override
+    protected String getWindowTitle() {
+        return "Calculated Confidence Interval";
     }
 
     @Override
@@ -259,31 +197,8 @@ public class ConInt extends GenericTest implements Initializable {
         return "Confidence Interval";
     }
 
-    public void openWindow() {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/ConInt.fxml"));
-            fxmlLoader.setController(this);
-            Parent root1 = fxmlLoader.load();
-            /*
-             * if "fx:controller" is not set in fxml
-             * fxmlLoader.setController(NewWindowController);
-             */
-            Stage stage = new Stage();
-            stage.setMaxWidth(1200);
-            stage.setMaxHeight(600);
-            stage.setMinHeight(600);
-            stage.setMinWidth(800);
-            stage.setTitle("Calculated Confidence Interval");
-            stage.setScene(new Scene(root1));
-            setLabeling();
-            stage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void setLabeling() {
+    @Override
+    protected void setLabeling() {
         Run run = this.getSteadyStateRun();
         if(run == null){
             steadyStateLabel.setText("No steady state found");
@@ -291,5 +206,15 @@ public class ConInt extends GenericTest implements Initializable {
         }
 
         steadyStateLabel.setText("at run " + getSteadyStateRun().getID() + " | time: " + getSteadyStateRun().getStartTime());
+    }
+
+    @Override
+    public double getCriticalValue() {
+        return Run.UNDEFINED_DOUBLE_VALUE;
+    }
+
+    @Override
+    public TableView<Run> getTable() {
+        return conIntTable;
     }
 }

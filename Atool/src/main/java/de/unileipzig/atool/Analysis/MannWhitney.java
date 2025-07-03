@@ -32,7 +32,6 @@ import java.util.logging.Logger;
  * @author meni1999
  */
 public class MannWhitney extends GenericTest implements Initializable {
-    private static final Logger LOGGER = Logger.getLogger(MannWhitney.class.getName());
     private static class RankedDataPoint extends DataPoint {
         int flag;
         double rank;
@@ -56,16 +55,7 @@ public class MannWhitney extends GenericTest implements Initializable {
         }
     }
 
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("Mann-Whitney"));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);
-    }
-
     private final List<XYChart.Data<Number, Number>> uTestData;
-    private final Charter charter;
     @FXML public TableView<Run> uTestTable;
     @FXML public TableColumn<Run, Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
@@ -80,7 +70,6 @@ public class MannWhitney extends GenericTest implements Initializable {
 
     public MannWhitney(Job job,Settings settings) {
         super(job, settings.getUTestSkipRunsCounter(), settings.isUTestUseAdjacentRun(), 2, job.getAlpha(), settings.isBonferroniUTestSelected(), settings.getRequiredRunsForSteadyState());
-        this.charter = new Charter();
         this.uTestData = new ArrayList<>();
     }
 
@@ -97,12 +86,13 @@ public class MannWhitney extends GenericTest implements Initializable {
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
-        uTestTable.setItems(this.job.getFilteredRuns());
+        uTestTable.setItems(getResultRuns());
 
         drawUTestButton.setOnAction(e -> draw());
     }
 
-    private void setLabeling() {
+    @Override
+    protected void setLabeling() {
         zIntervalLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.zCrit));
         if(this.getSteadyStateRun() == null){
             steadyStateLabel.setText("No steady state run found.");
@@ -111,8 +101,19 @@ public class MannWhitney extends GenericTest implements Initializable {
         }
     }
 
+    @Override
+    protected URL getFXMLPath() {
+        return getClass().getResource("/de/unileipzig/atool/MannWithney.fxml");
+    }
+
+    @Override
+    protected String getWindowTitle() {
+        return "Calculated U-Test";
+    }
+
     public void draw() {
         charter.drawGraph("U-Test", "Run", "Z-Value","z-critical", this.zCrit, new Charter.ChartData("calculated Z", uTestData));
+        charter.openWindow();
     }
 
     @Override
@@ -120,7 +121,7 @@ public class MannWhitney extends GenericTest implements Initializable {
         return "Mann-Whitney";
     }
 
-    private void calculatePair(Run run1, Run run2) {
+    private void calculatePair(List<Run> resultRuns, Run run1, Run run2) {
         List<RankedDataPoint> rankedData1 = new ArrayList<>();
         List<RankedDataPoint> rankedData2 = new ArrayList<>();
         NormalDistribution n = new NormalDistribution();
@@ -189,27 +190,22 @@ public class MannWhitney extends GenericTest implements Initializable {
         double U = Math.min(U1, U2);
         double z = Math.abs((U - mu_U) / sigma_U);
         this.zCrit = n.inverseCumulativeProbability(1 - this.getAlpha() / 2.0);
-
-
-
         double pCalc = n.cumulativeProbability(z);
-        double pCrit = 1 - this.getAlpha() / 2.0;
-        byte hypothesis;
-        if (pCalc > pCrit) {
-            hypothesis = Run.REJECTED_NULLHYPOTHESIS;
-        } else {
-            hypothesis = Run.ACCEPTED_NULLHYPOTHESIS;
-        }
 
+        run1.setP(pCalc);
         run1.setZ(z);
-        run1.setNullhypothesis(hypothesis);
         uTestData.add(new XYChart.Data<>(run1.getRunID(), z));
-        this.resultRuns.add(run1);
+        resultRuns.add(run1);
 
     }
 
     @Override
-    public void calculateTest() {
+    public double getCriticalValue() {
+        return this.zCrit;
+    }
+
+    @Override
+    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
         if (this.job.getRuns().size() <= 1) return;
         List<Run> runs = this.job.getRuns();
 
@@ -217,7 +213,7 @@ public class MannWhitney extends GenericTest implements Initializable {
             if (i < runs.size() - 1) {
                 Run run1 = runs.get(i);
                 Run run2 = runs.get(i + 1);
-                calculatePair(run1, run2);
+                calculatePair(resultRuns, run1, run2);
             }
         }
     }
@@ -232,24 +228,13 @@ public class MannWhitney extends GenericTest implements Initializable {
         return value < this.zCrit;
     }
 
-    public void openWindow() {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/MannWithney.fxml"));
-            fxmlLoader.setController(this);
-            Parent root1 = fxmlLoader.load();
+    @Override
+    public Scene getCharterScene() {
+        return charter.drawGraph("U-Test", "Run", "Z-Value","z-critical", this.zCrit, new Charter.ChartData("calculated Z", uTestData));
+    }
 
-            Stage stage = new Stage();
-            stage.setMaxWidth(1200);
-            stage.setMaxHeight(600);
-            stage.setMinHeight(600);
-            stage.setMinWidth(800);
-            stage.setTitle("Calculated U-Test");
-            stage.setScene(new Scene(root1));
-            setLabeling();
-            stage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    @Override
+    public TableView<Run> getTable() {
+        return uTestTable;
     }
 }

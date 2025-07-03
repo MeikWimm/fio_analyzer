@@ -1,30 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="498.0" prefWidth="871.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <top>
       <Label id="labelHeader" fx:id="labelHeader" text="Evaluation" BorderPane.alignment="CENTER" />
    </top>
    <center>
       <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
          <children>
-            <TableView id="evalTable" fx:id="evalTable" prefHeight="482.0" prefWidth="871.0">
+            <TableView id="evalTable" fx:id="evalTable" prefHeight="500.0" prefWidth="1000.0">
               <columns>
                 <TableColumn id="testColumn" fx:id="testColumn" prefWidth="58.0" text="Test" />
                   <TableColumn id="runColumn" fx:id="runColumn" prefWidth="169.0" text="Run" />
                 <TableColumn id="timeColumn" fx:id="timeColumn" prefWidth="200.0" text="Time (sec)" />
-                  <TableColumn id="averageTimePerMilliColumn" fx:id="averageTimePerMilliColumn" prefWidth="156.0" text="Average time per millisec" visible="false" />
                   <TableColumn id="typeOfComparedRunsColumn" fx:id="typeOfComparedRunsColumn" prefWidth="200.0" text="sequential/adjacent" />
                   <TableColumn id="skippedRunColumn" fx:id="skippedRunColumn" minWidth="9.0" prefWidth="100.0" text="Runs skipped" />
                   <TableColumn id="bonferroniColumn" fx:id="bonferroniColumn" minWidth="0.0" prefWidth="100.0" text="Bonferroni" />
-                  <TableColumn id="comparedRunsColumn" fx:id="comparedRunsColumn" minWidth="0.0" prefWidth="122.0" text="Compared Runs " visible="false" />
               </columns>
             </TableView>
+            <Pane prefHeight="100.0" prefWidth="1000.0">
+               <children>
+                  <Button id="saveEvalButton" fx:id="saveEvalButton" layoutX="14.0" layoutY="12.0" mnemonicParsing="false" text="Save evaluation" />
+               </children>
+            </Pane>
          </children>
       </VBox>
    </center>

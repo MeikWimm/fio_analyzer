@@ -7,9 +7,9 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <TableView id="TTable" fx:id="TTable" prefHeight="496.0" prefWidth="800.0">
+      <TableView id="TTable" fx:id="TTable" prefHeight="500.0" prefWidth="1000.0">
          <columns>
             <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="31.0" text="Run" />
             <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="119.0" text="Measurment" />
@@ -18,11 +18,11 @@
             <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="123.0" text="Nullhypothesis" />
          </columns>
       </TableView>
-      <Pane prefHeight="110.0" prefWidth="600.0">
+      <Pane prefHeight="100.0" prefWidth="1000.0">
          <children>
             <Label layoutX="112.0" layoutY="22.0" prefHeight="17.0" prefWidth="108.0" text="critical T = " />
             <Label id="zCritLabel" fx:id="zCritLabel" layoutX="220.0" layoutY="22.0" prefHeight="17.0" prefWidth="225.0" text="_" />
-            <Button id="drawTTest" fx:id="drawTTest" layoutX="14.0" layoutY="27.0" mnemonicParsing="false" text="draw T-Test" />
+            <Button id="drawTTest" fx:id="drawTTest" layoutX="14.0" layoutY="27.0" mnemonicParsing="false" text="Draw T-Test" />
             <Label layoutX="112.0" layoutY="37.0" prefHeight="17.0" prefWidth="108.0" text="Steady state:" />
             <Label id="steadyStateLabel" fx:id="steadyStateLabel" layoutX="220.0" layoutY="37.0" prefHeight="17.0" prefWidth="225.0" text="_" />
          </children>

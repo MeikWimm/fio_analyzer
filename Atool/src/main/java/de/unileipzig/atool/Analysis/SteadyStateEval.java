@@ -1,6 +1,7 @@
 package de.unileipzig.atool.Analysis;
 
 import de.unileipzig.atool.Job;
+import de.unileipzig.atool.OutputModule;
 import de.unileipzig.atool.Settings;
 import de.unileipzig.atool.Utils;
 import javafx.collections.FXCollections;
@@ -9,11 +10,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import jdk.incubator.vector.VectorOperators;
 
 import java.io.IOException;
 import java.net.URL;
@@ -41,48 +44,46 @@ public class SteadyStateEval implements Initializable {
     @FXML private TableColumn<TestEval, String> testColumn; // Replace the first '?' with the type of the table's data, and the second '?' with the type of the column's value.
     @FXML private TableColumn<TestEval, String> runColumn;
     @FXML private TableColumn<TestEval, String> timeColumn;
-    @FXML private TableColumn<TestEval, Integer> averageTimePerMilliColumn;
     @FXML private TableColumn<TestEval, String> typeOfComparedRunsColumn;
     @FXML private TableColumn<TestEval, Integer> skippedRunColumn;
     @FXML private TableColumn<TestEval, Boolean> bonferroniColumn;
-    @FXML private TableColumn<TestEval, Integer> comparedRunsColumn;
-
+    @FXML Button saveEvalButton;
     private final Job job;
     private final List<TestEval> testEvals;
     private final Settings settings;
-    private final GenericTest[] test;
-
+    private final GenericTest[] tests;
+    private final OutputModule outputModule;
+    private Scene scene;
 
     public SteadyStateEval(Job job, Settings settings){
         this.job = job;
         this.settings = settings;
-        test = new  GenericTest[5];
+        tests = new  GenericTest[5];
+        outputModule = new OutputModule();
 
         Anova anova = new Anova(job, settings);
         TukeyHSD tukey = new TukeyHSD(anova);
         anova.setPostHocTest(tukey);
-        test[0] = anova;
+        tests[0] = anova;
 
-        test[1] = new ConInt(job, settings);
-        test[2] = new CoV(job, settings);
+        tests[1] = new ConInt(job, settings);
+        tests[2] = new CoV(job, settings);
         //test[3] = new CoVWindowed(job, settings);
-        test[3] = new MannWhitney(job, settings);
-        test[4] = new TTest(job, settings);
+        tests[3] = new MannWhitney(job, settings);
+        tests[4] = new TTest(job, settings);
         testEvals = new ArrayList<>();
         prepareTests();
     }
 
     private void prepareTests() {
-        for (GenericTest genericTest : test) {
-            TestEval testEval;
-            PostHocTest postHocTest = genericTest.getPostHocTest();
-            testEval = new TestEval(this.job, genericTest);
-            testEvals.add(testEval);
-
-            if(postHocTest != null){
-                TestEval postHocTestEval = new TestEval(this.job, genericTest, postHocTest);
+        for (GenericTest genericTest : tests) {
+            TestEval testEval = new TestEval(genericTest);
+            TestEval postHocTestEval = testEval.getPostHocTest();
+            if (postHocTestEval != null) {
                 testEvals.add(postHocTestEval);
             }
+
+            testEvals.add(testEval);
         }
     }
 
@@ -92,42 +93,62 @@ public class SteadyStateEval implements Initializable {
         runColumn.setCellValueFactory(new PropertyValueFactory<>("SteadyStateRun"));
         testColumn.setCellValueFactory(new PropertyValueFactory<>("TestName"));
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("Time"));
-        averageTimePerMilliColumn.setCellValueFactory(new PropertyValueFactory<>("AverageTimePerMilliVal"));
         typeOfComparedRunsColumn.setCellValueFactory(new PropertyValueFactory<>("TypeOfComparedRuns"));
         skippedRunColumn.setCellValueFactory(new PropertyValueFactory<>("SkippedRunVal"));
         bonferroniColumn.setCellValueFactory(new PropertyValueFactory<>("BonferroniVal"));
-        comparedRunsColumn.setCellValueFactory(new PropertyValueFactory<>("ComparedRunsVal"));
+
+        saveEvalButton.setOnAction(e -> onActionSaveEval());
 
         labelHeader.setText(this.job.toString());
         evalTable.setItems(FXCollections.observableArrayList(testEvals));
     }
 
     public void openWindow() {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/SteadyStateEval.fxml"));
-            fxmlLoader.setController(this);
-            Parent root1 = fxmlLoader.load();
-            /*
-             * if "fx:controller" is not set in fxml
-             * fxmlLoader.setController(NewWindowController);
-             */
-            Stage stage = new Stage();
-            stage.setMaxWidth(1200);
-            stage.setMaxHeight(600);
-            stage.setMinHeight(600);
-            stage.setMinWidth(800);
-            stage.setTitle("Job Evaluation");
-            stage.setScene(new Scene(root1));
-            setLabeling();
-            stage.show();
+        this.scene = getScene();
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Stage stage = new Stage();
+        stage.setMaxWidth(1200);
+        stage.setMaxHeight(600);
+        stage.setMinHeight(600);
+        stage.setMinWidth(800);
+        stage.setTitle("Job Evaluation");
+        stage.setScene(this.scene);
+        setLabeling();
+        stage.show();
+
     }
 
     private void setLabeling() {
         labelHeader.setText("Job Evaluation | Job alpha: " + this.job.getAlpha() + " | Required accepted runs for steady state: " + settings.getRequiredRunsForSteadyState());
     }
 
+    private void onActionSaveEval(){
+        outputModule.openDirectoryChooser(this.scene.getWindow());
+        OutputModule.STATUS status = outputModule.saveEval(this);
+        LOGGER.info(status.toString());
+    }
+
+    public Scene getScene() {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/SteadyStateEval.fxml"));
+        fxmlLoader.setController(this);
+        Parent root1 = null;
+        try {
+            root1 = fxmlLoader.load();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return new Scene(root1);
+    }
+
+    public GenericTest[] getTests() {
+        return tests;
+    }
+
+    public Job getJob() {
+        return job;
+    }
+
+    public TableView<TestEval> getEvalTable() {
+        return evalTable;
+    }
 }

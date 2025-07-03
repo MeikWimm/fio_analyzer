@@ -7,18 +7,18 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="625.0" prefWidth="800.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <TableView id="anovaTable" fx:id="uTestTable" prefHeight="547.0" prefWidth="800.0">
+      <TableView id="anovaTable" fx:id="uTestTable" prefHeight="500.0" prefWidth="1000.0">
          <columns>
-            <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="31.0" text="Run" />
-            <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="119.0" text="Measurment" />
-            <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="119.0" text="Compare to Run" />
-            <TableColumn id="FColumn" fx:id="ZColumn" prefWidth="123.0" text="Z (calculated)" />
-            <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="123.0" text="Nullhypothesis" />
+            <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="62.0" text="Run" />
+            <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="134.0" text="Measurment" />
+            <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="141.0" text="Compare to Run" />
+            <TableColumn id="FColumn" fx:id="ZColumn" prefWidth="127.0" text="Z (calculated)" />
+            <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="152.0" text="Nullhypothesis" />
          </columns>
       </TableView>
-      <Pane prefHeight="125.0" prefWidth="800.0">
+      <Pane prefHeight="100.0" prefWidth="1000.0">
          <children>
             <Label layoutX="127.0" layoutY="14.0" prefHeight="17.0" prefWidth="225.0" text="Calcluated Z = " />
             <Label id="zIntervalLabel" fx:id="zIntervalLabel" layoutX="217.0" layoutY="14.0" prefHeight="17.0" prefWidth="142.0" text="_" />

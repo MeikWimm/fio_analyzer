@@ -23,7 +23,6 @@ import java.util.ResourceBundle;
 
 public class CoV extends GenericTest implements Initializable {
     private final List<XYChart.Data<Number, Number>> covData;
-    private final Charter charter;
     private final CoVWindowed covWindowed;
     private final double STEADY_STATE_COV_THRESHOLD;
 
@@ -44,7 +43,6 @@ public class CoV extends GenericTest implements Initializable {
         final int dataSizeWithRuns = job.getRuns().size() * 2;
         this.covData = new ArrayList<>(dataSizeWithRuns);
         this.covWindowed = new CoVWindowed(job, settings);
-        this.charter = new Charter();
         this.STEADY_STATE_COV_THRESHOLD = this.job.getCvThreshold();
     }
 
@@ -64,11 +62,12 @@ public class CoV extends GenericTest implements Initializable {
         showCoVGraphButton.setOnAction(e -> covWindowed.drawWindowedCoV());
         showCoVWindowedGraphButton.setOnAction(e -> drawCoV());
 
-        covTable.setItems(this.job.getFilteredRuns());
+        covTable.setItems(getResultRuns());
 
     }
 
-    private void setLabeling() {
+    @Override
+    protected void setLabeling() {
         if(getSteadyStateRun() == null){
             steadyStateLabel.setText("No steady state CV found.");
         } else {
@@ -84,8 +83,18 @@ public class CoV extends GenericTest implements Initializable {
     }
 
     @Override
-    public void calculateTest() {
-        calculateCoV();
+    protected URL getFXMLPath() {
+        return getClass().getResource("/de/unileipzig/atool/CoV.fxml");
+    }
+
+    @Override
+    protected String getWindowTitle() {
+        return "Calculated CoV";
+    }
+
+    @Override
+    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
+        calculateCoV(groups, resultRuns);
         covWindowed.calculate();
     }
 
@@ -94,41 +103,26 @@ public class CoV extends GenericTest implements Initializable {
         return "Coefficient of Variation";
     }
 
-    private void calculateCoV(){
-        for (List<Run> group : this.groups) {
+    private void calculateCoV(List<List<Run>> groups, List<Run> resultRuns){
+        for (List<Run> group : groups) {
             Run run = group.getFirst();
             double cov = calculateCoVGroup(group);
             run.setCoV(cov);
             covData.add(new XYChart.Data<>(run.getRunID(), cov));
-            this.resultRuns.add(run);
+            resultRuns.add(run);
         }
     }
 
     private double calculateCoVGroup(List<Run> group) {
-        if (group == null || group.isEmpty()) {
-            throw new IllegalArgumentException("Group cannot be null or empty");
-        }
-
         double average = MathUtils.average(group);
-        if (average == 0) {
-            throw new IllegalArgumentException("Cannot calculate CoV when mean is zero");
-        }
-
         double n = 0;
         double sum = 0;
 
         for (Run run : group) {
-            if (run == null || run.getData() == null) {
-                throw new IllegalArgumentException("Invalid run data");
-            }
             for (DataPoint dp : run.getData()) {
                 sum += Math.pow(dp.getData() - average, 2);
                 n++;
             }
-        }
-
-        if (n <= 1) {
-            throw new IllegalArgumentException("Need at least two data points to calculate CoV");
         }
 
         double std = Math.sqrt(sum / (n - 1));
@@ -145,28 +139,23 @@ public class CoV extends GenericTest implements Initializable {
         return value < STEADY_STATE_COV_THRESHOLD;
     }
 
+    @Override
+    public double getCriticalValue() {
+        return this.job.getCvThreshold();
+    }
+
+    @Override
+    public Scene getCharterScene() {
+        return charter.drawGraph("Run CoV", "Per run", "F-Value", "Threshold", this.job.getCvThreshold(), new Charter.ChartData("CV over Job", covData));
+    }
+
     public void drawCoV() {
         charter.drawGraph("Run CoV", "Per run", "F-Value", "Threshold", this.job.getCvThreshold(), new Charter.ChartData("CV over Job", covData));
+        charter.openWindow();
     }
 
-    public final void openWindow() {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/CoV.fxml"));
-            fxmlLoader.setController(this);
-            Parent root1 = fxmlLoader.load();
-
-            Stage stage = new Stage();
-            stage.setMaxWidth(1200);
-            stage.setMaxHeight(600);
-            stage.setMinHeight(600);
-            stage.setMinWidth(800);
-            stage.setTitle("Calculated CoV");
-            stage.setScene(new Scene(root1));
-            setLabeling();
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    @Override
+    public TableView<Run> getTable() {
+        return covTable;
     }
-
 }

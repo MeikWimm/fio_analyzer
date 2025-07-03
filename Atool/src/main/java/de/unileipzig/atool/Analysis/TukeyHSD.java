@@ -38,15 +38,6 @@ import net.sourceforge.jdistlib.Tukey;
  * @author meni1999
  */
 public class TukeyHSD extends PostHocTest implements Initializable {
-    private static final Logger LOGGER = Logger.getLogger( TukeyHSD.class.getName() );
-
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("TukeyHSD"));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);      
-    }
 
     @FXML public Label qCritLabel;
     @FXML public Label anovaSteadyStateLabel;
@@ -56,7 +47,6 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     @FXML public Button drawTukey;
     
     @FXML public TableView<Run> TukeyTable;
-    @FXML public TableColumn<Run,Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, Integer> compareToRunColumn;
     @FXML public TableColumn<Run, Double> QColumn;
@@ -64,20 +54,15 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     private double qHSD;
     private final List<XYChart.Data<Number, Number>> meanData;
     private final List<XYChart.Data<Number, Number>> qHSDData;
-    private final Charter charter;
 
     public TukeyHSD(Anova anova){
         super(anova);
         this.meanData = new ArrayList<>();
         this.qHSDData = new ArrayList<>();
-        this.charter = new Charter();
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
-        averageSpeedColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
-
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("GroupID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
         QColumn.setCellValueFactory(new PropertyValueFactory<>("Q"));
@@ -88,12 +73,13 @@ public class TukeyHSD extends PostHocTest implements Initializable {
 
         drawTukey.setOnAction(e -> draw());
         
-        TukeyTable.setItems(this.test.getPostHocRuns());
+        TukeyTable.setItems(getPostHocRuns());
         qCritLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.qHSD));
     }
 
     public void draw(){
         charter.drawGraph("U-Test","Group","Mean/Difference",new Charter.ChartData("Run mean", meanData), new Charter.ChartData("QHSD", qHSDData));
+        charter.openWindow();
     }
 
     @Override
@@ -102,24 +88,15 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     }
 
     @Override
-    public void apply(List<Run> postHocRuns, List<List<Run>> postHocGroups) {
-        if (postHocRuns == null || postHocGroups == null) {
-            throw new IllegalArgumentException("Input lists cannot be null");
-        }
-
-        int totalObservations = test.getJob().getData().size();
+    public void calculate() {
+        int totalObservations = job.getData().size();
         for (int i = 0; i <= postHocGroups.size() - 2; i += 2) {
-                Job job = test.getJob();
                 double n = job.getData().size();
                 int numberOfGroups = postHocGroups.size();
                 int dfError = totalObservations - numberOfGroups;
                 Tukey tukey = new Tukey(postHocGroups.getFirst().size(), numberOfGroups, dfError);
                 List<Run> group1 = postHocGroups.get(i);
                 List<Run> group2 = postHocGroups.get(i + 1);
-
-            if (group1.isEmpty() || group2.isEmpty()) {
-                throw new IllegalArgumentException("Groups cannot be empty");
-            }
 
             Run run = group1.getFirst();
                 double speedSumGroup1 = 0;
@@ -142,39 +119,26 @@ public class TukeyHSD extends PostHocTest implements Initializable {
                 qHSD = qCritical * standardError;
                 run.setQ(overallMean);
 
+                checkHypothesis(run, qHSD);
+
                 meanData.add(new XYChart.Data<>(run.getGroupID(), overallMean));
                 qHSDData.add(new XYChart.Data<>(run.getGroupID(), qHSD));
-                if(qHSD < overallMean){
-                    run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
-                } else {
-                    run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
-                }
 
-                checkSteadyStateRun(run, group1, group2);
+                this.firstGroup.add(group1);
+                this.secondGroup.add(group2);
         }
     }
 
-    public void openWindow(){
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/TukeyHSD.fxml"));
-            fxmlLoader.setController(this);
-            Parent root1 = fxmlLoader.load();
-
-            Stage stage = new Stage();
-            stage.setMaxWidth(1200);      
-            stage.setMaxHeight(600);
-            stage.setMinHeight(600);
-            stage.setMinWidth(800);
-            stage.setTitle("Calculated Tukey HSD");
-            stage.setScene(new Scene(root1));
-            setLabeling();
-            stage.show();
-    } catch (IOException e) {
-            e.printStackTrace();
+    private void checkHypothesis(Run run, double qHSD) {
+        if(run.getQ() < qHSD){
+            run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+        } else {
+            run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
         }
     }
 
-    private void setLabeling() {
+    @Override
+    protected void setLabeling() {
         if(steadyStateRun == null && anovaSteadyStateRun == null){
             evalLabel.setText("No steady state run found.");
             return;
@@ -196,4 +160,30 @@ public class TukeyHSD extends PostHocTest implements Initializable {
             }
         }
     }
+
+    @Override
+    protected URL getFXMLPath() {
+        return getClass().getResource("/de/unileipzig/atool/TukeyHSD.fxml");
+    }
+
+    @Override
+    protected String getWindowTitle() {
+        return "Calculated Tukey HSD";
+    }
+
+    @Override
+    public Scene getCharterScene() {
+        return charter.drawGraph("Tukey-HSD-Test","Group","Mean/Difference",new Charter.ChartData("Run mean", meanData), new Charter.ChartData("QHSD", qHSDData));
+    }
+
+    @Override
+    public double getCriticalValue() {
+        return this.qHSD;
+    }
+
+    @Override
+    public TableView<Run> getTable() {
+        return TukeyTable;
+    }
+
 }

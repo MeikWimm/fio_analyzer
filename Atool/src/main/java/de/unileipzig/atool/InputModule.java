@@ -10,7 +10,6 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import java.io.BufferedReader;
@@ -35,7 +34,7 @@ import java.util.logging.Logger;
 public class
 InputModule {
     private static final Logger LOGGER = Logger.getLogger(InputModule.class.getName());
-    public static final int MIN_POSSIBLE_DATA_SIZE = 100;
+    public static final int MIN_POSSIBLE_DATA_SIZE = 1000;
     static {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setLevel(Level.FINEST);
@@ -44,11 +43,10 @@ InputModule {
         LOGGER.addHandler(handler);
     }
 
-    public File selectedDirectory;
+    public static File SELECTED_DIRECTORY;
     DirectoryChooser directoryChooser;
     ObservableList<Job> jobs = FXCollections.observableArrayList();
     private boolean isDirChooserOpen = false;
-    private File[] files;
     private BufferedReader br;
     private int time;
     private double averageSpeed;
@@ -64,7 +62,7 @@ InputModule {
     }
 
     public void openDirectoryChooser(Window ownerWindow) {
-        this.selectedDirectory = directoryChooser.showDialog(ownerWindow);
+        SELECTED_DIRECTORY = directoryChooser.showDialog(ownerWindow);
     }
 
     /**
@@ -75,11 +73,12 @@ InputModule {
         LOGGER.log(Level.INFO, "Loading input module...");
 
         STATUS state;
+        File[] files;
         if (!isDirChooserOpen) {
             isDirChooserOpen = true;
             try {
-                if(this.selectedDirectory != null && this.selectedDirectory.isDirectory()) {
-                    files = selectedDirectory.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
+                if(SELECTED_DIRECTORY != null && SELECTED_DIRECTORY.isDirectory()) {
+                    files = SELECTED_DIRECTORY.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
                 }
             } finally {
                 isDirChooserOpen = false;
@@ -88,10 +87,10 @@ InputModule {
             return STATUS.DIR_CHOOSER_ALREADY_OPEN;
         }
 
-        if (selectedDirectory != null) {
-            boolean isDirReadable = selectedDirectory.canRead();
-            LOGGER.log(Level.INFO, "Is directory selected: " + selectedDirectory.isDirectory());
-            LOGGER.log(Level.INFO, "Selected directory: " + selectedDirectory.getAbsolutePath());
+        if (SELECTED_DIRECTORY != null) {
+            boolean isDirReadable = SELECTED_DIRECTORY.canRead();
+            LOGGER.log(Level.INFO, "Is directory selected: " + SELECTED_DIRECTORY.isDirectory());
+            LOGGER.log(Level.INFO, "Selected directory: " + SELECTED_DIRECTORY.getAbsolutePath());
             LOGGER.log(Level.INFO, "Is directory readable: " + isDirReadable);
 
             if(!isDirReadable){
@@ -101,7 +100,7 @@ InputModule {
                 return STATUS.DIR_NOT_READABLE;
             }
 
-            files = selectedDirectory.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
+            files = SELECTED_DIRECTORY.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
 
 
             if (files == null || files.length == 0) {
