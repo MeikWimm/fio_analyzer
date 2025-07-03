@@ -140,6 +140,11 @@ public class CoV extends GenericTest implements Initializable {
     }
 
     @Override
+    public double getCriticalValue() {
+        return this.job.getCvThreshold();
+    }
+
+    @Override
     public Scene getCharterScene() {
         return charter.drawGraph("Run CoV", "Per run", "F-Value", "Threshold", this.job.getCvThreshold(), new Charter.ChartData("CV over Job", covData));
     }

@@ -122,6 +122,11 @@ public class CoVWindowed extends GenericTest {
     }
 
     @Override
+    public double getCriticalValue() {
+        return this.job.getCvThreshold();
+    }
+
+    @Override
     public TableView<Run> getTable() {
         return null;
     }

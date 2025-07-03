@@ -3,6 +3,7 @@ package de.unileipzig.atool;
 import de.unileipzig.atool.Analysis.GenericTest;
 import de.unileipzig.atool.Analysis.PostHocTest;
 import de.unileipzig.atool.Analysis.SteadyStateEval;
+import de.unileipzig.atool.Analysis.TestEval;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
@@ -33,7 +34,7 @@ public class OutputModule {
     private boolean isAlreadyOpen;
     private File selectedDirectory;
     private final StringBuilder stringBuilder;
-    private String selfCreatedPath = "/" + "Job_";
+    private File path;
 
     public OutputModule() {
         directoryChooser = new DirectoryChooser();
@@ -55,13 +56,17 @@ public class OutputModule {
             LOGGER.log(Level.INFO, "Saving eval to "+selectedDirectory.getAbsolutePath());
         }
 
-        LOGGER.log(Level.WARNING, "Is selected directory writable: " + selectedDirectory.canWrite());
         if(!selectedDirectory.canWrite()) {
+            LOGGER.log(Level.WARNING, "Is selected directory writable: " + selectedDirectory.canWrite());
             return STATUS.DIR_NOT_WRITEABLE;
+        } else {
+            LOGGER.log(Level.INFO, "Is selected directory writable: " + selectedDirectory.canWrite());
         }
 
         if(!isOpen()) {
             isAlreadyOpen = true;
+            path = new File(selectedDirectory + "/Job_" + eval.getJob().getID());
+            LOGGER.log(Level.INFO, "created new directory: " + "\\Job_" + eval.getJob().getID());
             writeEval();
             saveEvalToFile();
         } else {
@@ -74,7 +79,7 @@ public class OutputModule {
 
     private void saveEvalToFile() {
         try {
-            FileWriter fileWriter = new FileWriter(selectedDirectory + selfCreatedPath + eval.getJob().getID() + "/evaluation.txt");
+            FileWriter fileWriter = new FileWriter(path + "/evaluation.txt");
             // Creates a BufferedWriter
             BufferedWriter output = new BufferedWriter(fileWriter);
 
@@ -101,7 +106,6 @@ public class OutputModule {
         stringBuilder.append("Runs: ").append(job.getRuns().size()).append('\n');
         stringBuilder.append("Alpha: ").append(job.getAlpha()).append('\n');
         stringBuilder.append("\n");
-        File path = new File(selectedDirectory + selfCreatedPath + "_eval");
         boolean isPathCreated = false;
         if (!path.exists()){
             isPathCreated = path.mkdirs();
@@ -109,14 +113,17 @@ public class OutputModule {
 
         if(isPathCreated){
             eval.getScene();
+            stringBuilder.append("[Evaluation]").append("\n");
             saveTable("Evaluation",eval.getEvalTable());
 
             for (GenericTest test : eval.getTests()) {
                 test.getScene();
+                saveTestValues(test);
                 saveTable(test.getTestName(), test.getTable());
                 PostHocTest postHocTest = test.getPostHocTest();
                 if(postHocTest != null){
                     postHocTest.getScene();
+                    savePostHocTestValues(postHocTest);
                     saveTable(postHocTest.getTestName(), postHocTest.getTable());
                 }
 
@@ -128,25 +135,46 @@ public class OutputModule {
                     saveSnapshot(img, graphFile);
                     savePostHocGraphTests(img, path, test);
                 } else {
-                    Logger.getLogger(OutputModule.class.getName()).log(Level.WARNING, "Charter scene equals null! Test: " + test.getTestName());
+                    Logger.getLogger(OutputModule.class.getName()).log(Level.INFO, "No charter scene found for test: " + test.getTestName());
                 }
             }
         } else {
             LOGGER.log(Level.WARNING, "Directory already exist!");
         }
 
-        Logger.getLogger(OutputModule.class.getName()).log(Level.INFO, "Saved!");
+        Logger.getLogger(OutputModule.class.getName()).log(Level.INFO, "Done!");
     }
 
-        private void saveTable(String title, TableView<?> table) {
-        String space = "%-26s";
-        String line = "--------------------------";
+    private void savePostHocTestValues(PostHocTest test) {
+        stringBuilder.append("[").append(test.getTestName()).append("]").append("\n");
+        double criticalValue = test.getCriticalValue();
+        if(criticalValue == Run.UNDEFINED_DOUBLE_VALUE){
+            stringBuilder.append("Critical Value: ").append("UNDEFINED").append("\n").append("\n");
+        } else {
+            stringBuilder.append("Critical Value: ").append(criticalValue).append("\n").append("\n");
+        }
+    }
+
+    private void saveTestValues(GenericTest test) {
+        stringBuilder.append("[").append(test.getTestName()).append("]").append("\n");
+        double criticalValue = test.getCriticalValue();
+        if(criticalValue == Run.UNDEFINED_DOUBLE_VALUE){
+            stringBuilder.append("Critical Value: ").append("UNDEFINED").append("\n").append("\n");
+        } else {
+            stringBuilder.append("Critical Value: ").append(criticalValue).append("\n").append("\n");
+        }
+    }
+
+    private void saveTable(String title, TableView<?> table) {
+        int width = 35;
+        String space = String.format("%%-%ds", width);
+        String line = "-".repeat(width);
 
         if(table == null) {
             LOGGER.log(Level.WARNING, "TableView equals null for test " + title);
             return;
         }
-            stringBuilder.append("[").append(title).append("]").append("\n").append("\n");
+
         for (int i = 0; i < table.getColumns().size(); i++) {
             String columnText = table.getColumns().get(i).getText();
             stringBuilder.append(String.format(space, columnText));

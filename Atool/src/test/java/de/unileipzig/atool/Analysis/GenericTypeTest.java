@@ -47,7 +47,6 @@ class GenericTypeTest {
                     new MannWhitney(job, settings)
             );
             for (GenericTest test: tests){
-                test = new Anova(job, settings);
                 assertNotNull(test, "Anova instance should be initialized.");
                 assertEquals(0.05, test.getAlpha(), "Alpha value should be set correctly.");
             }
@@ -66,8 +65,8 @@ class GenericTypeTest {
 
             for (GenericTest test: tests){
                 test.calculate();
-                Job calculatedJob = test.getJob();
-                assertNotNull(calculatedJob, "Calculated job should not be null.");
+                List<Run> result = test.getResultRuns();
+                assertNotNull(result, "result list should not be null.");
                 assertNotNull(test.getGroups(), "Runs should not be empty after calculation.");
                 for(List<Run> group: test.getGroups()){
                     assertNotNull(group, "Group should not be null.");

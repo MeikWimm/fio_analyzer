@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 public class
 InputModule {
     private static final Logger LOGGER = Logger.getLogger(InputModule.class.getName());
-    public static final int MIN_POSSIBLE_DATA_SIZE = 100;
+    public static final int MIN_POSSIBLE_DATA_SIZE = 1000;
     static {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setLevel(Level.FINEST);

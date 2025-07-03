@@ -64,7 +64,7 @@ class JobTest {
         int groupSize = 2;
         for (Job job: jobs){
             for (int vals: testValsAverageSpeedPerMilli){
-                job.setAverageTimePerMilliSec(vals);
+               // job.setAverageTimePerMilliSec(vals);
                 job.updateRunsData();
                 List<List<Run>> groups = Job.setupGroups(job, false, groupSize);
                 List<Run> runs = job.getRuns();
@@ -103,17 +103,6 @@ class JobTest {
             // Assert
             assertNotNull(series, "Speed series should not be null.");
             //assertEquals(10, series.size(), "Speed series should contain the expected number of data points.");
-        }
-    }
-
-    @Test
-    void testMADNormalization() {
-        // Act
-        for (Job job: jobs){
-            List<DataPoint> normalizedData = job.getMADNormalized();
-            List<DataPoint> originalData = job.getData();
-            assertNotNull(normalizedData, "MAD normalized data should not be null.");
-            assertEquals(originalData.size(), normalizedData.size(), "Normalized data size should match the original data size.");
         }
     }
 

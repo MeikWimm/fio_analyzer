@@ -128,6 +128,11 @@ public class TTest extends GenericTest implements Initializable {
         return charter.drawGraph("T-Test", "Run", "T-Value", "critical T", tCrit, new Charter.ChartData("calculated T", tData));
     }
 
+    @Override
+    public double getCriticalValue() {
+        return this.tCrit;
+    }
+
     private double calculateVariance(Run run, double sse) {
         return (1.0 / (run.getData().size() - 1.0)) * sse;
     }

@@ -201,8 +201,12 @@ public abstract class PostHocTest {
 
     public abstract TableView<Run> getTable();
 
+    public abstract double getCriticalValue();
+
     public void setJob(Job job) {
         this.job = new Job(job);
         //this.job.resetRuns();
     }
+
+
 }

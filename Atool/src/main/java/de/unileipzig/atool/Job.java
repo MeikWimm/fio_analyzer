@@ -295,7 +295,7 @@ public class Job {
         final int MIN_RUN_DATA_LENGTH = 8;
         final int MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI = (int) Math.floor(rawData.size() / (double) (MIN_RUN_DATA_LENGTH * runsCounter));
 
-        if (averageTimePerMilliSec > MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI) {
+        if (averageTimePerMilliSec > MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI && MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI != 0) {
             averageTimePerMilliSec = MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI;
         }
 
@@ -340,76 +340,6 @@ public class Job {
             Run run = new Run(j, run_data);
             runs.add(run);
         }
-    }
-
-    public void setAverageTimePerMilliSec(int averageTimePerMilliSec) {
-        this.averageTimePerMilliSec = averageTimePerMilliSec;
-    }
-
-    public List<DataPoint> getDataNormalized() {
-        if (data == null || data.size() < 2) {
-            throw new IllegalArgumentException("Data list must contain at least two elements.");
-        }
-
-        int n = data.size();
-        double sum = 0.0;
-
-        for (DataPoint value : data) {
-            sum += value.getData();
-        }
-        double mean = sum / n;
-
-        double squaredDiffSum = 0.0;
-        for (DataPoint value : data) {
-            double diff = value.getData() - mean;
-            squaredDiffSum += diff * diff;
-        }
-        double stdDev = Math.sqrt(squaredDiffSum / (n - 1)); // Sample standard deviation
-
-        List<DataPoint> normalized = new ArrayList<>();
-        for (DataPoint value : data) {
-            double z = (value.getData() - mean) / stdDev;
-            normalized.add(new DataPoint(z, value.getTime()));
-        }
-
-        return normalized;
-    }
-
-    // Normalize data using median and MAD
-    public List<DataPoint> getMADNormalized() {
-        if (data == null || data.size() < 2) {
-            throw new IllegalArgumentException("Data list must contain at least two elements.");
-        }
-
-        // Step 1: Compute the median
-        List<DataPoint> sorted = new ArrayList<>(data);
-        sorted.sort(new Utils.SpeedComparator());
-        double median = computeMedian(sorted);
-
-        // Step 2: Compute the absolute deviations from the median
-        List<DataPoint> absDeviations = new ArrayList<>();
-        for (DataPoint value : data) {
-            absDeviations.add(new DataPoint(Math.abs(value.getData() - median), value.time));
-        }
-
-        // Step 3: Compute MAD (Median Absolute Deviation)
-        sorted.sort(new Utils.SpeedComparator());
-        double mad = computeMedian(absDeviations);
-
-        if (mad == 0) {
-            throw new ArithmeticException("MAD is zero — normalization cannot proceed.");
-        }
-
-        // Step 4: Normalize using robust z-score
-        // z_i = (x_i - median) / (MAD * 1.4826)
-        double madScale = mad * 1.4826;  // Consistency constant for normal distribution
-        List<DataPoint> normalized = new ArrayList<>();
-        for (DataPoint value : data) {
-            double z = (value.getData() - median) / madScale;
-            normalized.add(new DataPoint(z, value.time));
-        }
-
-        return normalized;
     }
 
     // Helper to compute the median

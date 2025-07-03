@@ -200,6 +200,11 @@ public class MannWhitney extends GenericTest implements Initializable {
     }
 
     @Override
+    public double getCriticalValue() {
+        return this.zCrit;
+    }
+
+    @Override
     protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
         if (this.job.getRuns().size() <= 1) return;
         List<Run> runs = this.job.getRuns();

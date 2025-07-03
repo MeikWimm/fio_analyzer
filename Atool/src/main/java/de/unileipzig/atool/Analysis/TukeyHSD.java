@@ -47,7 +47,6 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     @FXML public Button drawTukey;
     
     @FXML public TableView<Run> TukeyTable;
-    @FXML public TableColumn<Run,Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, Integer> compareToRunColumn;
     @FXML public TableColumn<Run, Double> QColumn;
@@ -64,9 +63,6 @@ public class TukeyHSD extends PostHocTest implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
-        averageSpeedColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));  
-
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("GroupID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
         QColumn.setCellValueFactory(new PropertyValueFactory<>("Q"));
@@ -177,11 +173,17 @@ public class TukeyHSD extends PostHocTest implements Initializable {
 
     @Override
     public Scene getCharterScene() {
-        return charter.drawGraph("U-Test","Group","Mean/Difference",new Charter.ChartData("Run mean", meanData), new Charter.ChartData("QHSD", qHSDData));
+        return charter.drawGraph("Tukey-HSD-Test","Group","Mean/Difference",new Charter.ChartData("Run mean", meanData), new Charter.ChartData("QHSD", qHSDData));
+    }
+
+    @Override
+    public double getCriticalValue() {
+        return this.qHSD;
     }
 
     @Override
     public TableView<Run> getTable() {
         return TukeyTable;
     }
+
 }

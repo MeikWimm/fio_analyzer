@@ -11,11 +11,10 @@
    <children>
       <TableView id="TukeyTable" fx:id="TukeyTable" prefHeight="500.0" prefWidth="1000.0">
          <columns>
-            <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="149.0" text="Group" />
-            <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="165.0" text="Measurment" />
-            <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="244.0" text="Groups" />
-            <TableColumn id="QColumn" fx:id="QColumn" prefWidth="215.0" text="Mean" />
-            <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="149.0" text="Nullhypothesis" />
+            <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="88.0" text="Group" />
+            <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="342.0" text="Groups" />
+            <TableColumn id="QColumn" fx:id="QColumn" prefWidth="202.0" text="Mean" />
+            <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="180.0" text="Nullhypothesis" />
          </columns>
       </TableView>
       <Pane prefHeight="100.0" prefWidth="1000.0">

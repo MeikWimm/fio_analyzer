@@ -237,6 +237,11 @@ public class CUSUM extends GenericTest{
     }
 
     @Override
+    public double getCriticalValue() {
+        return Run.UNDEFINED_DOUBLE_VALUE;
+    }
+
+    @Override
     public TableView<Run> getTable() {
         return null;
     }
