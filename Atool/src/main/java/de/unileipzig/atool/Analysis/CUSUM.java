@@ -30,7 +30,7 @@ public class CUSUM extends GenericTest{
     }
 
     @Override
-    public void calculateTest() {
+    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
         List<DataPoint> data = this.job.getData();
        // int initWindow = 1000;
        // int windowSize = 1000;

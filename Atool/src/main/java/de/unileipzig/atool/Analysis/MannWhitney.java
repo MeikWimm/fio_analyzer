@@ -32,7 +32,6 @@ import java.util.logging.Logger;
  * @author meni1999
  */
 public class MannWhitney extends GenericTest implements Initializable {
-    private static final Logger LOGGER = Logger.getLogger(MannWhitney.class.getName());
     private static class RankedDataPoint extends DataPoint {
         int flag;
         double rank;
@@ -54,14 +53,6 @@ public class MannWhitney extends GenericTest implements Initializable {
         public int getFlag() {
             return flag;
         }
-    }
-
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("Mann-Whitney"));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);
     }
 
     private final List<XYChart.Data<Number, Number>> uTestData;
@@ -95,7 +86,7 @@ public class MannWhitney extends GenericTest implements Initializable {
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
-        uTestTable.setItems(this.job.getFilteredRuns());
+        uTestTable.setItems(getResultRuns());
 
         drawUTestButton.setOnAction(e -> draw());
     }
@@ -130,7 +121,7 @@ public class MannWhitney extends GenericTest implements Initializable {
         return "Mann-Whitney";
     }
 
-    private void calculatePair(Run run1, Run run2) {
+    private void calculatePair(List<Run> resultRuns, Run run1, Run run2) {
         List<RankedDataPoint> rankedData1 = new ArrayList<>();
         List<RankedDataPoint> rankedData2 = new ArrayList<>();
         NormalDistribution n = new NormalDistribution();
@@ -204,12 +195,12 @@ public class MannWhitney extends GenericTest implements Initializable {
         run1.setP(pCalc);
         run1.setZ(z);
         uTestData.add(new XYChart.Data<>(run1.getRunID(), z));
-        this.resultRuns.add(run1);
+        resultRuns.add(run1);
 
     }
 
     @Override
-    public void calculateTest() {
+    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
         if (this.job.getRuns().size() <= 1) return;
         List<Run> runs = this.job.getRuns();
 
@@ -217,7 +208,7 @@ public class MannWhitney extends GenericTest implements Initializable {
             if (i < runs.size() - 1) {
                 Run run1 = runs.get(i);
                 Run run2 = runs.get(i + 1);
-                calculatePair(run1, run2);
+                calculatePair(resultRuns, run1, run2);
             }
         }
     }

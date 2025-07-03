@@ -36,17 +36,8 @@ import java.util.logging.Logger;
  * @author meni1999
  */
 public class ConInt extends GenericTest implements Initializable {
-    private static final Logger LOGGER = Logger.getLogger(ConInt.class.getName());
     private static final double STEADY_STATE_RCIW_THRESHOLD = .02;
     private final int WINDOW_SIZE;
-
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("Settings"));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);
-    }
 
     @FXML public Label labelHeader;
     @FXML public Button drawConIntDiffButton;
@@ -94,11 +85,11 @@ public class ConInt extends GenericTest implements Initializable {
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
         labelHeader.setText(this.job.toString());
-        conIntTable.setItems(this.job.getFilteredRuns());
+        conIntTable.setItems(getResultRuns());
     }
 
     @Override
-    public void calculateTest() {
+    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
         NormalDistribution normDis = new NormalDistribution();
         double dataSize = this.job.getRunDataSize();
 
@@ -120,7 +111,7 @@ public class ConInt extends GenericTest implements Initializable {
         /*
         Look for overlapping intervals
          */
-        for (List<Run> runs : this.groups) {
+        for (List<Run> runs : groups) {
             Run run1 = runs.get(0);
             Run run2 = runs.get(1);
             double a1 = run1.getIntervalFrom();
@@ -146,7 +137,7 @@ public class ConInt extends GenericTest implements Initializable {
             double c2 = x + y;
 
             run1.setNullhypothesis(doesIntervalContainZero(c1, c2));
-            this.resultRuns.add(run1);
+            resultRuns.add(run1);
         }
     }
 

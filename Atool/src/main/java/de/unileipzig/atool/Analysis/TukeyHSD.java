@@ -38,15 +38,6 @@ import net.sourceforge.jdistlib.Tukey;
  * @author meni1999
  */
 public class TukeyHSD extends PostHocTest implements Initializable {
-    private static final Logger LOGGER = Logger.getLogger( TukeyHSD.class.getName() );
-
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("TukeyHSD"));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);      
-    }
 
     @FXML public Label qCritLabel;
     @FXML public Label anovaSteadyStateLabel;
@@ -86,7 +77,7 @@ public class TukeyHSD extends PostHocTest implements Initializable {
 
         drawTukey.setOnAction(e -> draw());
         
-        TukeyTable.setItems(this.test.getPostHocRuns());
+        TukeyTable.setItems(getPostHocRuns());
         qCritLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.qHSD));
     }
 
@@ -101,24 +92,15 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     }
 
     @Override
-    public void apply(List<Run> postHocRuns, List<List<Run>> postHocGroups) {
-//        if (postHocRuns == null || postHocGroups == null) {
-//            throw new IllegalArgumentException("Input lists cannot be null");
-//        }
-
-        int totalObservations = test.getJob().getData().size();
+    public void calculate() {
+        int totalObservations = job.getData().size();
         for (int i = 0; i <= postHocGroups.size() - 2; i += 2) {
-                Job job = test.getJob();
                 double n = job.getData().size();
                 int numberOfGroups = postHocGroups.size();
                 int dfError = totalObservations - numberOfGroups;
                 Tukey tukey = new Tukey(postHocGroups.getFirst().size(), numberOfGroups, dfError);
                 List<Run> group1 = postHocGroups.get(i);
                 List<Run> group2 = postHocGroups.get(i + 1);
-
-//            if (group1.isEmpty() || group2.isEmpty()) {
-//                throw new IllegalArgumentException("Groups cannot be empty");
-//            }
 
             Run run = group1.getFirst();
                 double speedSumGroup1 = 0;
@@ -141,11 +123,21 @@ public class TukeyHSD extends PostHocTest implements Initializable {
                 qHSD = qCritical * standardError;
                 run.setQ(overallMean);
 
+                checkHypothesis(run, qHSD);
+
                 meanData.add(new XYChart.Data<>(run.getGroupID(), overallMean));
                 qHSDData.add(new XYChart.Data<>(run.getGroupID(), qHSD));
 
+                this.firstGroup.add(group1);
+                this.secondGroup.add(group2);
+        }
+    }
 
-                checkSteadyStateRun(run, group1, group2);
+    private void checkHypothesis(Run run, double qHSD) {
+        if(run.getQ() < qHSD){
+            run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+        } else {
+            run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
         }
     }
 

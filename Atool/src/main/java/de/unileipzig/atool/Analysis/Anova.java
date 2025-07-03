@@ -34,15 +34,6 @@ import java.util.logging.Logger;
  * @author meni1999
  */
 public class Anova extends GenericTest implements Initializable {
-    private static final Logger LOGGER = Logger.getLogger(Anova.class.getName());
-
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("ANOVA"));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);
-    }
 
     private final List<XYChart.Data<Number, Number>> anovaData;
     @FXML public Label averageSpeedLabel;
@@ -103,8 +94,7 @@ public class Anova extends GenericTest implements Initializable {
 
         showFGraphButton.setOnAction(e -> drawANOVAGraph());
 
-        anovaTable.setItems(this.job.getFilteredRuns());
-
+        anovaTable.setItems(getResultRuns());
     }
 
     private void updateLabeling(Run run) {
@@ -134,33 +124,9 @@ public class Anova extends GenericTest implements Initializable {
     }
 
     @Override
-    public void calculateTest() {
-        calculateAnova();
-    }
-
-    @Override
-    protected double extractValue(Run run) {
-        return run.getF();
-    }
-
-    @Override
-    protected boolean isWithinThreshold(double value) {
-        return value < this.fCrit;
-    }
-
-    private void calculateAnova() {
-        int num = this.groups.size() - 1;
+    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
+        int num = groups.size() - 1;
         int denom = (num + 1) * (this.job.getData().size() - 1);
-
-//        if (this.groups.isEmpty()) {
-//            LOGGER.log(Level.WARNING, "Groups list cannot be empty");
-//            return;
-//        }
-//
-//        if (this.groups.size() < 2) {
-//            LOGGER.log(Level.WARNING, "Groups list must contain at least two groups");
-//            return;
-//        }
 
         FDistribution fDistribution = new FDistribution(num, denom);
         fCrit = fDistribution.inverseCumulativeProbability(1.0 - alpha);
@@ -168,7 +134,7 @@ public class Anova extends GenericTest implements Initializable {
         double ssa = 0.0;
 
 
-        for (List<Run> group : this.groups) {
+        for (List<Run> group : groups) {
             for (Run run : group) {
                 double averageSpeedOfRun = run.getAverageSpeed();
                 ssa += Math.pow(averageSpeedOfRun - MathUtils.average(group), 2);
@@ -179,7 +145,7 @@ public class Anova extends GenericTest implements Initializable {
         }
 
 
-        for (List<Run> group : this.groups) {
+        for (List<Run> group : groups) {
             for (Run run : group) {
                 for (DataPoint dp : run.getData()) {
                     sse += (Math.pow((dp.getData() - MathUtils.average(group)), 2));
@@ -190,24 +156,34 @@ public class Anova extends GenericTest implements Initializable {
         }
 
         double fValue;
-        for (List<Run> group : this.groups) {
+        for (List<Run> group : groups) {
             Run run = group.getFirst();
-            double s_2_a = run.getSSA() / (this.groups.size() - 1);
-            double s_2_e = run.getSSE() / (this.groups.size() * (run.getData().size() - 1));
+            double s_2_a = run.getSSA() / (groups.size() - 1);
+            double s_2_e = run.getSSE() / (groups.size() * (run.getData().size() - 1));
             fValue = s_2_a / s_2_e;
             run.setF(fValue);
             run.setP(1.0 - fDistribution.cumulativeProbability(fValue));
-            this.resultRuns.add(run);
+            resultRuns.add(run);
             anovaData.add(new XYChart.Data<>(run.getID(), fValue));
         }
 
         double totalSSE = 0;
-        for (Run run : this.resultRuns) {
+        for (Run run : resultRuns) {
             totalSSE += run.getSSE();
         }
 
         this.job.setSSE(totalSSE);
         this.job.setMSE(totalSSE / denom);
+    }
+
+    @Override
+    protected double extractValue(Run run) {
+        return run.getF();
+    }
+
+    @Override
+    protected boolean isWithinThreshold(double value) {
+        return value < this.fCrit;
     }
 
     private void drawANOVAGraph() {

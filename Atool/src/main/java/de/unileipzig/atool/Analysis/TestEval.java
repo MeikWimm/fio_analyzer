@@ -2,11 +2,11 @@ package de.unileipzig.atool.Analysis;
 
 import de.unileipzig.atool.Job;
 import de.unileipzig.atool.Run;
+import jdk.incubator.vector.VectorOperators;
 
 public class TestEval{
-    private final GenericTest test;
+    private GenericTest test;
     private PostHocTest postHoctest;
-    private final Job job;
     private String testName;
     private String steadyStateRunString;
     private String time;
@@ -15,19 +15,34 @@ public class TestEval{
     private String skippedRunVal;
     private String bonferroniVal;
     private String comparedRunsVal;
+    private TestEval postHocEval;
 
-    public TestEval(Job job, GenericTest test){
+    public TestEval(GenericTest test){
         this.test = test;
-        this.job = job;
+        this.test.calculate();
         prepareItem();
+
+        if (test.getPostHocTest() != null){
+            postHocEval = new TestEval(this.test, test.getPostHocTest());
+        }
     }
 
-    public TestEval(Job job, GenericTest test, PostHocTest postHoctest){
+    public TestEval getPostHocTest(){
+        return postHocEval;
+    }
+
+    private TestEval(GenericTest test, PostHocTest postHoctest){
         this.test = test;
         this.postHoctest = postHoctest;
-        this.job = job;
         preparePostHocItem();
     }
+
+//    public TestEval(GenericTest test, PostHocTest postHoctest){
+//        this.test = test;
+//        this.postHoctest = postHoctest;
+//        test.calculate();
+//        preparePostHocItem();
+//    }
 
     private void preparePostHocItem() {
         Run steadyStateRun = postHoctest.getSteadyStateRun();
@@ -80,7 +95,6 @@ public class TestEval{
     }
 
     private void prepareItem() {
-        test.calculate();
         Run steadyStateRun = test.getSteadyStateRun();
         testName = test.getTestName();
 

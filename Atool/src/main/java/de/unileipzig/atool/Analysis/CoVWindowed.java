@@ -28,7 +28,7 @@ public class CoVWindowed extends GenericTest {
         this.STEADY_STATE_COV_THRESHOLD = this.job.getCvThreshold();
     }
     @Override
-    public void calculateTest() {
+    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
         calculateWindowedCoV();
     }
 

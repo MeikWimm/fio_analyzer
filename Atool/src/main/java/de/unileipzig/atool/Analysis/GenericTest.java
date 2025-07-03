@@ -5,6 +5,7 @@ import de.unileipzig.atool.Run;
 import de.unileipzig.atool.Utils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -20,22 +21,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class GenericTest {
-    private static final Logger LOGGER = Logger.getLogger(GenericTest.class.getName());
-
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter(GenericTest.class.getName()));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);
-    }
+    private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
 
     protected Job job;
-    protected List<List<Run>> groups;
+    private final List<List<Run>> groups;
     protected List<List<Run>> resultGroups;
-    protected List<Run> resultRuns;
-    protected List<List<Run>> postHocGroups;
-    protected List<Run> postHocRuns;
+    private final List<Run> resultRuns;
     protected List<Run> possibleSteadyStateRuns;
     protected double alpha;
     protected boolean skipGroup;
@@ -55,8 +46,6 @@ public abstract class GenericTest {
         this.groupSize = groupSize;
         this.resultGroups = new ArrayList<>();
         this.resultRuns = new ArrayList<>();
-        this.postHocRuns = new ArrayList<>();
-        this.postHocGroups = new ArrayList<>();
         this.possibleSteadyStateRuns = new ArrayList<>();
         this.charter = new Charter();
         this.skipGroup = skipGroup;
@@ -67,6 +56,14 @@ public abstract class GenericTest {
         if (applyBonferroni) {
             recalculateAlpha();
         }
+        setupLogger();
+    }
+    private void setupLogger(){
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setLevel(Level.FINEST);
+        handler.setFormatter(new Utils.CustomFormatter(this.getClass().getName()));
+        LOGGER.setUseParentHandlers(false);
+        LOGGER.addHandler(handler);
     }
 
     public int getSkippedRunCount(){
@@ -81,9 +78,11 @@ public abstract class GenericTest {
         this.alpha = this.alpha / this.groups.size();
     }
 
-    protected abstract void calculateTest();
+    protected abstract void calculateTest(List<List<Run>> groups, List<Run> resultRuns);
 
     protected abstract double extractValue(Run run);
+
+    protected abstract boolean isWithinThreshold(double value);
 
     public void setPostHocTest(PostHocTest postHocTest) {
         this.postHocTest = postHocTest;
@@ -92,8 +91,7 @@ public abstract class GenericTest {
     public PostHocTest getPostHocTest() {
         return this.postHocTest;
     }
-    
-    protected abstract boolean isWithinThreshold(double value);
+
 
     protected void checkForHypothesis(){
         for (Run run : this.resultRuns) {
@@ -103,11 +101,18 @@ public abstract class GenericTest {
                 run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
             }
         }
+
+        for(List<Run> group : this.groups){
+            Run run = group.getFirst();
+            if(run.getNullhypothesis() == Run.ACCEPTED_NULLHYPOTHESIS){
+                this.resultGroups.add(group);
+            }
+        }
     }
 
     protected void calculateSteadyState() {
         possibleSteadyStateRuns = new ArrayList<>(thresholdSectionsForSteadyState);
-        boolean isSteadyStateFound = false;
+        boolean isSteadyStateFound;
 
         for (int j = 0; j < this.resultRuns.size(); j++) {
             isSteadyStateFound = true;
@@ -133,12 +138,13 @@ public abstract class GenericTest {
             }
         }
 
-        if(isSteadyStateFound && possibleSteadyStateRuns.size() >= thresholdSectionsForSteadyState){
-            LOGGER.log(Level.INFO, String.format("Found steady state at Time %f and Section ID: %d", possibleSteadyStateRuns.getFirst().getStartTime(), possibleSteadyStateRuns.getFirst().getID()));
-        } else {
+        if((possibleSteadyStateRuns.size() < thresholdSectionsForSteadyState) && !possibleSteadyStateRuns.isEmpty()){
+            LOGGER.log(Level.WARNING, String.format("Max possible steady state runs: %d", possibleSteadyStateRuns.size()));
+            LOGGER.log(Level.WARNING, String.format("Threshold is set to: %d", thresholdSectionsForSteadyState));
             possibleSteadyStateRuns.clear();
-            LOGGER.log(Level.INFO, "No steady state found");
         }
+
+
     }
 
     public Run getSteadyStateRun(){
@@ -150,7 +156,7 @@ public abstract class GenericTest {
     }
 
     public void calculate(){
-        this.calculateTest();
+        this.calculateTest(this.groups,this.resultRuns);
         this.checkForHypothesis();
         this.calculateSteadyState();
         this.calculatePostHoc();
@@ -162,7 +168,6 @@ public abstract class GenericTest {
 
     public void calculatePostHoc() {
         if (postHocTest == null) {
-            LOGGER.log(Level.WARNING, "PostHocAnalyzer is null");
             return;
         }
 
@@ -170,52 +175,11 @@ public abstract class GenericTest {
             LOGGER.log(Level.WARNING, String.format("%s group size of test result is 1", this.getClass().getName()));
             return;
         }
-        //TODO andere Tests brauchen doch kein this.result.add
-        for (List<Run> runs : this.resultGroups) {
-            for (Run run : runs) {
-                if (run.getNullhypothesis() == Run.ACCEPTED_NULLHYPOTHESIS) {
-                    this.resultRuns.add(run);
-                }
-            }
-        }
-        job.resetRuns();
-        setupGroups();
-        postHocTest.apply(this.postHocRuns, this.postHocGroups);
-    }
 
-    private void setupGroups() {
-        int ID = 1;
-        for (int i = 0; i < resultGroups.size() - 1; i++) {
-            for (int j = i + 1; j < resultGroups.size(); j++) {
-                List<Run> group1 = resultGroups.get(i);
-                List<Run> group2 = resultGroups.get(j);
-                List<Run> copyGroup1 = new ArrayList<>();
-                List<Run> copyGroup2 = new ArrayList<>();
-
-                for (Run run : group1) {
-                    copyGroup1.add(new Run(run));
-                }
-
-                for (Run run : group2) {
-                    copyGroup2.add(new Run(run));
-                }
-
-                postHocGroups.add(copyGroup1);
-                Run run = postHocGroups.getLast().getFirst();
-                run.setGroup(group1.getFirst().getGroup() + " | " + group2.getFirst().getGroup());
-                run.setGroupID(ID);
-                postHocRuns.add(run);
-
-                postHocGroups.add(copyGroup2);
-
-
-                ID++;
-            }
-        }
-    }
-
-    public ObservableList<Run> getPostHocRuns() {
-        return FXCollections.observableArrayList(postHocRuns);
+        postHocTest.setupGroups(this.resultGroups);
+        postHocTest.setJob(this.job);
+        postHocTest.calculate();
+        postHocTest.checkSteadyStateRun();
     }
 
     public Job getJob() {
@@ -238,8 +202,12 @@ public abstract class GenericTest {
         return groups;
     }
 
-    public List<Run> getResultRuns() {
-        return resultRuns;
+//    public List<Run> getResultRuns() {
+//        return resultRuns;
+//    }
+
+    public ObservableList<Run> getResultRuns() {
+        return FXCollections.observableArrayList(resultRuns);
     }
 
     public List<List<Run>> getResultGroups() {
@@ -302,5 +270,6 @@ public abstract class GenericTest {
     public abstract String getTestName();
 
     public abstract TableView<Run> getTable();
+
 
 }

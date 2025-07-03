@@ -31,16 +31,6 @@ import java.util.logging.Logger;
  * @author meni1999
  */
 public class TTest extends GenericTest implements Initializable {
-    private static final Logger LOGGER = Logger.getLogger(TTest.class.getName());
-
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("TTest"));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);
-    }
-
     @FXML public Label zCritLabel;
     @FXML public Label steadyStateLabel;
 
@@ -75,7 +65,7 @@ public class TTest extends GenericTest implements Initializable {
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
         drawTTest.setOnAction(e -> drawTGraph(this.job));
-        TTable.setItems(this.job.getFilteredRuns());
+        TTable.setItems(getResultRuns());
     }
 
     @Override
@@ -99,8 +89,7 @@ public class TTest extends GenericTest implements Initializable {
     }
 
     @Override
-    public void calculateTest() {
-        //if (groups.size() <= 1) return;
+    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
         TDistribution t = new TDistribution(job.getData().size() * 2 - 2);
         this.tCrit = t.inverseCumulativeProbability(1 - this.alpha / 2.0);
 
@@ -120,7 +109,7 @@ public class TTest extends GenericTest implements Initializable {
             run.setT(tVal);
 
             tData.add(new XYChart.Data<>(run.getID(), tVal));
-            this.resultRuns.add(run);
+            resultRuns.add(run);
         }
     }
 

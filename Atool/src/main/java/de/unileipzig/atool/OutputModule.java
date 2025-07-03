@@ -6,23 +6,14 @@ import de.unileipzig.atool.Analysis.SteadyStateEval;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.image.WritableImage;
-import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
-import net.sourceforge.jdistlib.F;
 
 import javax.imageio.ImageIO;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,9 +32,12 @@ public class OutputModule {
     private final DirectoryChooser directoryChooser;
     private boolean isAlreadyOpen;
     private File selectedDirectory;
+    private final StringBuilder stringBuilder;
+    private String selfCreatedPath = "/" + "Job_";
 
     public OutputModule() {
         directoryChooser = new DirectoryChooser();
+        stringBuilder = new StringBuilder();
     }
 
     public void openDirectoryChooser(Window ownerWindow) {
@@ -56,12 +50,20 @@ public class OutputModule {
 
         if(selectedDirectory == null) {
             LOGGER.log(Level.WARNING, "Cannot save eval to null directory");
-            return STATUS.DIR_NOT_READABLE;
+            return STATUS.NO_DIR_SET;
+        } else {
+            LOGGER.log(Level.INFO, "Saving eval to "+selectedDirectory.getAbsolutePath());
+        }
+
+        LOGGER.log(Level.WARNING, "Is selected directory writable: " + selectedDirectory.canWrite());
+        if(!selectedDirectory.canWrite()) {
+            return STATUS.DIR_NOT_WRITEABLE;
         }
 
         if(!isOpen()) {
             isAlreadyOpen = true;
-            saveEvalAsImage();
+            writeEval();
+            saveEvalToFile();
         } else {
             LOGGER.log(Level.WARNING, "Directory Chooser already open!");
             return STATUS.DIR_CHOOSER_ALREADY_OPEN;
@@ -70,120 +72,98 @@ public class OutputModule {
         return STATUS.SUCCESS;
     }
 
+    private void saveEvalToFile() {
+        try {
+            FileWriter fileWriter = new FileWriter(selectedDirectory + selfCreatedPath + eval.getJob().getID() + "/evaluation.txt");
+            // Creates a BufferedWriter
+            BufferedWriter output = new BufferedWriter(fileWriter);
+
+            // Writes the string to the file
+            output.append(stringBuilder);
+
+            // Closes the writer
+            output.close();
+        } catch (IOException e) {
+            Logger.getLogger(OutputModule.class.getName()).log(Level.SEVERE, null, e);
+            throw new RuntimeException(e);
+        }
+    }
+
     private boolean isOpen() {
         return isAlreadyOpen;
     }
 
-    private void saveEvalAsImage() {
-        Platform.runLater(() -> {
-            WritableImage img = new WritableImage(1000, 500);
-            WritableImage imgGraph = new WritableImage(800, 600);
-            Job job = eval.getJob();
-            File path = new File(InputModule.SELECTED_DIRECTORY.toString() + "/" + "TEST" + "_eval");
-            boolean isPathCreated = false;
-            if (!path.exists()){
-                isPathCreated = path.mkdirs();
-            }
+    private void writeEval() {
+        WritableImage img = new WritableImage(800, 600);
+        Job job = eval.getJob();
+        stringBuilder.append("Job: ").append(job.getFile().toString()).append("\n");
+        stringBuilder.append("Averaged Speed: ").append(job.getAverageSpeed()).append('\n');
+        stringBuilder.append("Runs: ").append(job.getRuns().size()).append('\n');
+        stringBuilder.append("Alpha: ").append(job.getAlpha()).append('\n');
+        stringBuilder.append("\n");
+        File path = new File(selectedDirectory + selfCreatedPath + "_eval");
+        boolean isPathCreated = false;
+        if (!path.exists()){
+            isPathCreated = path.mkdirs();
+        }
 
-            if(isPathCreated){
-                //Saving table evaluation
-                Scene scene = eval.getScene();
-                if(scene != null) {
-                    scene.snapshot(img);
-                    File evalFile = new File(Paths.get(path.toString(), "/Evaluation.png").toString());
-                    saveSnapshot(img, evalFile);
+        if(isPathCreated){
+            eval.getScene();
+            saveTable("Evaluation",eval.getEvalTable());
+
+            for (GenericTest test : eval.getTests()) {
+                test.getScene();
+                saveTable(test.getTestName(), test.getTable());
+                PostHocTest postHocTest = test.getPostHocTest();
+                if(postHocTest != null){
+                    postHocTest.getScene();
+                    saveTable(postHocTest.getTestName(), postHocTest.getTable());
+                }
+
+                // Saving graphs of all Tests
+                Scene testCharterScene = test.getCharterScene();
+                if(testCharterScene != null) {
+                    testCharterScene.snapshot(img);
+                    File graphFile = new File(Paths.get(path.toString(), "/" + test.getTestName() + "_graph"  + ".png").toString());
+                    saveSnapshot(img, graphFile);
+                    savePostHocGraphTests(img, path, test);
                 } else {
-                    Logger.getLogger(OutputModule.class.getName()).log(Level.WARNING, "Eval scene equals null!");
+                    Logger.getLogger(OutputModule.class.getName()).log(Level.WARNING, "Charter scene equals null! Test: " + test.getTestName());
                 }
-
-
-                for (GenericTest test : eval.getTests()) {
-                    test.getScene();
-                    saveTable(test.getTestName(), test.getTable());
-                    PostHocTest postHocTest = test.getPostHocTest();
-                    if(postHocTest != null){
-                        postHocTest.getScene();
-                        saveTable(postHocTest.getTestName(), postHocTest.getTable());
-                    }
-
-                    // Saving graphs of all Tests
-                    Scene testCharterScene = test.getCharterScene();
-                    if(testCharterScene != null) {
-                        scene = test.getCharterScene();
-                        scene.snapshot(imgGraph);
-                        File graphFile = new File(Paths.get(path.toString(), "/" + test.getTestName() + "_graph"  + ".png").toString());
-                        saveSnapshot(imgGraph, graphFile);
-                        savePostHocGraphTests(imgGraph, path, test);
-                    } else {
-                        Logger.getLogger(OutputModule.class.getName()).log(Level.WARNING, "Charter scene equals null! Test: " + test.getTestName());
-                    }
-                }
-            } else {
-                LOGGER.log(Level.WARNING, "Directory already exist!");
             }
+        } else {
+            LOGGER.log(Level.WARNING, "Directory already exist!");
+        }
 
-            Logger.getLogger(OutputModule.class.getName()).log(Level.INFO, "Saved!");
-        });
+        Logger.getLogger(OutputModule.class.getName()).log(Level.INFO, "Saved!");
     }
 
         private void saveTable(String title, TableView<?> table) {
+        String space = "%-26s";
+        String line = "--------------------------";
+
         if(table == null) {
             LOGGER.log(Level.WARNING, "TableView equals null for test " + title);
             return;
         }
-        StringBuilder sb = new StringBuilder();
-        //sb.append("<table border=\"1\">\n");
-            sb.append("[").append(title).append("]").append("\n").append("\n");
+            stringBuilder.append("[").append(title).append("]").append("\n").append("\n");
         for (int i = 0; i < table.getColumns().size(); i++) {
             String columnText = table.getColumns().get(i).getText();
-            sb.append(String.format("%-30s", columnText));
+            stringBuilder.append(String.format(space, columnText));
         }
-            sb.append("\n");
-            sb.append("------------------------------".repeat(table.getColumns().size())).append("\n"); // 30 characters
+            stringBuilder.append("\n");
+            stringBuilder.append(line.repeat(table.getColumns().size())).append("\n"); // 30 characters
 
             for(int i= 0; i < table.getItems().size(); i++){ // rows
             for(int j = 0; j < table.getColumns().size() ; j++){ //columns
                 String value = getValueAt(table, i, j); // table cell value
-                sb.append(String.format("%-30s", value));
+                stringBuilder.append(String.format(space, value));
             }
-            sb.append("\n");
+            stringBuilder.append("\n");
         }
-        System.out.println(sb);
+            stringBuilder.append("\n");
+            stringBuilder.append("\n");
     }
-
-//    private void saveTableAsImage(TableView<?> table) {
-//        GridPane gPane = new GridPane();
-//        gPane.setSnapToPixel(true);
-//        String style =  "-fx-background-color: WHITE; -fx-padding: 5;"+
-//                        "-fx-hgap: 5; -fx-vgap: 5;";
-//        gPane.setStyle(style);
-//
-//        int columnCounter = 0;
-//        boolean isColumnSet = false;
-//        for(int i= 0; i < table.getItems().size(); i++){ // rows
-//            for(int j = 0; j < table.getColumns().size(); j++){ //columns
-//                if(!isColumnSet){
-//                    String columnName = table.getColumns().get(columnCounter).getText();
-//                    Label label = new Label(columnName);
-//                    label.setStyle("-fx-border-color: black;");
-//                    gPane.add(label, i, j);
-//                    isColumnSet = true;
-//                }
-//                    String value = getValueAt(table, i, j);
-//                    Label label = new Label(value);
-//                label.setStyle("-fx-border-color: black;");
-//                gPane.add(label, i, j + 1);
-//            }
-//
-//            if(columnCounter < table.getColumns().size()) {
-//                columnCounter++;
-//                isColumnSet = false;
-//            }
-//        }
-//        new Scene(gPane);
-//        WritableImage image = gPane.snapshot(new SnapshotParameters(), null);
-//        saveSnapshot(image, new File(InputModule.SELECTED_DIRECTORY.toString() + "/" + "TEST" + "_table.png"));
-//    }
 
     private String getValueAt(TableView<?> table, int row, int column) {
         var r = table.getColumns().get(column).getCellObservableValue(row);
@@ -230,6 +210,7 @@ public class OutputModule {
         NO_FILES_FOUND,
         NO_DIR_SET,
         DIR_NOT_READABLE,
+        DIR_NOT_WRITEABLE,
         ERROR_WHILE_READING_FILE,
         DIR_CHOOSER_ALREADY_OPEN,
         FAILURE

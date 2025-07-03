@@ -427,13 +427,13 @@ public class Job {
     }
 
     public ObservableList<Run> getFilteredRuns() {
-        ArrayList<Run> clearedRuns = new ArrayList<>();
+        ArrayList<Run> runWithGroup = new ArrayList<>();
         for (Run run : this.runs) {
             if (!(Objects.equals(run.getGroup(), ""))) {
-                clearedRuns.add(run);
+                runWithGroup.add(run);
             }
         }
-        return FXCollections.observableArrayList(clearedRuns);
+        return FXCollections.observableArrayList(runWithGroup);
     }
 
     public double getStandardDeviation() {

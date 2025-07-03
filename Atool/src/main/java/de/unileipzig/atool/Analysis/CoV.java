@@ -62,7 +62,7 @@ public class CoV extends GenericTest implements Initializable {
         showCoVGraphButton.setOnAction(e -> covWindowed.drawWindowedCoV());
         showCoVWindowedGraphButton.setOnAction(e -> drawCoV());
 
-        covTable.setItems(this.job.getFilteredRuns());
+        covTable.setItems(getResultRuns());
 
     }
 
@@ -93,8 +93,8 @@ public class CoV extends GenericTest implements Initializable {
     }
 
     @Override
-    public void calculateTest() {
-        calculateCoV();
+    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
+        calculateCoV(groups, resultRuns);
         covWindowed.calculate();
     }
 
@@ -103,42 +103,27 @@ public class CoV extends GenericTest implements Initializable {
         return "Coefficient of Variation";
     }
 
-    private void calculateCoV(){
-        for (List<Run> group : this.groups) {
+    private void calculateCoV(List<List<Run>> groups, List<Run> resultRuns){
+        for (List<Run> group : groups) {
             Run run = group.getFirst();
             double cov = calculateCoVGroup(group);
             run.setCoV(cov);
             covData.add(new XYChart.Data<>(run.getRunID(), cov));
-            this.resultRuns.add(run);
+            resultRuns.add(run);
         }
     }
 
     private double calculateCoVGroup(List<Run> group) {
-//        if (group == null || group.isEmpty()) {
-//            throw new IllegalArgumentException("Group cannot be null or empty");
-//        }
-
         double average = MathUtils.average(group);
-//        if (average == 0) {
-//            throw new IllegalArgumentException("Cannot calculate CoV when mean is zero");
-//        }
-
         double n = 0;
         double sum = 0;
 
         for (Run run : group) {
-//            if (run == null || run.getData() == null) {
-//                throw new IllegalArgumentException("Invalid run data");
-//            }
             for (DataPoint dp : run.getData()) {
                 sum += Math.pow(dp.getData() - average, 2);
                 n++;
             }
         }
-
-//        if (n <= 1) {
-//            throw new IllegalArgumentException("Need at least two data points to calculate CoV");
-//        }
 
         double std = Math.sqrt(sum / (n - 1));
         return (std / average);

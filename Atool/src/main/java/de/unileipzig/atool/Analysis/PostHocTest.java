@@ -1,6 +1,9 @@
 package de.unileipzig.atool.Analysis;
 
+import de.unileipzig.atool.Job;
 import de.unileipzig.atool.Run;
+import de.unileipzig.atool.Utils;
+import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -13,22 +16,88 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class PostHocTest {
+    private static final Logger LOGGER = Logger.getLogger(PostHocTest.class.getName());
+
+    static {
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setLevel(Level.FINEST);
+        handler.setFormatter(new Utils.CustomFormatter("Post Hoc Test"));
+        LOGGER.setUseParentHandlers(false);
+        LOGGER.addHandler(handler);
+    }
     protected GenericTest test;
     protected Run steadyStateRun;
     protected Run anovaSteadyStateRun;
     private boolean isFirst = true;
     private Scene scene;
     protected final Charter charter;
+    protected final List<List<Run>> firstGroup;
+    protected final List<List<Run>> secondGroup;
+    protected final List<List<Run>> postHocGroups;
+    protected final List<Run> postHocRuns;
+    protected Job job;
 
     public PostHocTest(GenericTest test){
         super();
         this.test = test;
         this.charter = new Charter();
+        this.firstGroup = new ArrayList<>();
+        this.secondGroup = new ArrayList<>();
+        this.postHocGroups = new ArrayList<>();
+        this.postHocRuns = new ArrayList<>();
     }
 
-    protected void checkSteadyStateRun(Run savedHypothesisRun, List<Run> group1, List<Run> group2){
+    public void setupGroups(List<List<Run>> resultGroups) {
+        int ID = 1;
+        for (int i = 0; i < resultGroups.size() - 1; i++) {
+            for (int j = i + 1; j < resultGroups.size(); j++) {
+                List<Run> group1 = resultGroups.get(i);
+                List<Run> group2 = resultGroups.get(j);
+                List<Run> copyGroup1 = new ArrayList<>();
+                List<Run> copyGroup2 = new ArrayList<>();
+
+                for (Run run : group1) {
+                    copyGroup1.add(new Run(run));
+                }
+
+                for (Run run : group2) {
+                    copyGroup2.add(new Run(run));
+                }
+
+                postHocGroups.add(copyGroup1);
+                Run run = postHocGroups.getLast().getFirst();
+                run.setGroup(group1.getFirst().getGroup() + " | " + group2.getFirst().getGroup());
+                run.setGroupID(ID);
+                postHocRuns.add(run);
+
+                postHocGroups.add(copyGroup2);
+
+
+                ID++;
+            }
+        }
+    }
+
+    protected void checkSteadyStateRun(){
+
+        if(this.firstGroup.size() != this.secondGroup.size()){
+            Logger.getLogger(PostHocTest.class.getName()).log(Level.WARNING, "Number of groups do not match");
+            return;
+        }
+
+        for(int i = 0; i < this.firstGroup.size(); i++){
+            checkSteadyStateRun(this.firstGroup.get(i), this.secondGroup.get(i));
+        }
+    }
+
+    private void checkSteadyStateRun(List<Run> group1, List<Run> group2){
+        Run savedHypothesisRun = group1.getFirst();
         List<Run> possibleRuns = this.test.getPossibleSteadyStateRuns();
         if(possibleRuns == null || possibleRuns.isEmpty()){
             return;
@@ -58,7 +127,11 @@ public abstract class PostHocTest {
 
     public abstract String getTestName();
 
-    public abstract void apply(List<Run> resultWithRuns, List<List<Run>> resultWithGroups);
+    public abstract void calculate();
+
+    public ObservableList<Run> getPostHocRuns() {
+        return FXCollections.observableList(postHocRuns);
+    }
 
     private static boolean isFound(List<Run> group1, List<Run> group2, Run possibleRun) {
         int ID = possibleRun.getID();
@@ -127,4 +200,9 @@ public abstract class PostHocTest {
     public abstract Scene getCharterScene();
 
     public abstract TableView<Run> getTable();
+
+    public void setJob(Job job) {
+        this.job = new Job(job);
+        //this.job.resetRuns();
+    }
 }

@@ -16,6 +16,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import jdk.incubator.vector.VectorOperators;
 
 import java.io.IOException;
 import java.net.URL;
@@ -51,7 +52,7 @@ public class SteadyStateEval implements Initializable {
     private final List<TestEval> testEvals;
     private final Settings settings;
     private final GenericTest[] tests;
-    private OutputModule outputModule;
+    private final OutputModule outputModule;
     private Scene scene;
 
     public SteadyStateEval(Job job, Settings settings){
@@ -59,6 +60,7 @@ public class SteadyStateEval implements Initializable {
         this.settings = settings;
         tests = new  GenericTest[5];
         outputModule = new OutputModule();
+
         Anova anova = new Anova(job, settings);
         TukeyHSD tukey = new TukeyHSD(anova);
         anova.setPostHocTest(tukey);
@@ -75,15 +77,13 @@ public class SteadyStateEval implements Initializable {
 
     private void prepareTests() {
         for (GenericTest genericTest : tests) {
-            TestEval testEval;
-            PostHocTest postHocTest = genericTest.getPostHocTest();
-            testEval = new TestEval(this.job, genericTest);
-            testEvals.add(testEval);
-
-            if(postHocTest != null){
-                TestEval postHocTestEval = new TestEval(this.job, genericTest, postHocTest);
+            TestEval testEval = new TestEval(genericTest);
+            TestEval postHocTestEval = testEval.getPostHocTest();
+            if (postHocTestEval != null) {
                 testEvals.add(postHocTestEval);
             }
+
+            testEvals.add(testEval);
         }
     }
 

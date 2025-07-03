@@ -65,7 +65,7 @@ class GenericTypeTest {
             );
 
             for (GenericTest test: tests){
-                test.calculateTest();
+                test.calculate();
                 Job calculatedJob = test.getJob();
                 assertNotNull(calculatedJob, "Calculated job should not be null.");
                 assertNotNull(test.getGroups(), "Runs should not be empty after calculation.");
