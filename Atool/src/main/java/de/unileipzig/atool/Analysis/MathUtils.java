@@ -48,4 +48,22 @@ public class MathUtils {
         }
         return Math.sqrt(sum / data.size());
     }
+
+
+    public enum CONVERT {
+        DEFAULT, // KIBI_BYTE
+        MEGA_BYTE,
+        MEBI_BYTE,
+        KILO_BYTE;
+
+        public static double getConvertValue(CONVERT hl) {
+            return switch (hl) {
+                case MEGA_BYTE -> 976.6;
+                case MEBI_BYTE -> 1024.0;
+                case KILO_BYTE -> 1.0 / 1024.0;
+                default -> // KIBI_BYTE
+                        1.0;
+            };
+        }
+    }
 }

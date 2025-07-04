@@ -38,6 +38,7 @@ public class Job {
     private final List<XYChart.Data<Number, Number>> speedSeries;
     private Map<Integer, Integer> freq;
     private List<XYChart.Data<Number, Number>> chartData;
+    private final List<DataPoint> rawData;
     private List<DataPoint> data;
     private List<DataPoint> convertedData;
     private List<Run> runs;
@@ -61,6 +62,7 @@ public class Job {
         this.freq = new TreeMap<>();
         this.speedSeries = new ArrayList<>();
         this.data = new ArrayList<>(data);
+        this.rawData = new ArrayList<>(data);
         this.convertedData = new ArrayList<>();
         this.chartData = new ArrayList<>();
         updateRunsData();
@@ -68,13 +70,13 @@ public class Job {
     }
 
     public Job(Job other) {
-        other.updateRunsData();
         this.file = other.file;
         this.runs = new ArrayList<>();
         for (Run run : other.runs) {
             this.runs.add(new Run(run));
         }
         this.data = other.data;
+        this.rawData = other.rawData;
         this.speedSeries = other.speedSeries;
         this.file = other.file;
         this.convertedData = new ArrayList<>(other.convertedData);
@@ -93,6 +95,7 @@ public class Job {
         this.chartData = other.chartData;
         this.skipSize = other.skipSize;
         this.runDataSize = other.runDataSize;
+        this.updateRunsData();
     }
 
     public static List<List<Run>> setupGroups(Job job, boolean skipGroups, int groupSize) {
@@ -144,7 +147,7 @@ public class Job {
     }
 
     public void updateRunsData() {
-        //List<DataPoint> data = rawData;
+        List<DataPoint> data = rawData;
         runs = new ArrayList<>();
         convertedData = new ArrayList<>();
         if (runsCounter <= 0 || runsCounter > 1000) {
@@ -162,7 +165,7 @@ public class Job {
         for (int j = 1; j <= runsCounter; j++) {
             run_data = new ArrayList<>();
             for (; i < this.runDataSize * j; i++) {
-                DataPoint dp = new DataPoint(data.get(i).data / Settings.CONVERSION_VALUE, data.get(i).time);
+                DataPoint dp = new DataPoint(data.get(i).data / Settings.CONVERSION_VALUE, rawData.get(i).time);
                 run_data.add(dp);
                 convertedData.add(dp);
             }

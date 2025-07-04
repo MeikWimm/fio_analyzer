@@ -27,7 +27,6 @@ class GenericTypeTest {
         settings.setAnovaSkipRunsCounter(2);
         settings.setAnovaUseAdjacentRun(true);
         settings.setGroupSize(3);
-        settings.setWindowSize(5);
 
         InputModule inputModule = new InputModule();
 

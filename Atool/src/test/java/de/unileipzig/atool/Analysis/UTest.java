@@ -65,7 +65,6 @@ class UTest {
                 utest.calculate();
                 assertNotNull(utest.getResultRuns(), "U-Test result should not be null.");
                 assertNotNull(utest.getResultGroups(), "U-Test result group should not be null.");
-                //assertNotNull(anova.getSteadyStateRun(), "Steady state run should not be null.");
             }
         }
     }
