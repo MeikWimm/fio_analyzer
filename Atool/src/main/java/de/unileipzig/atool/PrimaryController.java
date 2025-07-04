@@ -19,6 +19,10 @@ import java.util.logging.Level;
 
 
 public class PrimaryController implements Initializable {
+    @FXML public MenuItem menuItem_generalSettings;
+    @FXML public MenuItem menuItem_open;
+    @FXML public MenuItem refreshTableMenuItem;
+    @FXML public MenuBar menuBar;
     @FXML private Button steadyStateEvalButton;
     @FXML private Label labelLoadInfo;
     @FXML private TableView<Job> table;

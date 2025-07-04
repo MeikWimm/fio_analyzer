@@ -17,9 +17,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author meni1999
@@ -201,14 +199,6 @@ public class Settings implements Initializable {
             Logging.log(Level.SEVERE, "Settings", "Coudn't open Settings Window! App state");
         }
     }
-
-    @FXML
-    public void onActionUseSpeedPerSec(ActionEvent event) {
-        isSpeedPerMilliSelected = checkboxSpeedPerSec.isSelected();
-        Logging.log(Level.INFO, "Settings",String.format("use Average Speed per Sec set to %b", isSpeedPerMilliSelected));
-        avSpeedSlider.setDisable(!isSpeedPerMilliSelected);
-    }
-
 
     private void onActionSaveSettings(ActionEvent actionEvent) {
         CONVERSION = (CONVERT) toggleGorup.getSelectedToggle().getUserData();
