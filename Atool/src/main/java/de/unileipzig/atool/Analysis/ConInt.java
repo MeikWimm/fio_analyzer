@@ -6,11 +6,8 @@ package de.unileipzig.atool.Analysis;
 
 import de.unileipzig.atool.*;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.chart.XYChart;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -18,17 +15,11 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.stage.Stage;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
-import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * ConInt (Confidence Interval)
@@ -36,29 +27,24 @@ import java.util.logging.Logger;
  * @author meni1999
  */
 public class ConInt extends GenericTest implements Initializable {
-    private static final double STEADY_STATE_RCIW_THRESHOLD = .02;
-    private final int WINDOW_SIZE;
-
-    @FXML public Label labelHeader;
-    @FXML public Button drawConIntDiffButton;
-    @FXML public Button drawWindowedRCIWButton;
-    @FXML public TableView<Run> conIntTable;
-    @FXML public TableColumn<Run, Integer> runsColumn;
-    @FXML public TableColumn<Run, Double> averageSpeedColumn;
-    @FXML public TableColumn<Run, Double> intervalFromColumn;
-    @FXML public TableColumn<Run, Double> intervalToColumn;
-    @FXML public TableColumn<Run, Double> plusMinusValueColumn;
-    @FXML public TableColumn<Run, Double> standardDeviationColumn;
-    @FXML public TableColumn<Run, String> compareToRunColumn;
-    @FXML public TableColumn<Run, Byte> overlappingColumn;
-    @FXML public TableColumn<Run, Byte> hypothesisColumn;
-    @FXML public Label steadyStateLabel;
+    @FXML private Label labelHeader;
+    @FXML private Button drawConIntDiffButton;
+    @FXML private Button drawWindowedRCIWButton;
+    @FXML private TableView<Run> conIntTable;
+    @FXML private TableColumn<Run, Integer> runsColumn;
+    @FXML private TableColumn<Run, Double> averageSpeedColumn;
+    @FXML private TableColumn<Run, Double> intervalFromColumn;
+    @FXML private TableColumn<Run, Double> intervalToColumn;
+    @FXML private TableColumn<Run, Double> plusMinusValueColumn;
+    @FXML private TableColumn<Run, Double> standardDeviationColumn;
+    @FXML private TableColumn<Run, String> compareToRunColumn;
+    @FXML private TableColumn<Run, Byte> overlappingColumn;
+    @FXML private TableColumn<Run, Byte> hypothesisColumn;
+    @FXML private Label steadyStateLabel;
 
 
     public ConInt(Job job,Settings settings) {
         super(job, settings.getConIntSkipRunsCounter(), settings.isConIntUseAdjacentRun(), 2, job.getAlpha(), settings.isBonferroniConIntSelected(), settings.getRequiredRunsForSteadyState());
-        int dataSize = this.job.getData().size();
-        WINDOW_SIZE = settings.getWindowSize();
     }
 
     @Override
@@ -150,20 +136,18 @@ public class ConInt extends GenericTest implements Initializable {
     }
 
     private byte doConfidenceIntervalsOverlap(double a1, double b1, double a2, double b2) {
-        //TODO add extra byte type
         if(Math.max(a1, a2) <= Math.min(b1, b2)){
-            return Run.ACCEPTED_NULLHYPOTHESIS;
+            return ACCEPTED;
         } else {
-            return Run.REJECTED_NULLHYPOTHESIS;
+            return REJECTED;
         }
     }
 
     private byte doesIntervalContainZero(double lowerBound, double upperBound) {
-        //TODO add extra byte type
         if(lowerBound <= 0 && upperBound >= 0){
-            return Run.ACCEPTED_NULLHYPOTHESIS;
+            return ACCEPTED;
         } else {
-            return Run.REJECTED_NULLHYPOTHESIS;
+            return REJECTED;
         }
     }
 
@@ -174,7 +158,7 @@ public class ConInt extends GenericTest implements Initializable {
 
     @Override
     protected boolean isWithinThreshold(double value) {
-        return value == Run.ACCEPTED_NULLHYPOTHESIS;
+        return value == ACCEPTED;
     }
 
     @Override

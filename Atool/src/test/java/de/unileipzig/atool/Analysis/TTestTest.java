@@ -36,7 +36,7 @@ class TTestTest {
         settings[4] = new Settings(null);
         settings[4].setTTestSkipRunsCounter(3);
 
-        InputModule inputModule = new InputModule(settings[0]);
+        InputModule inputModule = new InputModule();
 
         inputModule.readFiles(files);
         jobs = inputModule.getJobs();

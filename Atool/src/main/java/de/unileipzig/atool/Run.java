@@ -4,6 +4,8 @@
  */
 package de.unileipzig.atool;
 
+import de.unileipzig.atool.Analysis.GenericTest;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,12 +14,7 @@ import java.util.List;
  * @author meni1999
  */
 public class Run /*Section*/ {
-    public static final byte ACCEPTED_NULLHYPOTHESIS = 1;
-    public static final byte REJECTED_NULLHYPOTHESIS = 0;
-    public static final byte UNDEFIND_NULLHYPOTHESIS = -1;
-
     public static Double UNDEFINED_DOUBLE_VALUE = Double.MIN_VALUE;
-    public static Float UNDEFINED_FLOAT_VALUE = Float.MIN_VALUE;
     public static Integer UNDEFINED_INTEGER = Integer.MIN_VALUE;
     private List<DataPoint> data = new ArrayList<>();
     private final int runID;
@@ -27,20 +24,20 @@ public class Run /*Section*/ {
     private double standardDeviation = UNDEFINED_DOUBLE_VALUE;
     private double ssa = UNDEFINED_DOUBLE_VALUE;
     private double sse = UNDEFINED_DOUBLE_VALUE;
-    private Byte isNullhypothesis = UNDEFIND_NULLHYPOTHESIS;
+    private Byte isNullhypothesis = GenericTest.UNDEFINED;
+    private byte isOverlapping = GenericTest.UNDEFINED;
     private double F = UNDEFINED_DOUBLE_VALUE;
     private double zVal = UNDEFINED_DOUBLE_VALUE;
     private double qVal = UNDEFINED_DOUBLE_VALUE;
     private double tVal = UNDEFINED_DOUBLE_VALUE;
     private double cov = UNDEFINED_DOUBLE_VALUE;
     private double qHSD = UNDEFINED_DOUBLE_VALUE;
-    private byte isOverlapping = Run.UNDEFIND_NULLHYPOTHESIS; // TODO make a different byte declaration
     private double startTime = UNDEFINED_DOUBLE_VALUE;
     private double endTime = UNDEFINED_DOUBLE_VALUE;
     private double duration = UNDEFINED_DOUBLE_VALUE;
+    private double p = UNDEFINED_DOUBLE_VALUE;
     private int groupID = UNDEFINED_INTEGER;
-    private String group = "";
-    private double p;
+    private String group = "UNDEFINED";
 
 
     public Run(final int runNumber, List<DataPoint> runData){
@@ -81,13 +78,13 @@ public class Run /*Section*/ {
     private void calculateRun() {
         double ioSpeed = 0;
         for (DataPoint p : data) {
-            ioSpeed += p.getData();
+            ioSpeed += p.data;
         }
         this.averageSpeed = ioSpeed / data.size();
         
         double nominator = 0;
         for (DataPoint p : data) {
-            nominator += Math.pow(p.getData() - averageSpeed, 2);
+            nominator += Math.pow(p.data - averageSpeed, 2);
         }
         
         this.standardDeviation = (Math.sqrt((nominator / data.size())));
@@ -234,10 +231,6 @@ public class Run /*Section*/ {
             this.cov = cov;
     }
 
-    public void reset() {
-        this.isNullhypothesis = UNDEFIND_NULLHYPOTHESIS;
-    }
-
     public int getGroupID() {
         return groupID;
     }
@@ -260,10 +253,6 @@ public class Run /*Section*/ {
 
     public void setP(double p) {
         this.p = p;
-    }
-
-    public void setqHSD(double qHSD) {
-        this.qHSD = qHSD;
     }
 
     public double getQHSD() {

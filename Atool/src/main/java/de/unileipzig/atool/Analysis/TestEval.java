@@ -1,15 +1,13 @@
 package de.unileipzig.atool.Analysis;
 
-import de.unileipzig.atool.Job;
 import de.unileipzig.atool.Run;
 
 public class TestEval{
-    private GenericTest test;
+    private final GenericTest test;
     private PostHocTest postHoctest;
     private String testName;
     private String steadyStateRunString;
     private String time;
-    private String averageTimePerMilliVal;
     private String typeOfComparedRuns;
     private String skippedRunVal;
     private String bonferroniVal;
@@ -35,13 +33,6 @@ public class TestEval{
         this.postHoctest = postHoctest;
         preparePostHocItem();
     }
-
-//    public TestEval(GenericTest test, PostHocTest postHoctest){
-//        this.test = test;
-//        this.postHoctest = postHoctest;
-//        test.calculate();
-//        preparePostHocItem();
-//    }
 
     private void preparePostHocItem() {
         Run steadyStateRun = postHoctest.getSteadyStateRun();
@@ -69,30 +60,6 @@ public class TestEval{
         comparedRunsVal = Integer.toString(test.getGroupSize());
     }
 
-    public String getSteadyStateRun() {
-        return steadyStateRunString;
-    }
-
-    public String getTestName() {
-        return testName;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public String getAverageTimePerMilliVal() {
-        return averageTimePerMilliVal;
-    }
-
-    public String getTypeOfComparedRuns() {
-        return typeOfComparedRuns;
-    }
-
-    public String getSkippedRunVal() {
-        return skippedRunVal;
-    }
-
     private void prepareItem() {
         Run steadyStateRun = test.getSteadyStateRun();
         testName = test.getTestName();
@@ -104,15 +71,10 @@ public class TestEval{
             steadyStateRunString = "No steady state run found";
         }
 
-        //a Workaround for windowed CoV
-        if(test instanceof CoVWindowed){
-            typeOfComparedRuns = "-";
+        if(test.isSkipGroup()){
+            typeOfComparedRuns = "sequential";
         } else {
-            if(test.isSkipGroup()){
-                typeOfComparedRuns = "sequential";
-            } else {
-                typeOfComparedRuns = "adjacent";
-            }
+            typeOfComparedRuns = "adjacent";
         }
 
         if(test.isApplyBonferroni()){
@@ -130,5 +92,25 @@ public class TestEval{
 
     public String getComparedRunsVal() {
         return comparedRunsVal;
+    }
+
+    public String getSteadyStateRun() {
+        return steadyStateRunString;
+    }
+
+    public String getTestName() {
+        return testName;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public String getTypeOfComparedRuns() {
+        return typeOfComparedRuns;
+    }
+
+    public String getSkippedRunVal() {
+        return skippedRunVal;
     }
 }

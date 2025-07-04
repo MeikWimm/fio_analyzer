@@ -6,9 +6,7 @@ package de.unileipzig.atool.Analysis;
 
 import de.unileipzig.atool.*;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
@@ -17,15 +15,10 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.stage.Stage;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.*;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 /**
@@ -37,7 +30,7 @@ public class MannWhitney extends GenericTest implements Initializable {
         double rank;
 
         public RankedDataPoint(DataPoint dp, int rank, int flag) {
-            super(dp.getData(), dp.getTime());
+            super(dp.data, dp.time);
             this.rank = rank;
             this.flag = flag;
         }
@@ -144,9 +137,9 @@ public class MannWhitney extends GenericTest implements Initializable {
         int index = 0;
         int jindex = 0;
         for (RankedDataPoint p : mergedData) {
-            new_speed = p.getData();
+            new_speed = p.data;
             if (jindex < mergedData.size() - 1) {
-                next_speed = mergedData.get(jindex + 1).getData();
+                next_speed = mergedData.get(jindex + 1).data;
             }
 
             if (next_speed == new_speed && jindex < mergedData.size() - 1) {

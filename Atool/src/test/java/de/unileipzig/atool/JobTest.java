@@ -4,7 +4,6 @@
  */
 package de.unileipzig.atool;
 
-import de.unileipzig.atool.Analysis.Anova;
 import javafx.scene.chart.XYChart;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,9 +12,6 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,8 +28,7 @@ class JobTest {
         File[] files = logfilesDir.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
         assertNotNull(files);
 
-        Settings settings = new Settings(null);
-        InputModule inputModule = new InputModule(settings);
+        InputModule inputModule = new InputModule();
 
         inputModule.readFiles(files);
         jobs = inputModule.getJobs();

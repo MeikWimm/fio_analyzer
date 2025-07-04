@@ -4,25 +4,13 @@
 package de.unileipzig.atool.Analysis;
 
 import de.unileipzig.atool.*;
-import javafx.application.Platform;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.image.WritableImage;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 
-import javax.imageio.ImageIO;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+
 
 /**
  * Diese Klasse stellt Methoden zur grafischen Darstellung von Jobs bereit.

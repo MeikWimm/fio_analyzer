@@ -1,9 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package de.unileipzig.atool;
 
+import de.unileipzig.atool.Analysis.GenericTest;
 import javafx.beans.binding.Bindings;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.LineChart;
@@ -18,7 +15,6 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.logging.*;
-import java.util.logging.Formatter;
 
 /**
  * @author meni1999
@@ -27,19 +23,38 @@ public abstract class Utils {
 
 
     public static Callback<TableColumn<Run, Byte>, TableCell<Run, Byte>> getHypothesisCellFactory() {
-        return (TableColumn<Run, Byte> col) -> new TableCell<Run, Byte>() {
+        return (TableColumn<Run, Byte> col) -> new TableCell<>() {
             @Override
             public void updateItem(Byte item, boolean empty) {
                 super.updateItem(item, empty);
-                if (Objects.equals(item, Run.UNDEFIND_NULLHYPOTHESIS) || item == null) {
+                if (Objects.equals(item, GenericTest.UNDEFINED) || item == null) {
                     setText("");
                     setStyle("");
-                } else if (item.equals(Run.REJECTED_NULLHYPOTHESIS)) {
-                    setStyle("-fx-background-color: tomato;");
+                } else if (item.equals(GenericTest.REJECTED)) {
+                    setStyle("-fx-background-color: #fb7157;");
                     setText("Rejected");
                 } else {
-                    setStyle("-fx-background-color: green;");
+                    setStyle("-fx-background-color: #5fd85f;");
                     setText("Accepted");
+                }
+            }
+        };
+    }
+
+    public static Callback<TableColumn<Run, Double>, TableCell<Run, Double>> getStatusCellFactory(double threshold) {
+        return (TableColumn<Run, Double> col) -> new TableCell<>() {
+            @Override
+            public void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null) {
+                    setText("");
+                    setStyle("");
+                } else if (item > threshold) {
+                    setStyle("-fx-background-color: #fb7157;");
+                    setText(String.format(Locale.US,"%.2f", item));
+                } else {
+                    setStyle("-fx-background-color: #5fd85f;");
+                    setText(String.format(Locale.US,"%.2f", item));
                 }
             }
         };
@@ -50,10 +65,10 @@ public abstract class Utils {
             @Override
             public void updateItem(Byte item, boolean empty) {
                 super.updateItem(item, empty);
-                if (Objects.equals(item, Run.UNDEFIND_NULLHYPOTHESIS) || item == null) {
+                if (Objects.equals(item, GenericTest.UNDEFINED) || item == null) {
                     setText("");
                     setStyle("");
-                } else if (item.equals(Run.REJECTED_NULLHYPOTHESIS)) {
+                } else if (item.equals(GenericTest.REJECTED)) {
                     setText("No");
                 } else {
                     setText("Yes");
@@ -116,7 +131,7 @@ public abstract class Utils {
 
         @Override
         public int compare(DataPoint lhs, DataPoint rhs) {
-            return Double.compare(lhs.getData(), rhs.getData());
+            return Double.compare(lhs.data, rhs.data);
         }
     }
 

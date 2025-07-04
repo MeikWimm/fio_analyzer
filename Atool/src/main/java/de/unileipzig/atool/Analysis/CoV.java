@@ -2,9 +2,7 @@ package de.unileipzig.atool.Analysis;
 
 import de.unileipzig.atool.*;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
@@ -13,9 +11,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,26 +19,23 @@ import java.util.ResourceBundle;
 
 public class CoV extends GenericTest implements Initializable {
     private final List<XYChart.Data<Number, Number>> covData;
-    private final CoVWindowed covWindowed;
     private final double STEADY_STATE_COV_THRESHOLD;
 
-    @FXML public TableView<Run> covTable;
-    @FXML public TableColumn<Run, Integer> runIDColumn;
-    @FXML public TableColumn<Run, Double> averageSpeedColumn;
-    @FXML public TableColumn<Run, Double> covColumn;
-    @FXML public TableColumn<Run, Double> startTimeColumn;
-    @FXML public TableColumn<Run, String> compareToRunColumn;
+    @FXML private TableView<Run> covTable;
+    @FXML private TableColumn<Run, Integer> runIDColumn;
+    @FXML private TableColumn<Run, Double> averageSpeedColumn;
+    @FXML private TableColumn<Run, Double> covColumn;
+    @FXML private TableColumn<Run, Double> startTimeColumn;
+    @FXML private TableColumn<Run, String> compareToRunColumn;
     @FXML private Label steadyStateLabelWindowed;
     @FXML private Label steadyStateLabel;
-    @FXML Button showCoVWindowedGraphButton;
-    @FXML Button showCoVGraphButton;
+    @FXML private Button showCoVWindowedGraphButton;
 
 
     public CoV(Job job, Settings settings) {
         super(job, settings.getCovSkipRunsCounter(), settings.isCovUseAdjacentRun(), settings.getGroupSize(), job.getAlpha(), false, settings.getRequiredRunsForSteadyState());
         final int dataSizeWithRuns = job.getRuns().size() * 2;
         this.covData = new ArrayList<>(dataSizeWithRuns);
-        this.covWindowed = new CoVWindowed(job, settings);
         this.STEADY_STATE_COV_THRESHOLD = this.job.getCvThreshold();
     }
 
@@ -53,13 +46,12 @@ public class CoV extends GenericTest implements Initializable {
         averageSpeedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         covColumn.setCellValueFactory(new PropertyValueFactory<>("CoV"));
-        covColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
+        covColumn.setCellFactory(Utils.getStatusCellFactory(STEADY_STATE_COV_THRESHOLD));
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         startTimeColumn.setCellValueFactory(new PropertyValueFactory<>("StartTime"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
 
-        showCoVGraphButton.setOnAction(e -> covWindowed.drawWindowedCoV());
         showCoVWindowedGraphButton.setOnAction(e -> drawCoV());
 
         covTable.setItems(getResultRuns());
@@ -73,13 +65,6 @@ public class CoV extends GenericTest implements Initializable {
         } else {
             steadyStateLabel.setText("at run " + getSteadyStateRun().getID() + " | time: " + getSteadyStateRun().getStartTime());
         }
-
-        if(covWindowed.getSteadyStateRun() == null){
-            steadyStateLabelWindowed.setText("No steady state CV found.");
-        } else {
-            steadyStateLabelWindowed.setText("at run " + covWindowed.getSteadyStateRun().getID() + " | time: " + covWindowed.getSteadyStateRun().getStartTime());
-        }
-
     }
 
     @Override
@@ -95,7 +80,6 @@ public class CoV extends GenericTest implements Initializable {
     @Override
     protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
         calculateCoV(groups, resultRuns);
-        covWindowed.calculate();
     }
 
     @Override
@@ -120,7 +104,7 @@ public class CoV extends GenericTest implements Initializable {
 
         for (Run run : group) {
             for (DataPoint dp : run.getData()) {
-                sum += Math.pow(dp.getData() - average, 2);
+                sum += Math.pow(dp.data - average, 2);
                 n++;
             }
         }

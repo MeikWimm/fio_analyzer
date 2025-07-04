@@ -40,7 +40,7 @@ class UTest {
         settings[5] = new Settings(null);
         settings[5].setUTestSkipRunsCounter(5);
 
-        InputModule inputModule = new InputModule(settings[0]);
+        InputModule inputModule = new InputModule();
 
         inputModule.readFiles(files);
         jobs = inputModule.getJobs();
@@ -65,7 +65,6 @@ class UTest {
                 utest.calculate();
                 assertNotNull(utest.getResultRuns(), "U-Test result should not be null.");
                 assertNotNull(utest.getResultGroups(), "U-Test result group should not be null.");
-                //assertNotNull(anova.getSteadyStateRun(), "Steady state run should not be null.");
             }
         }
     }

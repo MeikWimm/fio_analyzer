@@ -22,9 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A Class for loading a reading the log file of fio Jobs
@@ -39,19 +37,15 @@ InputModule {
     public static File SELECTED_DIRECTORY;
     DirectoryChooser directoryChooser;
     ObservableList<Job> jobs = FXCollections.observableArrayList();
-    private boolean isDirChooserOpen = false;
-    private BufferedReader br;
     private int time;
     private double averageSpeed;
     private double standardDeviation;
     private List<DataPoint> data;
     private Map<Integer, Integer> freq;
     private BasicFileAttributes fileAttribute;
-    private final Settings settings;
     private final String className = "InputModule";
 
-    public InputModule(Settings settings) {
-        this.settings = settings;
+    public InputModule() {
         directoryChooser = new DirectoryChooser();
     }
 
@@ -65,21 +59,8 @@ InputModule {
      */
     public STATUS loadFile() {
         Logging.log(Level.INFO, className, "Loading input module...");
-
         STATUS state;
         File[] files;
-        if (!isDirChooserOpen) {
-            isDirChooserOpen = true;
-            try {
-                if(SELECTED_DIRECTORY != null && SELECTED_DIRECTORY.isDirectory()) {
-                    files = SELECTED_DIRECTORY.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
-                }
-            } finally {
-                isDirChooserOpen = false;
-            }
-        } else {
-            return STATUS.DIR_CHOOSER_ALREADY_OPEN;
-        }
 
         if (SELECTED_DIRECTORY != null) {
             boolean isDirReadable = SELECTED_DIRECTORY.canRead();
@@ -146,7 +127,7 @@ InputModule {
                         Logging.log(Level.WARNING, className,String.format("file -> %s is to small!", file.getAbsolutePath()));
                     } else {
                         Logging.log(Level.INFO, "Input Module", "Preparing Job Data: " + file);
-                        Job job = new Job(this.data, settings.averageSpeedPerMillisec);
+                        Job job = new Job(this.data);
                         job.setFrequency(this.freq);
                         job.setFile(file);
                         job.setFileAttributes(this.fileAttribute);
@@ -241,7 +222,6 @@ InputModule {
             this.freq = freq;
             this.data = data;
         } catch (IOException ex) {
-            ex.printStackTrace();
             Logging.log(Level.SEVERE, className,String.format("Error occured while reading file: %s. App state: %s", file, STATUS.ERROR_WHILE_READING_FILE));
         }
         return STATUS.SUCCESS;
@@ -251,13 +231,23 @@ InputModule {
         return jobs;
     }
 
+
+    public String getInfo(InputModule.STATUS state) {
+        return switch (state) {
+            case NO_DIR_SET -> "No directory set!";
+            case NO_FILES_FOUND -> "No files found!";
+            case DIR_NOT_READABLE -> "Directory is not readable!";
+            case SUCCESS -> "All files loaded!";
+            default -> "Unknown state!";
+        };
+    }
+
     public enum STATUS {
         SUCCESS,
         NO_FILES_FOUND,
         NO_DIR_SET,
         DIR_NOT_READABLE,
         ERROR_WHILE_READING_FILE,
-        DIR_CHOOSER_ALREADY_OPEN,
         FAILURE
     }
 

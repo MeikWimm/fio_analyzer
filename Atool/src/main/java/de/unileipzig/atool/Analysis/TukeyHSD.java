@@ -4,23 +4,15 @@
  */
 package de.unileipzig.atool.Analysis;
 
-import de.unileipzig.atool.Job;
 import de.unileipzig.atool.Run;
 import de.unileipzig.atool.Settings;
 import de.unileipzig.atool.Utils;
-import java.io.IOException;
+
 import java.net.URL;
 import java.util.*;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
@@ -29,7 +21,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.stage.Stage;
 import net.sourceforge.jdistlib.Tukey;
 
 
@@ -131,9 +122,9 @@ public class TukeyHSD extends PostHocTest implements Initializable {
 
     private void checkHypothesis(Run run, double qHSD) {
         if(run.getQ() < qHSD){
-            run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+            run.setNullhypothesis(GenericTest.ACCEPTED);
         } else {
-            run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
+            run.setNullhypothesis(GenericTest.REJECTED);
         }
     }
 
