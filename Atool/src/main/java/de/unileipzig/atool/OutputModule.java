@@ -3,8 +3,6 @@ package de.unileipzig.atool;
 import de.unileipzig.atool.Analysis.GenericTest;
 import de.unileipzig.atool.Analysis.PostHocTest;
 import de.unileipzig.atool.Analysis.SteadyStateEval;
-import de.unileipzig.atool.Analysis.TestEval;
-import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
 import javafx.scene.control.TableView;
@@ -15,26 +13,16 @@ import javafx.stage.Window;
 import javax.imageio.ImageIO;
 import java.io.*;
 import java.nio.file.Paths;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class OutputModule {
-    private static final Logger LOGGER = Logger.getLogger(OutputModule.class.getName());
-
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("Output Module"));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);
-    }
     private SteadyStateEval eval;
     private final DirectoryChooser directoryChooser;
     private boolean isAlreadyOpen;
     private File selectedDirectory;
     private final StringBuilder stringBuilder;
     private File path;
+    private final String className = "OutputModule";
 
     public OutputModule() {
         directoryChooser = new DirectoryChooser();
@@ -50,27 +38,27 @@ public class OutputModule {
         this.eval = eval;
 
         if(selectedDirectory == null) {
-            LOGGER.log(Level.WARNING, "Cannot save eval to null directory");
+            Logging.log(Level.WARNING, className, "Cannot save eval to null directory");
             return STATUS.NO_DIR_SET;
         } else {
-            LOGGER.log(Level.INFO, "Saving eval to "+selectedDirectory.getAbsolutePath());
+            Logging.log(Level.INFO,  className,"Saving eval to "+selectedDirectory.getAbsolutePath());
         }
 
         if(!selectedDirectory.canWrite()) {
-            LOGGER.log(Level.WARNING, "Is selected directory writable: " + selectedDirectory.canWrite());
+            Logging.log(Level.WARNING, className, "Is selected directory writable: " + selectedDirectory.canWrite());
             return STATUS.DIR_NOT_WRITEABLE;
         } else {
-            LOGGER.log(Level.INFO, "Is selected directory writable: " + selectedDirectory.canWrite());
+            Logging.log(Level.INFO, className, "Is selected directory writable: " + selectedDirectory.canWrite());
         }
 
         if(!isOpen()) {
             isAlreadyOpen = true;
             path = new File(selectedDirectory + "/Job_" + eval.getJob().getID());
-            LOGGER.log(Level.INFO, "created new directory: " + "\\Job_" + eval.getJob().getID());
+            Logging.log(Level.INFO, className, "created new directory: " + "\\Job_" + eval.getJob().getID());
             writeEval();
             saveEvalToFile();
         } else {
-            LOGGER.log(Level.WARNING, "Directory Chooser already open!");
+            Logging.log(Level.WARNING, className, "Directory Chooser already open!");
             return STATUS.DIR_CHOOSER_ALREADY_OPEN;
         }
 
@@ -89,7 +77,7 @@ public class OutputModule {
             // Closes the writer
             output.close();
         } catch (IOException e) {
-            Logger.getLogger(OutputModule.class.getName()).log(Level.SEVERE, null, e);
+            Logging.log(Level.SEVERE, className, e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -135,14 +123,14 @@ public class OutputModule {
                     saveSnapshot(img, graphFile);
                     savePostHocGraphTests(img, path, test);
                 } else {
-                    Logger.getLogger(OutputModule.class.getName()).log(Level.INFO, "No charter scene found for test: " + test.getTestName());
+                    Logging.log(Level.INFO, className, "No charter scene found for test: " + test.getTestName());
                 }
             }
         } else {
-            LOGGER.log(Level.WARNING, "Directory already exist!");
+            Logging.log(Level.WARNING, className,"Directory already exist!");
         }
 
-        Logger.getLogger(OutputModule.class.getName()).log(Level.INFO, "Done!");
+        Logging.log(Level.INFO, className,"Done!");
     }
 
     private void savePostHocTestValues(PostHocTest test) {
@@ -171,7 +159,7 @@ public class OutputModule {
         String line = "-".repeat(width);
 
         if(table == null) {
-            LOGGER.log(Level.WARNING, "TableView equals null for test " + title);
+            Logging.log(Level.WARNING, className,"TableView equals null for test " + title);
             return;
         }
 
@@ -227,9 +215,9 @@ public class OutputModule {
     private void saveSnapshot(WritableImage img, File file) {
         try {
             ImageIO.write(SwingFXUtils.fromFXImage(img, null), "png", file);
-            Logger.getLogger(OutputModule.class.getName()).log(Level.INFO, "Saved image to: " + file.getAbsolutePath());
+            Logging.log(Level.INFO, className,"Saved image to: " + file.getAbsolutePath());
         } catch (IOException e) {
-            Logger.getLogger(OutputModule.class.getName()).log(Level.SEVERE, null, e);
+            Logging.log(Level.SEVERE, className, e.getMessage());
         }
     }
 

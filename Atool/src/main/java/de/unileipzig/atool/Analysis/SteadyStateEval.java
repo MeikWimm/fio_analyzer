@@ -1,9 +1,6 @@
 package de.unileipzig.atool.Analysis;
 
-import de.unileipzig.atool.Job;
-import de.unileipzig.atool.OutputModule;
-import de.unileipzig.atool.Settings;
-import de.unileipzig.atool.Utils;
+import de.unileipzig.atool.*;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,7 +13,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
-import jdk.incubator.vector.VectorOperators;
 
 import java.io.IOException;
 import java.net.URL;
@@ -28,15 +24,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SteadyStateEval implements Initializable {
-    private static final Logger LOGGER = Logger.getLogger(SteadyStateEval.class.getName());
-
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("SteadyStateEval"));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);
-    }
     @FXML
     private Label labelHeader;
 
@@ -125,7 +112,7 @@ public class SteadyStateEval implements Initializable {
     private void onActionSaveEval(){
         outputModule.openDirectoryChooser(this.scene.getWindow());
         OutputModule.STATUS status = outputModule.saveEval(this);
-        LOGGER.info(status.toString());
+        Logging.log(Level.INFO, "SteadyStateEval", status.toString());
     }
 
     public Scene getScene() {

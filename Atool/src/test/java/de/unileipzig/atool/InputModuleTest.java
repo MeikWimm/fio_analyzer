@@ -24,16 +24,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test class for the Job class.
  */
 class InputModuleTest {
-    private static final Logger LOGGER = Logger.getLogger(InputModuleTest.class.getName());
-
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("InputModuleTest"));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);
-    }
-
     private List<Job> jobs;
 
     @BeforeEach

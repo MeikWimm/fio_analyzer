@@ -33,15 +33,8 @@ import java.util.logging.Logger;
  */
 public class
 InputModule {
-    private static final Logger LOGGER = Logger.getLogger(InputModule.class.getName());
-    public static final int MIN_POSSIBLE_DATA_SIZE = 1000;
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("Input Module"));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);
-    }
+    public static final int MIN_POSSIBLE_DATA_SIZE = 500;
+
 
     public static File SELECTED_DIRECTORY;
     DirectoryChooser directoryChooser;
@@ -55,6 +48,7 @@ InputModule {
     private Map<Integer, Integer> freq;
     private BasicFileAttributes fileAttribute;
     private final Settings settings;
+    private final String className = "InputModule";
 
     public InputModule(Settings settings) {
         this.settings = settings;
@@ -70,7 +64,7 @@ InputModule {
      *
      */
     public STATUS loadFile() {
-        LOGGER.log(Level.INFO, "Loading input module...");
+        Logging.log(Level.INFO, className, "Loading input module...");
 
         STATUS state;
         File[] files;
@@ -89,9 +83,9 @@ InputModule {
 
         if (SELECTED_DIRECTORY != null) {
             boolean isDirReadable = SELECTED_DIRECTORY.canRead();
-            LOGGER.log(Level.INFO, "Is directory selected: " + SELECTED_DIRECTORY.isDirectory());
-            LOGGER.log(Level.INFO, "Selected directory: " + SELECTED_DIRECTORY.getAbsolutePath());
-            LOGGER.log(Level.INFO, "Is directory readable: " + isDirReadable);
+            Logging.log(Level.INFO, className, "Is directory selected: " + SELECTED_DIRECTORY.isDirectory());
+            Logging.log(Level.INFO, className,"Selected directory: " + SELECTED_DIRECTORY.getAbsolutePath());
+            Logging.log(Level.INFO, className,"Is directory readable: " + isDirReadable);
 
             if(!isDirReadable){
                 Alert alert = new Alert(AlertType.WARNING);
@@ -110,9 +104,9 @@ InputModule {
 
 
                 if(files == null){
-                    LOGGER.log(Level.WARNING, "files is Null!");
+                    Logging.log(Level.WARNING, className, "files is Null!");
                 } else {
-                    LOGGER.log(Level.WARNING, "files array length is 0!");
+                    Logging.log(Level.WARNING, className,"files array length is 0!");
                 }
 
                 return STATUS.NO_FILES_FOUND;
@@ -120,7 +114,7 @@ InputModule {
                 state = readFiles(files);
             }
         } else {
-            LOGGER.log(Level.WARNING, "Dir chooser is null!");
+            Logging.log(Level.WARNING, className,"Dir chooser is null!");
             return STATUS.NO_DIR_SET;
         }
         return state;
@@ -146,11 +140,12 @@ InputModule {
             if(!exists){
                 foundNewFile =  true;
                 if(readData(file) != STATUS.SUCCESS){
-                    LOGGER.log(Level.WARNING, String.format("Error while reading file -> %s", file.getAbsolutePath()));
+                    Logging.log(Level.WARNING, className, String.format("Error while reading file -> %s", file.getAbsolutePath()));
                 } else {
                     if(this.data.size() < MIN_POSSIBLE_DATA_SIZE){
-                        LOGGER.log(Level.WARNING, String.format("file -> %s is to small!", file.getAbsolutePath()));
+                        Logging.log(Level.WARNING, className,String.format("file -> %s is to small!", file.getAbsolutePath()));
                     } else {
+                        Logging.log(Level.INFO, "Input Module", "Preparing Job Data: " + file);
                         Job job = new Job(this.data, settings.averageSpeedPerMillisec);
                         job.setFrequency(this.freq);
                         job.setFile(file);
@@ -165,9 +160,9 @@ InputModule {
         }
 
         if(foundNewFile){
-            LOGGER.log(Level.INFO, "New file\\s found.");
+            Logging.log(Level.INFO, className,"New file\\s found.");
         }
-        LOGGER.log(Level.INFO, "Finished reading files!");
+        Logging.log(Level.INFO, className,"Finished reading files!");
         return STATUS.SUCCESS;
     }
 
@@ -247,7 +242,7 @@ InputModule {
             this.data = data;
         } catch (IOException ex) {
             ex.printStackTrace();
-            LOGGER.log(Level.SEVERE, String.format("Error occured while reading file: %s. App state: %s", file, STATUS.ERROR_WHILE_READING_FILE));
+            Logging.log(Level.SEVERE, className,String.format("Error occured while reading file: %s. App state: %s", file, STATUS.ERROR_WHILE_READING_FILE));
         }
         return STATUS.SUCCESS;
     }

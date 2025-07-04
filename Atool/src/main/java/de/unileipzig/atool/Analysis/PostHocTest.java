@@ -22,15 +22,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class PostHocTest {
-    private static final Logger LOGGER = Logger.getLogger(PostHocTest.class.getName());
-
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("Post Hoc Test"));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);
-    }
     protected GenericTest test;
     protected Run steadyStateRun;
     protected Run anovaSteadyStateRun;
@@ -115,7 +106,7 @@ public abstract class PostHocTest {
                         steadyStateRun = possibleRun;
                     }
                 } else {
-                    System.out.println("[PostHoc] Found at: " + possibleRun.getID() + " but rejected");
+                    //System.out.println("[PostHoc] Found at: " + possibleRun.getID() + " but rejected");
                 }
             }
         }

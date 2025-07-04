@@ -21,17 +21,6 @@ import java.util.logging.Logger;
 
 
 public class PrimaryController implements Initializable {
-    private static final Logger LOGGER = Logger.getLogger(PrimaryController.class.getName());
-
-    // Setting up Logger
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("Primary Controller"));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);
-    }
-
     // FXML Items
     @FXML public MenuItem menuItem_open;
     @FXML public MenuItem menuItem_ANOVA;
@@ -269,7 +258,7 @@ public class PrimaryController implements Initializable {
             eval.openWindow();
         } else {
             labelLoadInfo.setText("Please select a Job!");
-            LOGGER.log(Level.WARNING, "Error in opening SteadyStateEvalButton");
+            Logging.log(Level.WARNING, "Primary Controller","Error in opening SteadyStateEvalButton");
         }
     }
 
@@ -284,7 +273,7 @@ public class PrimaryController implements Initializable {
         if (e.getCode() == KeyCode.DELETE) {
             int pos = table.getSelectionModel().getSelectedIndex();
             Job removedJob = table.getItems().remove(pos);
-            LOGGER.log(Level.INFO, String.format("Removed Job -> %s", removedJob.toString()));
+            Logging.log(Level.INFO, "Primary Controller",String.format("Removed Job -> %s", removedJob.toString()));
         }
     }
 
