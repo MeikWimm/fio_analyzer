@@ -9,8 +9,8 @@ package de.unileipzig.atool;
  * @author meni1999
  */
 public class DataPoint {
-    protected double data;
-    protected double time;
+    public final double data;
+    public final double time;
 
     public DataPoint(double speed, double time) {
         this.data = speed;
@@ -25,14 +25,6 @@ public class DataPoint {
     @Override
     public String toString() {
         return String.format("Speed: %f, Time: %f", data, time);
-    }
-
-    public double getData() {
-        return this.data;
-    }
-
-    public double getTime() {
-        return this.time;
     }
 
 }

@@ -23,21 +23,13 @@ public class Logging {
      * @author meni1999
      */
     public static class CustomFormatter extends Formatter {
-
-        String stageName;
-
         public CustomFormatter() {
             super();
-        }
-
-        public void setStageName(String stageName) {
-            this.stageName = stageName;
         }
 
         @Override
         public String format(LogRecord record) {
             return record.getMessage() + "\n";
         }
-
     }
 }

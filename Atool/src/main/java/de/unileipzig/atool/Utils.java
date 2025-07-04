@@ -116,7 +116,7 @@ public abstract class Utils {
 
         @Override
         public int compare(DataPoint lhs, DataPoint rhs) {
-            return Double.compare(lhs.getData(), rhs.getData());
+            return Double.compare(lhs.data, rhs.data);
         }
     }
 

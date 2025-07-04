@@ -251,6 +251,18 @@ InputModule {
         return jobs;
     }
 
+
+    public String getInfo(InputModule.STATUS state) {
+        return switch (state) {
+            case NO_DIR_SET -> "No directory set!";
+            case NO_FILES_FOUND -> "No files found!";
+            case DIR_CHOOSER_ALREADY_OPEN -> "Directory chooser already open!";
+            case DIR_NOT_READABLE -> "Directory is not readable!";
+            case SUCCESS -> "All files loaded!";
+            default -> "Unknown state!";
+        };
+    }
+
     public enum STATUS {
         SUCCESS,
         NO_FILES_FOUND,

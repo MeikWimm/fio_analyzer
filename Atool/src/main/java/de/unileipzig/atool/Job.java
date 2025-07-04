@@ -73,7 +73,7 @@ public class Job {
         this.averageTimePerMilliSec = averageTimePerMilliSec;
         this.convertedData = new ArrayList<>();
         this.chartData = new ArrayList<>();
-        prepareData();
+        updateRunsData();
         COUNTER++;
     }
 
@@ -189,15 +189,6 @@ public class Job {
         this.data = data;
     }
 
-    private void prepareData() {
-        //this.epsilon = rawData.size() / 1000.0;
-        if (this.epsilon > MAX_EPSILON) {
-            this.epsilon = MAX_EPSILON;
-        }
-
-        updateRunsData();
-    }
-
     public File getFile() {
         return this.file;
     }
@@ -267,26 +258,8 @@ public class Job {
         this.averageSpeed = average_speed;
     }
 
-//    public Map<Integer, Integer> getFrequency() {
-//        return this.frequency;
-//    }
-//
-//    public void setFrequency(Map<Integer, Integer> freq) {
-//        this.frequency = freq;
-//    }
-
-    public double getEpsilon() {
-        return this.epsilon;
-    }
-
     public void setEpsilon(double epsilon) {
         this.epsilon = epsilon;
-    }
-
-    public void resetRuns() {
-        for (Run run : this.runs) {
-            run.reset();
-        }
     }
 
     public void updateRunsData() {
@@ -319,11 +292,11 @@ public class Job {
             for (DataPoint dataPoint : rawData /*rawData*/) {
                 if (i % averageTimePerMilliSec == 0 && flag) {
                     double average_speed = speed / averageTimePerMilliSec;
-                    averagedData.add(new DataPoint(average_speed, dataPoint.getTime()));
-                    speed = dataPoint.getData();
+                    averagedData.add(new DataPoint(average_speed, dataPoint.time));
+                    speed = dataPoint.data;
                 } else {
                     flag = true;
-                    speed += dataPoint.getData();
+                    speed += dataPoint.data;
                 }
                 i++;
             }
@@ -341,7 +314,7 @@ public class Job {
         for (int j = 1; j <= runsCounter; j++) {
             run_data = new ArrayList<>();
             for (; i < this.runDataSize * j; i++) {
-                DataPoint dp = new DataPoint(averagedData.get(i).getData() / Settings.CONVERSION_VALUE, averagedData.get(i).getTime());
+                DataPoint dp = new DataPoint(averagedData.get(i).data / Settings.CONVERSION_VALUE, averagedData.get(i).time);
                 run_data.add(dp);
                 convertedData.add(dp);
             }
@@ -350,28 +323,8 @@ public class Job {
         }
     }
 
-    // Helper to compute the median
-    private double computeMedian(List<DataPoint> sorted) {
-        int n = sorted.size();
-        if (n % 2 == 0) {
-            return (sorted.get(n / 2 - 1).getData() + sorted.get(n / 2).getData()) / 2.0;
-        } else {
-            return sorted.get(n / 2).getData();
-        }
-    }
-
     public ObservableList<Run> getRuns() {
         return FXCollections.observableArrayList(this.runs);
-    }
-
-    public ObservableList<Run> getFilteredRuns() {
-        ArrayList<Run> runWithGroup = new ArrayList<>();
-        for (Run run : this.runs) {
-            if (!(Objects.equals(run.getGroup(), ""))) {
-                runWithGroup.add(run);
-            }
-        }
-        return FXCollections.observableArrayList(runWithGroup);
     }
 
     public double getStandardDeviation() {
@@ -395,20 +348,13 @@ public class Job {
     public List<XYChart.Data<Number, Number>> getSeries() {
         if (this.speedSeries.isEmpty()) {
             for (DataPoint dp : getData()) {
-                speedSeries.add(new XYChart.Data<>(dp.getTime(), dp.getData()));
+                speedSeries.add(new XYChart.Data<>(dp.time, dp.data));
             }
         }
 
         return this.speedSeries;
     }
 
-    public int getDataStartPoint(Run run){
-        return run.getData().size();
-    }
-
-    public int getDataEndPoint(Run run){
-        return this.data.size() - run.getData().size();
-    }
 
     public void setSSE(double SSE) {
         this.SSE = SSE;
@@ -434,7 +380,7 @@ public class Job {
         return this.runDataSize;
     }
 
-    public int getSkippedRuns() {
+    public int getSkippedRunsDataSize() {
         return this.skipSize;
     }
 }

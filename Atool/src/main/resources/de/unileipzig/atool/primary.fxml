@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1080.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.unileipzig.atool.PrimaryController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1080.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.unileipzig.atool.PrimaryController">
    <top>
       <MenuBar fx:id="menuBar" prefHeight="22.0" prefWidth="751.0" BorderPane.alignment="CENTER">
         <menus>
@@ -43,13 +43,11 @@
                   <TableColumn id="timeColumn" fx:id="timeColumn" prefWidth="112.0" text="Time (in sec)" />
                   <TableColumn id="lastModifiedColumn" fx:id="lastModifiedColumn" prefWidth="142.00003051757812" text="Last Modified" />
                   <TableColumn id="fileCreatedColumn" fx:id="fileCreatedColumn" prefWidth="168.0" text="File Created" />
-                  <TableColumn id="fileCreatedColumn" fx:id="epsilonColumn" prefWidth="119.0" sortable="false" text="Epsilon for RDP" visible="false" />
                   <TableColumn id="fileCreatedColumn" fx:id="alphaColumn" prefWidth="87.0" text="Alpha" />
                   <TableColumn id="cvColumn" fx:id="cvColumn" prefWidth="75.0" text="CV Threshold" />
-                  <TableColumn id="rciwColumn" fx:id="rciwColumn" prefWidth="75.0" text="RCIW Threshold" visible="false" />
               </columns>
             </TableView>
-            <Pane prefHeight="93.0" prefWidth="1080.0">
+            <Pane prefHeight="100.0" prefWidth="1080.0">
                <children>
                   <Button id="steadyStateEvalButton" fx:id="steadyStateEvalButton" layoutX="14.0" layoutY="13.0" mnemonicParsing="false" onAction="#onActionCalcualteSteadyState" prefHeight="25.0" prefWidth="129.0" text="Evaluate steady state" />
                </children>

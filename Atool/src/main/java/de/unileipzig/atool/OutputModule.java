@@ -31,7 +31,11 @@ public class OutputModule {
 
     public void openDirectoryChooser(Window ownerWindow) {
         isAlreadyOpen = false;
-        selectedDirectory = directoryChooser.showDialog(ownerWindow);
+        if(ownerWindow != null) {
+            selectedDirectory = directoryChooser.showDialog(ownerWindow);
+        } else {
+            selectedDirectory = directoryChooser.showDialog(null);
+        }
     }
 
     public STATUS saveEval(SteadyStateEval eval) {
@@ -219,6 +223,16 @@ public class OutputModule {
         } catch (IOException e) {
             Logging.log(Level.SEVERE, className, e.getMessage());
         }
+    }
+
+    public String getInfo(OutputModule.STATUS state) {
+        return switch (state) {
+            case NO_DIR_SET -> "No directory set!";
+            case DIR_CHOOSER_ALREADY_OPEN -> "Directory chooser already open!";
+            case DIR_NOT_WRITEABLE -> "Directory is not writable!";
+            case SUCCESS -> "All files loaded!";
+            default -> "Unknown state!";
+        };
     }
 
     public enum STATUS {

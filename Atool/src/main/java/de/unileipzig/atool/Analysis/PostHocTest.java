@@ -105,8 +105,6 @@ public abstract class PostHocTest {
                         isFirst = false;
                         steadyStateRun = possibleRun;
                     }
-                } else {
-                    //System.out.println("[PostHoc] Found at: " + possibleRun.getID() + " but rejected");
                 }
             }
         }
@@ -196,7 +194,6 @@ public abstract class PostHocTest {
 
     public void setJob(Job job) {
         this.job = new Job(job);
-        //this.job.resetRuns();
     }
 
 

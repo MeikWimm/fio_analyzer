@@ -13,6 +13,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.io.IOException;
 import java.net.URL;
@@ -35,12 +36,12 @@ public class SteadyStateEval implements Initializable {
     @FXML private TableColumn<TestEval, Integer> skippedRunColumn;
     @FXML private TableColumn<TestEval, Boolean> bonferroniColumn;
     @FXML Button saveEvalButton;
+    private Window owner;
     private final Job job;
     private final List<TestEval> testEvals;
     private final Settings settings;
     private final GenericTest[] tests;
     private final OutputModule outputModule;
-    private Scene scene;
 
     public SteadyStateEval(Job job, Settings settings){
         this.job = job;
@@ -74,6 +75,9 @@ public class SteadyStateEval implements Initializable {
         }
     }
 
+    public void setOwner(Window owner) {
+        this.owner = owner;
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -91,15 +95,14 @@ public class SteadyStateEval implements Initializable {
     }
 
     public void openWindow() {
-        this.scene = getScene();
-
+        Scene scene = getScene();
         Stage stage = new Stage();
         stage.setMaxWidth(1200);
         stage.setMaxHeight(600);
         stage.setMinHeight(600);
         stage.setMinWidth(800);
         stage.setTitle("Job Evaluation");
-        stage.setScene(this.scene);
+        stage.setScene(scene);
         setLabeling();
         stage.show();
 
@@ -110,7 +113,7 @@ public class SteadyStateEval implements Initializable {
     }
 
     private void onActionSaveEval(){
-        outputModule.openDirectoryChooser(this.scene.getWindow());
+        outputModule.openDirectoryChooser(owner);
         OutputModule.STATUS status = outputModule.saveEval(this);
         Logging.log(Level.INFO, "SteadyStateEval", status.toString());
     }
@@ -118,13 +121,13 @@ public class SteadyStateEval implements Initializable {
     public Scene getScene() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/SteadyStateEval.fxml"));
         fxmlLoader.setController(this);
-        Parent root1 = null;
+        Parent root;
         try {
-            root1 = fxmlLoader.load();
+            root = fxmlLoader.load();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return new Scene(root1);
+        return new Scene(root);
     }
 
     public GenericTest[] getTests() {

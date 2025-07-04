@@ -37,7 +37,7 @@ public class MannWhitney extends GenericTest implements Initializable {
         double rank;
 
         public RankedDataPoint(DataPoint dp, int rank, int flag) {
-            super(dp.getData(), dp.getTime());
+            super(dp.data, dp.time);
             this.rank = rank;
             this.flag = flag;
         }
@@ -144,9 +144,9 @@ public class MannWhitney extends GenericTest implements Initializable {
         int index = 0;
         int jindex = 0;
         for (RankedDataPoint p : mergedData) {
-            new_speed = p.getData();
+            new_speed = p.data;
             if (jindex < mergedData.size() - 1) {
-                next_speed = mergedData.get(jindex + 1).getData();
+                next_speed = mergedData.get(jindex + 1).data;
             }
 
             if (next_speed == new_speed && jindex < mergedData.size() - 1) {

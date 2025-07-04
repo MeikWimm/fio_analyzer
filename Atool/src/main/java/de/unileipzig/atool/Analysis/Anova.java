@@ -147,7 +147,7 @@ public class Anova extends GenericTest implements Initializable {
         for (List<Run> group : groups) {
             for (Run run : group) {
                 for (DataPoint dp : run.getData()) {
-                    sse += (Math.pow((dp.getData() - MathUtils.average(group)), 2));
+                    sse += (Math.pow((dp.data - MathUtils.average(group)), 2));
                 }
                 run.setSSE(sse);
                 sse = 0;

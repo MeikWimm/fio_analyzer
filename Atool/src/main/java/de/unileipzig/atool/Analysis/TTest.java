@@ -142,11 +142,11 @@ public class TTest extends GenericTest implements Initializable {
         double averageSpeed = (run1.getAverageSpeed() + run2.getAverageSpeed()) / 2.0;
 
         for (DataPoint dp : run1.getData()) {
-            sse += (Math.pow((dp.getData() - averageSpeed), 2));
+            sse += (Math.pow((dp.data - averageSpeed), 2));
         }
 
         for (DataPoint dp : run2.getData()) {
-            sse += (Math.pow((dp.getData() - averageSpeed), 2));
+            sse += (Math.pow((dp.data - averageSpeed), 2));
         }
 
         return sse;

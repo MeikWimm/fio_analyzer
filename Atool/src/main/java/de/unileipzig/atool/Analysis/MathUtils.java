@@ -13,7 +13,7 @@ public class MathUtils {
         double sum = 0;
         double n = run.getData().size();
         for (DataPoint dp : run.getData()) {
-            sum += dp.getData();
+            sum += dp.data;
         }
         return sum / n;
     }
@@ -23,7 +23,7 @@ public class MathUtils {
         double n = 0;
         for (Run run : group) {
             for (DataPoint dp : run.getData()) {
-                sum += dp.getData();
+                sum += dp.data;
                 n++;
             }
         }
@@ -36,9 +36,9 @@ public class MathUtils {
         sorted.sort(new Utils.SpeedComparator());
         int n = sorted.size();
         if (n % 2 == 1) {
-            return sorted.get(n / 2).getData();
+            return sorted.get(n / 2).data;
         } else {
-            return (sorted.get(n / 2 - 1).getData() + sorted.get(n / 2).getData()) / 2.0;
+            return (sorted.get(n / 2 - 1).data + sorted.get(n / 2).data) / 2.0;
         }
     }
 
@@ -46,7 +46,7 @@ public class MathUtils {
     public static double mad(Run run, double median) {
         List<DataPoint> deviations = new ArrayList<>();
         for (DataPoint dp : run.getData()) {
-            deviations.add(new DataPoint(Math.abs(dp.getData() - median), dp.getTime()));
+            deviations.add(new DataPoint(Math.abs(dp.data - median), dp.time));
         }
         deviations.sort(new Utils.SpeedComparator());
         return median(deviations);
@@ -57,7 +57,7 @@ public class MathUtils {
         double average = average(run);
         double n = run.getData().size();
         for (DataPoint dp : run.getData()) {
-            sum += Math.pow(dp.getData() - average, 2);
+            sum += Math.pow(dp.data - average, 2);
         }
         return sum / (n - 1);
     }
@@ -116,7 +116,7 @@ public class MathUtils {
     public static double calculateDeviation(List<DataPoint> data, double average_speed) {
         double sum = 0.0;
         for (DataPoint dataPoint : data) {
-            sum += Math.pow(dataPoint.getData() - average_speed, 2);
+            sum += Math.pow(dataPoint.data - average_speed, 2);
         }
         return Math.sqrt(sum / data.size());
     }

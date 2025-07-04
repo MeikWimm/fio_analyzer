@@ -174,7 +174,7 @@ public class CUSUM extends GenericTest{
         // Estimate target mean from the initial window
         double sum = 0;
         for (int i = 0; i < windowSize; i++) {
-            double speed = data.get(i).getData();
+            double speed = data.get(i).data;
             sum += speed;
             windowList.add(speed);
         }
@@ -192,7 +192,7 @@ public class CUSUM extends GenericTest{
         //double speed = data.get(i).getSpeed();
         //double time = data.get(i).getTime();
         for (int i = 1; i < data.size() - windowSize; i++) {
-            double dataSpeed = data.get(i).getData();
+            double dataSpeed = data.get(i).data;
 
             //double z = ((speed - targetMean) / (std));
             double cPos = Math.max(0.0, lastCPos + (targetMean - dataSpeed - k));
@@ -205,7 +205,7 @@ public class CUSUM extends GenericTest{
             // Check if last `windowSize` CUSUM values are within threshold
             int endWindow = Math.min(i + windowSize, data.size());
                 for (int j = i; j < endWindow; j++) {
-                    double tempSpeed = data.get(j).getData();
+                    double tempSpeed = data.get(j).data;
                     sum += tempSpeed;
                     windowList.add(tempSpeed);
                 //std = Math.sqrt(GenericTest.variance(windowList, targetMean));

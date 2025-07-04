@@ -120,7 +120,7 @@ public class CoV extends GenericTest implements Initializable {
 
         for (Run run : group) {
             for (DataPoint dp : run.getData()) {
-                sum += Math.pow(dp.getData() - average, 2);
+                sum += Math.pow(dp.data - average, 2);
                 n++;
             }
         }

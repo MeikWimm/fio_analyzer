@@ -34,7 +34,7 @@ public class CoVWindowed extends GenericTest {
 
     @Override
     public void calculateSteadyState(){
-        double windowedTime = windowedPossibleCoVSteadyState.getFirst().getTime();
+        double windowedTime = windowedPossibleCoVSteadyState.getFirst().time;
         for (Run run : this.job.getRuns()){
             if(run.getStartTime() <= windowedTime && run.getEndTime() >= windowedTime){
                 possibleSteadyStateRuns.add(run);
@@ -70,20 +70,20 @@ public class CoVWindowed extends GenericTest {
         double[] windowList = new double[WINDOW_SIZE];
 
         for (int i = 0; i < windowSize; i++) {
-            double speed = data.get(i).getData();
+            double speed = data.get(i).data;
             sum += speed;
             windowList[i] = speed;
         }
         double targetMean = sum / windowSize;
         double cov = Math.sqrt(MathUtils.variance(windowList, targetMean)) / targetMean;
-        covWindowedData.add(new XYChart.Data<>(data.getFirst().getTime(), cov));
+        covWindowedData.add(new XYChart.Data<>(data.getFirst().time, cov));
 
         for (int i = 1; i < data.size(); i++) {
             sum = 0;
             boolean done = false;
             for (int j = 0; j < windowSize; j++) {
                 if(i + j < data.size()) {
-                    double speed = data.get(i + j).getData();
+                    double speed = data.get(i + j).data;
                     sum += speed;
                     windowList[j] = speed;
                 } else {
@@ -92,7 +92,7 @@ public class CoVWindowed extends GenericTest {
                 }
             }
             targetMean = sum / windowSize;
-            double time = data.get(i).getTime();
+            double time = data.get(i).time;
             cov = Math.sqrt(MathUtils.variance(windowList, targetMean)) / targetMean;
             covWindowedData.add(new XYChart.Data<>(time, cov));
 

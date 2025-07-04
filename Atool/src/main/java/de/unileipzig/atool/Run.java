@@ -81,13 +81,13 @@ public class Run /*Section*/ {
     private void calculateRun() {
         double ioSpeed = 0;
         for (DataPoint p : data) {
-            ioSpeed += p.getData();
+            ioSpeed += p.data;
         }
         this.averageSpeed = ioSpeed / data.size();
         
         double nominator = 0;
         for (DataPoint p : data) {
-            nominator += Math.pow(p.getData() - averageSpeed, 2);
+            nominator += Math.pow(p.data - averageSpeed, 2);
         }
         
         this.standardDeviation = (Math.sqrt((nominator / data.size())));
