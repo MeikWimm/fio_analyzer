@@ -2,8 +2,6 @@ package de.unileipzig.atool.Analysis;
 
 import de.unileipzig.atool.Job;
 import de.unileipzig.atool.Run;
-import de.unileipzig.atool.Utils;
-import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -16,8 +14,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -100,7 +96,7 @@ public abstract class PostHocTest {
             boolean found = isFound(group1, group2, possibleRun);
 
             if(found){
-                if(savedHypothesisRun.getNullhypothesis() == Run.ACCEPTED_NULLHYPOTHESIS){
+                if(savedHypothesisRun.getNullhypothesis() == GenericTest.ACCEPTED){
                     if(isFirst){
                         isFirst = false;
                         steadyStateRun = possibleRun;
@@ -128,7 +124,6 @@ public abstract class PostHocTest {
         Run firstOfGroup1 = group1.getFirst();
         Run lastOfGroup1 = group1.getLast();
         Run firstOfGroup2 = group2.getFirst();
-        Run lastOfGroup2 = group2.getLast();
 
         // Found if the last run of group1 is the same as the first run of group2
         // i.e., 4-5 | 5-6 -> 4 possible steady state
@@ -164,8 +159,8 @@ public abstract class PostHocTest {
         scene = getScene();
         Stage stage = new Stage();
         stage.setMaxWidth(1200);
-        stage.setMaxHeight(600);
-        stage.setMinHeight(600);
+        stage.setMaxHeight(650);
+        stage.setMinHeight(650);
         stage.setMinWidth(800);
         stage.setTitle(getWindowTitle());
         stage.setScene(scene);
@@ -176,13 +171,13 @@ public abstract class PostHocTest {
     public Scene getScene() {
         FXMLLoader fxmlLoader = new FXMLLoader(getFXMLPath());
         fxmlLoader.setController(this);
-        Parent root1 = null;
+        Parent root;
         try {
-            root1 = fxmlLoader.load();
+            root = fxmlLoader.load();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        scene = new Scene(root1);
+        scene = new Scene(root);
         return scene;
     }
 

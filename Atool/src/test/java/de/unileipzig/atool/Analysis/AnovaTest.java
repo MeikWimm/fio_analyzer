@@ -6,12 +6,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -44,7 +41,7 @@ class AnovaTest {
         settings[4].setAnovaSkipRunsCounter(3);
         settings[4].setGroupSize(2);
 
-        InputModule inputModule = new InputModule(settings[0]);
+        InputModule inputModule = new InputModule();
 
         inputModule.readFiles(files);
         jobs = inputModule.getJobs();

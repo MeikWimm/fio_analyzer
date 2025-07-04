@@ -6,11 +6,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,7 +29,7 @@ class GenericTypeTest {
         settings.setGroupSize(3);
         settings.setWindowSize(5);
 
-        InputModule inputModule = new InputModule(settings);
+        InputModule inputModule = new InputModule();
 
         inputModule.readFiles(files);
         jobs = inputModule.getJobs();

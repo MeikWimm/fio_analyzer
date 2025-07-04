@@ -20,16 +20,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class SteadyStateEval implements Initializable {
-    @FXML
-    private Label labelHeader;
-
-    @FXML private TableView<TestEval> evalTable; // Replace '?' with the type of objects in the table.
-    @FXML private TableColumn<TestEval, String> testColumn; // Replace the first '?' with the type of the table's data, and the second '?' with the type of the column's value.
+    @FXML private Label labelHeader;
+    @FXML private TableView<TestEval> evalTable;
+    @FXML private TableColumn<TestEval, String> testColumn;
     @FXML private TableColumn<TestEval, String> runColumn;
     @FXML private TableColumn<TestEval, String> timeColumn;
     @FXML private TableColumn<TestEval, String> typeOfComparedRunsColumn;
@@ -53,10 +49,8 @@ public class SteadyStateEval implements Initializable {
         TukeyHSD tukey = new TukeyHSD(anova);
         anova.setPostHocTest(tukey);
         tests[0] = anova;
-
         tests[1] = new ConInt(job, settings);
         tests[2] = new CoV(job, settings);
-        //test[3] = new CoVWindowed(job, settings);
         tests[3] = new MannWhitney(job, settings);
         tests[4] = new TTest(job, settings);
         testEvals = new ArrayList<>();
@@ -67,6 +61,7 @@ public class SteadyStateEval implements Initializable {
         for (GenericTest genericTest : tests) {
             TestEval testEval = new TestEval(genericTest);
             TestEval postHocTestEval = testEval.getPostHocTest();
+
             if (postHocTestEval != null) {
                 testEvals.add(postHocTestEval);
             }
@@ -98,8 +93,8 @@ public class SteadyStateEval implements Initializable {
         Scene scene = getScene();
         Stage stage = new Stage();
         stage.setMaxWidth(1200);
-        stage.setMaxHeight(600);
-        stage.setMinHeight(600);
+        stage.setMaxHeight(700);
+        stage.setMinHeight(700);
         stage.setMinWidth(800);
         stage.setTitle("Job Evaluation");
         stage.setScene(scene);

@@ -8,17 +8,18 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TableView;
 import javafx.stage.Stage;
-import org.apache.commons.math3.distribution.FDistribution;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public abstract class GenericTest {
+    public static final byte ACCEPTED = 1;
+    public static final byte REJECTED = 0;
+    public static final byte UNDEFINED = -1;
+
     private final String className = this.getClass().getSimpleName();
     protected Job job;
     private final List<List<Run>> groups;
@@ -29,7 +30,6 @@ public abstract class GenericTest {
     protected boolean skipGroup;
     protected int thresholdSectionsForSteadyState;
     protected boolean applyBonferroni;
-    protected int averageTimePerMillisec;
     protected int skipCounter;
     protected int groupSize;
     private PostHocTest postHocTest;
@@ -86,15 +86,15 @@ public abstract class GenericTest {
     protected void checkForHypothesis(){
         for (Run run : this.resultRuns) {
             if(isWithinThreshold(extractValue(run))){
-                run.setNullhypothesis(Run.ACCEPTED_NULLHYPOTHESIS);
+                run.setNullhypothesis(ACCEPTED);
             } else {
-                run.setNullhypothesis(Run.REJECTED_NULLHYPOTHESIS);
+                run.setNullhypothesis(REJECTED);
             }
         }
 
         for(List<Run> group : this.groups){
             Run run = group.getFirst();
-            if(run.getNullhypothesis() == Run.ACCEPTED_NULLHYPOTHESIS){
+            if(run.getNullhypothesis() == ACCEPTED){
                 this.resultGroups.add(group);
             }
         }
@@ -105,8 +105,6 @@ public abstract class GenericTest {
         boolean isSteadyStateFound;
 
         if((this.groups.size() < thresholdSectionsForSteadyState)){
-//            LOGGER.log(Level.WARNING, String.format("Max possible steady state runs: %d | %s", this.groups.size(), this.getClass().getName()));
-//            LOGGER.log(Level.WARNING, String.format("Threshold is set to: %d | %s", thresholdSectionsForSteadyState, this.getClass().getName()));
             return;
         }
 
@@ -230,14 +228,6 @@ public abstract class GenericTest {
         return skipGroup;
     }
 
-    public int getAverageTimePerMillisec() {
-        return averageTimePerMillisec;
-    }
-
-    public int getSkipCounter() {
-        return skipCounter;
-    }
-
     public abstract Scene getCharterScene();
 
     // Optional method for setting labels, can be overridden
@@ -253,8 +243,8 @@ public abstract class GenericTest {
         scene = getScene();
         Stage stage = new Stage();
         stage.setMaxWidth(1200);
-        stage.setMaxHeight(600);
-        stage.setMinHeight(600);
+        stage.setMaxHeight(650);
+        stage.setMinHeight(650);
         stage.setMinWidth(800);
         stage.setTitle(getWindowTitle());
         stage.setScene(scene);
@@ -265,13 +255,13 @@ public abstract class GenericTest {
     public Scene getScene() {
         FXMLLoader fxmlLoader = new FXMLLoader(getFXMLPath());
         fxmlLoader.setController(this);
-        Parent root1 = null;
+        Parent root;
         try {
-            root1 = fxmlLoader.load();
+            root = fxmlLoader.load();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        scene = new Scene(root1);
+        scene = new Scene(root);
         return scene;
     }
 

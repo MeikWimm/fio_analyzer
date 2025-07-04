@@ -40,7 +40,7 @@ public class PrimaryController implements Initializable {
     @Override
     public void initialize(URL arg0, ResourceBundle arg1) {
         settings = new Settings(this);
-        inputModule = new InputModule(settings);
+        inputModule = new InputModule();
 
         setupCellValueFactory();
         setupTableMenuItems();
@@ -126,8 +126,6 @@ public class PrimaryController implements Initializable {
         menuItems.addMenuItem("T-Test", this::onActionCalcTTest);
         menuItems.addMenuItem("U-Test", this::onActionCalcMannWhitneyTest);
         menuItems.addMenuItem("Tukey-HSD", this::onActionCalcTukeyHSD);
-        //menuItems.addMenuItem("CUSUM Runs", this::onActionCalcCusum);
-        //menuItems.addMenuItem("CUSUM Job", this::onActionCalcCusumJob);
 
         table.setRowFactory(menuItems);
     }
@@ -152,6 +150,14 @@ public class PrimaryController implements Initializable {
         Job job = row.getItem();
         Charter charter = new Charter();
         charter.drawGraph("Job Speed", "Time in (ms)", "Speed in KiBi", new Charter.ChartData("Job speed",job.getSeries()));
+        charter.openWindow();
+    }
+
+    private void onActionDrawJobFreq(TableRow<Job> row, TableView<Job> table) {
+        Job job = row.getItem();
+        Charter charter = new Charter();
+        charter.drawGraph("Speed Frequency", "Speed", "Frequency", new Charter.ChartData("Speed frequency",job.getFrequencySeries()));
+        charter.openWindow();
     }
 
     private void onActionCalcConInt(TableRow<Job> row, TableView<Job> table) {
@@ -175,12 +181,6 @@ public class PrimaryController implements Initializable {
         cov.openWindow();
     }
 
-    private void onActionDrawJobFreq(TableRow<Job> row, TableView<Job> table) {
-        Job job = row.getItem();
-        Charter charter = new Charter();
-        charter.drawGraph("Speed Frequency", "Speed", "Frequency", new Charter.ChartData("Speed frequency",job.getFrequencySeries()));
-    }
-
     private void onActionCalcTTest(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
         TTest tTest = new TTest(job, settings);
@@ -202,20 +202,6 @@ public class PrimaryController implements Initializable {
         anova.setPostHocTest(tukey);
         anova.calculate();
         tukey.openWindow();
-    }
-
-    private void onActionCalcCusum(TableRow<Job> row, TableView<Job> table) {
-        Job job = row.getItem();
-        CUSUM cusum = new CUSUM(job, settings, job.getAlpha());
-        cusum.calculate();
-        cusum.draw();
-    }
-
-    private void onActionCalcCusumJob(TableRow<Job> row, TableView<Job> table) {
-        Job job = row.getItem();
-        CUSUM cusum = new CUSUM(job, settings, job.getAlpha());
-        cusum.calculateWindowed();
-        cusum.draw();
     }
 
     @FXML

@@ -30,21 +30,16 @@ public class Job {
     public final static Double MAX_ALPHA = 0.99999;
     public final static Double MIN_ALPHA = 0.00001;
 
-    public final static Double DEFAULT_EPSILON = 1.0;
-    public final static Double MAX_EPSILON = 1000.0;
-    public final static Double MIN_EPSILON = 1.0;
-
     public final static Double DEFAULT_CV_THRESHOLD = .2;
     public final static Double MAX_CV_THRESHOLD = .6;
     public final static Double MIN_CV_THRESHOLD = .05;
 
-    private static int COUNTER = 1; // so that each Job has a unique ID
+    private static int COUNTER = 1;
+    private final int ID = COUNTER; // so that each Job has a unique ID
+    private final List<XYChart.Data<Number, Number>> speedSeries;
     private Map<Integer, Integer> freq;
     private List<XYChart.Data<Number, Number>> chartData;
-    private final int ID = COUNTER;
-    private final List<DataPoint> rawData;
     private List<DataPoint> data;
-    private final List<XYChart.Data<Number, Number>> speedSeries;
     private List<DataPoint> convertedData;
     private List<Run> runs;
     private File file;
@@ -52,10 +47,8 @@ public class Job {
     private int runsCounter = DEFAULT_RUN_COUNT;
     private int time;
     private int runDataSize;
-    private int averageTimePerMilliSec;
     private double conversion;
     private double averageSpeed;
-    private double epsilon = DEFAULT_EPSILON;
     private double alpha = DEFAULT_ALPHA;
     private double cvThreshold = DEFAULT_CV_THRESHOLD;
     private double calculatedF;
@@ -65,12 +58,10 @@ public class Job {
     private int skipSize;
 
 
-    public Job(List<DataPoint> data, int averageTimePerMilliSec) {
+    public Job(List<DataPoint> data) {
         this.freq = new TreeMap<>();
         this.speedSeries = new ArrayList<>();
         this.data = new ArrayList<>(data);
-        this.rawData = new ArrayList<>(data);
-        this.averageTimePerMilliSec = averageTimePerMilliSec;
         this.convertedData = new ArrayList<>();
         this.chartData = new ArrayList<>();
         updateRunsData();
@@ -85,7 +76,6 @@ public class Job {
             this.runs.add(new Run(run));
         }
         this.data = other.data;
-        this.rawData = other.rawData;
         this.speedSeries = other.speedSeries;
         this.file = other.file;
         this.convertedData = new ArrayList<>(other.convertedData);
@@ -94,9 +84,7 @@ public class Job {
         this.conversion = other.conversion;
         this.time = other.time;
         this.averageSpeed = other.averageSpeed;
-        this.averageTimePerMilliSec = other.averageTimePerMilliSec;
         this.attr = other.attr;
-        this.epsilon = other.epsilon;
         this.alpha = other.alpha;
         this.calculatedF = other.calculatedF;
         this.standardDeviation = other.standardDeviation;
@@ -156,6 +144,34 @@ public class Job {
         return groups;
     }
 
+    public void updateRunsData() {
+        //List<DataPoint> data = rawData;
+        runs = new ArrayList<>();
+        convertedData = new ArrayList<>();
+        if (runsCounter <= 0 || runsCounter > 1000) {
+            runsCounter = DEFAULT_RUN_COUNT;
+        }
+
+        this.conversion = Settings.CONVERSION_VALUE;
+        this.runDataSize = (data.size() / runsCounter);
+
+        /*
+        Split job into runs depending on run_size
+        */
+        ArrayList<DataPoint> run_data;
+        int i = 0;
+        for (int j = 1; j <= runsCounter; j++) {
+            run_data = new ArrayList<>();
+            for (; i < this.runDataSize * j; i++) {
+                DataPoint dp = new DataPoint(data.get(i).data / Settings.CONVERSION_VALUE, data.get(i).time);
+                run_data.add(dp);
+                convertedData.add(dp);
+            }
+            Run run = new Run(j, run_data);
+            runs.add(run);
+        }
+    }
+
     public void prepareSkippedData(int skipRuns) {
         this.skipSize = skipRuns;
         if (skipRuns < 1) {
@@ -173,8 +189,24 @@ public class Job {
         runsCounter = runsCounter - skipRuns;
     }
 
-    private List<DataPoint> getRawData() {
-        return this.rawData;
+    public List<XYChart.Data<Number, Number>> getFrequencySeries() {
+        if(this.chartData.isEmpty()) {
+            this.chartData = freq.entrySet()
+                    .stream()
+                    .map(entry -> new XYChart.Data<Number, Number>(entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toList());
+        }
+        return chartData;
+    }
+
+    public List<XYChart.Data<Number, Number>> getSeries() {
+        if (this.speedSeries.isEmpty()) {
+            for (DataPoint dp : data) {
+                speedSeries.add(new XYChart.Data<>(dp.time, dp.data));
+            }
+        }
+
+        return this.speedSeries;
     }
 
     public void setFileAttributes(BasicFileAttributes attr) {
@@ -233,11 +265,6 @@ public class Job {
         return this.ID;
     }
 
-    @Override
-    public String toString() {
-        return String.format("Job ID: %d | Average Speed %s | Runs: %d | Alpha: %f | File: %s", this.ID, new DecimalFormat("#.##").format(this.averageSpeed), this.runsCounter, this.alpha, this.file);
-    }
-
     void setTime(int time) {
         this.time = time;
     }
@@ -258,71 +285,6 @@ public class Job {
         this.averageSpeed = average_speed;
     }
 
-    public void setEpsilon(double epsilon) {
-        this.epsilon = epsilon;
-    }
-
-    public void updateRunsData() {
-        //List<DataPoint> data = rawData;
-        runs = new ArrayList<>();
-        convertedData = new ArrayList<>();
-        if (runsCounter <= 0 || runsCounter > 1000) {
-            runsCounter = DEFAULT_RUN_COUNT;
-        }
-
-        this.conversion = Settings.CONVERSION_VALUE;
-        int i = 0;
-
-        final int MIN_RUN_DATA_LENGTH = 8;
-        final int MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI = (int) Math.floor(rawData.size() / (double) (MIN_RUN_DATA_LENGTH * runsCounter));
-
-        if (averageTimePerMilliSec > MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI && MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI != 0) {
-            averageTimePerMilliSec = MAX_POSSIBLE_AVERAGE_TIME_PER_MILLI;
-        }
-
-        if (averageTimePerMilliSec <= 1) {
-            averageTimePerMilliSec = 1;
-        }
-
-        List<DataPoint> averagedData = new ArrayList<>();
-        if (!(averageTimePerMilliSec == 1)) {
-            double speed = 0;
-            boolean flag = false;
-
-            for (DataPoint dataPoint : rawData /*rawData*/) {
-                if (i % averageTimePerMilliSec == 0 && flag) {
-                    double average_speed = speed / averageTimePerMilliSec;
-                    averagedData.add(new DataPoint(average_speed, dataPoint.time));
-                    speed = dataPoint.data;
-                } else {
-                    flag = true;
-                    speed += dataPoint.data;
-                }
-                i++;
-            }
-        } else {
-            averagedData = new ArrayList<>(rawData);
-        }
-
-        this.data = averagedData;
-        this.runDataSize = (averagedData.size() / runsCounter);
-        /*
-        Split job into runs depending on run_size
-        */
-        i = 0;
-        ArrayList<DataPoint> run_data;
-        for (int j = 1; j <= runsCounter; j++) {
-            run_data = new ArrayList<>();
-            for (; i < this.runDataSize * j; i++) {
-                DataPoint dp = new DataPoint(averagedData.get(i).data / Settings.CONVERSION_VALUE, averagedData.get(i).time);
-                run_data.add(dp);
-                convertedData.add(dp);
-            }
-            Run run = new Run(j, run_data);
-            runs.add(run);
-        }
-    }
-
     public ObservableList<Run> getRuns() {
         return FXCollections.observableArrayList(this.runs);
     }
@@ -334,27 +296,6 @@ public class Job {
     public void setStandardDeviation(double standardDeviation) {
         this.standardDeviation = standardDeviation;
     }
-
-    public List<XYChart.Data<Number, Number>> getFrequencySeries() {
-        if(this.chartData.isEmpty()) {
-            this.chartData = freq.entrySet()
-                    .stream()
-                    .map(entry -> new XYChart.Data<Number, Number>(entry.getKey(), entry.getValue()))
-                    .collect(Collectors.toList());
-        }
-        return chartData;
-    }
-
-    public List<XYChart.Data<Number, Number>> getSeries() {
-        if (this.speedSeries.isEmpty()) {
-            for (DataPoint dp : getData()) {
-                speedSeries.add(new XYChart.Data<>(dp.time, dp.data));
-            }
-        }
-
-        return this.speedSeries;
-    }
-
 
     public void setSSE(double SSE) {
         this.SSE = SSE;
@@ -382,5 +323,10 @@ public class Job {
 
     public int getSkippedRunsDataSize() {
         return this.skipSize;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Job ID: %d | Average Speed %s | Runs: %d | Alpha: %f | File: %s", this.ID, new DecimalFormat("#.##").format(this.averageSpeed), this.runsCounter, this.alpha, this.file);
     }
 }

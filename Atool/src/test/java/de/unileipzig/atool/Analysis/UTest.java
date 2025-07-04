@@ -40,7 +40,7 @@ class UTest {
         settings[5] = new Settings(null);
         settings[5].setUTestSkipRunsCounter(5);
 
-        InputModule inputModule = new InputModule(settings[0]);
+        InputModule inputModule = new InputModule();
 
         inputModule.readFiles(files);
         jobs = inputModule.getJobs();

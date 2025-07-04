@@ -22,9 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A Class for loading a reading the log file of fio Jobs
@@ -47,11 +45,9 @@ InputModule {
     private List<DataPoint> data;
     private Map<Integer, Integer> freq;
     private BasicFileAttributes fileAttribute;
-    private final Settings settings;
     private final String className = "InputModule";
 
-    public InputModule(Settings settings) {
-        this.settings = settings;
+    public InputModule() {
         directoryChooser = new DirectoryChooser();
     }
 
@@ -146,7 +142,7 @@ InputModule {
                         Logging.log(Level.WARNING, className,String.format("file -> %s is to small!", file.getAbsolutePath()));
                     } else {
                         Logging.log(Level.INFO, "Input Module", "Preparing Job Data: " + file);
-                        Job job = new Job(this.data, settings.averageSpeedPerMillisec);
+                        Job job = new Job(this.data);
                         job.setFrequency(this.freq);
                         job.setFile(file);
                         job.setFileAttributes(this.fileAttribute);

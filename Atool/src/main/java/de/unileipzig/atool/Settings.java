@@ -25,17 +25,9 @@ import java.util.logging.Logger;
  * @author meni1999
  */
 public class Settings implements Initializable {
-    public final static int DEFAULT_SPEED_PER_MILLI = 1;
-    public final static int MAX_SPEED_PER_MIILI = 2000;
-    public final static int MIN_SPEED_PER_MIILI = 1;
-
     public static final int MAX_SKIP_COUNT = 5;
     public static final int MIN_SKIP_COUNT = 0;
     public static final int DEFAULT_SKIP_COUNT = 0;
-
-    public static final int MAX_WINDOW_SIZE = 5000;
-    public static final int MIN_WINDOW_SIZE = 1;
-    public static final int DEFAULT_WINDOW_SIZE = 5000;
 
     public static final int MAX_REQUIRED_RUNS_FOR_STEADY_STATE = 10;
     public static final int MIN_REQUIRED_RUNS_FOR_STEADY_STATE = 2;
@@ -43,10 +35,7 @@ public class Settings implements Initializable {
 
     private double covThreshold = Job.DEFAULT_CV_THRESHOLD;
     private int requiredRunsForSteadyState = DEFAULT_REQUIRED_RUNS_FOR_STEADY_STATE;
-    private int windowSize = 100; // Default window size 100
-
     private int groupSize = 2;
-
     private boolean isSpeedPerMilliSelected;
 
     private static final int DIGIT = 3;
@@ -54,7 +43,6 @@ public class Settings implements Initializable {
     public static final int FRACTION_DIGITS = DIGIT;
 
     public static double CONVERSION_VALUE = CONVERT.getConvertValue(CONVERT.DEFAULT);
-    public int averageSpeedPerMillisec = DEFAULT_SPEED_PER_MILLI;
     public static CONVERT CONVERSION = CONVERT.DEFAULT;
 
     private int anovaSkipRunsCounter = 0;
@@ -70,7 +58,6 @@ public class Settings implements Initializable {
     private boolean tTestUseAdjacentRun = false;
     private boolean uTestUseAdjacentRun = false;
     private boolean cusumUseAdjacentRun = false;
-    private boolean tukeyUseAdjacentRun = false;
 
     private boolean isBonferroniANOVASelected = false;
     private boolean isBonferroniConIntSelected = false;
@@ -86,12 +73,6 @@ public class Settings implements Initializable {
     @FXML public CheckBox adjacentRunTTestcheckbox;
     @FXML public CheckBox adjacentRunUTestcheckbox;
     @FXML public CheckBox adjacentRunCUSUMcheckbox;
-
-    @FXML public CheckBox skipRunANOVAcheckbox;
-    @FXML public CheckBox skipRunConIntcheckbox;
-    @FXML public CheckBox skipRunTTestcheckbox;
-    @FXML public CheckBox skipRunUTestcheckbox;
-    @FXML public CheckBox skipRunCUSUMcheckbox;
 
     @FXML public CheckBox bonferroniANOVAcheckbox;
     @FXML public CheckBox bonferroniConIntcheckbox;
@@ -134,6 +115,7 @@ public class Settings implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         avSpeedSlider.setDisable(!checkboxSpeedPerSec.isSelected());
+
         radioButtonKibiByte.setUserData(CONVERT.DEFAULT);
         radioButtonKiloByte.setUserData(CONVERT.KILO_BYTE);
         radioButtonMebibyte.setUserData(CONVERT.MEBI_BYTE);
@@ -141,18 +123,15 @@ public class Settings implements Initializable {
         radioButtonKibiByte.setToggleGroup(toggleGorup);
         radioButtonKiloByte.setToggleGroup(toggleGorup);
         radioButtonMebibyte.setToggleGroup(toggleGorup);
+
         skipRunAnovaSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
         skipRunCoVSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
         skipRunConIntSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
         skipRunTTestSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
         skipRunUTestSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
         skipRunCUSUMSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
-        requiredRunsForSteadyStateSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_REQUIRED_RUNS_FOR_STEADY_STATE, MAX_REQUIRED_RUNS_FOR_STEADY_STATE, DEFAULT_REQUIRED_RUNS_FOR_STEADY_STATE));
 
-//        bonferroniUTestcheckbox.setDisable(true);
-//        bonferroniTTestcheckbox.setDisable(true);
-//        bonferroniConIntcheckbox.setDisable(true);
-//        bonferroniANOVAcheckbox.setDisable(true);
+        requiredRunsForSteadyStateSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_REQUIRED_RUNS_FOR_STEADY_STATE, MAX_REQUIRED_RUNS_FOR_STEADY_STATE, DEFAULT_REQUIRED_RUNS_FOR_STEADY_STATE));
 
         buttonSaveSettings.setOnAction(this::onActionSaveSettings);
         avSpeedSlider.valueProperty().addListener(setupChangeListener(avSpeedSlider, labelSliderVal));
@@ -185,12 +164,9 @@ public class Settings implements Initializable {
         bonferroniUTestcheckbox.setSelected(isBonferroniUTestSelected);
 
         checkboxSpeedPerSec.setSelected(isSpeedPerMilliSelected);
-        avSpeedSlider.setDisable(!isSpeedPerMilliSelected);
-        avSpeedSlider.setValue(averageSpeedPerMillisec);
+
         runCompareCounterSlider.setValue(groupSize);
-        windowSlider.setValue(windowSize);
-        labelSliderVal.setText(Integer.toString(averageSpeedPerMillisec));
-        windowValueLabel.setText(Integer.toString(windowSize));
+
 
         skipRunAnovaSpinner.getValueFactory().setValue(anovaSkipRunsCounter);
         skipRunCoVSpinner.getValueFactory().setValue(covSkipRunsCounter);
@@ -198,6 +174,7 @@ public class Settings implements Initializable {
         skipRunTTestSpinner.getValueFactory().setValue(tTestSkipRunsCounter);
         skipRunUTestSpinner.getValueFactory().setValue(uTestSkipRunsCounter);
         skipRunCUSUMSpinner.getValueFactory().setValue(cusumSkipRunsCounter);
+
         requiredRunsForSteadyStateSpinner.getValueFactory().setValue(requiredRunsForSteadyState);
 
         adjacentRunANOVAcheckbox.setSelected(anovaUseAdjacentRun);
@@ -214,17 +191,13 @@ public class Settings implements Initializable {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/Settings.fxml"));
             fxmlLoader.setController(this);
             Parent root1 = fxmlLoader.load();
-            /*
-             * if "fx:controller" is not set in fxml
-             * fxmlLoader.setController(NewWindowController);
-             */
+
             Stage stage = new Stage();
             stage.setTitle("Settings");
             stage.setScene(new Scene(root1));
             stage.setResizable(false);
             stage.show();
         } catch (IOException e) {
-            e.printStackTrace();
             Logging.log(Level.SEVERE, "Settings", "Coudn't open Settings Window! App state");
         }
     }
@@ -240,9 +213,7 @@ public class Settings implements Initializable {
     private void onActionSaveSettings(ActionEvent actionEvent) {
         CONVERSION = (CONVERT) toggleGorup.getSelectedToggle().getUserData();
         CONVERSION_VALUE = CONVERT.getConvertValue(CONVERSION);
-        averageSpeedPerMillisec = (int) avSpeedSlider.getValue();
         groupSize = (int) runCompareCounterSlider.getValue();
-        windowSize = (int) windowSlider.getValue();
         anovaUseAdjacentRun = adjacentRunANOVAcheckbox.isSelected();
         covUseAdjacentRun = adjacentRunCoVcheckbox.isSelected();
         conIntUseAdjacentRun = adjacentRunConIntcheckbox.isSelected();
@@ -296,20 +267,8 @@ public class Settings implements Initializable {
         return hasChanged;
     }
 
-    public int getAverageSpeedPerMillisec() {
-        return averageSpeedPerMillisec;
-    }
-
-    public int getWindowSize() {
-        return windowSize;
-    }
-
     public int getGroupSize() {
         return groupSize;
-    }
-
-    public boolean isSpeedPerMilliSelected() {
-        return isSpeedPerMilliSelected;
     }
 
     public boolean isAnovaUseAdjacentRun() {
@@ -332,14 +291,6 @@ public class Settings implements Initializable {
         return uTestUseAdjacentRun;
     }
 
-    public boolean isCusumUseAdjacentRun() {
-        return cusumUseAdjacentRun;
-    }
-
-    public boolean isTukeyUseAdjacentRun() {
-        return tukeyUseAdjacentRun;
-    }
-
     public int getAnovaSkipRunsCounter() {
         return anovaSkipRunsCounter;
     }
@@ -358,10 +309,6 @@ public class Settings implements Initializable {
 
     public int getUTestSkipRunsCounter() {
         return uTestSkipRunsCounter;
-    }
-
-    public int getCusumSkipRunsCounter() {
-        return cusumSkipRunsCounter;
     }
 
     public int getRequiredRunsForSteadyState() {
@@ -406,22 +353,6 @@ public class Settings implements Initializable {
 
     public void setUTestUseAdjacentRun(boolean uTestUseAdjacentRun) {
         this.uTestUseAdjacentRun = uTestUseAdjacentRun;
-    }
-
-    public void setCusumSkipRunsCounter(int cusumSkipRunsCounter) {
-        this.cusumSkipRunsCounter = cusumSkipRunsCounter;
-    }
-
-    public void setCusumUseAdjacentRun(boolean cusumUseAdjacentRun) {
-        this.cusumUseAdjacentRun = cusumUseAdjacentRun;
-    }
-
-    public void setTukeyUseAdjacentRun(boolean tukeyUseAdjacentRun) {
-        this.tukeyUseAdjacentRun = tukeyUseAdjacentRun;
-    }
-
-    public void setWindowSize(int windowSize) {
-        this.windowSize = windowSize;
     }
 
     public void setGroupSize(int groupSize) {

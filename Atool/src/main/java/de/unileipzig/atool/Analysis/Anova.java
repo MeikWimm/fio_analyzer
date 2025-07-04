@@ -6,9 +6,7 @@ package de.unileipzig.atool.Analysis;
 
 import de.unileipzig.atool.*;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
@@ -19,16 +17,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
-import javafx.stage.Stage;
 import org.apache.commons.math3.distribution.FDistribution;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.*;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author meni1999
@@ -36,29 +28,27 @@ import java.util.logging.Logger;
 public class Anova extends GenericTest implements Initializable {
 
     private final List<XYChart.Data<Number, Number>> anovaData;
-    @FXML public Label averageSpeedLabel;
-    @FXML public Label sseLabel;
-    @FXML public Label ssaLabel;
-    @FXML public Label sstLabel;
-    @FXML public Label ssaSstLabel;
-    @FXML public Label sseSstLabel;
-    @FXML public Label fCriticalLabel;
-    @FXML public Label fCalculatedLabel;
-    @FXML public Button showFGraphButton;
-    @FXML public Button showCoVGraph;
-    @FXML public Button showWinCoVGraph;
-    @FXML public Label sigmaJobLabel;
-    @FXML public Label steadyStateLabel;
-    @FXML public Label steadyStateCVLabel;
-    @FXML public Label steadyStateCVWinLabel;
-    @FXML public Pane anovaPane;
-    @FXML public TableView<Run> anovaTable;
-    @FXML public TableColumn<Run, Double> averageSpeedColumn;
-    @FXML public TableColumn<Run, Integer> runIDColumn;
-    @FXML public TableColumn<Run, Double> startTimeColumn;
-    @FXML public TableColumn<Run, String> compareToRunColumn;
-    @FXML public TableColumn<Run, Double> FColumn;
-    @FXML public TableColumn<Run, Byte> hypothesisColumn;
+    @FXML private Label averageSpeedLabel;
+    @FXML private Label sseLabel;
+    @FXML private Label ssaLabel;
+    @FXML private Label sstLabel;
+    @FXML private Label ssaSstLabel;
+    @FXML private Label sseSstLabel;
+    @FXML private Label fCriticalLabel;
+    @FXML private Label fCalculatedLabel;
+    @FXML private Button showFGraphButton;
+    @FXML private Button showCoVGraph;
+    @FXML private Button showWinCoVGraph;
+    @FXML private Label sigmaJobLabel;
+    @FXML private Label steadyStateLabel;
+
+    @FXML private TableView<Run> anovaTable;
+    @FXML private TableColumn<Run, Double> averageSpeedColumn;
+    @FXML private TableColumn<Run, Integer> runIDColumn;
+    @FXML private TableColumn<Run, Double> startTimeColumn;
+    @FXML private TableColumn<Run, String> compareToRunColumn;
+    @FXML private TableColumn<Run, Double> FColumn;
+    @FXML private TableColumn<Run, Byte> hypothesisColumn;
     private double fCrit;
 
     public Anova(Job job, Settings settings) {
@@ -185,13 +175,22 @@ public class Anova extends GenericTest implements Initializable {
         return value < this.fCrit;
     }
 
+    public double getCriticalValue() {
+        return fCrit;
+    }
+
+    @Override
+    public String getTestName() {
+        return "ANOVA";
+    }
+
+    public TableView<Run> getTable() {
+        return anovaTable;
+    }
+
     private void drawANOVAGraph() {
         charter.drawGraph("ANOVA", "Run", "F-Value", "Critical value", this.fCrit, new Charter.ChartData("calculated F", anovaData));
         charter.openWindow();
-    }
-
-    public double getCriticalValue() {
-        return fCrit;
     }
 
     @Override
@@ -207,14 +206,5 @@ public class Anova extends GenericTest implements Initializable {
     @Override
     protected String getWindowTitle() {
         return "Calculated Anova";
-    }
-
-    @Override
-    public String getTestName() {
-        return "ANOVA";
-    }
-
-    public TableView<Run> getTable() {
-        return anovaTable;
     }
 }

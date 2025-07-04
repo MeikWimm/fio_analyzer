@@ -6,9 +6,7 @@ package de.unileipzig.atool.Analysis;
 
 import de.unileipzig.atool.*;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
@@ -17,15 +15,11 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.stage.Stage;
 import org.apache.commons.math3.distribution.TDistribution;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.*;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 /**
  * @author meni1999
@@ -64,7 +58,7 @@ public class TTest extends GenericTest implements Initializable {
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
-        drawTTest.setOnAction(e -> drawTGraph(this.job));
+        drawTTest.setOnAction(e -> drawTGraph());
         TTable.setItems(getResultRuns());
     }
 
@@ -157,7 +151,7 @@ public class TTest extends GenericTest implements Initializable {
         return "T-Test";
     }
 
-    private void drawTGraph(Job job) {
+    private void drawTGraph() {
         charter.drawGraph("T-Test", "Run", "T-Value", "critical T", tCrit, new Charter.ChartData("calculated T", tData));
         charter.openWindow();
     }
