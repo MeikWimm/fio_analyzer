@@ -8,7 +8,6 @@ module de.unileipzig.atool {
     requires jdistlib;
     requires java.sql;
     requires java.desktop;
-    requires jdk.incubator.vector;
 
     opens de.unileipzig.atool to javafx.fxml;
     opens de.unileipzig.atool.Analysis to javafx.fxml;

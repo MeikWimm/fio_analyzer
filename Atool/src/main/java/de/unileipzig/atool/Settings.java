@@ -25,17 +25,6 @@ import java.util.logging.Logger;
  * @author meni1999
  */
 public class Settings implements Initializable {
-
-
-    private static final Logger LOGGER = Logger.getLogger(Settings.class.getName());
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("Settings"));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);
-    }
-
     public final static int DEFAULT_SPEED_PER_MILLI = 1;
     public final static int MAX_SPEED_PER_MIILI = 2000;
     public final static int MIN_SPEED_PER_MIILI = 1;
@@ -236,14 +225,14 @@ public class Settings implements Initializable {
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            LOGGER.log(Level.SEVERE, "Coudn't open Settings Window! App state");
+            Logging.log(Level.SEVERE, "Settings", "Coudn't open Settings Window! App state");
         }
     }
 
     @FXML
     public void onActionUseSpeedPerSec(ActionEvent event) {
         isSpeedPerMilliSelected = checkboxSpeedPerSec.isSelected();
-        LOGGER.log(Level.INFO, String.format("use Average Speed per Sec set to %b", isSpeedPerMilliSelected));
+        Logging.log(Level.INFO, "Settings",String.format("use Average Speed per Sec set to %b", isSpeedPerMilliSelected));
         avSpeedSlider.setDisable(!isSpeedPerMilliSelected);
     }
 
@@ -280,9 +269,9 @@ public class Settings implements Initializable {
         if(primaryController != null){
             primaryController.update();
         } else {
-            LOGGER.log(Level.SEVERE, "No PrimaryController set!");
+            Logging.log(Level.SEVERE, "Settings", "No PrimaryController set!");
         }
-        LOGGER.log(Level.INFO, "Settings saved");
+        Logging.log(Level.INFO, "Settings", "Settings saved");
         Stage stage = (Stage) buttonSaveSettings.getScene().getWindow();
         stage.close();
     }

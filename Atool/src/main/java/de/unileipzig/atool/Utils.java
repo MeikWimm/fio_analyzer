@@ -24,15 +24,7 @@ import java.util.logging.Formatter;
  * @author meni1999
  */
 public abstract class Utils {
-    private static final Logger LOGGER = Logger.getLogger(Utils.class.getName());
 
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("ANOVA"));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);
-    }
 
     public static Callback<TableColumn<Run, Byte>, TableCell<Run, Byte>> getHypothesisCellFactory() {
         return (TableColumn<Run, Byte> col) -> new TableCell<Run, Byte>() {
@@ -70,28 +62,6 @@ public abstract class Utils {
         };
     }
 
-    /**
-     * Formatter for Logger
-     *
-     * @author meni1999
-     */
-    public static class CustomFormatter extends Formatter {
-
-        String stageName;
-
-        public CustomFormatter(String stageName) {
-            super();
-            this.stageName = stageName;
-        }
-
-        @Override
-        public String format(LogRecord record) {
-            return String.format("[LOG, %s, %s] ", this.stageName, record.getLevel()) +
-                    record.getMessage() +
-                    "\n";
-        }
-
-    }
 
     public static class CustomStringConverter extends StringConverter<Double> {
         private final NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
@@ -123,7 +93,7 @@ public abstract class Utils {
             try {
                 val = Integer.valueOf(value);
             } catch (NumberFormatException e) {
-                LOGGER.log(Level.WARNING, e.getMessage(), e);
+                Logging.log(Level.WARNING, "Utils", "NumberFormatException: " + value);
             }
             return val;
         }
@@ -136,7 +106,7 @@ public abstract class Utils {
             try {
                 val = Double.valueOf(value);
             } catch (NumberFormatException e) {
-                LOGGER.log(Level.WARNING, e.getMessage(), e);
+                Logging.log(Level.WARNING, "Utils", "NumberFormatException: " + value);
             }
             return val;
         }

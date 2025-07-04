@@ -12,6 +12,8 @@ import java.io.File;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -160,6 +162,12 @@ public class Job {
             return;
         }
         int skipSize = this.runDataSize * skipRuns;
+
+        if(skipSize > this.data.size()){
+            Logging.log(Level.WARNING, "Job", "Skipped data size " + skipSize + " exceeds job data size " + this.data.size());
+            return;
+        }
+
         this.data.subList(0, skipSize).clear();
         this.runs.subList(0, skipRuns).clear();
         runsCounter = runsCounter - skipRuns;

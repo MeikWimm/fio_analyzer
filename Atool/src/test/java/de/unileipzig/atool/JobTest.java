@@ -23,15 +23,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test class for the Job class.
  */
 class JobTest {
-    private static final Logger LOGGER = Logger.getLogger(JobTest.class.getName());
-
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("JobTest"));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);
-    }
 
     private List<Job> jobs;
 

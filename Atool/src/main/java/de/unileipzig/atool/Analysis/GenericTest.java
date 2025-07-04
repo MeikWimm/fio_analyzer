@@ -1,9 +1,6 @@
 package de.unileipzig.atool.Analysis;
 
-import de.unileipzig.atool.InputModule;
-import de.unileipzig.atool.Job;
-import de.unileipzig.atool.Run;
-import de.unileipzig.atool.Utils;
+import de.unileipzig.atool.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -22,16 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class GenericTest {
-    private static final Logger LOGGER = Logger.getLogger(GenericTest.class.getName());
-    public static final int MIN_POSSIBLE_DATA_SIZE = 100;
-    static {
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter("Generic Test"));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);
-    }
-
+    private final String className = this.getClass().getSimpleName();
     protected Job job;
     private final List<List<Run>> groups;
     protected List<List<Run>> resultGroups;
@@ -65,15 +53,8 @@ public abstract class GenericTest {
         if (applyBonferroni) {
             recalculateAlpha();
         }
-        setupLogger();
     }
-    private void setupLogger(){
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setLevel(Level.FINEST);
-        handler.setFormatter(new Utils.CustomFormatter(this.getClass().getName()));
-        LOGGER.setUseParentHandlers(false);
-        LOGGER.addHandler(handler);
-    }
+
 
     public int getSkippedRunCount(){
         return skipCounter;
@@ -164,12 +145,14 @@ public abstract class GenericTest {
 
     public void calculate(){
         if(isDataApplicable()){
+            Logging.log(Level.INFO, className, "Calculating Job " + this.job.getFile());
             this.calculateTest(this.groups,this.resultRuns);
             this.checkForHypothesis();
             this.calculateSteadyState();
             this.calculatePostHoc();
+            Logging.log(Level.INFO, className, "Done calculating.");
         } else {
-            LOGGER.log(Level.WARNING, "Data is not applicable for test: ");
+            Logging.log(Level.WARNING, className,"Loaded data can't be calculated!");
         }
 
     }
@@ -181,12 +164,12 @@ public abstract class GenericTest {
         //FDistribution fDistribution = new FDistribution(num, denom);
 
         if(num < 0 || denom < 0){
-            LOGGER.log(Level.WARNING, String.format("FDistribution cannot be instantiated - nominator: %d | denominator: %d", num, denom));
+            Logging.log(Level.WARNING, className,String.format("FDistribution -> nominator: %d | denominator: %d", num, denom));
             return false;
         }
 
         if(groups.size() <= 1){
-            LOGGER.log(Level.WARNING, "Group size is smaller than 1!");
+            Logging.log(Level.WARNING, className,"Group size is smaller than 1!");
             return false;
         }
 
@@ -203,7 +186,7 @@ public abstract class GenericTest {
         }
 
         if (this.resultGroups.size() < 2) {
-            LOGGER.log(Level.WARNING, String.format("%s group size of test result is smaller than 2!", this.getClass().getName()));
+            Logging.log(Level.WARNING, className, " group size of test result is smaller than 2!");
             return;
         }
 

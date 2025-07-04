@@ -2,7 +2,6 @@ package de.unileipzig.atool.Analysis;
 
 import de.unileipzig.atool.Job;
 import de.unileipzig.atool.Run;
-import jdk.incubator.vector.VectorOperators;
 
 public class TestEval{
     private GenericTest test;
