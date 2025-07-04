@@ -37,7 +37,6 @@ InputModule {
     public static File SELECTED_DIRECTORY;
     DirectoryChooser directoryChooser;
     ObservableList<Job> jobs = FXCollections.observableArrayList();
-    private BufferedReader br;
     private int time;
     private double averageSpeed;
     private double standardDeviation;
