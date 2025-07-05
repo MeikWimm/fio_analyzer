@@ -143,7 +143,7 @@ public abstract class GenericTest {
 
     public void calculate(){
         if(isDataApplicable()){
-            Logging.log(Level.INFO, className, "Calculating Job " + this.job.getFile());
+            Logging.log(Level.INFO, className, "Calculating Job " + this.job.getFileName());
             this.calculateTest(this.groups,this.resultRuns);
             this.checkForHypothesis();
             this.calculateSteadyState();

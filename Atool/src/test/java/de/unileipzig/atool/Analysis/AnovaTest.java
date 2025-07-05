@@ -45,6 +45,12 @@ class AnovaTest {
 
         inputModule.readFiles(files);
         jobs = inputModule.getJobs();
+
+        for(Job job: jobs){
+            job.setRunsCounter((int) (Math.random() * Job.MAX_RUN_COUNT));
+            job.setRunsCounter((int) (Math.random() * Job.MAX_ALPHA));
+            job.setRunsCounter((int) (Math.random() * Job.MAX_CV_THRESHOLD));
+        }
     }
 
     @Test
@@ -60,14 +66,13 @@ class AnovaTest {
 
     @Test
     void testCalculate() {
-        for(Settings setting: settings){
-            Logging.log(Level.INFO, "Anova Test", "Setting used " + setting.toString());
-            for (Job job: jobs){
+        for(Job job: jobs){
+            Logging.log(Level.INFO, "Anova Test", "Testing Job: " + job.getFileName());
+            for (Settings setting: settings){
                 Anova anova = new Anova(job, setting);
                 anova.calculate();
                 assertNotNull(anova.getResultRuns(), "Anova result should not be null.");
                 assertNotNull(anova.getResultGroups(), "Anova result group should not be null.");
-                //assertNotNull(anova.getSteadyStateRun(), "Steady state run should not be null.");
             }
         }
     }
