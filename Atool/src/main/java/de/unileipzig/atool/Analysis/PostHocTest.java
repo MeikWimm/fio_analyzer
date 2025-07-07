@@ -18,7 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class PostHocTest {
-    protected GenericTest test;
+    private final GenericTest test;
     protected Run steadyStateRun;
     protected Run anovaSteadyStateRun;
     private boolean isFirst = true;
@@ -26,9 +26,8 @@ public abstract class PostHocTest {
     protected final Charter charter;
     protected final List<List<Run>> firstGroup;
     protected final List<List<Run>> secondGroup;
-    protected final List<List<Run>> postHocGroups;
-    protected final List<Run> postHocRuns;
-    protected Job job;
+    private final List<List<Run>> postHocGroups;
+    private final List<Run> postHocRuns;
 
     public PostHocTest(GenericTest test){
         super();
@@ -58,14 +57,11 @@ public abstract class PostHocTest {
                 }
 
                 postHocGroups.add(copyGroup1);
-                Run run = postHocGroups.getLast().getFirst();
+                Run run = copyGroup1.getFirst();
                 run.setGroup(group1.getFirst().getGroup() + " | " + group2.getFirst().getGroup());
                 run.setGroupID(ID);
-                postHocRuns.add(run);
 
                 postHocGroups.add(copyGroup2);
-
-
                 ID++;
             }
         }
@@ -96,7 +92,7 @@ public abstract class PostHocTest {
             boolean found = isFound(group1, group2, possibleRun);
 
             if(found){
-                if(savedHypothesisRun.getNullhypothesis() == GenericTest.ACCEPTED){
+                if(savedHypothesisRun.getNullhypothesis()){
                     if(isFirst){
                         isFirst = false;
                         steadyStateRun = possibleRun;
@@ -112,11 +108,28 @@ public abstract class PostHocTest {
 
     public abstract String getTestName();
 
-    public abstract void calculate();
+    public abstract void calculateTest(List<List<Run>> postHocGroups, List<Run> postHocRuns);
+
+    public void calculate(){
+        calculateTest(this.postHocGroups, this.postHocRuns);
+        checkForHypothesis();
+        checkSteadyStateRun();
+    }
+
+    protected abstract double extractValue(Run run);
+
+    protected abstract boolean isWithinThreshold(double value);
+
+    private void checkForHypothesis() {
+        for(Run run: postHocRuns){
+            run.setNullhypothesis(isWithinThreshold(extractValue(run)));
+        }
+    }
 
     public ObservableList<Run> getPostHocRuns() {
         return FXCollections.observableList(postHocRuns);
     }
+
 
     private static boolean isFound(List<Run> group1, List<Run> group2, Run possibleRun) {
         int ID = possibleRun.getID();
@@ -186,10 +199,4 @@ public abstract class PostHocTest {
     public abstract TableView<Run> getTable();
 
     public abstract double getCriticalValue();
-
-    public void setJob(Job job) {
-        this.job = new Job(job);
-    }
-
-
 }

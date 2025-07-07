@@ -35,7 +35,7 @@ public class TTest extends GenericTest implements Initializable {
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, Integer> compareToRunColumn;
     @FXML public TableColumn<Run, Double> TColumn;
-    @FXML public TableColumn<Run, Byte> hypothesisColumn;
+    @FXML public TableColumn<Run, Boolean> hypothesisColumn;
 
     private double tCrit;
     private final List<XYChart.Data<Number, Number>> tData;

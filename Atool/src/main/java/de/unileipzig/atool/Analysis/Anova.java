@@ -48,7 +48,7 @@ public class Anova extends GenericTest implements Initializable {
     @FXML private TableColumn<Run, Double> startTimeColumn;
     @FXML private TableColumn<Run, String> compareToRunColumn;
     @FXML private TableColumn<Run, Double> FColumn;
-    @FXML private TableColumn<Run, Byte> hypothesisColumn;
+    @FXML private TableColumn<Run, Boolean> hypothesisColumn;
     private double fCrit;
 
     public Anova(Job job, Settings settings) {

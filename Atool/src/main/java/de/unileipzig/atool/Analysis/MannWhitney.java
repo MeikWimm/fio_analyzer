@@ -54,7 +54,7 @@ public class MannWhitney extends GenericTest implements Initializable {
     @FXML public TableColumn<Run, Integer> runIDColumn;
     @FXML public TableColumn<Run, Integer> compareToRunColumn;
     @FXML public TableColumn<Run, Double> ZColumn;
-    @FXML public TableColumn<Run, Byte> hypothesisColumn;
+    @FXML public TableColumn<Run, Boolean> hypothesisColumn;
     @FXML public Button drawUTestButton;
     @FXML public Label zIntervalLabel;
     @FXML public Label steadyStateLabel;

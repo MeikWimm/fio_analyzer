@@ -24,7 +24,7 @@ public class Run /*Section*/ {
     private double standardDeviation = UNDEFINED_DOUBLE_VALUE;
     private double ssa = UNDEFINED_DOUBLE_VALUE;
     private double sse = UNDEFINED_DOUBLE_VALUE;
-    private Byte isNullhypothesis = GenericTest.UNDEFINED;
+    private boolean isNullhypothesis = false;
     private byte isOverlapping = GenericTest.UNDEFINED;
     private double F = UNDEFINED_DOUBLE_VALUE;
     private double zVal = UNDEFINED_DOUBLE_VALUE;
@@ -207,11 +207,11 @@ public class Run /*Section*/ {
         return runID;
     }
     
-    public void setNullhypothesis(byte isNullhypothesis){
+    public void setNullhypothesis(boolean isNullhypothesis){
         this.isNullhypothesis = isNullhypothesis;
     }
     
-    public byte getNullhypothesis(){
+    public boolean getNullhypothesis(){
         return this.isNullhypothesis;
     }
 
