@@ -46,7 +46,7 @@ public class SteadyStateEval implements Initializable {
         outputModule = new OutputModule();
 
         Anova anova = new Anova(job, settings);
-        TukeyHSD tukey = new TukeyHSD(anova);
+        TukeyHSD tukey = new TukeyHSD();
         anova.setPostHocTest(tukey);
         tests[0] = anova;
         tests[1] = new ConInt(job, settings);

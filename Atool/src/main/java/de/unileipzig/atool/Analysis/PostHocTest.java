@@ -1,6 +1,5 @@
 package de.unileipzig.atool.Analysis;
 
-import de.unileipzig.atool.Job;
 import de.unileipzig.atool.Run;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,7 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class PostHocTest {
-    private final GenericTest test;
+    private GenericTest test;
     protected Run steadyStateRun;
     protected Run anovaSteadyStateRun;
     private boolean isFirst = true;
@@ -27,16 +26,15 @@ public abstract class PostHocTest {
     protected final List<List<Run>> firstGroup;
     protected final List<List<Run>> secondGroup;
     private final List<List<Run>> postHocGroups;
-    private final List<Run> postHocRuns;
+    private final List<Run> resultRuns;
 
-    public PostHocTest(GenericTest test){
+    public PostHocTest(){
         super();
-        this.test = test;
         this.charter = new Charter();
         this.firstGroup = new ArrayList<>();
         this.secondGroup = new ArrayList<>();
         this.postHocGroups = new ArrayList<>();
-        this.postHocRuns = new ArrayList<>();
+        this.resultRuns = new ArrayList<>();
     }
 
     public void setupGroups(List<List<Run>> resultGroups) {
@@ -62,12 +60,15 @@ public abstract class PostHocTest {
                 run.setGroupID(ID);
 
                 postHocGroups.add(copyGroup2);
+
+                this.firstGroup.add(copyGroup1);
+                this.secondGroup.add(copyGroup2);
                 ID++;
             }
         }
     }
 
-    protected void checkSteadyStateRun(){
+    private void checkSteadyStateRun(){
 
         if(this.firstGroup.size() != this.secondGroup.size()){
             Logger.getLogger(PostHocTest.class.getName()).log(Level.WARNING, "Number of groups do not match");
@@ -108,10 +109,22 @@ public abstract class PostHocTest {
 
     public abstract String getTestName();
 
-    public abstract void calculateTest(List<List<Run>> postHocGroups, List<Run> postHocRuns);
+    protected abstract void calculateTest(List<Run> firstGroup, List<Run> secondGroup, List<Run> postHocRuns);
+
+    protected abstract void  initPostHocTest(GenericTest test, List<List<Run>> postHocGroups);
 
     public void calculate(){
-        calculateTest(this.postHocGroups, this.postHocRuns);
+        initPostHocTest(this.test, this.postHocGroups);
+
+        if(this.firstGroup.size() != this.secondGroup.size()){
+            Logger.getLogger(PostHocTest.class.getName()).log(Level.WARNING, "Number of groups do not match");
+            return;
+        }
+
+        for(int i = 0; i < this.firstGroup.size(); i++){
+            calculateTest(this.firstGroup.get(i), this.secondGroup.get(i), this.resultRuns);
+        }
+
         checkForHypothesis();
         checkSteadyStateRun();
     }
@@ -121,13 +134,13 @@ public abstract class PostHocTest {
     protected abstract boolean isWithinThreshold(double value);
 
     private void checkForHypothesis() {
-        for(Run run: postHocRuns){
+        for(Run run: resultRuns){
             run.setNullhypothesis(isWithinThreshold(extractValue(run)));
         }
     }
 
     public ObservableList<Run> getPostHocRuns() {
-        return FXCollections.observableList(postHocRuns);
+        return FXCollections.observableList(resultRuns);
     }
 
 
@@ -199,4 +212,12 @@ public abstract class PostHocTest {
     public abstract TableView<Run> getTable();
 
     public abstract double getCriticalValue();
+
+    public GenericTest getTest() {
+        return test;
+    }
+
+    public void setGenericTest(GenericTest test) {
+        this.test = test;
+    }
 }

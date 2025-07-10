@@ -193,12 +193,6 @@ public class Job {
     }
 
     public List<XYChart.Data<Number, Number>> getFrequencySeries() {
-        if(this.chartData.isEmpty()) {
-            this.chartData = freq.entrySet()
-                    .stream()
-                    .map(entry -> new XYChart.Data<Number, Number>(entry.getKey(), entry.getValue()))
-                    .collect(Collectors.toList());
-        }
         return chartData;
     }
 
@@ -345,6 +339,10 @@ public class Job {
 
     public void setFrequency(Map<Integer, Integer> freq) {
         this.freq = freq;
+        this.chartData = freq.entrySet()
+                .stream()
+                .map(entry -> new XYChart.Data<Number, Number>(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
     }
 
     public int getRunDataSize() {

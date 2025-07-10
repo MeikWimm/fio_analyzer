@@ -30,32 +30,32 @@ import net.sourceforge.jdistlib.Tukey;
  * @author meni1999
  */
 public class TukeyHSD extends PostHocTest implements Initializable {
+    @FXML private Label labelHeader;
+    @FXML private Label unitLabel;
+    @FXML private Label qCritLabel;
+    @FXML private Label anovaSteadyStateLabel;
+    @FXML private Label tukeySteadyStateLabel;
+    @FXML private Label evalLabel;
 
-    @FXML public Label qCritLabel;
-    @FXML public Label anovaSteadyStateLabel;
-    @FXML public Label tukeySteadyStateLabel;
-    @FXML public Label evalLabel;
-
-    @FXML public Button drawTukey;
+    @FXML private Button drawTukey;
     
-    @FXML public TableView<Run> TukeyTable;
-    @FXML public TableColumn<Run, Integer> runIDColumn;
-    @FXML public TableColumn<Run, Integer> compareToRunColumn;
-    @FXML public TableColumn<Run, Double> QColumn;
-    @FXML public TableColumn<Run, Boolean> hypothesisColumn;
+    @FXML private TableView<Run> TukeyTable;
+    @FXML private TableColumn<Run, Integer> runIDColumn;
+    @FXML private TableColumn<Run, Integer> compareToRunColumn;
+    @FXML private TableColumn<Run, Double> QColumn;
+    @FXML private TableColumn<Run, Boolean> hypothesisColumn;
     private double qHSD;
     private final List<XYChart.Data<Number, Number>> meanData;
-    private final List<XYChart.Data<Number, Number>> qHSDData;
-    private final Anova anova;
-    public TukeyHSD(Anova anova){
-        super(anova);
-        this.anova = anova;
+    private Job job;
+    public TukeyHSD(){
+        super();
         this.meanData = new ArrayList<>();
-        this.qHSDData = new ArrayList<>();
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        unitLabel.setText(Settings.getConversion());
+
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("GroupID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
         QColumn.setCellValueFactory(new PropertyValueFactory<>("Q"));
@@ -68,10 +68,11 @@ public class TukeyHSD extends PostHocTest implements Initializable {
         
         TukeyTable.setItems(getPostHocRuns());
         qCritLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.qHSD));
+        labelHeader.setText(getTest().getJob().toString());
     }
 
     public void draw(){
-        charter.drawGraph("U-Test","Group","Mean/Difference",new Charter.ChartData("Run mean", meanData), new Charter.ChartData("QHSD", qHSDData));
+        charter.drawGraph("U-Test","Group","Mean/Difference","Q-HSD", qHSD,new Charter.ChartData("Run mean", meanData));
         charter.openWindow();
     }
 
@@ -81,33 +82,27 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     }
 
     @Override
-    public void calculateTest(List<List<Run>> postHocGroups, List<Run> postHocRuns) {
-        Job job = anova.getJob();
+    protected void initPostHocTest(GenericTest test, List<List<Run>> postHocGroups) {
+        this.job = test.getJob();
         int totalObservations = job.getData().size();
         double n = job.getData().size();
         int numberOfGroups = postHocGroups.size();
         int dfError = totalObservations - numberOfGroups;
         Tukey tukey = new Tukey(postHocGroups.getFirst().size(), numberOfGroups, dfError);
         double standardError = Math.sqrt(job.getMSE() / n);
-        double qCritical = tukey.inverse_survival(anova.getAlpha(), false);
+        double qCritical = tukey.inverse_survival(test.getAlpha(), false);
         qHSD = qCritical * standardError;
+    }
 
-        for (int i = 0; i <= postHocGroups.size() - 2; i += 2) {
-            List<Run> group1 = postHocGroups.get(i);
-            List<Run> group2 = postHocGroups.get(i + 1);
+    @Override
+    protected void calculateTest(List<Run> firstGroup, List<Run> secondGroup, List<Run> postHocRuns){
+        Run run = firstGroup.getFirst();
+        double overallMean = getOverallMean(firstGroup, secondGroup);
 
-            Run run = group1.getFirst();
-            double overallMean = getOverallMean(group1, group2);
+        run.setQ(overallMean);
+        postHocRuns.add(run);
 
-            run.setQ(overallMean);
-            postHocRuns.add(run);
-
-            meanData.add(new XYChart.Data<>(run.getGroupID(), overallMean));
-            qHSDData.add(new XYChart.Data<>(run.getGroupID(), qHSD));
-
-            this.firstGroup.add(group1);
-            this.secondGroup.add(group2);
-        }
+        meanData.add(new XYChart.Data<>(run.getGroupID(), overallMean));
     }
 
     private double getOverallMean(List<Run> group1, List<Run> group2) {
@@ -138,7 +133,6 @@ public class TukeyHSD extends PostHocTest implements Initializable {
         return value < qHSD;
     }
 
-    @Override
     protected void setLabeling() {
         if(steadyStateRun == null && anovaSteadyStateRun == null){
             evalLabel.setText("No steady state run found.");
@@ -174,7 +168,7 @@ public class TukeyHSD extends PostHocTest implements Initializable {
 
     @Override
     public Scene getCharterScene() {
-        return charter.drawGraph("Tukey-HSD-Test","Group","Mean/Difference",new Charter.ChartData("Run mean", meanData), new Charter.ChartData("QHSD", qHSDData));
+        return charter.drawGraph("U-Test","Group","Mean/Difference","Q-HSD", qHSD,new Charter.ChartData("Run mean", meanData));
     }
 
     @Override

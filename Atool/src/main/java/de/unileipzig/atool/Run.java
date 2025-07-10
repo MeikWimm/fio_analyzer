@@ -25,7 +25,7 @@ public class Run /*Section*/ {
     private double ssa = UNDEFINED_DOUBLE_VALUE;
     private double sse = UNDEFINED_DOUBLE_VALUE;
     private boolean isNullhypothesis = false;
-    private byte isOverlapping = GenericTest.UNDEFINED;
+    private boolean isOverlapping = false;
     private double F = UNDEFINED_DOUBLE_VALUE;
     private double zVal = UNDEFINED_DOUBLE_VALUE;
     private double qVal = UNDEFINED_DOUBLE_VALUE;
@@ -131,11 +131,11 @@ public class Run /*Section*/ {
         return Math.abs(this.intervalTo - this.intervalFrom);
     }
     
-    public byte getOverlap(){
+    public boolean getOverlap(){
         return this.isOverlapping;
     }
     
-    public void setOverlap(byte isOverlapping){
+    public void setOverlap(boolean isOverlapping){
         this.isOverlapping = isOverlapping;
     }
 

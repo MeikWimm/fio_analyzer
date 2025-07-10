@@ -76,6 +76,7 @@ public abstract class GenericTest {
 
     public void setPostHocTest(PostHocTest postHocTest) {
         this.postHocTest = postHocTest;
+        this.postHocTest.setGenericTest(this);
     }
 
     public PostHocTest getPostHocTest() {

@@ -28,6 +28,7 @@ import java.util.*;
 public class Anova extends GenericTest implements Initializable {
 
     private final List<XYChart.Data<Number, Number>> anovaData;
+    @FXML private Label jobLabel;
     @FXML private Label averageSpeedLabel;
     @FXML private Label sseLabel;
     @FXML private Label ssaLabel;
@@ -82,12 +83,13 @@ public class Anova extends GenericTest implements Initializable {
         });
 
         showFGraphButton.setOnAction(e -> drawANOVAGraph());
-
+        jobLabel.setText(this.job.toString());
         anovaTable.setItems(getResultRuns());
     }
 
     private void updateLabeling(Run run) {
-        averageSpeedLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getAverageSpeed()));
+        String averageSpeedLabelText = String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getAverageSpeed());
+        averageSpeedLabel.setText(String.format(Locale.ENGLISH, "%s %s", averageSpeedLabelText, Settings.getConversion()));
         sseLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSSE()));
         ssaLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSSA()));
         sstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSST()));

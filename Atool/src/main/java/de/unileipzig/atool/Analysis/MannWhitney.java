@@ -49,6 +49,9 @@ public class MannWhitney extends GenericTest implements Initializable {
     }
 
     private final List<XYChart.Data<Number, Number>> uTestData;
+
+    @FXML public Label labelHeader;
+
     @FXML public TableView<Run> uTestTable;
     @FXML public TableColumn<Run, Double> averageSpeedColumn;
     @FXML public TableColumn<Run, Integer> runIDColumn;
@@ -68,6 +71,7 @@ public class MannWhitney extends GenericTest implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        averageSpeedColumn.setText("Average Speed " + Settings.getConversion());
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         averageSpeedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
@@ -80,6 +84,7 @@ public class MannWhitney extends GenericTest implements Initializable {
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
         uTestTable.setItems(getResultRuns());
+        labelHeader.setText(this.job.toString());
 
         drawUTestButton.setOnAction(e -> draw());
     }

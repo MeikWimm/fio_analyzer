@@ -95,6 +95,8 @@ public class OutputModule {
         Job job = eval.getJob();
         stringBuilder.append("Job: ").append(job.getFile().toString()).append("\n");
         stringBuilder.append("Averaged Speed: ").append(job.getAverageSpeed()).append('\n');
+        stringBuilder.append("Unit used: ").append(Settings.getConversion()).append("\n");
+        stringBuilder.append("Standard Deviation: ").append(job.getStandardDeviation()).append('\n');
         stringBuilder.append("Runs: ").append(job.getRuns().size()).append('\n');
         stringBuilder.append("Alpha: ").append(job.getAlpha()).append('\n');
         stringBuilder.append("\n");

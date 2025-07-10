@@ -59,10 +59,10 @@ import java.util.logging.Level;
  * FXML file to define the layout and wire up FX elements like MenuItems, Labels, Buttons, and TableColumns.
  */
 public class PrimaryController implements Initializable {
-    @FXML public MenuItem menuItem_generalSettings;
-    @FXML public MenuItem menuItem_open;
-    @FXML public MenuItem refreshTableMenuItem;
-    @FXML public MenuBar menuBar;
+    @FXML private MenuItem menuItem_generalSettings;
+    @FXML private MenuItem menuItem_open;
+    @FXML private MenuItem refreshTableMenuItem;
+    @FXML private MenuBar menuBar;
     @FXML private Button steadyStateEvalButton;
     @FXML private Label labelLoadInfo;
     @FXML private TableView<Job> table;
@@ -114,8 +114,7 @@ public class PrimaryController implements Initializable {
      * - Displays feedback regarding the loading status in a label.
      */
     private void setupJobItems() {
-        Window ownerWindow = steadyStateEvalButton.getScene().getWindow();
-        inputModule.openDirectoryChooser(ownerWindow);
+        inputModule.openDirectoryChooser(getOwner());
         InputModule.STATUS state = inputModule.loadFile();
 
         if(state == InputModule.STATUS.SUCCESS){
@@ -140,10 +139,10 @@ public class PrimaryController implements Initializable {
         }
 
         speedColumn.setText("Average Speed " + Settings.getConversion()); // TODO labeling with unit
+        settings.updatedSettings();
+
         table.getColumns().getFirst().setVisible(false);
         table.getColumns().getFirst().setVisible(true);
-
-        settings.updatedSettings();
     }
 
     /**
@@ -283,11 +282,11 @@ public class PrimaryController implements Initializable {
      * @param row the table row containing the job data for which the speed graph is to be drawn
      * @param table the table view that contains the list of jobs, including the specified row
      */
-    // Code block callback functions for table menu items
     private void onActionDrawJobSpeed(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
         Charter charter = new Charter();
-        charter.drawGraph("Job Speed", "Time in (ms)", "Speed in KiBi", new Charter.ChartData("Job speed",job.getSeries()));
+        String yAxisLabel = "Speed " + Settings.getConversion();
+        charter.drawGraph("Job Speed", "Time in (ms)", yAxisLabel, new Charter.ChartData("Job speed",job.getSeries()));
         charter.openWindow();
     }
 
@@ -394,7 +393,7 @@ public class PrimaryController implements Initializable {
     private void onActionCalcTukeyHSD(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
         Anova anova = new Anova(job, settings);
-        TukeyHSD tukey = new TukeyHSD(anova);
+        TukeyHSD tukey = new TukeyHSD();
         anova.setPostHocTest(tukey);
         anova.calculate();
         tukey.openWindow();
@@ -503,6 +502,15 @@ public class PrimaryController implements Initializable {
             Job removedJob = table.getItems().remove(pos);
             Logging.log(Level.INFO, "Primary Controller",String.format("Removed Job -> %s", removedJob.toString()));
         }
+    }
+
+    /**
+     * Retrieves the owner window of the current scene associated with the steadyStateEvalButton.
+     *
+     * @return the owner Window of the scene linked to the steadyStateEvalButton
+     */
+    public Window getOwner(){
+        return steadyStateEvalButton.getScene().getWindow();
     }
 }
 
