@@ -13,6 +13,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -192,12 +193,6 @@ public class Job {
     }
 
     public List<XYChart.Data<Number, Number>> getFrequencySeries() {
-        if(this.chartData.isEmpty()) {
-            this.chartData = freq.entrySet()
-                    .stream()
-                    .map(entry -> new XYChart.Data<Number, Number>(entry.getKey(), entry.getValue()))
-                    .collect(Collectors.toList());
-        }
         return chartData;
     }
 
@@ -227,6 +222,13 @@ public class Job {
         return this.file;
     }
 
+    public String getFileName() {
+        if(this.file == null){
+            return "";
+        }
+        return this.file.getName();
+    }
+
     public void setFile(File file) {
         this.file = file;
     }
@@ -244,6 +246,14 @@ public class Job {
     }
 
     public void setRunsCounter(int runsCounter) {
+        if(runsCounter < MIN_RUN_COUNT || runsCounter > MAX_RUN_COUNT){
+            Logging.log(Level.WARNING, "Job", String.format("In Job: %s", getFileName()));
+            Logging.log(Level.WARNING, "Job", String.format("Runs counter must be between %d and %d", MIN_RUN_COUNT, MAX_RUN_COUNT));
+            Logging.log(Level.WARNING, "Job", String.format("Runs counter set to default value %d", DEFAULT_RUN_COUNT));
+            this.runsCounter = DEFAULT_RUN_COUNT;
+            return;
+        }
+
         this.runsCounter = runsCounter;
     }
 
@@ -252,6 +262,12 @@ public class Job {
     }
 
     void setAlpha(Double alpha) {
+        if(alpha < MIN_ALPHA || alpha > MAX_ALPHA){
+            Logging.log(Level.WARNING, "Job", String.format("Alpha must be between %f and %f", MIN_ALPHA, MAX_ALPHA));
+            Logging.log(Level.WARNING, "Job", String.format("Alpha set to default value %f", DEFAULT_ALPHA));
+            this.alpha = DEFAULT_ALPHA;
+            return;
+        }
         this.alpha = alpha;
     }
 
@@ -260,6 +276,12 @@ public class Job {
     }
 
     public void setCvThreshold(Double cvThreshold) {
+        if(cvThreshold < MIN_CV_THRESHOLD || cvThreshold > MAX_CV_THRESHOLD){
+            Logging.log(Level.WARNING, "Job", String.format("CV threshold must be between %f and %f", MIN_CV_THRESHOLD, MAX_CV_THRESHOLD));
+            Logging.log(Level.WARNING, "Job", String.format("CV threshold set to default value %f", DEFAULT_CV_THRESHOLD));
+            this.cvThreshold = DEFAULT_CV_THRESHOLD;
+            return;
+        }
         this.cvThreshold = cvThreshold;
     }
 
@@ -317,6 +339,10 @@ public class Job {
 
     public void setFrequency(Map<Integer, Integer> freq) {
         this.freq = freq;
+        this.chartData = freq.entrySet()
+                .stream()
+                .map(entry -> new XYChart.Data<Number, Number>(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
     }
 
     public int getRunDataSize() {

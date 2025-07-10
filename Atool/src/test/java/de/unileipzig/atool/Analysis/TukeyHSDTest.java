@@ -51,7 +51,7 @@ class TukeyHSDTest {
         for(Job job: jobs){
             for (Settings setting: settings){
                 Anova anova = new Anova(job, setting);
-                TukeyHSD tukeyHSD = new TukeyHSD(anova);
+                TukeyHSD tukeyHSD = new TukeyHSD();
                 assertNotNull(tukeyHSD, "Anova instance should be initialized.");
             }
         }
@@ -62,7 +62,7 @@ class TukeyHSDTest {
         for(Job job: jobs){
             for (Settings setting: settings){
                 Anova anova = new Anova(job, setting);
-                TukeyHSD tukeyHSD = new TukeyHSD(anova);
+                TukeyHSD tukeyHSD = new TukeyHSD();
                 anova.calculate();
                 assertNotNull(tukeyHSD.getPostHocRuns(), "TukeyHSD result should not be null.");
             }

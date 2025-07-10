@@ -76,6 +76,7 @@ public abstract class GenericTest {
 
     public void setPostHocTest(PostHocTest postHocTest) {
         this.postHocTest = postHocTest;
+        this.postHocTest.setGenericTest(this);
     }
 
     public PostHocTest getPostHocTest() {
@@ -85,16 +86,12 @@ public abstract class GenericTest {
 
     protected void checkForHypothesis(){
         for (Run run : this.resultRuns) {
-            if(isWithinThreshold(extractValue(run))){
-                run.setNullhypothesis(ACCEPTED);
-            } else {
-                run.setNullhypothesis(REJECTED);
-            }
+            run.setNullhypothesis(isWithinThreshold(extractValue(run)));
         }
 
         for(List<Run> group : this.groups){
             Run run = group.getFirst();
-            if(run.getNullhypothesis() == ACCEPTED){
+            if(run.getNullhypothesis()){
                 this.resultGroups.add(group);
             }
         }
@@ -143,7 +140,7 @@ public abstract class GenericTest {
 
     public void calculate(){
         if(isDataApplicable()){
-            Logging.log(Level.INFO, className, "Calculating Job " + this.job.getFile());
+            Logging.log(Level.INFO, className, "Calculating Job " + this.job.getFileName());
             this.calculateTest(this.groups,this.resultRuns);
             this.checkForHypothesis();
             this.calculateSteadyState();
@@ -189,9 +186,7 @@ public abstract class GenericTest {
         }
 
         postHocTest.setupGroups(this.resultGroups);
-        postHocTest.setJob(this.job);
         postHocTest.calculate();
-        postHocTest.checkSteadyStateRun();
     }
 
     public Job getJob() {

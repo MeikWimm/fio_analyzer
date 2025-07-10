@@ -25,17 +25,18 @@ import java.util.*;
  * @author meni1999
  */
 public class TTest extends GenericTest implements Initializable {
-    @FXML public Label zCritLabel;
-    @FXML public Label steadyStateLabel;
+    @FXML private Label labelHeader;
+    @FXML private Label zCritLabel;
+    @FXML private Label steadyStateLabel;
 
-    @FXML public Button drawTTest;
+    @FXML private Button drawTTest;
 
-    @FXML public TableView<Run> TTable;
-    @FXML public TableColumn<Run, Double> averageSpeedColumn;
-    @FXML public TableColumn<Run, Integer> runIDColumn;
-    @FXML public TableColumn<Run, Integer> compareToRunColumn;
-    @FXML public TableColumn<Run, Double> TColumn;
-    @FXML public TableColumn<Run, Byte> hypothesisColumn;
+    @FXML private TableView<Run> TTable;
+    @FXML private TableColumn<Run, Double> averageSpeedColumn;
+    @FXML private TableColumn<Run, Integer> runIDColumn;
+    @FXML private TableColumn<Run, Integer> compareToRunColumn;
+    @FXML private TableColumn<Run, Double> TColumn;
+    @FXML private TableColumn<Run, Boolean> hypothesisColumn;
 
     private double tCrit;
     private final List<XYChart.Data<Number, Number>> tData;
@@ -47,6 +48,7 @@ public class TTest extends GenericTest implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        averageSpeedColumn.setText("Average Speed " + Settings.getConversion());
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         averageSpeedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
@@ -57,6 +59,8 @@ public class TTest extends GenericTest implements Initializable {
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
+
+        labelHeader.setText(this.job.toString());
 
         drawTTest.setOnAction(e -> drawTGraph());
         TTable.setItems(getResultRuns());

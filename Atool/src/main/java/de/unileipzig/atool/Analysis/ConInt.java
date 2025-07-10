@@ -38,8 +38,8 @@ public class ConInt extends GenericTest implements Initializable {
     @FXML private TableColumn<Run, Double> plusMinusValueColumn;
     @FXML private TableColumn<Run, Double> standardDeviationColumn;
     @FXML private TableColumn<Run, String> compareToRunColumn;
-    @FXML private TableColumn<Run, Byte> overlappingColumn;
-    @FXML private TableColumn<Run, Byte> hypothesisColumn;
+    @FXML private TableColumn<Run, Boolean> overlappingColumn;
+    @FXML private TableColumn<Run, Boolean> hypothesisColumn;
     @FXML private Label steadyStateLabel;
 
 
@@ -50,6 +50,7 @@ public class ConInt extends GenericTest implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         runsColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
+        averageSpeedColumn.setText("Average Speed" + Settings.getConversion());
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         averageSpeedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
         intervalFromColumn.setCellValueFactory(new PropertyValueFactory<>("IntervalFrom"));
@@ -127,6 +128,16 @@ public class ConInt extends GenericTest implements Initializable {
         }
     }
 
+
+
+    private boolean doConfidenceIntervalsOverlap(double a1, double b1, double a2, double b2) {
+        return Math.max(a1, a2) <= Math.min(b1, b2);
+    }
+
+    private boolean doesIntervalContainZero(double lowerBound, double upperBound) {
+        return lowerBound <= 0 && upperBound >= 0;
+    }
+
     /**
      * Replaced with doConfidenceIntervalsOverlap() function
      */
@@ -135,30 +146,16 @@ public class ConInt extends GenericTest implements Initializable {
         //NO-OP
     }
 
-    private byte doConfidenceIntervalsOverlap(double a1, double b1, double a2, double b2) {
-        if(Math.max(a1, a2) <= Math.min(b1, b2)){
-            return ACCEPTED;
-        } else {
-            return REJECTED;
-        }
-    }
-
-    private byte doesIntervalContainZero(double lowerBound, double upperBound) {
-        if(lowerBound <= 0 && upperBound >= 0){
-            return ACCEPTED;
-        } else {
-            return REJECTED;
-        }
-    }
-
     @Override
     protected double extractValue(Run run) {
-        return run.getNullhypothesis();
+        //NO-OP
+        return 0;
     }
 
     @Override
     protected boolean isWithinThreshold(double value) {
-        return value == ACCEPTED;
+        //NO-OP
+        return false;
     }
 
     @Override

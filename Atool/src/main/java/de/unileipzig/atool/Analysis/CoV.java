@@ -21,6 +21,8 @@ public class CoV extends GenericTest implements Initializable {
     private final List<XYChart.Data<Number, Number>> covData;
     private final double STEADY_STATE_COV_THRESHOLD;
 
+    @FXML private Label labelHeader;
+
     @FXML private TableView<Run> covTable;
     @FXML private TableColumn<Run, Integer> runIDColumn;
     @FXML private TableColumn<Run, Double> averageSpeedColumn;
@@ -53,7 +55,7 @@ public class CoV extends GenericTest implements Initializable {
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
 
         showCoVWindowedGraphButton.setOnAction(e -> drawCoV());
-
+        labelHeader.setText(this.job.toString());
         covTable.setItems(getResultRuns());
 
     }

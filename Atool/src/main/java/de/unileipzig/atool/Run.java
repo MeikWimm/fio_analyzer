@@ -24,8 +24,8 @@ public class Run /*Section*/ {
     private double standardDeviation = UNDEFINED_DOUBLE_VALUE;
     private double ssa = UNDEFINED_DOUBLE_VALUE;
     private double sse = UNDEFINED_DOUBLE_VALUE;
-    private Byte isNullhypothesis = GenericTest.UNDEFINED;
-    private byte isOverlapping = GenericTest.UNDEFINED;
+    private boolean isNullhypothesis = false;
+    private boolean isOverlapping = false;
     private double F = UNDEFINED_DOUBLE_VALUE;
     private double zVal = UNDEFINED_DOUBLE_VALUE;
     private double qVal = UNDEFINED_DOUBLE_VALUE;
@@ -131,11 +131,11 @@ public class Run /*Section*/ {
         return Math.abs(this.intervalTo - this.intervalFrom);
     }
     
-    public byte getOverlap(){
+    public boolean getOverlap(){
         return this.isOverlapping;
     }
     
-    public void setOverlap(byte isOverlapping){
+    public void setOverlap(boolean isOverlapping){
         this.isOverlapping = isOverlapping;
     }
 
@@ -207,11 +207,11 @@ public class Run /*Section*/ {
         return runID;
     }
     
-    public void setNullhypothesis(byte isNullhypothesis){
+    public void setNullhypothesis(boolean isNullhypothesis){
         this.isNullhypothesis = isNullhypothesis;
     }
     
-    public byte getNullhypothesis(){
+    public boolean getNullhypothesis(){
         return this.isNullhypothesis;
     }
 

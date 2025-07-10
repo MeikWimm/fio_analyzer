@@ -9,6 +9,7 @@
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
+      <Label id="labelHeader" fx:id="labelHeader" prefHeight="17.0" prefWidth="1000.0" text="Tukey-HSD" />
       <TableView id="TukeyTable" fx:id="TukeyTable" prefHeight="500.0" prefWidth="1000.0">
          <columns>
             <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="88.0" text="Group" />
@@ -20,7 +21,7 @@
       <Pane prefHeight="100.0" prefWidth="1000.0">
          <children>
             <Label layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="108.0" text="Q-HSD = " />
-            <Label id="qCritLabel" fx:id="qCritLabel" layoutX="122.0" layoutY="14.0" prefHeight="17.0" prefWidth="225.0" text="_" />
+            <Label id="qCritLabel" fx:id="qCritLabel" layoutX="122.0" layoutY="14.0" prefHeight="17.0" prefWidth="86.0" text="_" />
             <Button id="drawTukey" fx:id="drawTukey" layoutX="14.0" layoutY="54.0" mnemonicParsing="false" text="Draw Tukey-HSD Test" />
             <Label layoutX="214.0" layoutY="14.0" prefHeight="17.0" prefWidth="131.0" text="ANOVA Steady state at:" />
             <Label layoutX="214.0" layoutY="33.0" prefHeight="17.0" prefWidth="131.0" text="Tukey steady state at:" />
@@ -28,6 +29,8 @@
             <Label id="tukeySteadyStateLabel" fx:id="tukeySteadyStateLabel" layoutX="347.0" layoutY="33.0" prefHeight="17.0" prefWidth="265.0" text="_" />
             <Label layoutX="214.0" layoutY="50.0" prefHeight="17.0" prefWidth="131.0" text="Evaluation:" />
             <Label id="evalLabel" fx:id="evalLabel" layoutX="347.0" layoutY="50.0" prefHeight="17.0" prefWidth="265.0" text="_" />
+            <Label layoutX="14.0" layoutY="33.0" prefHeight="17.0" prefWidth="108.0" text="Unit used = " />
+            <Label id="unitLabel" fx:id="unitLabel" layoutX="122.0" layoutY="33.0" prefHeight="17.0" prefWidth="86.0" text="_" />
          </children>
       </Pane>
    </children>

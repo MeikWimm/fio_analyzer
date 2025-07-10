@@ -22,15 +22,15 @@ import java.util.logging.*;
 public abstract class Utils {
 
 
-    public static Callback<TableColumn<Run, Byte>, TableCell<Run, Byte>> getHypothesisCellFactory() {
-        return (TableColumn<Run, Byte> col) -> new TableCell<>() {
+    public static Callback<TableColumn<Run, Boolean>, TableCell<Run, Boolean>> getHypothesisCellFactory() {
+        return (TableColumn<Run, Boolean> col) -> new TableCell<>() {
             @Override
-            public void updateItem(Byte item, boolean empty) {
+            public void updateItem(Boolean item, boolean empty) {
                 super.updateItem(item, empty);
-                if (Objects.equals(item, GenericTest.UNDEFINED) || item == null) {
+                if (item == null) {
                     setText("");
                     setStyle("");
-                } else if (item.equals(GenericTest.REJECTED)) {
+                } else if (!item) {
                     setStyle("-fx-background-color: #fb7157;");
                     setText("Rejected");
                 } else {
@@ -60,18 +60,18 @@ public abstract class Utils {
         };
     }
 
-    public static Callback<TableColumn<Run, Byte>, TableCell<Run, Byte>> getBooleanCellFactory() {
-        return (TableColumn<Run, Byte> col) -> new TableCell<Run, Byte>() {
+    public static Callback<TableColumn<Run, Boolean>, TableCell<Run, Boolean>> getBooleanCellFactory() {
+        return (TableColumn<Run, Boolean> col) -> new TableCell<>() {
             @Override
-            public void updateItem(Byte item, boolean empty) {
+            public void updateItem(Boolean item, boolean empty) {
                 super.updateItem(item, empty);
-                if (Objects.equals(item, GenericTest.UNDEFINED) || item == null) {
+                if (item == null) {
                     setText("");
                     setStyle("");
-                } else if (item.equals(GenericTest.REJECTED)) {
-                    setText("No");
-                } else {
+                } else if (item) {
                     setText("Yes");
+                } else {
+                    setText("No");
                 }
             }
         };
