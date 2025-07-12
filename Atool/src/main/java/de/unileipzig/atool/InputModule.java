@@ -128,7 +128,7 @@ InputModule {
                     } else {
                         Logging.log(Level.INFO, "Input Module", "Preparing Job Data: " + file);
                         Job job = new Job(this.data);
-                        job.setFrequency(this.freq);
+                        job.setFrequencyMap(this.freq);
                         job.setFile(file);
                         job.setFileAttributes(this.fileAttribute);
                         job.setTime(this.time);
@@ -238,7 +238,8 @@ InputModule {
             case NO_FILES_FOUND -> "No files found!";
             case DIR_NOT_READABLE -> "Directory is not readable!";
             case SUCCESS -> "All files loaded!";
-            default -> "Unknown state!";
+            case ERROR_WHILE_READING_FILE -> "Error while reading file!";
+            default -> "Failure!";
         };
     }
 

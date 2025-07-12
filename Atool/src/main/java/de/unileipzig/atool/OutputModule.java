@@ -198,16 +198,6 @@ public class OutputModule {
         return "";
     }
 
-    private void savePostHocTests(WritableImage img, File path, GenericTest test) {
-        if(test.getPostHocTest() != null) {
-            PostHocTest postHocTest = test.getPostHocTest();
-            Scene scene = postHocTest.getScene();
-            scene.snapshot(img);
-            File postHocGraphFile = new File(Paths.get(path.toString(), "/" + postHocTest.getTestName()  + ".png").toString());
-            saveSnapshot(img, postHocGraphFile);
-        }
-    }
-
     private void savePostHocGraphTests(WritableImage img, File path, GenericTest test) {
         if(test.getPostHocTest() != null) {
             PostHocTest postHocTest = test.getPostHocTest();

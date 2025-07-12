@@ -2,6 +2,7 @@ package de.unileipzig.atool.Analysis;
 
 import de.unileipzig.atool.DataPoint;
 import de.unileipzig.atool.Run;
+import de.unileipzig.atool.Section;
 
 import java.util.List;
 
@@ -21,6 +22,18 @@ public class MathUtils {
         double n = 0;
         for (Run run : group) {
             for (DataPoint dp : run.getData()) {
+                sum += dp.data;
+                n++;
+            }
+        }
+        return sum / n;
+    }
+
+    public static double average(List<Section> sections, int i) {
+        double sum = 0;
+        double n = 0;
+        for (Section section : sections) {
+            for (DataPoint dp : section.getData()) {
                 sum += dp.data;
                 n++;
             }

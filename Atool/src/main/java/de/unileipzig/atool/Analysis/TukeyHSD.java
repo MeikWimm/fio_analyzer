@@ -46,7 +46,7 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     @FXML private TableColumn<Run, Boolean> hypothesisColumn;
     private double qHSD;
     private final List<XYChart.Data<Number, Number>> meanData;
-    private Job job;
+
     public TukeyHSD(){
         super();
         this.meanData = new ArrayList<>();
@@ -83,7 +83,7 @@ public class TukeyHSD extends PostHocTest implements Initializable {
 
     @Override
     protected void initPostHocTest(GenericTest test, List<List<Run>> postHocGroups) {
-        this.job = test.getJob();
+        Job job = test.getJob();
         int totalObservations = job.getData().size();
         double n = job.getData().size();
         int numberOfGroups = postHocGroups.size();

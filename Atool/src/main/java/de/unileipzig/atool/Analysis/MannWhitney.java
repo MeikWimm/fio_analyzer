@@ -25,29 +25,6 @@ import java.util.*;
  * @author meni1999
  */
 public class MannWhitney extends GenericTest implements Initializable {
-    private static class RankedDataPoint extends DataPoint {
-        int flag;
-        double rank;
-
-        public RankedDataPoint(DataPoint dp, int rank, int flag) {
-            super(dp.data, dp.time);
-            this.rank = rank;
-            this.flag = flag;
-        }
-
-        public double getRank() {
-            return rank;
-        }
-
-        public void setRank(double rank) {
-            this.rank = rank;
-        }
-
-        public int getFlag() {
-            return flag;
-        }
-    }
-
     private final List<XYChart.Data<Number, Number>> uTestData;
 
     @FXML public Label labelHeader;
@@ -63,10 +40,12 @@ public class MannWhitney extends GenericTest implements Initializable {
     @FXML public Label steadyStateLabel;
 
     private double zCrit;
+    private final Job job;
 
     public MannWhitney(Job job,Settings settings) {
         super(job, settings.getUTestSkipRunsCounter(), settings.isUTestUseAdjacentRun(), 2, job.getAlpha(), settings.isBonferroniUTestSelected(), settings.getRequiredRunsForSteadyState());
         this.uTestData = new ArrayList<>();
+        this.job = getJob();
     }
 
     @Override
@@ -120,17 +99,17 @@ public class MannWhitney extends GenericTest implements Initializable {
     }
 
     private void calculatePair(List<Run> resultRuns, Run run1, Run run2) {
-        List<RankedDataPoint> rankedData1 = new ArrayList<>();
-        List<RankedDataPoint> rankedData2 = new ArrayList<>();
+        List<DataPoint.RankedDataPoint> rankedData1 = new ArrayList<>();
+        List<DataPoint.RankedDataPoint> rankedData2 = new ArrayList<>();
         NormalDistribution n = new NormalDistribution();
 
         int size = run1.getData().size();
         for (int i = 0; i < size; i++) {
-            rankedData1.add(new RankedDataPoint(run1.getData().get(i), 0, 0));
-            rankedData2.add(new RankedDataPoint(run2.getData().get(i), 0, 1));
+            rankedData1.add(new DataPoint.RankedDataPoint(run1.getData().get(i), 0, 0));
+            rankedData2.add(new DataPoint.RankedDataPoint(run2.getData().get(i), 0, 1));
         }
 
-        List<RankedDataPoint> mergedData = new ArrayList<>(rankedData1);
+        List<DataPoint.RankedDataPoint> mergedData = new ArrayList<>(rankedData1);
         mergedData.addAll(rankedData2);
 
 
@@ -141,7 +120,7 @@ public class MannWhitney extends GenericTest implements Initializable {
         double new_speed, next_speed = -1;
         int index = 0;
         int jindex = 0;
-        for (RankedDataPoint p : mergedData) {
+        for (DataPoint.RankedDataPoint p : mergedData) {
             new_speed = p.data;
             if (jindex < mergedData.size() - 1) {
                 next_speed = mergedData.get(jindex + 1).data;
@@ -172,8 +151,8 @@ public class MannWhitney extends GenericTest implements Initializable {
         double run1_ranksum = 0;
         double run2_ranksum = 0;
 
-        for (RankedDataPoint dataPoint : mergedData) {
-            if (dataPoint.getFlag() == 0) {
+        for (DataPoint.RankedDataPoint dataPoint : mergedData) {
+            if (dataPoint.flag == 0) {
                 run1_ranksum += dataPoint.getRank();
             } else {
                 run2_ranksum += dataPoint.getRank();
@@ -203,6 +182,11 @@ public class MannWhitney extends GenericTest implements Initializable {
     }
 
     @Override
+    protected void calculateTest(Run run, List<Section> resultSections) {
+
+    }
+
+    @Override
     protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
         if (this.job.getRuns().size() <= 1) return;
         List<Run> runs = this.job.getRuns();
@@ -224,6 +208,11 @@ public class MannWhitney extends GenericTest implements Initializable {
     @Override
     protected boolean isWithinThreshold(double value) {
         return value < this.zCrit;
+    }
+
+    @Override
+    protected double extractValue(Section section) {
+        return 0;
     }
 
     @Override

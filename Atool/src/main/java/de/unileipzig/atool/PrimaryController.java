@@ -80,7 +80,6 @@ public class PrimaryController implements Initializable {
     private Settings settings;
     private Job job;
 
-
     /**
      * Initializes the primary controller by setting up various modules and configurations.
      * This method is called automatically when the corresponding FXML file is loaded.
@@ -92,6 +91,7 @@ public class PrimaryController implements Initializable {
     public void initialize(URL arg0, ResourceBundle arg1) {
         settings = new Settings(this);
         inputModule = new InputModule();
+
 
         setupCellValueFactory();
         setupTableMenuItems();

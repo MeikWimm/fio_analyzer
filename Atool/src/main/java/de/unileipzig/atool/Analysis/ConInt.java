@@ -8,7 +8,6 @@ import de.unileipzig.atool.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -37,14 +36,14 @@ public class ConInt extends GenericTest implements Initializable {
     @FXML private TableColumn<Run, Double> intervalToColumn;
     @FXML private TableColumn<Run, Double> plusMinusValueColumn;
     @FXML private TableColumn<Run, Double> standardDeviationColumn;
-    @FXML private TableColumn<Run, String> compareToRunColumn;
-    @FXML private TableColumn<Run, Boolean> overlappingColumn;
     @FXML private TableColumn<Run, Boolean> hypothesisColumn;
     @FXML private Label steadyStateLabel;
+    private final Job job;
 
 
     public ConInt(Job job,Settings settings) {
         super(job, settings.getConIntSkipRunsCounter(), settings.isConIntUseAdjacentRun(), 2, job.getAlpha(), settings.isBonferroniConIntSelected(), settings.getRequiredRunsForSteadyState());
+        this.job = getJob();
     }
 
     @Override
@@ -65,55 +64,52 @@ public class ConInt extends GenericTest implements Initializable {
         standardDeviationColumn.setCellValueFactory(new PropertyValueFactory<>("StandardDeviation"));
         standardDeviationColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
-        compareToRunColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getGroup()));
-        overlappingColumn.setCellValueFactory(new PropertyValueFactory<>("Overlap"));
-        overlappingColumn.setCellFactory(Utils.getBooleanCellFactory()); //TODO currently workaround and bad name
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
         labelHeader.setText(this.job.toString());
-        conIntTable.setItems(getResultRuns());
+        conIntTable.setItems(this.job.getRuns());
     }
 
     @Override
-    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
+    protected void calculateTest(Run run, List<Section> resultSection) {
         NormalDistribution normDis = new NormalDistribution();
-        double dataSize = this.job.getRunDataSize();
+        double dataSize = run.getSections().getFirst().getData().size();
 
         /*
         Calculate first the intervals
          */
-        for (Run run : this.job.getRuns()) {
-            double averageSpeed = run.getAverageSpeed();
-            double alpha = job.getAlpha();
-            double std = run.getStandardDeviation();
+        for (Section section : run.getSections()) {
+            double averageSpeed = section.getAverageSpeed();
+            double alpha = getAlpha();
+            double std = section.getStandardDeviation();
 
             double c1 = averageSpeed - (normDis.inverseCumulativeProbability(1.0 - alpha / 2.0) * (std / Math.sqrt(dataSize)));
-            run.setIntervalFrom(c1);
+            section.setIntervalFrom(c1);
 
             double c2 = averageSpeed + (normDis.inverseCumulativeProbability(1.0 - alpha / 2.0) * (std / Math.sqrt(dataSize)));
-            run.setIntervalTo(c2);
+            section.setIntervalTo(c2);
         }
 
         /*
         Look for overlapping intervals
          */
-        for (List<Run> runs : groups) {
-            Run run1 = runs.get(0);
-            Run run2 = runs.get(1);
-            double a1 = run1.getIntervalFrom();
-            double a2 = run2.getIntervalFrom();
-            double b1 = run1.getIntervalTo();
-            double b2 = run2.getIntervalTo();
-            run1.setOverlap(doConfidenceIntervalsOverlap(a1, b1, a2, b2));
+        for (List<Section> sections : run.getGroups()) {
+            Section section1 = sections.get(0);
+            Section section2 = sections.get(1);
+            double a1 = section1.getIntervalFrom();
+            double a2 = section2.getIntervalFrom();
+            double b1 = section1.getIntervalTo();
+            double b2 = section2.getIntervalTo();
+            section1.setOverlap(doConfidenceIntervalsOverlap(a1, b1, a2, b2));
 
-            double averageSpeed1 = run1.getAverageSpeed();
-            double averageSpeed2 = run2.getAverageSpeed();
-            double alpha = job.getAlpha();
-            double std1 = run1.getStandardDeviation();
-            double dataSize1 = run1.getData().size();
-            double std2 = run2.getStandardDeviation();
-            double dataSize2 = run1.getData().size();
+            double averageSpeed1 = section1.getAverageSpeed();
+            double averageSpeed2 = section2.getAverageSpeed();
+            double alpha = getAlpha();
+            double std1 = section1.getStandardDeviation();
+            double dataSize1 = section1.getData().size();
+            double std2 = section2.getStandardDeviation();
+            double dataSize2 = section1.getData().size();
             /*
             Calculate new interval
              */
@@ -123,11 +119,28 @@ public class ConInt extends GenericTest implements Initializable {
             double c1 = x - y;
             double c2 = x + y;
 
-            run1.setNullhypothesis(doesIntervalContainZero(c1, c2));
-            resultRuns.add(run1);
+            section1.setNullhypothesis(doesIntervalContainZero(c1, c2));
+            if(section1.getNullhypothesis()){
+                run.setNullhypothesis(true);
+            }
+            resultSection.add(section1);
         }
     }
 
+    @Override
+    protected void checkForHypothesis(Run run, List<Section> resultSections) {
+
+    }
+
+    @Override
+    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
+
+    }
+
+    @Override
+    protected double extractValue(Run run) {
+        return 0;
+    }
 
 
     private boolean doConfidenceIntervalsOverlap(double a1, double b1, double a2, double b2) {
@@ -138,16 +151,8 @@ public class ConInt extends GenericTest implements Initializable {
         return lowerBound <= 0 && upperBound >= 0;
     }
 
-    /**
-     * Replaced with doConfidenceIntervalsOverlap() function
-     */
     @Override
-    protected void checkForHypothesis() {
-        //NO-OP
-    }
-
-    @Override
-    protected double extractValue(Run run) {
+    protected double extractValue(Section section) {
         //NO-OP
         return 0;
     }

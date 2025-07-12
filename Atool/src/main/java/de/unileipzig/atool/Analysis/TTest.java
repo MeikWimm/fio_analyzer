@@ -40,10 +40,12 @@ public class TTest extends GenericTest implements Initializable {
 
     private double tCrit;
     private final List<XYChart.Data<Number, Number>> tData;
+    private final Job job;
 
     public TTest(Job job, Settings settings) {
         super(job, settings.getTTestSkipRunsCounter(), settings.isTTestUseAdjacentRun(), 2, job.getAlpha() ,settings.isBonferroniTTestSelected(), settings.getRequiredRunsForSteadyState());
         this.tData = new ArrayList<>();
+        this.job = getJob();
     }
 
     @Override
@@ -87,6 +89,11 @@ public class TTest extends GenericTest implements Initializable {
     }
 
     @Override
+    protected void calculateTest(Run run, List<Section> resultSections) {
+
+    }
+
+    @Override
     protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
         TDistribution t = new TDistribution(job.getData().size() * 2 - 2);
         this.tCrit = t.inverseCumulativeProbability(1 - this.alpha / 2.0);
@@ -119,6 +126,11 @@ public class TTest extends GenericTest implements Initializable {
     @Override
     protected boolean isWithinThreshold(double value) {
         return value < this.tCrit;
+    }
+
+    @Override
+    protected double extractValue(Section section) {
+        return 0;
     }
 
     @Override

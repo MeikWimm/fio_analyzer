@@ -17,15 +17,13 @@
          <children>
             <TableView fx:id="conIntTable" prefHeight="600.0" prefWidth="600.0">
               <columns>
-                <TableColumn id="runsColumn" fx:id="runsColumn" prefWidth="52.0" text="Runs" />
+                <TableColumn id="runsColumn" fx:id="runsColumn" prefWidth="52.0" text="Run" />
                   <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="105.0" text="Average Speed" />
                 <TableColumn id="intervalFromColumn" fx:id="intervalFromColumn" prefWidth="116.0" text="Interval (From)" />
                   <TableColumn id="intervalToColumn" fx:id="intervalToColumn" prefWidth="110.0" text="Interval (To)" />
                   <TableColumn id="plusMinusValue" fx:id="plusMinusValueColumn" prefWidth="98.0" text="±" />
-                  <TableColumn id="standardDeviationColumn" fx:id="standardDeviationColumn" prefWidth="116.0" text="Standard Deviation" />
-                  <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="125.0" text="Group" />
-                  <TableColumn id="overlappingColumn" fx:id="overlappingColumn" prefWidth="107.0" text="Does overlap?" />
-                  <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="124.0" text="Nullhypothesis" />
+                  <TableColumn id="standardDeviationColumn" fx:id="standardDeviationColumn" prefWidth="150.0" text="Standard Deviation" />
+                  <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="176.0" text="Nullhypothesis" />
               </columns>
             </TableView>
          </children>

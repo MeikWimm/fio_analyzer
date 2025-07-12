@@ -1,6 +1,5 @@
 package de.unileipzig.atool;
 
-import de.unileipzig.atool.Analysis.GenericTest;
 import javafx.beans.binding.Bindings;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.LineChart;
@@ -41,24 +40,24 @@ public abstract class Utils {
         };
     }
 
-    public static Callback<TableColumn<Run, Double>, TableCell<Run, Double>> getStatusCellFactory(double threshold) {
-        return (TableColumn<Run, Double> col) -> new TableCell<>() {
-            @Override
-            public void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item == null) {
-                    setText("");
-                    setStyle("");
-                } else if (item > threshold) {
-                    setStyle("-fx-background-color: #fb7157;");
-                    setText(String.format(Locale.US,"%.2f", item));
-                } else {
-                    setStyle("-fx-background-color: #5fd85f;");
-                    setText(String.format(Locale.US,"%.2f", item));
-                }
-            }
-        };
-    }
+//    public static Callback<TableColumn<Run, Double>, TableCell<Run, Double>> getStatusCellFactory(double threshold) {
+//        return (TableColumn<Run, Double> col) -> new TableCell<>() {
+//            @Override
+//            public void updateItem(Double item, boolean empty) {
+//                super.updateItem(item, empty);
+//                if (item == null) {
+//                    setText("");
+//                    setStyle("");
+//                } else if (item > threshold) {
+//                    setStyle("-fx-background-color: #fb7157;");
+//                    setText(String.format(Locale.US,"%.2f", item));
+//                } else {
+//                    setStyle("-fx-background-color: #5fd85f;");
+//                    setText(String.format(Locale.US,"%.2f", item));
+//                }
+//            }
+//        };
+//    }
 
     public static Callback<TableColumn<Run, Boolean>, TableCell<Run, Boolean>> getBooleanCellFactory() {
         return (TableColumn<Run, Boolean> col) -> new TableCell<>() {
@@ -100,6 +99,8 @@ public abstract class Utils {
             return null;
         }
     }
+
+    
 
     public static class SafeIntegerStringConverter extends IntegerStringConverter {
         @Override
@@ -232,6 +233,47 @@ public abstract class Utils {
                 Bindings.when(row.emptyProperty())
                         .then((ContextMenu) null)
                         .otherwise(rowMenu)
+            );
+
+            return row;
+        }
+    }
+
+    public static class CustomRunTableRowFactory implements Callback<TableView<Run>, TableRow<Run>> {
+
+        // A descriptor class for each menu item to be added later
+        private static class MenuItemDescriptor {
+            String name;
+            BiConsumer<TableRow<Run>, TableView<Run>> handler;
+
+            MenuItemDescriptor(String name, BiConsumer<TableRow<Run>, TableView<Run>> handler) {
+                this.name = name;
+                this.handler = handler;
+            }
+        }
+
+        private final List<MenuItemDescriptor> menuItemDescriptors = new ArrayList<>();
+
+        public void addMenuItem(String name, BiConsumer<TableRow<Run>, TableView<Run>> handler) {
+            menuItemDescriptors.add(new MenuItemDescriptor(name, handler));
+        }
+
+        @Override
+        public TableRow<Run> call(TableView<Run> table) {
+            final TableRow<Run> row = new TableRow<>();
+            final ContextMenu rowMenu = new ContextMenu();
+
+            // Build actual MenuItems using row and table
+            for (MenuItemDescriptor descriptor : menuItemDescriptors) {
+                MenuItem item = new MenuItem(descriptor.name);
+                item.setOnAction(e -> descriptor.handler.accept(row, table));
+                rowMenu.getItems().add(item);
+            }
+
+            row.contextMenuProperty().bind(
+                    Bindings.when(row.emptyProperty())
+                            .then((ContextMenu) null)
+                            .otherwise(rowMenu)
             );
 
             return row;

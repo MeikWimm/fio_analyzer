@@ -16,13 +16,8 @@ import java.util.List;
 import java.util.logging.Level;
 
 public abstract class GenericTest {
-    public static final byte ACCEPTED = 1;
-    public static final byte REJECTED = 0;
-    public static final byte UNDEFINED = -1;
-
     private final String className = this.getClass().getSimpleName();
-    protected Job job;
-    private final List<List<Run>> groups;
+    private Job job;
     protected List<List<Run>> resultGroups;
     private final List<Run> resultRuns;
     protected List<Run> possibleSteadyStateRuns;
@@ -35,11 +30,16 @@ public abstract class GenericTest {
     private PostHocTest postHocTest;
     private Scene scene;
     protected final Charter charter;
+    private final List<Run> runs;
 
     public GenericTest(Job job, int skipFirstRun, boolean skipGroup, int groupSize, double alpha, boolean applyBonferroni, int thresholdSectionsForSteadyState) {
         this.job = new Job(job);
+        this.runs = this.job.getRuns();
         this.job.prepareSkippedData(skipFirstRun);
-        this.groups = Job.setupGroups(this.job, skipGroup, groupSize);
+        for ( Run run : this.job.getRuns() ) {
+            List<List<Section>> groups = Run.setupGroups(run, skipGroup, groupSize);
+            run.setGroups(groups);
+        }
         this.groupSize = groupSize;
         this.resultGroups = new ArrayList<>();
         this.resultRuns = new ArrayList<>();
@@ -65,9 +65,10 @@ public abstract class GenericTest {
     }
 
     private void recalculateAlpha() {
-        this.alpha = this.alpha / this.groups.size();
+        this.alpha = this.alpha / this.runs.getFirst().getSections().size();
     }
 
+    protected abstract void calculateTest(Run run, List<Section> resultSections);
     protected abstract void calculateTest(List<List<Run>> groups, List<Run> resultRuns);
 
     protected abstract double extractValue(Run run);
@@ -84,78 +85,58 @@ public abstract class GenericTest {
     }
 
 
-    protected void checkForHypothesis(){
-        for (Run run : this.resultRuns) {
-            run.setNullhypothesis(isWithinThreshold(extractValue(run)));
-        }
+    protected void checkForHypothesis(Run run, List<Section> resultSections){
+        for (Section section : resultSections) {
+            section.setNullhypothesis(isWithinThreshold(extractValue(section)));
 
-        for(List<Run> group : this.groups){
-            Run run = group.getFirst();
-            if(run.getNullhypothesis()){
-                this.resultGroups.add(group);
+            if(section.getNullhypothesis()){
+                run.setNullhypothesis(true);
             }
         }
     }
 
+    protected abstract double extractValue(Section section);
+
     protected void calculateSteadyState() {
-        possibleSteadyStateRuns = new ArrayList<>(thresholdSectionsForSteadyState);
-        boolean isSteadyStateFound;
 
-        if((this.groups.size() < thresholdSectionsForSteadyState)){
-            return;
-        }
-
-        for (int j = 0; j < this.resultRuns.size(); j++) {
-            isSteadyStateFound = true;
-            int counter = 0;
-            for (int i = j; i < j + thresholdSectionsForSteadyState; i++) {
-                if(i < this.resultRuns.size()){
-                    Run run = this.resultRuns.get(i);
-                    double VALUE = extractValue(run);
-                    if (isWithinThreshold(VALUE)) {
-                        possibleSteadyStateRuns.add(run);
-                    } else {
-                        isSteadyStateFound = false;
-                        j = j + counter;
-                        possibleSteadyStateRuns.clear();
-                        break;
-                    }
-                    counter++;
-                }
-            }
-
-            if(isSteadyStateFound){
-                break;
-            }
-        }
     }
 
     public Run getSteadyStateRun(){
-        if(this.possibleSteadyStateRuns.isEmpty()){
-            return null;
-        } else {
-            return this.possibleSteadyStateRuns.getFirst();
-        }
+//        if(this.possibleSteadyStateRuns.isEmpty()){
+//            return null;
+//        } else {
+//            return this.possibleSteadyStateRuns.getFirst();
+//        }
+        return null;
     }
 
     public void calculate(){
-        if(isDataApplicable()){
-            Logging.log(Level.INFO, className, "Calculating Job " + this.job.getFileName());
-            this.calculateTest(this.groups,this.resultRuns);
-            this.checkForHypothesis();
-            this.calculateSteadyState();
-            this.calculatePostHoc();
-            Logging.log(Level.INFO, className, "Done calculating.");
-        } else {
-            Logging.log(Level.WARNING, className,"Loaded data can't be calculated!");
+        for(Run run: this.runs){
+            List<Section> resultSections = new ArrayList<>();
+            if(isDataApplicable(run)){
+                this.calculateTest(run, resultSections);
+                this.checkForHypothesis(run, resultSections);
+                if(run.getNullhypothesis()){
+                    this.resultRuns.add(run);
+                }
+                //this.calculatePostHoc();
+            } else {
+                Logging.log(Level.WARNING, className,"Loaded data can't be calculated!");
+            }
         }
 
+        for(Run run: this.runs){
+            calculateSteadyState();
+        }
+
+        Logging.log(Level.INFO, className, "Done calculating.");
     }
 
-    private boolean isDataApplicable() {
+    private boolean isDataApplicable(Run run) {
         //check for FDistribution
-        int num = groups.size() - 1;
-        int denom = (num + 1) * (this.job.getData().size() - 1);
+        List<List<Section>> sectionGroups = run.getGroups();
+        int num = sectionGroups.size() - 1;
+        int denom = (num + 1) * (run.getData().size() - 1);
         //FDistribution fDistribution = new FDistribution(num, denom);
 
         if(num < 0 || denom < 0){
@@ -163,7 +144,7 @@ public abstract class GenericTest {
             return false;
         }
 
-        if(groups.size() <= 1){
+        if(sectionGroups.size() <= 1){
             Logging.log(Level.WARNING, className,"Group size is smaller than 1!");
             return false;
         }
@@ -202,10 +183,6 @@ public abstract class GenericTest {
     }
 
     public abstract double getCriticalValue();
-
-    public List<List<Run>> getGroups() {
-        return groups;
-    }
 
     public ObservableList<Run> getResultRuns() {
         return FXCollections.observableArrayList(resultRuns);

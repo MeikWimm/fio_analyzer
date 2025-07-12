@@ -5,10 +5,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 
@@ -16,6 +13,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 
 public class CoV extends GenericTest implements Initializable {
     private final List<XYChart.Data<Number, Number>> covData;
@@ -26,18 +24,18 @@ public class CoV extends GenericTest implements Initializable {
     @FXML private TableView<Run> covTable;
     @FXML private TableColumn<Run, Integer> runIDColumn;
     @FXML private TableColumn<Run, Double> averageSpeedColumn;
-    @FXML private TableColumn<Run, Double> covColumn;
+    @FXML private TableColumn<Run, Boolean> covColumn;
     @FXML private TableColumn<Run, Double> startTimeColumn;
-    @FXML private TableColumn<Run, String> compareToRunColumn;
-    @FXML private Label steadyStateLabelWindowed;
+    @FXML private TableColumn<Run, Double> minimialCVColumn;
     @FXML private Label steadyStateLabel;
-    @FXML private Button showCoVWindowedGraphButton;
+    private final Job job;
 
 
     public CoV(Job job, Settings settings) {
         super(job, settings.getCovSkipRunsCounter(), settings.isCovUseAdjacentRun(), settings.getGroupSize(), job.getAlpha(), false, settings.getRequiredRunsForSteadyState());
         final int dataSizeWithRuns = job.getRuns().size() * 2;
         this.covData = new ArrayList<>(dataSizeWithRuns);
+        this.job = getJob();
         this.STEADY_STATE_COV_THRESHOLD = this.job.getCvThreshold();
     }
 
@@ -47,17 +45,27 @@ public class CoV extends GenericTest implements Initializable {
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         averageSpeedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
-        covColumn.setCellValueFactory(new PropertyValueFactory<>("CoV"));
-        covColumn.setCellFactory(Utils.getStatusCellFactory(STEADY_STATE_COV_THRESHOLD));
+        covColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
+        covColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         startTimeColumn.setCellValueFactory(new PropertyValueFactory<>("StartTime"));
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
+        minimialCVColumn.setCellValueFactory(new PropertyValueFactory<>("CoV"));
 
-        showCoVWindowedGraphButton.setOnAction(e -> drawCoV());
         labelHeader.setText(this.job.toString());
-        covTable.setItems(getResultRuns());
+        covTable.setItems(this.job.getRuns());
 
+        Utils.CustomRunTableRowFactory menuItems = new Utils.CustomRunTableRowFactory();
+        menuItems.addMenuItem("Show Run calculation", this::showCoVSections);
+
+        covTable.setRowFactory(menuItems);
+    }
+
+    public void showCoVSections(TableRow<Run> row, TableView<Run> table) {
+        Logging.log(Level.INFO, "CoV", "Showing sections for run " + row.getItem().getRunID());
+        for (Section section : row.getItem().getSections()) {
+            Logging.log(Level.INFO, "CoV", section.toString());
+        }
     }
 
     @Override
@@ -80,8 +88,14 @@ public class CoV extends GenericTest implements Initializable {
     }
 
     @Override
+    protected void calculateTest(Run run, List<Section> resultSections) {
+        calculateCoV(run, resultSections);
+
+    }
+
+    @Override
     protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
-        calculateCoV(groups, resultRuns);
+        //calculateCoV(groups, resultRuns);
     }
 
     @Override
@@ -89,23 +103,31 @@ public class CoV extends GenericTest implements Initializable {
         return "Coefficient of Variation";
     }
 
-    private void calculateCoV(List<List<Run>> groups, List<Run> resultRuns){
-        for (List<Run> group : groups) {
-            Run run = group.getFirst();
+    private void calculateCoV(Run run, List<Section> resultSections){
+        double minPossibleCV = Double.MAX_VALUE;
+
+        for (List<Section> group : run.getGroups()) {
+            Section section = group.getFirst();
             double cov = calculateCoVGroup(group);
-            run.setCoV(cov);
-            covData.add(new XYChart.Data<>(run.getRunID(), cov));
-            resultRuns.add(run);
+            section.setCoV(cov);
+            covData.add(new XYChart.Data<>(section.getID(), cov));
+            resultSections.add(section);
+
+            if(cov < minPossibleCV){
+                minPossibleCV = cov;
+            }
         }
+
+        run.setCoV(minPossibleCV);
     }
 
-    private double calculateCoVGroup(List<Run> group) {
-        double average = MathUtils.average(group);
+    private double calculateCoVGroup(List<Section> sections) {
+        double average = MathUtils.average(sections, 0);
         double n = 0;
         double sum = 0;
 
-        for (Run run : group) {
-            for (DataPoint dp : run.getData()) {
+        for (Section section : sections) {
+            for (DataPoint dp : section.getData()) {
                 sum += Math.pow(dp.data - average, 2);
                 n++;
             }
@@ -117,12 +139,17 @@ public class CoV extends GenericTest implements Initializable {
 
     @Override
     protected double extractValue(Run run) {
-        return run.getCoV();
+        return 0;
     }
 
     @Override
     protected boolean isWithinThreshold(double value) {
         return value < STEADY_STATE_COV_THRESHOLD;
+    }
+
+    @Override
+    protected double extractValue(Section section) {
+        return section.getCoV();
     }
 
     @Override

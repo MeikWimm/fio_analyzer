@@ -56,7 +56,7 @@ public abstract class PostHocTest {
 
                 postHocGroups.add(copyGroup1);
                 Run run = copyGroup1.getFirst();
-                run.setGroup(group1.getFirst().getGroup() + " | " + group2.getFirst().getGroup());
+                //run.setGroup(group1.getFirst().getGroup() + " | " + group2.getFirst().getGroup());
                 run.setGroupID(ID);
 
                 postHocGroups.add(copyGroup2);

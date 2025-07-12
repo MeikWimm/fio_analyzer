@@ -9,10 +9,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseButton;
@@ -21,6 +18,7 @@ import org.apache.commons.math3.distribution.FDistribution;
 
 import java.net.URL;
 import java.util.*;
+import java.util.logging.Level;
 
 /**
  * @author meni1999
@@ -51,11 +49,13 @@ public class Anova extends GenericTest implements Initializable {
     @FXML private TableColumn<Run, Double> FColumn;
     @FXML private TableColumn<Run, Boolean> hypothesisColumn;
     private double fCrit;
+    private final Job job;
 
     public Anova(Job job, Settings settings) {
         super(job, settings.getAnovaSkipRunsCounter(), settings.isAnovaUseAdjacentRun(), settings.getGroupSize(), job.getAlpha(), settings.isBonferroniANOVASelected() , settings.getRequiredRunsForSteadyState());
         final int dataSize = job.getData().size();
         this.anovaData = new ArrayList<>(dataSize);
+        this.job = getJob();
     }
 
     @Override
@@ -85,6 +85,18 @@ public class Anova extends GenericTest implements Initializable {
         showFGraphButton.setOnAction(e -> drawANOVAGraph());
         jobLabel.setText(this.job.toString());
         anovaTable.setItems(getResultRuns());
+        Utils.CustomRunTableRowFactory menuItems = new Utils.CustomRunTableRowFactory();
+
+        menuItems.addMenuItem("Show Run calculation", this::showAnovaSections);
+
+        anovaTable.setRowFactory(menuItems);
+    }
+
+    public void showAnovaSections(TableRow<Run> row, TableView<Run> table) {
+        Logging.log(Level.INFO, "ANOVA", "Showing sections for run " + row.getItem().getRunID());
+        for (Section section : row.getItem().getSections()) {
+            Logging.log(Level.INFO, "ANOVA", section.toString());
+        }
     }
 
     private void updateLabeling(Run run) {
@@ -115,9 +127,10 @@ public class Anova extends GenericTest implements Initializable {
     }
 
     @Override
-    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
+    protected void calculateTest(Run run, List<Section> resultSections) {
+        List<List<Section>> groups = run.getGroups();
         int num = groups.size() - 1;
-        int denom = (num + 1) * (this.job.getData().size() - 1);
+        int denom = (num + 1) * (run.getData().size() - 1);
 
         FDistribution fDistribution = new FDistribution(num, denom);
         fCrit = fDistribution.inverseCumulativeProbability(1.0 - alpha);
@@ -125,46 +138,51 @@ public class Anova extends GenericTest implements Initializable {
         double ssa = 0.0;
 
 
-        for (List<Run> group : groups) {
-            for (Run run : group) {
-                double averageSpeedOfRun = run.getAverageSpeed();
-                ssa += Math.pow(averageSpeedOfRun - MathUtils.average(group), 2);
-                ssa *= run.getData().size();
-                run.setSSA(ssa);
+        for (List<Section> group : groups) {
+            for (Section section : group) {
+                double averageSpeedOfRun = section.getAverageSpeed();
+                ssa += Math.pow(averageSpeedOfRun - MathUtils.average(group , 0), 2);
+                ssa *= section.getData().size();
+                section.setSSA(ssa);
                 ssa = 0;
             }
         }
 
 
-        for (List<Run> group : groups) {
-            for (Run run : group) {
-                for (DataPoint dp : run.getData()) {
-                    sse += (Math.pow((dp.data - MathUtils.average(group)), 2));
+        for (List<Section> group : groups) {
+            for (Section section : group) {
+                for (DataPoint dp : section.getData()) {
+                    sse += (Math.pow((dp.data - MathUtils.average(group, 0)), 2));
                 }
-                run.setSSE(sse);
+                section.setSSE(sse);
                 sse = 0;
             }
         }
 
         double fValue;
-        for (List<Run> group : groups) {
-            Run run = group.getFirst();
-            double s_2_a = run.getSSA() / (groups.size() - 1);
-            double s_2_e = run.getSSE() / (groups.size() * (run.getData().size() - 1));
+        for (List<Section> group : groups) {
+            Section section = group.getFirst();
+            double s_2_a = section.getSSA() / (groups.size() - 1);
+            double s_2_e = section.getSSE() / (groups.size() * (section.getData().size() - 1));
             fValue = s_2_a / s_2_e;
-            run.setF(fValue);
-            run.setP(1.0 - fDistribution.cumulativeProbability(fValue));
-            resultRuns.add(run);
-            anovaData.add(new XYChart.Data<>(run.getID(), fValue));
+            section.setF(fValue);
+            section.setP(1.0 - fDistribution.cumulativeProbability(fValue));
+            resultSections.add(section);
+            anovaData.add(new XYChart.Data<>(section.getID(), fValue));
         }
 
         double totalSSE = 0;
-        for (Run run : resultRuns) {
-            totalSSE += run.getSSE();
+        for (Section section : resultSections) {
+            totalSSE += section.getSSE();
         }
 
         this.job.setSSE(totalSSE);
         this.job.setMSE(totalSSE / denom);
+    }
+
+    @Override
+    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
+
     }
 
     @Override
@@ -175,6 +193,11 @@ public class Anova extends GenericTest implements Initializable {
     @Override
     protected boolean isWithinThreshold(double value) {
         return value < this.fCrit;
+    }
+
+    @Override
+    protected double extractValue(Section section) {
+        return section.getF();
     }
 
     public double getCriticalValue() {
