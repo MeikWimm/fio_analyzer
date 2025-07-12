@@ -1,6 +1,7 @@
 package de.unileipzig.atool.Analysis;
 
 import de.unileipzig.atool.Run;
+import de.unileipzig.atool.Section;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -19,14 +20,14 @@ import java.util.logging.Logger;
 public abstract class PostHocTest {
     private GenericTest test;
     protected Run steadyStateRun;
-    protected Run anovaSteadyStateRun;
+    protected Section steadyStateSection;
     private boolean isFirst = true;
     private Scene scene;
     protected final Charter charter;
-    protected final List<List<Run>> firstGroup;
-    protected final List<List<Run>> secondGroup;
-    private final List<List<Run>> postHocGroups;
-    private final List<Run> resultRuns;
+    protected final List<List<Section>> firstGroup;
+    protected final List<List<Section>> secondGroup;
+    private final List<List<Section>> postHocGroups;
+    private final List<Section> resultRuns;
 
     public PostHocTest(){
         super();
@@ -37,27 +38,27 @@ public abstract class PostHocTest {
         this.resultRuns = new ArrayList<>();
     }
 
-    public void setupGroups(List<List<Run>> resultGroups) {
+    public void setupGroups(List<List<Section>> resultGroups) {
         int ID = 1;
         for (int i = 0; i < resultGroups.size() - 1; i++) {
             for (int j = i + 1; j < resultGroups.size(); j++) {
-                List<Run> group1 = resultGroups.get(i);
-                List<Run> group2 = resultGroups.get(j);
-                List<Run> copyGroup1 = new ArrayList<>();
-                List<Run> copyGroup2 = new ArrayList<>();
+                List<Section> group1 = resultGroups.get(i);
+                List<Section> group2 = resultGroups.get(j);
+                List<Section> copyGroup1 = new ArrayList<>();
+                List<Section> copyGroup2 = new ArrayList<>();
 
-                for (Run run : group1) {
-                    copyGroup1.add(new Run(run));
+                for (Section section : group1) {
+                    copyGroup1.add(new Section(section));
                 }
 
-                for (Run run : group2) {
-                    copyGroup2.add(new Run(run));
+                for (Section section : group2) {
+                    copyGroup2.add(new Section(section));
                 }
 
                 postHocGroups.add(copyGroup1);
-                Run run = copyGroup1.getFirst();
+                Section section = copyGroup1.getFirst();
                 //run.setGroup(group1.getFirst().getGroup() + " | " + group2.getFirst().getGroup());
-                run.setGroupID(ID);
+                section.setGroupID(ID);
 
                 postHocGroups.add(copyGroup2);
 
@@ -80,26 +81,26 @@ public abstract class PostHocTest {
         }
     }
 
-    private void checkSteadyStateRun(List<Run> group1, List<Run> group2){
-        Run savedHypothesisRun = group1.getFirst();
-        List<Run> possibleRuns = this.test.getPossibleSteadyStateRuns();
-        if(possibleRuns == null || possibleRuns.isEmpty()){
+    private void checkSteadyStateRun(List<Section> group1, List<Section> group2){
+        Section savedHypothesisRun = group1.getFirst();
+        List<Section> possibleSections = this.test.getAcceptedSections();
+        if(possibleSections == null || possibleSections.isEmpty()){
             return;
         }
 
-        anovaSteadyStateRun = possibleRuns.getFirst();
+        steadyStateSection = possibleSections.getFirst();
 
-        for (Run possibleRun : possibleRuns) {
-            boolean found = isFound(group1, group2, possibleRun);
+        for (Section possibleRun : possibleSections) {
+            //boolean found = isFound(group1, group2, possibleRun);
 
-            if(found){
+            //if(found){
                 if(savedHypothesisRun.getNullhypothesis()){
                     if(isFirst){
                         isFirst = false;
                         steadyStateRun = possibleRun;
                     }
                 }
-            }
+            //}
         }
     }
 
@@ -129,47 +130,46 @@ public abstract class PostHocTest {
         checkSteadyStateRun();
     }
 
-    protected abstract double extractValue(Run run);
+    protected abstract double extractValue(Section section);
 
     protected abstract boolean isWithinThreshold(double value);
 
     private void checkForHypothesis() {
-        for(Run run: resultRuns){
+        for(Section run: resultRuns){
             run.setNullhypothesis(isWithinThreshold(extractValue(run)));
         }
     }
 
-    public ObservableList<Run> getPostHocRuns() {
+    public ObservableList<Section> getPostHocRuns() {
         return FXCollections.observableList(resultRuns);
     }
 
-
-    private static boolean isFound(List<Run> group1, List<Run> group2, Run possibleRun) {
-        int ID = possibleRun.getID();
-        boolean found = false;
-        Run firstOfGroup1 = group1.getFirst();
-        Run lastOfGroup1 = group1.getLast();
-        Run firstOfGroup2 = group2.getFirst();
-
-        // Found if the last run of group1 is the same as the first run of group2
-        // i.e., 4-5 | 5-6 -> 4 possible steady state
-        if(lastOfGroup1.getID() == ID + 1 && firstOfGroup2.getID() == ID + 1){
-            found = true;
-        }
-        // Found if the last run of group1 is the same as the second run of group2
-        // i.e., 4-5 | 6-7 -> 4 possible steady state
-        if(lastOfGroup1.getID() == ID + 1 && firstOfGroup2.getID() - 1 == ID + 1){
-            found = true;
-        }
-
-        // Found if the first run of group1 is the same as the second run of group2
-        // i.e., 10-14 | 15-19 -> 10 possible steady state if both groups are accepted
-        if(firstOfGroup1.getID() == ID && lastOfGroup1.getID() == firstOfGroup2.getID() - 1){
-            found = true;
-        }
-
-        return found;
-    }
+//    private static boolean isFound(List<Section> group1, List<Section> group2, Run possibleRun) {
+//        int ID = possibleRun.getID();
+//        boolean found = false;
+//        Section firstOfGroup1 = group1.getFirst();
+//        Section lastOfGroup1 = group1.getLast();
+//        Section firstOfGroup2 = group2.getFirst();
+//
+//        // Found if the last run of group1 is the same as the first run of group2
+//        // i.e., 4-5 | 5-6 -> 4 possible steady state
+//        if(lastOfGroup1.getID() == ID + 1 && firstOfGroup2.getID() == ID + 1){
+//            found = true;
+//        }
+//        // Found if the last run of group1 is the same as the second run of group2
+//        // i.e., 4-5 | 6-7 -> 4 possible steady state
+//        if(lastOfGroup1.getID() == ID + 1 && firstOfGroup2.getID() - 1 == ID + 1){
+//            found = true;
+//        }
+//
+//        // Found if the first run of group1 is the same as the second run of group2
+//        // i.e., 10-14 | 15-19 -> 10 possible steady state if both groups are accepted
+//        if(firstOfGroup1.getID() == ID && lastOfGroup1.getID() == firstOfGroup2.getID() - 1){
+//            found = true;
+//        }
+//
+//        return found;
+//    }
 
 
     // Optional method for setting labels, can be overridden

@@ -9,16 +9,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 import java.net.URL;
 import java.util.*;
+import java.util.logging.Level;
 
 
 /**
@@ -62,10 +60,21 @@ public class MannWhitney extends GenericTest implements Initializable {
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
-        uTestTable.setItems(getResultRuns());
+        uTestTable.setItems(this.job.getRuns());
         labelHeader.setText(this.job.toString());
+        Utils.CustomRunTableRowFactory menuItems = new Utils.CustomRunTableRowFactory();
 
+        menuItems.addMenuItem("Show Run calculation", this::showMannWhitneySections);
+
+        uTestTable.setRowFactory(menuItems);
         drawUTestButton.setOnAction(e -> draw());
+    }
+
+    public void showMannWhitneySections(TableRow<Run> row, TableView<Run> table) {
+        Logging.log(Level.INFO, "U-Test", "Showing sections for run " + row.getItem().getRunID());
+        for (Section section : row.getItem().getSections()) {
+            Logging.log(Level.INFO, "U-Test", section.toString());
+        }
     }
 
     @Override
@@ -98,7 +107,7 @@ public class MannWhitney extends GenericTest implements Initializable {
         return "Mann-Whitney";
     }
 
-    private void calculatePair(List<Run> resultRuns, Run run1, Run run2) {
+    private void calculatePair(Run run, Section run1, Section run2, List<Section> resultSections) {
         List<DataPoint.RankedDataPoint> rankedData1 = new ArrayList<>();
         List<DataPoint.RankedDataPoint> rankedData2 = new ArrayList<>();
         NormalDistribution n = new NormalDistribution();
@@ -171,19 +180,13 @@ public class MannWhitney extends GenericTest implements Initializable {
 
         run1.setP(pCalc);
         run1.setZ(z);
-        uTestData.add(new XYChart.Data<>(run1.getRunID(), z));
-        resultRuns.add(run1);
-
+        //uTestData.add(new XYChart.Data<>(run1.getRunID(), z));
+        resultSections.add(run1);
     }
 
     @Override
     public double getCriticalValue() {
         return this.zCrit;
-    }
-
-    @Override
-    protected void calculateTest(Run run, List<Section> resultSections) {
-
     }
 
     @Override
@@ -195,7 +198,21 @@ public class MannWhitney extends GenericTest implements Initializable {
             if (i < runs.size() - 1) {
                 Run run1 = runs.get(i);
                 Run run2 = runs.get(i + 1);
-                calculatePair(resultRuns, run1, run2);
+                //calculatePair(resultRuns, run1, run2, resultSections);
+            }
+        }
+    }
+
+    @Override
+    protected void calculateTest(Run run, List<Section> resultSections) {
+        if (run.getSections().size() <= 1) return;
+        List<Section> sections = run.getSections();
+
+        for (int i = 0; i < sections.size(); i ++) {
+            if (i < sections.size() - 1) {
+                Section run1 = sections.get(i);
+                Section run2 = sections.get(i + 1);
+                calculatePair(run, run1, run2, resultSections);
             }
         }
     }
@@ -212,7 +229,7 @@ public class MannWhitney extends GenericTest implements Initializable {
 
     @Override
     protected double extractValue(Section section) {
-        return 0;
+        return section.getZ();
     }
 
     @Override

@@ -1,15 +1,7 @@
 package de.unileipzig.atool;
 
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-
-import java.io.IOException;
-import java.net.URL;
 import java.util.List;
-import java.util.ResourceBundle;
+
 
 public class Section{
     private final List<DataPoint> data;
@@ -31,7 +23,7 @@ public class Section{
     private double cov = Run.UNDEFINED_DOUBLE_VALUE;
     private double qHSD = Run.UNDEFINED_DOUBLE_VALUE;
     private double p = Run.UNDEFINED_DOUBLE_VALUE;
-    //private int groupID = Run.UNDEFINED_INTEGER;
+    private int groupID = Run.UNDEFINED_INTEGER;
     private String group = "UNDEFINED";
     private List<Section> sections;
 
@@ -39,6 +31,38 @@ public class Section{
         this.data = data;
         this.ID = ID;
         calculateSection();
+    }
+
+    public Section(Section other){
+        this.data = other.data;
+        this.ID = other.ID;
+        this.averageSpeed = other.averageSpeed;
+        this.standardDeviation = other.standardDeviation;
+        this.startTime = other.startTime;
+        this.endTime = other.endTime;
+        this.duration = other.duration;
+        this.isNullhypothesis = other.isNullhypothesis;
+        this.isOverlapping = other.isOverlapping;
+        this.F = other.F;
+        this.zVal = other.zVal;
+        this.tVal = other.tVal;
+        this.cov = other.cov;
+        this.qHSD = other.qHSD;
+        this.p = other.p;
+        this.groupID = other.groupID;
+        this.group = other.group;
+        this.sections = other.sections;
+        this.sse = other.sse;
+        this.ssa = other.ssa;
+        this.qVal = other.qVal;
+        this.P = other.P;
+        this.F = other.F;
+        this.tVal = other.tVal;
+        this.cov = other.cov;
+        this.qHSD = other.qHSD;
+        this.p = other.p;
+        this.groupID = other.groupID;
+        this.group = other.group;
     }
 
     private void calculateSection(){
@@ -143,7 +167,7 @@ public class Section{
 
     @Override
     public String toString() {
-        return String.format("Section %d: CV: %f, F: %f", ID, cov, F);
+        return String.format("Section %d: CV: %f, F: %f, Z: %f, T: %f", ID, cov, F, zVal, tVal);
     }
 
     public double getCoV() {
@@ -196,5 +220,9 @@ public class Section{
 
     public void setP(double p) {
         this.p = p;
+    }
+
+    public void setGroupID(int id) {
+        this.groupID = id;
     }
 }

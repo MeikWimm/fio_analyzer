@@ -134,21 +134,21 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     }
 
     protected void setLabeling() {
-        if(steadyStateRun == null && anovaSteadyStateRun == null){
+        if(steadyStateRun == null && steadyStateSection == null){
             evalLabel.setText("No steady state run found.");
             return;
         }
 
-        anovaSteadyStateLabel.setText("Run " + anovaSteadyStateRun.getID());
+        anovaSteadyStateLabel.setText("Run " + steadyStateSection.getID());
 
-        if(steadyStateRun == null && anovaSteadyStateRun != null){
-            evalLabel.setText("Run " + anovaSteadyStateRun.getID() + " most likely in transient state.");
+        if(steadyStateRun == null && steadyStateSection != null){
+            evalLabel.setText("Run " + steadyStateSection.getID() + " most likely in transient state.");
         }
 
         if(steadyStateRun != null){
-            if(steadyStateRun.getID() != anovaSteadyStateRun.getID()){
+            if(steadyStateRun.getID() != steadyStateSection.getID()){
                 tukeySteadyStateLabel.setText("Run " + steadyStateRun.getID());
-                evalLabel.setText("Run " + steadyStateRun.getID() + " more likely in steady state than Run " + anovaSteadyStateRun.getID() + ".");
+                evalLabel.setText("Run " + steadyStateRun.getID() + " more likely in steady state than Run " + steadyStateSection.getID() + ".");
             } else {
                 tukeySteadyStateLabel.setText("Run " + steadyStateRun.getID());
                 evalLabel.setText("Run " + steadyStateRun.getID() + " is in steady state.");

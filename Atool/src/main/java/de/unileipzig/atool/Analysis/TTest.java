@@ -9,16 +9,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.apache.commons.math3.distribution.TDistribution;
 
 import java.net.URL;
 import java.util.*;
+import java.util.logging.Level;
 
 
 /**
@@ -65,7 +63,20 @@ public class TTest extends GenericTest implements Initializable {
         labelHeader.setText(this.job.toString());
 
         drawTTest.setOnAction(e -> drawTGraph());
-        TTable.setItems(getResultRuns());
+        TTable.setItems(this.job.getRuns());
+
+        Utils.CustomRunTableRowFactory menuItems = new Utils.CustomRunTableRowFactory();
+
+        menuItems.addMenuItem("Show Run calculation", this::showTTableSections);
+
+        TTable.setRowFactory(menuItems);
+    }
+
+    public void showTTableSections(TableRow<Run> row, TableView<Run> table) {
+        Logging.log(Level.INFO, "T-Test", "Showing sections for run " + row.getItem().getRunID());
+        for (Section section : row.getItem().getSections()) {
+            Logging.log(Level.INFO, "T-Test", section.toString());
+        }
     }
 
     @Override
@@ -90,32 +101,32 @@ public class TTest extends GenericTest implements Initializable {
 
     @Override
     protected void calculateTest(Run run, List<Section> resultSections) {
+        TDistribution t = new TDistribution(run.getData().size() * 2 - 2);
+        this.tCrit = t.inverseCumulativeProbability(1 - getAlpha() / 2.0);
 
+
+        for (int i = 0; i < run.getSections().size() - 1; i++) {
+            Section section1 = run.getSections().get(i);
+            Section section2 = run.getSections().get(i + 1);
+
+            double sse = calculateSSE(section1, section2);
+            double runVariance1 = calculateVariance(section1, sse);
+            double runVariance2 = calculateVariance(section2, sse);
+            double runSize = this.job.getData().size();
+
+            double nominator = (section1.getAverageSpeed() - section2.getAverageSpeed());
+            double denominator = Math.sqrt((runVariance1 / runSize) + (runVariance2 / runSize));
+            double tVal = Math.abs(nominator / denominator);
+            section1.setT(tVal);
+
+            tData.add(new XYChart.Data<>(section1.getID(), tVal));
+            resultSections.add(section1);
+        }
     }
 
     @Override
     protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
-        TDistribution t = new TDistribution(job.getData().size() * 2 - 2);
-        this.tCrit = t.inverseCumulativeProbability(1 - this.alpha / 2.0);
 
-
-        for (int i = 0; i < job.getRuns().size() - 1; i++) {
-            Run run = job.getRuns().get(i);
-            Run run2 = job.getRuns().get(i + 1);
-
-            double sse = calculateSSE(run, run2);
-            double runVariance1 = calculateVariance(run, sse);
-            double runVariance2 = calculateVariance(run2, sse);
-            double runSize = this.job.getData().size();
-
-            double nominator = (run.getAverageSpeed() - run2.getAverageSpeed());
-            double denominator = Math.sqrt((runVariance1 / runSize) + (runVariance2 / runSize));
-            double tVal = Math.abs(nominator / denominator);
-            run.setT(tVal);
-
-            tData.add(new XYChart.Data<>(run.getID(), tVal));
-            resultRuns.add(run);
-        }
     }
 
     @Override
@@ -143,19 +154,19 @@ public class TTest extends GenericTest implements Initializable {
         return this.tCrit;
     }
 
-    private double calculateVariance(Run run, double sse) {
-        return (1.0 / (run.getData().size() - 1.0)) * sse;
+    private double calculateVariance(Section section, double sse) {
+        return (1.0 / (section.getData().size() - 1.0)) * sse;
     }
 
-    private double calculateSSE(Run run1, Run run2) {
+    private double calculateSSE(Section s1, Section s2) {
         double sse = 0;
-        double averageSpeed = (run1.getAverageSpeed() + run2.getAverageSpeed()) / 2.0;
+        double averageSpeed = (s1.getAverageSpeed() + s2.getAverageSpeed()) / 2.0;
 
-        for (DataPoint dp : run1.getData()) {
+        for (DataPoint dp : s1.getData()) {
             sse += (Math.pow((dp.data - averageSpeed), 2));
         }
 
-        for (DataPoint dp : run2.getData()) {
+        for (DataPoint dp : s2.getData()) {
             sse += (Math.pow((dp.data - averageSpeed), 2));
         }
 

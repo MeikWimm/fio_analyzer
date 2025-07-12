@@ -18,9 +18,9 @@ import java.util.logging.Level;
 public abstract class GenericTest {
     private final String className = this.getClass().getSimpleName();
     private Job job;
-    protected List<List<Run>> resultGroups;
+    protected List<List<Section>> resultGroupsSections;
     private final List<Run> resultRuns;
-    protected List<Run> possibleSteadyStateRuns;
+    protected List<Section> possibleSteadyStateRuns;
     protected double alpha;
     protected boolean skipGroup;
     protected int thresholdSectionsForSteadyState;
@@ -41,7 +41,7 @@ public abstract class GenericTest {
             run.setGroups(groups);
         }
         this.groupSize = groupSize;
-        this.resultGroups = new ArrayList<>();
+        this.resultGroupsSections = new ArrayList<>();
         this.resultRuns = new ArrayList<>();
         this.possibleSteadyStateRuns = new ArrayList<>();
         this.charter = new Charter();
@@ -101,13 +101,12 @@ public abstract class GenericTest {
 
     }
 
-    public Run getSteadyStateRun(){
-//        if(this.possibleSteadyStateRuns.isEmpty()){
-//            return null;
-//        } else {
-//            return this.possibleSteadyStateRuns.getFirst();
-//        }
-        return null;
+    public Section getSteadyStateRun(){
+        if(this.possibleSteadyStateRuns.isEmpty()){
+            return null;
+        } else {
+            return this.possibleSteadyStateRuns.getFirst();
+        }
     }
 
     public void calculate(){
@@ -116,10 +115,10 @@ public abstract class GenericTest {
             if(isDataApplicable(run)){
                 this.calculateTest(run, resultSections);
                 this.checkForHypothesis(run, resultSections);
-                if(run.getNullhypothesis()){
-                    this.resultRuns.add(run);
-                }
-                //this.calculatePostHoc();
+//                if(run.getNullhypothesis()){
+//                    this.resultRuns.add(run);
+//                }
+                this.calculatePostHoc(resultSections);
             } else {
                 Logging.log(Level.WARNING, className,"Loaded data can't be calculated!");
             }
@@ -152,21 +151,21 @@ public abstract class GenericTest {
         return true;
     }
 
-    public List<Run> getPossibleSteadyStateRuns() {
+    public List<Section> getAcceptedSections() {
         return possibleSteadyStateRuns;
     }
 
-    public void calculatePostHoc() {
+    public void calculatePostHoc(List<Section> resultSections) {
         if (postHocTest == null) {
             return;
         }
 
-        if (this.resultGroups.size() < 2) {
+        if (this.resultGroupsSections.size() < 2) {
             Logging.log(Level.WARNING, className, " group size of test result is smaller than 2!");
             return;
         }
 
-        postHocTest.setupGroups(this.resultGroups);
+        postHocTest.setupGroups(this.resultGroupsSections);
         postHocTest.calculate();
     }
 
@@ -188,8 +187,8 @@ public abstract class GenericTest {
         return FXCollections.observableArrayList(resultRuns);
     }
 
-    public List<List<Run>> getResultGroups() {
-        return resultGroups;
+    public List<List<Section>> getResultGroups() {
+        return resultGroupsSections;
     }
 
     public boolean isApplyBonferroni() {

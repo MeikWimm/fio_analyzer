@@ -15,9 +15,8 @@
             <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="52.0" text="Run" />
             <TableColumn id="startTimeColumn" fx:id="startTimeColumn" prefWidth="119.0" text="Start time" />
             <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="123.0" text="Measurment" visible="false" />
-            <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="302.0" text="Compare to Run" />
-            <TableColumn id="FColumn" fx:id="FColumn" prefWidth="157.0" text="F (calculated)" />
-            <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="242.0" text="Nullhypothesis" />
+            <TableColumn id="FColumn" fx:id="FColumn" prefWidth="208.0" text="Max F" />
+            <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="311.0" text="Nullhypothesis" />
          </columns>
       </TableView>
       <Pane id="anovaPane" fx:id="anovaPane" prefHeight="150.0" prefWidth="1000.0">

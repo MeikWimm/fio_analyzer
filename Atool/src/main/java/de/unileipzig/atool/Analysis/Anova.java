@@ -84,7 +84,7 @@ public class Anova extends GenericTest implements Initializable {
 
         showFGraphButton.setOnAction(e -> drawANOVAGraph());
         jobLabel.setText(this.job.toString());
-        anovaTable.setItems(getResultRuns());
+        anovaTable.setItems(this.job.getRuns());
         Utils.CustomRunTableRowFactory menuItems = new Utils.CustomRunTableRowFactory();
 
         menuItems.addMenuItem("Show Run calculation", this::showAnovaSections);
