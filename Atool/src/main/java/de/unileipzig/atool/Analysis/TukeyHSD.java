@@ -17,6 +17,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import net.sourceforge.jdistlib.Tukey;
+import org.apache.commons.math3.stat.inference.OneWayAnova;
 
 
 /**
@@ -103,33 +104,96 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     }
 
     @Override
-    protected void calculateTest(List<Section> firstGroup, List<Section> secondGroup, List<Section> resultSections){
-        Section section = firstGroup.getFirst();
-        double overallMean = getOverallMean(firstGroup, secondGroup);
+    protected void calculateTest(List<Section> groups, List<Section> secondGroup, List<Section> resultSections){
+        OneWayAnova anova = new OneWayAnova();
+        List<double[]> dataGroups = new ArrayList<>();
+        for (Section section : groups) {
+            double[] data1 = section.getData().stream().mapToDouble(dp -> dp.data).toArray();
+            dataGroups.add(data1);
+        }
+        double pValue = anova.anovaPValue(dataGroups);
+        System.out.println("ANOVA p-Wert: " + pValue);
 
-        section.setQ(overallMean);
-        resultSections.add(section);
-
-        //meanData.add(new XYChart.Data<>(run.getGroupID(), overallMean));
-    }
-
-    private double getOverallMean(List<Section> group1, List<Section> group2) {
-        double speedSumGroup1 = 0;
-        double speedSumGroup2 = 0;
-
-        for (Section s : group1) {
-            speedSumGroup1 += s.getAverageSpeed();
+        if (pValue >= 0.05) { //TODO test.getAlpha()
+            System.out.println("Keine signifikanten Unterschiede zwischen Gruppen (ANOVA nicht signifikant).");
+            return;
         }
 
-        for (Section s : group2) {
-            speedSumGroup2 += s.getAverageSpeed();
+        Tukey tukey = new Tukey(groups.size(), groups.size(), 10);
+        // Schritt 1: Mittelwerte und Größen berechnen
+        int k = dataGroups.size();
+        double[] means = new double[k];
+        int[] sizes = new int[k];
+        double grandMean = 0;
+        int totalN = 0;
+
+        for (int i = 0; i < k; i++) {
+            double sum = 0;
+            for (double v : dataGroups.get(i)) sum += v;
+            means[i] = sum / dataGroups.get(i).length;
+            sizes[i] = dataGroups.get(i).length;
+            grandMean += sum;
+            totalN += sizes[i];
         }
+        grandMean /= totalN;
 
-        double averageSpeedGroup1 = speedSumGroup1 / group1.size();
-        double averageSpeedGroup2 = speedSumGroup2 / group2.size();
+        // Schritt 2: Mean Square Error (MSE) berechnen (Fehlervarianz)
+        // MSE = Summe innerhalb der Gruppen Varianz * (n_i -1) / (totalN - k)
+        double ssWithin = 0;
+        for (int i = 0; i < k; i++) {
+            double mean = means[i];
+            for (double v : dataGroups.get(i)) {
+                ssWithin += (v - mean) * (v - mean);
+            }
+        }
+        int dfError = totalN - k;
+        double mse = ssWithin / dfError;
 
-        return Math.abs(averageSpeedGroup1 - averageSpeedGroup2);
+        // Schritt 3: kritischer q-Wert
+        double qCrit = tukey.inverse_survival(0.05, false); //TODO test.getAlpha()
+
+        System.out.printf("MSE: %.4f, dfError: %d, kritischer q: %.3f\n", mse, dfError, qCrit);
+
+        // Schritt 4: paarweise Vergleiche
+        // Tukey HSD: Unterschied > qCrit * sqrt(MSE / n_i)
+        for (int i = 0; i < k - 1; i++) {
+            for (int j = i + 1; j < k; j++) {
+                double meanDiff = Math.abs(means[i] - means[j]);
+                // Harmonic mean der Gruppengrößen, hier einfach für gleichen n:
+                double nEff = 2.0 / (1.0/sizes[i] + 1.0/sizes[j]);
+                double hsd = qCrit * Math.sqrt(mse / nEff);
+
+                System.out.printf("Vergleich Gruppe %d vs Gruppe %d: Mittelwertdiff = %.4f, HSD = %.4f -> %s\n",
+                        i+1, j+1, meanDiff, hsd, (meanDiff > hsd ? "Signifikant" : "Nicht signifikant"));
+            }
+        }
+//        Section section = firstGroup.getFirst();
+//        double overallMean = getOverallMean(firstGroup, secondGroup);
+//
+//        section.setQ(overallMean);
+//        resultSections.add(section);
+//
+//        meanData.add(new XYChart.Data<>(run.getGroupID(), overallMean));
+
     }
+//
+//    private double getOverallMean(List<Section> group1, List<Section> group2) {
+//        double speedSumGroup1 = 0;
+//        double speedSumGroup2 = 0;
+//
+//        for (Section s : group1) {
+//            speedSumGroup1 += s.getAverageSpeed();
+//        }
+//
+//        for (Section s : group2) {
+//            speedSumGroup2 += s.getAverageSpeed();
+//        }
+//
+//        double averageSpeedGroup1 = speedSumGroup1 / group1.size();
+//        double averageSpeedGroup2 = speedSumGroup2 / group2.size();
+//
+//        return Math.abs(averageSpeedGroup1 - averageSpeedGroup2);
+//    }
 
     @Override
     protected boolean isWithinThreshold(double value) {

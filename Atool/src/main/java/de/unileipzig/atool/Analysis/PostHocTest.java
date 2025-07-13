@@ -45,27 +45,7 @@ public abstract class PostHocTest {
             for (int j = i + 1; j < resultGroups.size(); j++) {
                 List<Section> group1 = resultGroups.get(i);
                 List<Section> group2 = resultGroups.get(j);
-//                List<Section> copyGroup1 = new ArrayList<>();
-//                List<Section> copyGroup2 = new ArrayList<>();
 
-//                for (Section section : group1) {
-//                    copyGroup1.add(new Section(section));
-//                }
-//
-//                for (Section section : group2) {
-//                    copyGroup2.add(new Section(section));
-//                }
-
-//                postHocGroups.add(copyGroup1);
-//                Section section = copyGroup1.getFirst();
-//                section.setGroup(group1.getFirst().getGroup() + " | " + group2.getFirst().getGroup());
-//                section.setGroupID(ID);
-//
-//                postHocGroups.add(copyGroup2);
-//
-//                this.firstGroup.add(copyGroup1);
-//                this.secondGroup.add(copyGroup2);
-//
                 postHocGroups.add(group1);
                 Section section = group1.getFirst();
                 section.setGroup(group1.getFirst().getGroup() + " | " + group2.getFirst().getGroup());

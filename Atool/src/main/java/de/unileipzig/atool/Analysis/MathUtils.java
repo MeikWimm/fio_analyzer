@@ -31,12 +31,9 @@ public class MathUtils {
 
     public static double average(List<Section> sections, int i) {
         double sum = 0;
-        double n = 0;
+        double n = sections.size();
         for (Section section : sections) {
-            for (DataPoint dp : section.getData()) {
-                sum += dp.data;
-                n++;
-            }
+            sum += section.getAverageSpeed();
         }
         return sum / n;
     }

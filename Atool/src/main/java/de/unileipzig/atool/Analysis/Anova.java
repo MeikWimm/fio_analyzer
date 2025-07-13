@@ -15,6 +15,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import org.apache.commons.math3.distribution.FDistribution;
+import org.apache.commons.math3.stat.inference.OneWayAnova;
 
 import java.net.URL;
 import java.util.*;
@@ -126,55 +127,19 @@ public class Anova extends GenericTest implements Initializable {
     @Override
     protected void calculateTest(Run run, List<Section> resultSections) {
         List<List<Section>> groups = run.getGroups();
-        int num = groups.size() - 1;
-        int denom = (num + 1) * (run.getDataGroupSize() - 1);
-
-        FDistribution fDistribution = new FDistribution(num, denom);
-        fCrit = fDistribution.inverseCumulativeProbability(1.0 - alpha);
-        double sse = 0.0;
-        double ssa = 0.0;
-
+        OneWayAnova anova = new OneWayAnova();
 
         for (List<Section> group : groups) {
-            for (Section section : group) {
-                double averageSpeedOfRun = section.getAverageSpeed();
-                ssa += Math.pow(averageSpeedOfRun - MathUtils.average(group , 0), 2);
-                ssa *= section.getData().size();
-                section.setSSA(ssa);
-                ssa = 0;
-            }
+            List<double[]> dataGroups = new ArrayList<>();
+           for (Section section : group) {
+               double[] data1 = section.getData().stream().mapToDouble(dp -> dp.data).toArray();
+               dataGroups.add(data1);
+           }
+
+            double pValue = anova.anovaPValue(dataGroups);
+            group.getFirst().setP(pValue);
+            anovaData.add(new XYChart.Data<>(group.getFirst().getID(), pValue));
         }
-
-
-        for (List<Section> group : groups) {
-            for (Section section : group) {
-                for (DataPoint dp : section.getData()) {
-                    sse += (Math.pow((dp.data - MathUtils.average(group, 0)), 2));
-                }
-                section.setSSE(sse);
-                sse = 0;
-            }
-        }
-
-        double fValue;
-        for (List<Section> group : groups) {
-            Section section = group.getFirst();
-            double s_2_a = section.getSSA() / (groups.size() - 1);
-            double s_2_e = section.getSSE() / (groups.size() * (section.getData().size() - 1));
-            fValue = s_2_a / s_2_e;
-            section.setF(fValue);
-            section.setP(1.0 - fDistribution.cumulativeProbability(fValue));
-            resultSections.add(section);
-            anovaData.add(new XYChart.Data<>(section.getID(), fValue));
-        }
-
-        double totalSSE = 0;
-        for (Section section : resultSections) {
-            totalSSE += section.getSSE();
-        }
-
-        run.setSSE(totalSSE);
-        run.setMSE(totalSSE / denom);
     }
 
     @Override
@@ -201,13 +166,13 @@ public class Anova extends GenericTest implements Initializable {
     }
 
     private void drawANOVAGraph() {
-        charter.drawGraph("ANOVA", "Run", "F-Value", "Critical value", this.fCrit, new Charter.ChartData("calculated F", anovaData));
+        charter.drawGraph("ANOVA", "Run", "F-Value", "Critical value", getAlpha(), new Charter.ChartData("calculated F", anovaData));
         charter.openWindow();
     }
 
     @Override
     public Scene getCharterScene() {
-        return charter.drawGraph("ANOVA", "Run", "F-Value", "Critical value", this.fCrit, new Charter.ChartData("calculated F", anovaData));
+        return charter.drawGraph("ANOVA", "Run", "F-Value", "Critical value", getAlpha(), new Charter.ChartData("calculated F", anovaData));
     }
 
     @Override

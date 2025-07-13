@@ -11,7 +11,7 @@ import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TTestTest {
+class AtoolTTestTest {
 
     private Settings[] settings;
     private List<Job> jobs;
@@ -46,7 +46,7 @@ class TTestTest {
     void testInitialization() {
         for(Job job: jobs){
             for (Settings setting: settings){
-                TTest ttest = new TTest(job, setting);
+                AtoolTTest ttest = new AtoolTTest(job, setting);
                 assertNotNull(ttest, "T-Test instance should be initialized.");
                 assertEquals(0.05, ttest.getAlpha(), "Alpha value should be set correctly.");
             }
@@ -57,7 +57,7 @@ class TTestTest {
     void testCalculate() {
         for(Job job: jobs){
             for (Settings setting: settings){
-                TTest ttest = new TTest(job, setting);
+                AtoolTTest ttest = new AtoolTTest(job, setting);
                 ttest.calculate();
                 assertNotNull(ttest.getResultRuns(), "T-Test result should not be null.");
                 assertNotNull(ttest.getResultGroups(), "T-Test result group should not be null.");

@@ -14,8 +14,7 @@ import java.util.List;
 public class Run /*Section*/ {
     public static Double UNDEFINED_DOUBLE_VALUE = Double.MIN_VALUE;
     public static Integer UNDEFINED_INTEGER = Integer.MIN_VALUE;
-    public static final int SECTION_SIZE_IN_MILLI_SEC = 10000;
-    public static final int WINDOW_SIZE_IN_MILLI_SEC = 1000;
+
     private List<DataPoint> data = new ArrayList<>();
     private final List<Section> sections = new ArrayList<>();
     private final int runID;
@@ -32,8 +31,6 @@ public class Run /*Section*/ {
     private double mse = UNDEFINED_DOUBLE_VALUE;
 
     private String group = "UNDEFINED";
-    //private final int sectionCount = 30;
-    private int sectionCount = 30;
     private List<List<Section>> groups = new ArrayList<>();
     private List<Section> resultSections;
 
@@ -42,11 +39,12 @@ public class Run /*Section*/ {
         this.runID = runNumber;
         this.data = runData;
         calculateRun(this.data);
-        sectionCount = (int) (this.data.size() / SECTION_SIZE_IN_MILLI_SEC);
-        if(sectionCount == 0){
-            sectionCount = 2;
-        }
-        prepareSectionsSliding(this.data, SECTION_SIZE_IN_MILLI_SEC, WINDOW_SIZE_IN_MILLI_SEC);
+//        //private final int sectionCount = 30;
+//        int sectionCount = (int) (this.data.size() / Settings.WINDOW_SIZE);
+//        if(sectionCount == 0){
+//            sectionCount = 2;
+//        }
+        prepareSectionsSliding(this.data);
     }
 
     // Copy constructor
@@ -56,7 +54,7 @@ public class Run /*Section*/ {
         for (DataPoint dataPoint: other.getData()){
             this.data.add(new DataPoint(dataPoint));
         }
-        prepareSectionsSliding(this.data, SECTION_SIZE_IN_MILLI_SEC, WINDOW_SIZE_IN_MILLI_SEC);
+        prepareSectionsSliding(this.data);
         this.startTime = other.getStartTime();
 //        this.endTime = other.getEndTime();
 //        this.duration = other.getDuration();
@@ -163,10 +161,12 @@ public class Run /*Section*/ {
         this.duration = this.endTime - this.startTime;
     }
 
-    private void prepareSectionsSliding(List<DataPoint> data, int windowSize, int stepSize) {
+    private void prepareSectionsSliding(List<DataPoint> data) {
         int count = 1;
-        for (int i = 0; i <= data.size() - windowSize; i += stepSize) {
-            Section section = new Section(data.subList(i, i + windowSize), count);
+        int WINDOW_SIZE = Settings.WINDOW_SIZE;
+        int WINDOW_STEP_SIZE = Settings.WINDOW_STEP_SIZE;
+        for (int i = 0; i <= data.size() - WINDOW_SIZE; i += WINDOW_STEP_SIZE) {
+            Section section = new Section(data.subList(i, i + WINDOW_SIZE), count);
             sections.add(section);
             count++;
         }

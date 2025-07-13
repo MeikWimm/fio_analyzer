@@ -31,13 +31,18 @@ public class Settings implements Initializable {
     public static final int MIN_REQUIRED_RUNS_FOR_STEADY_STATE = 2;
     public static final int DEFAULT_REQUIRED_RUNS_FOR_STEADY_STATE = 5;
 
-    public static final int MAX_REQUIRED_RUNS_FOR_STEADY_STATE = 10;
-    public static final int MIN_REQUIRED_RUNS_FOR_STEADY_STATE = 2;
-    public static final int DEFAULT_REQUIRED_RUNS_FOR_STEADY_STATE = 5;
+    public static final int MIN_WINDOW_SIZE = 1000;
+    public static final int MAX_WINDOW_SIZE = 30000;
+    public static final int DEFAULT_WINDOW_SIZE = 10000;
 
+    public static final int MIN_WINDOW_STEP_SIZE = 1000;
+    public static final int MAX_WINDOW_STEP_SIZE = 5000;
+    public static final int DEFAULT_WINDOW_STEP_SIZE = 1000;
 
 
     private int requiredRunsForSteadyState = DEFAULT_REQUIRED_RUNS_FOR_STEADY_STATE;
+    public static int WINDOW_STEP_SIZE = DEFAULT_WINDOW_STEP_SIZE;
+    public static int WINDOW_SIZE = DEFAULT_WINDOW_SIZE;
     private int groupSize = 2;
 
     private static final int DIGIT = 3;
@@ -147,7 +152,8 @@ public class Settings implements Initializable {
         bonferroniUTestcheckbox.setSelected(isBonferroniUTestSelected);
 
         runCompareCounterSlider.setValue(groupSize);
-
+        windowSlider.setValue((int) (WINDOW_SIZE * 0.001));
+        windowStepSlider.setValue((int) (WINDOW_STEP_SIZE * 0.001));
 
         skipRunAnovaSpinner.getValueFactory().setValue(anovaSkipRunsCounter);
         skipRunCoVSpinner.getValueFactory().setValue(covSkipRunsCounter);
@@ -177,6 +183,7 @@ public class Settings implements Initializable {
             stage.setResizable(false);
             stage.show();
         } catch (IOException e) {
+            e.printStackTrace();
             Logging.log(Level.SEVERE, "Settings", "Coudn't open Settings Window! App state");
         }
     }
@@ -199,6 +206,8 @@ public class Settings implements Initializable {
         uTestSkipRunsCounter = skipRunUTestSpinner.getValue();
 
         requiredRunsForSteadyState = requiredRunsForSteadyStateSpinner.getValue();
+        WINDOW_SIZE = (int) windowSlider.getValue() * 1000; //second
+        WINDOW_STEP_SIZE = (int) windowStepSlider.getValue() * 1000;
 
         isBonferroniANOVASelected = bonferroniANOVAcheckbox.isSelected();
         isBonferroniConIntSelected = bonferroniConIntcheckbox.isSelected();

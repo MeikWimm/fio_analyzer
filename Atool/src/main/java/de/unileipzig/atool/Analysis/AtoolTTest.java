@@ -13,16 +13,16 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.apache.commons.math3.distribution.TDistribution;
+import org.apache.commons.math3.stat.inference.TTest;
 
 import java.net.URL;
 import java.util.*;
-import java.util.logging.Level;
 
 
 /**
  * @author meni1999
  */
-public class TTest extends GenericTest implements Initializable {
+public class AtoolTTest extends GenericTest implements Initializable {
     @FXML private Label labelHeader;
     @FXML private Label zCritLabel;
     @FXML private Label steadyStateLabel;
@@ -40,7 +40,7 @@ public class TTest extends GenericTest implements Initializable {
     private final List<XYChart.Data<Number, Number>> tData;
     private final Job job;
 
-    public TTest(Job job, Settings settings) {
+    public AtoolTTest(Job job, Settings settings) {
         super(job, settings.getTTestSkipRunsCounter(), settings.isTTestUseAdjacentRun(), 2, job.getAlpha() ,settings.isBonferroniTTestSelected(), settings.getRequiredRunsForSteadyState());
         this.tData = new ArrayList<>();
         this.job = getJob();
@@ -109,16 +109,13 @@ public class TTest extends GenericTest implements Initializable {
             Section section1 = run.getSections().get(i);
             Section section2 = run.getSections().get(i + 1);
 
-            double sse = calculateSSE(section1, section2);
-            double runVariance1 = calculateVariance(section1, sse);
-            double runVariance2 = calculateVariance(section2, sse);
+            TTest ttest = new TTest();
+            double[] data1 = section1.getData().stream().mapToDouble(dp -> dp.data).toArray();
+            double[] data2 = section2.getData().stream().mapToDouble(dp -> dp.data).toArray();
+            double pVal = ttest.tTest(data1, data2);
 
-            double nominator = (section1.getAverageSpeed() - section2.getAverageSpeed());
-            double denominator = Math.sqrt((runVariance1 / dataSize) + (runVariance2 / dataSize));
-            double tVal = Math.abs(nominator / denominator);
-            section1.setT(tVal);
-
-            tData.add(new XYChart.Data<>(section1.getID(), tVal));
+            section1.setT(pVal);
+            tData.add(new XYChart.Data<>(section1.getID(), pVal));
             resultSections.add(section1);
         }
     }
@@ -135,7 +132,7 @@ public class TTest extends GenericTest implements Initializable {
 
     @Override
     public Scene getCharterScene() {
-        return charter.drawGraph("T-Test", "Run", "T-Value", "critical T", tCrit, new Charter.ChartData("calculated T", tData));
+        return charter.drawGraph("T-Test", "Run", "T-Value", "critical T", getAlpha(), new Charter.ChartData("calculated T", tData));
     }
 
     @Override
@@ -168,7 +165,7 @@ public class TTest extends GenericTest implements Initializable {
     }
 
     private void drawTGraph() {
-        charter.drawGraph("T-Test", "Run", "T-Value", "critical T", tCrit, new Charter.ChartData("calculated T", tData));
+        charter.drawGraph("T-Test", "Run", "T-Value", "critical T", getAlpha(), new Charter.ChartData("calculated T", tData));
         charter.openWindow();
     }
 

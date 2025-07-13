@@ -13,6 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
 import java.net.URL;
 import java.util.*;
@@ -39,6 +40,7 @@ public class MannWhitney extends GenericTest implements Initializable {
 
     private double zCrit;
     private final Job job;
+    private final double pCrit = 0.05;
 
     public MannWhitney(Job job,Settings settings) {
         super(job, settings.getUTestSkipRunsCounter(), settings.isUTestUseAdjacentRun(), 2, job.getAlpha(), settings.isBonferroniUTestSelected(), settings.getRequiredRunsForSteadyState());
@@ -107,80 +109,26 @@ public class MannWhitney extends GenericTest implements Initializable {
     }
 
     private void calculatePair(Run run, Section section1, Section section2, List<Section> resultSections) {
-        List<DataPoint.RankedDataPoint> rankedData1 = new ArrayList<>();
-        List<DataPoint.RankedDataPoint> rankedData2 = new ArrayList<>();
         NormalDistribution n = new NormalDistribution();
 
-        int size = section1.getData().size();
-        for (int i = 0; i < size; i++) {
-            rankedData1.add(new DataPoint.RankedDataPoint(section1.getData().get(i), 0, 0));
-            rankedData2.add(new DataPoint.RankedDataPoint(section2.getData().get(i), 0, 1));
+        double[] data1 =  new double[section1.getData().size()];
+        double[] data2 =  new double[section2.getData().size()];
+
+        for(int i = 0; i < section1.getData().size(); i++){
+            data1[i] = section1.getData().get(i).data;
+            data2[i] = section2.getData().get(i).data;
         }
 
-        List<DataPoint.RankedDataPoint> mergedData = new ArrayList<>(rankedData1);
-        mergedData.addAll(rankedData2);
+        MannWhitneyUTest uTest = new MannWhitneyUTest();
+        double p = uTest.mannWhitneyUTest(data1, data2);
 
 
-        mergedData.sort(new Utils.SpeedComparator());
+        double calcZ = n.inverseCumulativeProbability(p);
 
-        double r = 1;
-        int counter = 1;
-        double new_speed, next_speed = -1;
-        int index = 0;
-        int jindex = 0;
-        for (DataPoint.RankedDataPoint p : mergedData) {
-            new_speed = p.data;
-            if (jindex < mergedData.size() - 1) {
-                next_speed = mergedData.get(jindex + 1).data;
-            }
-
-            if (next_speed == new_speed && jindex < mergedData.size() - 1) {
-                if (counter == 1) {
-                    index = jindex;
-                }
-                counter++;
-            } else if (counter > 1) {
-                // For ties, use average of ranks
-                double averageRank = r + (counter - 1) / 2.0;
-                for (int i = index; i < index + counter; i++) {
-                    mergedData.get(i).setRank(averageRank);
-                }
-                counter = 1;
-            } else {
-                p.setRank(r);
-            }
-
-            if (counter == 1) {
-                r++;
-            }
-            jindex++;
-        }
-
-        double run1_ranksum = 0;
-        double run2_ranksum = 0;
-
-        for (DataPoint.RankedDataPoint dataPoint : mergedData) {
-            if (dataPoint.flag == 0) {
-                run1_ranksum += dataPoint.getRank();
-            } else {
-                run2_ranksum += dataPoint.getRank();
-            }
-        }
-
-        double m = mergedData.size() / 2.0;
-        double U1 = m * m + ((m * (m + 1) / 2)) - run1_ranksum;
-        double U2 = m * m + ((m * (m + 1) / 2)) - run2_ranksum;
-        double mu_U = m * m * 0.5;
-        double sigma_U = Math.sqrt((m * m * (2 * m + 1)) / 12.0);
-        double U = Math.min(U1, U2);
-        double z = Math.abs((U - mu_U) / sigma_U);
-        this.zCrit = n.inverseCumulativeProbability(1 - this.getAlpha() / 2.0);
-        double pCalc = n.cumulativeProbability(z);
-
-        section1.setP(pCalc);
-        section1.setZ(z);
-        //uTestData.add(new XYChart.Data<>(section1.getRunID(), z));
+        section1.setZ(p);
+        section1.setP(p);
         resultSections.add(section1);
+        uTestData.add(new XYChart.Data<>(section1.getID(), p));
     }
 
     @Override
@@ -204,17 +152,17 @@ public class MannWhitney extends GenericTest implements Initializable {
 
     @Override
     protected boolean isWithinThreshold(double value) {
-        return value < this.zCrit;
+        return value < this.pCrit;
     }
 
     @Override
     protected double extractValue(Section section) {
-        return section.getZ();
+        return section.getP();
     }
 
     @Override
     public Scene getCharterScene() {
-        return charter.drawGraph("U-Test", "Run", "Z-Value","z-critical", this.zCrit, new Charter.ChartData("calculated Z", uTestData));
+        return charter.drawGraph("U-Test", "Run", "calculated p-Value","p-critical", 0.05, new Charter.ChartData("calculated P", uTestData));
     }
 
     @Override
