@@ -17,7 +17,7 @@ import java.util.logging.Level;
 
 public abstract class GenericTest {
     private final String className = this.getClass().getSimpleName();
-    private Job job;
+    private final Job job;
     protected List<List<Section>> resultGroupsSections;
     private final List<Run> resultRuns;
     protected List<Section> possibleSteadyStateRuns;
@@ -31,6 +31,7 @@ public abstract class GenericTest {
     private Scene scene;
     protected final Charter charter;
     private final List<Run> runs;
+    public final double acceptedSectionsThreshold = 0.5; // %
 
     public GenericTest(Job job, int skipFirstRun, boolean skipGroup, int groupSize, double alpha, boolean applyBonferroni, int thresholdSectionsForSteadyState) {
         this.job = new Job(job);
@@ -65,13 +66,10 @@ public abstract class GenericTest {
     }
 
     private void recalculateAlpha() {
-        this.alpha = this.alpha / this.runs.getFirst().getSections().size();
+        this.alpha = this.alpha / this.runs.getFirst().getGroups().size();
     }
 
     protected abstract void calculateTest(Run run, List<Section> resultSections);
-    protected abstract void calculateTest(List<List<Run>> groups, List<Run> resultRuns);
-
-    protected abstract double extractValue(Run run);
 
     protected abstract boolean isWithinThreshold(double value);
 
@@ -85,13 +83,9 @@ public abstract class GenericTest {
     }
 
 
-    protected void checkForHypothesis(Run run, List<Section> resultSections){
+    protected void calculateSectionHypothesis(Run run, List<Section> resultSections){
         for (Section section : resultSections) {
             section.setNullhypothesis(isWithinThreshold(extractValue(section)));
-
-            if(section.getNullhypothesis()){
-                run.setNullhypothesis(true);
-            }
         }
     }
 
@@ -114,21 +108,44 @@ public abstract class GenericTest {
             List<Section> resultSections = new ArrayList<>();
             if(isDataApplicable(run)){
                 this.calculateTest(run, resultSections);
-                this.checkForHypothesis(run, resultSections);
-//                if(run.getNullhypothesis()){
-//                    this.resultRuns.add(run);
-//                }
-                this.calculatePostHoc(resultSections);
+                this.calculateSectionHypothesis(run, resultSections);
+                this.calculateRunHypothesis(run);
+                this.calculatePostHoc(run);
+                this.calculateSteadyState();
             } else {
                 Logging.log(Level.WARNING, className,"Loaded data can't be calculated!");
             }
         }
 
-        for(Run run: this.runs){
-            calculateSteadyState();
-        }
-
         Logging.log(Level.INFO, className, "Done calculating.");
+    }
+
+    private void calculateRunHypothesis(Run run) {
+//        if (run.getAcceptedSectionsRate() >= acceptedSectionsThreshold) {
+//            run.setNullhypothesis(true);
+//        }
+        int sectionsSize = run.getSections().size();
+        int sectionCountToBeAccepted = (int) Math.floor(sectionsSize * acceptedSectionsThreshold);
+        int acceptedSections = 0;
+
+        for(Section section: run.getSections()){
+
+            if(section.getNullhypothesis()){
+                acceptedSections++;
+            } else {
+                acceptedSections = 0;
+            }
+
+            if(acceptedSections == sectionCountToBeAccepted){
+                run.setNullhypothesis(true);
+                break;
+            }
+        }
+        Logging.log(Level.INFO, className, String.format("Run %d has been accepted with %d sections", run.getID(), acceptedSections));
+
+        if(run.getNullhypothesis()){
+            this.resultRuns.add(run);
+        }
     }
 
     private boolean isDataApplicable(Run run) {
@@ -155,17 +172,20 @@ public abstract class GenericTest {
         return possibleSteadyStateRuns;
     }
 
-    public void calculatePostHoc(List<Section> resultSections) {
+    public void calculatePostHoc(Run run) {
+        List<List<Section>> groups = run.getGroups();
+
         if (postHocTest == null) {
             return;
         }
 
-        if (this.resultGroupsSections.size() < 2) {
+        if (groups.size() < 2) {
             Logging.log(Level.WARNING, className, " group size of test result is smaller than 2!");
             return;
         }
 
-        postHocTest.setupGroups(this.resultGroupsSections);
+        postHocTest.setRun(run);
+        postHocTest.setupGroups(groups);
         postHocTest.calculate();
     }
 

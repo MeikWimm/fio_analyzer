@@ -40,6 +40,25 @@ public abstract class Utils {
         };
     }
 
+    public static Callback<TableColumn<Section, Boolean>, TableCell<Section, Boolean>> getSectionHypothesisCellFactory() {
+        return (TableColumn<Section, Boolean> col) -> new TableCell<>() {
+            @Override
+            public void updateItem(Boolean item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null) {
+                    setText("");
+                    setStyle("");
+                } else if (!item) {
+                    setStyle("-fx-background-color: #fb7157;");
+                    setText("Rejected");
+                } else {
+                    setStyle("-fx-background-color: #5fd85f;");
+                    setText("Accepted");
+                }
+            }
+        };
+    }
+
 //    public static Callback<TableColumn<Run, Double>, TableCell<Run, Double>> getStatusCellFactory(double threshold) {
 //        return (TableColumn<Run, Double> col) -> new TableCell<>() {
 //            @Override

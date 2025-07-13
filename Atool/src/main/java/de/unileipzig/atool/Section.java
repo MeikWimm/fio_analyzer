@@ -24,7 +24,7 @@ public class Section{
     private double qHSD = Run.UNDEFINED_DOUBLE_VALUE;
     private double p = Run.UNDEFINED_DOUBLE_VALUE;
     private int groupID = Run.UNDEFINED_INTEGER;
-    private String group = "UNDEFINED";
+    private String group = "";
     private List<Section> sections;
 
     public Section(List<DataPoint> data, int ID) {
@@ -167,7 +167,7 @@ public class Section{
 
     @Override
     public String toString() {
-        return String.format("Section %d: CV: %f, F: %f, Z: %f, T: %f", ID, cov, F, zVal, tVal);
+        return String.format("Section %d: CV: %f, F: %f, Z: %f, T: %f, Hypothesis: %s", ID, cov, F, zVal, tVal, isNullhypothesis);
     }
 
     public double getCoV() {
@@ -224,5 +224,13 @@ public class Section{
 
     public void setGroupID(int id) {
         this.groupID = id;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String s) {
+        this.group = s;
     }
 }

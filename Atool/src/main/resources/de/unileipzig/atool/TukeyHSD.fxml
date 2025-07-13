@@ -12,7 +12,7 @@
       <Label id="labelHeader" fx:id="labelHeader" prefHeight="17.0" prefWidth="1000.0" text="Tukey-HSD" />
       <TableView id="TukeyTable" fx:id="TukeyTable" prefHeight="500.0" prefWidth="1000.0">
          <columns>
-            <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="88.0" text="Group" />
+            <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="88.0" text="Run" />
             <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="342.0" text="Groups" />
             <TableColumn id="QColumn" fx:id="QColumn" prefWidth="202.0" text="Mean" />
             <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="180.0" text="Nullhypothesis" />

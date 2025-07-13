@@ -16,6 +16,7 @@ import java.util.List;
 public class Run /*Section*/ {
     public static Double UNDEFINED_DOUBLE_VALUE = Double.MIN_VALUE;
     public static Integer UNDEFINED_INTEGER = Integer.MIN_VALUE;
+    public static final double SECTION_SIZE_PER_MILLI_SEC = 1000.0;
     private List<DataPoint> data = new ArrayList<>();
     private final List<Section> sections = new ArrayList<>();
     private final int runID;
@@ -38,8 +39,11 @@ public class Run /*Section*/ {
     private double duration = UNDEFINED_DOUBLE_VALUE;
     private double p = UNDEFINED_DOUBLE_VALUE;
     private int groupID = UNDEFINED_INTEGER;
+    private double mse = UNDEFINED_DOUBLE_VALUE;
+
     private String group = "UNDEFINED";
-    private final int sectionCount = 10;
+    //private final int sectionCount = 30;
+    private int sectionCount = 30;
     private List<List<Section>> groups = new ArrayList<>();
 
 
@@ -47,6 +51,10 @@ public class Run /*Section*/ {
         this.runID = runNumber;
         this.data = runData;
         calculateRun(this.data);
+        sectionCount = (int) (this.data.size() / SECTION_SIZE_PER_MILLI_SEC);
+        if(sectionCount == 0){
+            sectionCount = 2;
+        }
         prepareSections(this.data);
     }
 
@@ -102,6 +110,9 @@ public class Run /*Section*/ {
                     runIndex++;
                 }
 
+                Section first = group.getFirst();
+                Section last = group.getLast();
+                group.getFirst().setGroup("Section " + first.getID() + " - " + "Section " + last.getID());
                 groups.add(group);
             }
         } else {
@@ -119,11 +130,27 @@ public class Run /*Section*/ {
                 }
                 if (group.size() == groupSize) {
                     groups.add(group);
+                    group.getFirst().setGroup("Section " + group.getFirst().getID() + " - " + "Section " + group.getLast().getID());
+
                 }
+                Section first = group.getFirst();
+                Section last = group.getLast();
+                group.getFirst().setGroup("Section " + first.getID() + " - " + "Section " + last.getID());
+
                 runIndex++;
             }
         }
         return groups;
+    }
+
+    public double getAcceptedSectionsRate(){
+        double acceptedSectionsRate = 0;
+        for(List<Section> sections: groups){
+            if(sections.getFirst().getNullhypothesis()){
+                acceptedSectionsRate++;
+            }
+        }
+        return acceptedSectionsRate / sections.size();
     }
 
     private void calculateRun(List<DataPoint> data) {
@@ -147,17 +174,20 @@ public class Run /*Section*/ {
     }
 
     private void prepareSections(List<DataPoint> data){
-        int sectionCount = 10;
         int sectionSize = data.size() / sectionCount;
         for(int i = 0; i < data.size(); i++){
             for(int j = 0; j < sectionCount; j++){
                 if(i == sectionSize * j){
-                    Section section = new Section(data.subList(i, i + sectionSize), j);
+                    Section section = new Section(data.subList(i, i + sectionSize), j + 1);
                     sections.add(section);
                     break;
                 }
             }
         }
+    }
+
+    public int getDataGroupSize(){
+        return this.getSections().getFirst().getData().size() * 2; // TODO ANOVA
     }
 
     public List<DataPoint> getData(){      
@@ -330,5 +360,13 @@ public class Run /*Section*/ {
 
     public void setGroups(List<List<Section>> groups) {
         this.groups = groups;
+    }
+
+    public void setMSE(double mse) {
+        this.mse = mse;
+    }
+
+    public double getMSE() {
+        return mse;
     }
 }

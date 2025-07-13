@@ -54,7 +54,7 @@ public class MannWhitney extends GenericTest implements Initializable {
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
-        ZColumn.setCellValueFactory(new PropertyValueFactory<>("Z"));
+        ZColumn.setCellValueFactory(new PropertyValueFactory<>("AcceptedSectionsRate"));
         ZColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
@@ -71,10 +71,9 @@ public class MannWhitney extends GenericTest implements Initializable {
     }
 
     public void showMannWhitneySections(TableRow<Run> row, TableView<Run> table) {
-        Logging.log(Level.INFO, "U-Test", "Showing sections for run " + row.getItem().getRunID());
-        for (Section section : row.getItem().getSections()) {
-            Logging.log(Level.INFO, "U-Test", section.toString());
-        }
+        SectionWindow sectionWindow = new SectionWindow(row.getItem());
+        sectionWindow.setShowZColumn(true);
+        sectionWindow.openWindow();
     }
 
     @Override
@@ -107,15 +106,15 @@ public class MannWhitney extends GenericTest implements Initializable {
         return "Mann-Whitney";
     }
 
-    private void calculatePair(Run run, Section run1, Section run2, List<Section> resultSections) {
+    private void calculatePair(Run run, Section section1, Section section2, List<Section> resultSections) {
         List<DataPoint.RankedDataPoint> rankedData1 = new ArrayList<>();
         List<DataPoint.RankedDataPoint> rankedData2 = new ArrayList<>();
         NormalDistribution n = new NormalDistribution();
 
-        int size = run1.getData().size();
+        int size = section1.getData().size();
         for (int i = 0; i < size; i++) {
-            rankedData1.add(new DataPoint.RankedDataPoint(run1.getData().get(i), 0, 0));
-            rankedData2.add(new DataPoint.RankedDataPoint(run2.getData().get(i), 0, 1));
+            rankedData1.add(new DataPoint.RankedDataPoint(section1.getData().get(i), 0, 0));
+            rankedData2.add(new DataPoint.RankedDataPoint(section2.getData().get(i), 0, 1));
         }
 
         List<DataPoint.RankedDataPoint> mergedData = new ArrayList<>(rankedData1);
@@ -178,29 +177,15 @@ public class MannWhitney extends GenericTest implements Initializable {
         this.zCrit = n.inverseCumulativeProbability(1 - this.getAlpha() / 2.0);
         double pCalc = n.cumulativeProbability(z);
 
-        run1.setP(pCalc);
-        run1.setZ(z);
-        //uTestData.add(new XYChart.Data<>(run1.getRunID(), z));
-        resultSections.add(run1);
+        section1.setP(pCalc);
+        section1.setZ(z);
+        //uTestData.add(new XYChart.Data<>(section1.getRunID(), z));
+        resultSections.add(section1);
     }
 
     @Override
     public double getCriticalValue() {
         return this.zCrit;
-    }
-
-    @Override
-    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
-        if (this.job.getRuns().size() <= 1) return;
-        List<Run> runs = this.job.getRuns();
-
-        for (int i = 0; i < runs.size(); i ++) {
-            if (i < runs.size() - 1) {
-                Run run1 = runs.get(i);
-                Run run2 = runs.get(i + 1);
-                //calculatePair(resultRuns, run1, run2, resultSections);
-            }
-        }
     }
 
     @Override
@@ -215,11 +200,6 @@ public class MannWhitney extends GenericTest implements Initializable {
                 calculatePair(run, run1, run2, resultSections);
             }
         }
-    }
-
-    @Override
-    protected double extractValue(Run run) {
-        return run.getZ();
     }
 
     @Override

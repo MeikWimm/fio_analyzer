@@ -28,6 +28,7 @@ public abstract class PostHocTest {
     protected final List<List<Section>> secondGroup;
     private final List<List<Section>> postHocGroups;
     private final List<Section> resultRuns;
+    private Run run;
 
     public PostHocTest(){
         super();
@@ -44,26 +45,36 @@ public abstract class PostHocTest {
             for (int j = i + 1; j < resultGroups.size(); j++) {
                 List<Section> group1 = resultGroups.get(i);
                 List<Section> group2 = resultGroups.get(j);
-                List<Section> copyGroup1 = new ArrayList<>();
-                List<Section> copyGroup2 = new ArrayList<>();
+//                List<Section> copyGroup1 = new ArrayList<>();
+//                List<Section> copyGroup2 = new ArrayList<>();
 
-                for (Section section : group1) {
-                    copyGroup1.add(new Section(section));
-                }
+//                for (Section section : group1) {
+//                    copyGroup1.add(new Section(section));
+//                }
+//
+//                for (Section section : group2) {
+//                    copyGroup2.add(new Section(section));
+//                }
 
-                for (Section section : group2) {
-                    copyGroup2.add(new Section(section));
-                }
-
-                postHocGroups.add(copyGroup1);
-                Section section = copyGroup1.getFirst();
-                //run.setGroup(group1.getFirst().getGroup() + " | " + group2.getFirst().getGroup());
+//                postHocGroups.add(copyGroup1);
+//                Section section = copyGroup1.getFirst();
+//                section.setGroup(group1.getFirst().getGroup() + " | " + group2.getFirst().getGroup());
+//                section.setGroupID(ID);
+//
+//                postHocGroups.add(copyGroup2);
+//
+//                this.firstGroup.add(copyGroup1);
+//                this.secondGroup.add(copyGroup2);
+//
+                postHocGroups.add(group1);
+                Section section = group1.getFirst();
+                section.setGroup(group1.getFirst().getGroup() + " | " + group2.getFirst().getGroup());
                 section.setGroupID(ID);
 
-                postHocGroups.add(copyGroup2);
+                postHocGroups.add(group2);
 
-                this.firstGroup.add(copyGroup1);
-                this.secondGroup.add(copyGroup2);
+                this.firstGroup.add(group1);
+                this.secondGroup.add(group2);
                 ID++;
             }
         }
@@ -71,37 +82,6 @@ public abstract class PostHocTest {
 
     private void checkSteadyStateRun(){
 
-        if(this.firstGroup.size() != this.secondGroup.size()){
-            Logger.getLogger(PostHocTest.class.getName()).log(Level.WARNING, "Number of groups do not match");
-            return;
-        }
-
-        for(int i = 0; i < this.firstGroup.size(); i++){
-            checkSteadyStateRun(this.firstGroup.get(i), this.secondGroup.get(i));
-        }
-    }
-
-    private void checkSteadyStateRun(List<Section> group1, List<Section> group2){
-        Section savedHypothesisRun = group1.getFirst();
-        List<Section> possibleSections = this.test.getAcceptedSections();
-        if(possibleSections == null || possibleSections.isEmpty()){
-            return;
-        }
-
-        steadyStateSection = possibleSections.getFirst();
-
-        for (Section possibleRun : possibleSections) {
-            //boolean found = isFound(group1, group2, possibleRun);
-
-            //if(found){
-                if(savedHypothesisRun.getNullhypothesis()){
-                    if(isFirst){
-                        isFirst = false;
-                        steadyStateRun = possibleRun;
-                    }
-                }
-            //}
-        }
     }
 
     public Run getSteadyStateRun() {
@@ -110,24 +90,27 @@ public abstract class PostHocTest {
 
     public abstract String getTestName();
 
-    protected abstract void calculateTest(List<Run> firstGroup, List<Run> secondGroup, List<Run> postHocRuns);
+    protected abstract void calculateTest(List<Section> firstGroup, List<Section> secondGroup, List<Section> resultSections);
 
-    protected abstract void  initPostHocTest(GenericTest test, List<List<Run>> postHocGroups);
+    protected abstract void  initPostHocTest(Run run, GenericTest test, List<List<Section>> postHocGroups);
 
     public void calculate(){
-        initPostHocTest(this.test, this.postHocGroups);
+        for (Run run : this.test.getResultRuns()) {
+            List<Section> resultSections = new ArrayList<>();
+            initPostHocTest(run, this.test, this.postHocGroups);
 
-        if(this.firstGroup.size() != this.secondGroup.size()){
-            Logger.getLogger(PostHocTest.class.getName()).log(Level.WARNING, "Number of groups do not match");
-            return;
+            if(this.firstGroup.size() != this.secondGroup.size()){
+                Logger.getLogger(PostHocTest.class.getName()).log(Level.WARNING, "Number of groups do not match");
+                return;
+            }
+
+            for(int i = 0; i < this.firstGroup.size(); i++){
+                calculateTest(this.firstGroup.get(i), this.secondGroup.get(i), resultSections);
+            }
+
+            checkForHypothesis();
+            checkSteadyStateRun();
         }
-
-        for(int i = 0; i < this.firstGroup.size(); i++){
-            calculateTest(this.firstGroup.get(i), this.secondGroup.get(i), this.resultRuns);
-        }
-
-        checkForHypothesis();
-        checkSteadyStateRun();
     }
 
     protected abstract double extractValue(Section section);
@@ -135,42 +118,14 @@ public abstract class PostHocTest {
     protected abstract boolean isWithinThreshold(double value);
 
     private void checkForHypothesis() {
-        for(Section run: resultRuns){
-            run.setNullhypothesis(isWithinThreshold(extractValue(run)));
+        for(Section section: resultRuns){
+            section.setNullhypothesis(isWithinThreshold(extractValue(section)));
         }
     }
 
     public ObservableList<Section> getPostHocRuns() {
         return FXCollections.observableList(resultRuns);
     }
-
-//    private static boolean isFound(List<Section> group1, List<Section> group2, Run possibleRun) {
-//        int ID = possibleRun.getID();
-//        boolean found = false;
-//        Section firstOfGroup1 = group1.getFirst();
-//        Section lastOfGroup1 = group1.getLast();
-//        Section firstOfGroup2 = group2.getFirst();
-//
-//        // Found if the last run of group1 is the same as the first run of group2
-//        // i.e., 4-5 | 5-6 -> 4 possible steady state
-//        if(lastOfGroup1.getID() == ID + 1 && firstOfGroup2.getID() == ID + 1){
-//            found = true;
-//        }
-//        // Found if the last run of group1 is the same as the second run of group2
-//        // i.e., 4-5 | 6-7 -> 4 possible steady state
-//        if(lastOfGroup1.getID() == ID + 1 && firstOfGroup2.getID() - 1 == ID + 1){
-//            found = true;
-//        }
-//
-//        // Found if the first run of group1 is the same as the second run of group2
-//        // i.e., 10-14 | 15-19 -> 10 possible steady state if both groups are accepted
-//        if(firstOfGroup1.getID() == ID && lastOfGroup1.getID() == firstOfGroup2.getID() - 1){
-//            found = true;
-//        }
-//
-//        return found;
-//    }
-
 
     // Optional method for setting labels, can be overridden
     protected void setLabeling() {
@@ -219,5 +174,9 @@ public abstract class PostHocTest {
 
     public void setGenericTest(GenericTest test) {
         this.test = test;
+    }
+
+    public void setRun(Run run) {
+        this.run = run;
     }
 }

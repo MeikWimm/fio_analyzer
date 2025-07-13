@@ -45,7 +45,6 @@ public class Anova extends GenericTest implements Initializable {
     @FXML private TableColumn<Run, Double> averageSpeedColumn;
     @FXML private TableColumn<Run, Integer> runIDColumn;
     @FXML private TableColumn<Run, Double> startTimeColumn;
-    @FXML private TableColumn<Run, String> compareToRunColumn;
     @FXML private TableColumn<Run, Double> FColumn;
     @FXML private TableColumn<Run, Boolean> hypothesisColumn;
     private double fCrit;
@@ -65,9 +64,8 @@ public class Anova extends GenericTest implements Initializable {
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         startTimeColumn.setCellValueFactory(new PropertyValueFactory<>("StartTime"));
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
 
-        FColumn.setCellValueFactory(new PropertyValueFactory<>("F"));
+        FColumn.setCellValueFactory(new PropertyValueFactory<>("AcceptedSectionsRate"));
         FColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
@@ -93,10 +91,9 @@ public class Anova extends GenericTest implements Initializable {
     }
 
     public void showAnovaSections(TableRow<Run> row, TableView<Run> table) {
-        Logging.log(Level.INFO, "ANOVA", "Showing sections for run " + row.getItem().getRunID());
-        for (Section section : row.getItem().getSections()) {
-            Logging.log(Level.INFO, "ANOVA", section.toString());
-        }
+        SectionWindow sectionWindow = new SectionWindow(row.getItem());
+        sectionWindow.setShowFColumn(true);
+        sectionWindow.openWindow();
     }
 
     private void updateLabeling(Run run) {
@@ -130,7 +127,7 @@ public class Anova extends GenericTest implements Initializable {
     protected void calculateTest(Run run, List<Section> resultSections) {
         List<List<Section>> groups = run.getGroups();
         int num = groups.size() - 1;
-        int denom = (num + 1) * (run.getData().size() - 1);
+        int denom = (num + 1) * (run.getDataGroupSize() - 1);
 
         FDistribution fDistribution = new FDistribution(num, denom);
         fCrit = fDistribution.inverseCumulativeProbability(1.0 - alpha);
@@ -176,18 +173,8 @@ public class Anova extends GenericTest implements Initializable {
             totalSSE += section.getSSE();
         }
 
-        this.job.setSSE(totalSSE);
-        this.job.setMSE(totalSSE / denom);
-    }
-
-    @Override
-    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
-
-    }
-
-    @Override
-    protected double extractValue(Run run) {
-        return run.getF();
+        run.setSSE(totalSSE);
+        run.setMSE(totalSSE / denom);
     }
 
     @Override

@@ -62,10 +62,9 @@ public class CoV extends GenericTest implements Initializable {
     }
 
     public void showCoVSections(TableRow<Run> row, TableView<Run> table) {
-        Logging.log(Level.INFO, "CoV", "Showing sections for run " + row.getItem().getRunID());
-        for (Section section : row.getItem().getSections()) {
-            Logging.log(Level.INFO, "CoV", section.toString());
-        }
+        SectionWindow sectionWindow = new SectionWindow(row.getItem());
+        sectionWindow.setShowCVColumn(true);
+        sectionWindow.openWindow();
     }
 
     @Override
@@ -91,11 +90,6 @@ public class CoV extends GenericTest implements Initializable {
     protected void calculateTest(Run run, List<Section> resultSections) {
         calculateCoV(run, resultSections);
 
-    }
-
-    @Override
-    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
-        //calculateCoV(groups, resultRuns);
     }
 
     @Override
@@ -135,11 +129,6 @@ public class CoV extends GenericTest implements Initializable {
 
         double std = Math.sqrt(sum / (n - 1));
         return (std / average);
-    }
-
-    @Override
-    protected double extractValue(Run run) {
-        return 0;
     }
 
     @Override

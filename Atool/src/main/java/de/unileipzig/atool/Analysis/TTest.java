@@ -54,7 +54,7 @@ public class TTest extends GenericTest implements Initializable {
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
-        TColumn.setCellValueFactory(new PropertyValueFactory<>("T"));
+        TColumn.setCellValueFactory(new PropertyValueFactory<>("AcceptedSectionsRate"));
         TColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
@@ -73,10 +73,9 @@ public class TTest extends GenericTest implements Initializable {
     }
 
     public void showTTableSections(TableRow<Run> row, TableView<Run> table) {
-        Logging.log(Level.INFO, "T-Test", "Showing sections for run " + row.getItem().getRunID());
-        for (Section section : row.getItem().getSections()) {
-            Logging.log(Level.INFO, "T-Test", section.toString());
-        }
+        SectionWindow sectionWindow = new SectionWindow(row.getItem());
+        sectionWindow.setShowTColumn(true);
+        sectionWindow.openWindow();
     }
 
     @Override
@@ -101,21 +100,21 @@ public class TTest extends GenericTest implements Initializable {
 
     @Override
     protected void calculateTest(Run run, List<Section> resultSections) {
-        TDistribution t = new TDistribution(run.getData().size() * 2 - 2);
+        int dataSize = run.getSections().getFirst().getData().size() * 2;
+
+        TDistribution t = new TDistribution(dataSize * 2 - 2);
         this.tCrit = t.inverseCumulativeProbability(1 - getAlpha() / 2.0);
 
-
-        for (int i = 0; i < run.getSections().size() - 1; i++) {
+        for(int i = 0; i < run.getGroups().size(); i++){
             Section section1 = run.getSections().get(i);
             Section section2 = run.getSections().get(i + 1);
 
             double sse = calculateSSE(section1, section2);
             double runVariance1 = calculateVariance(section1, sse);
             double runVariance2 = calculateVariance(section2, sse);
-            double runSize = this.job.getData().size();
 
             double nominator = (section1.getAverageSpeed() - section2.getAverageSpeed());
-            double denominator = Math.sqrt((runVariance1 / runSize) + (runVariance2 / runSize));
+            double denominator = Math.sqrt((runVariance1 / dataSize) + (runVariance2 / dataSize));
             double tVal = Math.abs(nominator / denominator);
             section1.setT(tVal);
 
@@ -125,23 +124,13 @@ public class TTest extends GenericTest implements Initializable {
     }
 
     @Override
-    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
-
-    }
-
-    @Override
-    protected double extractValue(Run run) {
-        return run.getT();
-    }
-
-    @Override
     protected boolean isWithinThreshold(double value) {
         return value < this.tCrit;
     }
 
     @Override
     protected double extractValue(Section section) {
-        return 0;
+        return section.getT();
     }
 
     @Override

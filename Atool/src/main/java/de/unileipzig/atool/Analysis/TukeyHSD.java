@@ -4,10 +4,7 @@
  */
 package de.unileipzig.atool.Analysis;
 
-import de.unileipzig.atool.Job;
-import de.unileipzig.atool.Run;
-import de.unileipzig.atool.Settings;
-import de.unileipzig.atool.Utils;
+import de.unileipzig.atool.*;
 
 import java.net.URL;
 import java.util.*;
@@ -16,10 +13,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import net.sourceforge.jdistlib.Tukey;
@@ -56,7 +50,7 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         unitLabel.setText(Settings.getConversion());
 
-        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("GroupID"));
+        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
         QColumn.setCellValueFactory(new PropertyValueFactory<>("Q"));
         QColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));
@@ -65,10 +59,20 @@ public class TukeyHSD extends PostHocTest implements Initializable {
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
         drawTukey.setOnAction(e -> draw());
-        
-        TukeyTable.setItems(getPostHocRuns());
+
+        Utils.CustomRunTableRowFactory menuItems = new Utils.CustomRunTableRowFactory();
+        menuItems.addMenuItem("Show Run calculation", this::showTukeySections);
+        TukeyTable.setRowFactory(menuItems);
+
+        TukeyTable.setItems(this.getTest().getJob().getRuns());
         qCritLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.qHSD));
         labelHeader.setText(getTest().getJob().toString());
+    }
+
+    public void showTukeySections(TableRow<Run> row, TableView<Run> table) {
+        SectionWindow sectionWindow = new SectionWindow(row.getItem());
+        sectionWindow.setShowQColumn(true);
+        sectionWindow.openWindow();
     }
 
     public void draw(){
@@ -82,50 +86,49 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     }
 
     @Override
-    protected void initPostHocTest(GenericTest test, List<List<Run>> postHocGroups) {
-        Job job = test.getJob();
-        int totalObservations = job.getData().size();
-        double n = job.getData().size();
+    protected void initPostHocTest(Run run, GenericTest test, List<List<Section>> postHocGroups) {
+        int totalObservations = run.getData().size();
+        double n = run.getData().size();
         int numberOfGroups = postHocGroups.size();
         int dfError = totalObservations - numberOfGroups;
         Tukey tukey = new Tukey(postHocGroups.getFirst().size(), numberOfGroups, dfError);
-        double standardError = Math.sqrt(job.getMSE() / n);
+        double standardError = Math.sqrt(run.getMSE() / n);
         double qCritical = tukey.inverse_survival(test.getAlpha(), false);
         qHSD = qCritical * standardError;
     }
 
     @Override
-    protected void calculateTest(List<Run> firstGroup, List<Run> secondGroup, List<Run> postHocRuns){
-        Run run = firstGroup.getFirst();
-        double overallMean = getOverallMean(firstGroup, secondGroup);
-
-        run.setQ(overallMean);
-        postHocRuns.add(run);
-
-        meanData.add(new XYChart.Data<>(run.getGroupID(), overallMean));
+    protected double extractValue(Section section) {
+        return 0;
     }
 
-    private double getOverallMean(List<Run> group1, List<Run> group2) {
+    @Override
+    protected void calculateTest(List<Section> firstGroup, List<Section> secondGroup, List<Section> resultSections){
+        Section section = firstGroup.getFirst();
+        double overallMean = getOverallMean(firstGroup, secondGroup);
+
+        section.setQ(overallMean);
+        resultSections.add(section);
+
+        //meanData.add(new XYChart.Data<>(run.getGroupID(), overallMean));
+    }
+
+    private double getOverallMean(List<Section> group1, List<Section> group2) {
         double speedSumGroup1 = 0;
         double speedSumGroup2 = 0;
 
-        for (Run r : group1) {
-            speedSumGroup1 += r.getAverageSpeed();
+        for (Section s : group1) {
+            speedSumGroup1 += s.getAverageSpeed();
         }
 
-        for (Run r : group2) {
-            speedSumGroup2 += r.getAverageSpeed();
+        for (Section s : group2) {
+            speedSumGroup2 += s.getAverageSpeed();
         }
 
         double averageSpeedGroup1 = speedSumGroup1 / group1.size();
         double averageSpeedGroup2 = speedSumGroup2 / group2.size();
 
         return Math.abs(averageSpeedGroup1 - averageSpeedGroup2);
-    }
-
-    @Override
-    protected double extractValue(Run run) {
-        return run.getQ();
     }
 
     @Override

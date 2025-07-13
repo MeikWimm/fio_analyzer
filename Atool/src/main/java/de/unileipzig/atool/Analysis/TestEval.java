@@ -61,7 +61,9 @@ public class TestEval{
     }
 
     private void prepareItem() {
-        Run steadyStateRun = test.getSteadyStateRun();
+        //Run steadyStateRun = test.getSteadyStateRun();
+        Run steadyStateRun = null;
+                if(true) return;
         testName = test.getTestName();
 
         if(steadyStateRun != null){

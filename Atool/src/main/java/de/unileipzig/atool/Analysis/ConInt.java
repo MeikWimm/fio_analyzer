@@ -120,28 +120,9 @@ public class ConInt extends GenericTest implements Initializable {
             double c2 = x + y;
 
             section1.setNullhypothesis(doesIntervalContainZero(c1, c2));
-            if(section1.getNullhypothesis()){
-                run.setNullhypothesis(true);
-            }
             resultSection.add(section1);
         }
     }
-
-    @Override
-    protected void checkForHypothesis(Run run, List<Section> resultSections) {
-
-    }
-
-    @Override
-    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
-
-    }
-
-    @Override
-    protected double extractValue(Run run) {
-        return 0;
-    }
-
 
     private boolean doConfidenceIntervalsOverlap(double a1, double b1, double a2, double b2) {
         return Math.max(a1, a2) <= Math.min(b1, b2);
@@ -149,6 +130,11 @@ public class ConInt extends GenericTest implements Initializable {
 
     private boolean doesIntervalContainZero(double lowerBound, double upperBound) {
         return lowerBound <= 0 && upperBound >= 0;
+    }
+
+    @Override
+    protected void calculateSectionHypothesis(Run run, List<Section> resultSections) {
+        //NO-OP
     }
 
     @Override
@@ -185,13 +171,13 @@ public class ConInt extends GenericTest implements Initializable {
 
     @Override
     protected void setLabeling() {
-        Run run = this.getSteadyStateRun();
-        if(run == null){
-            steadyStateLabel.setText("No steady state found");
-            return;
-        }
+        //Run run = this.getSteadyStateRun();
+//        if(run == null){
+//            steadyStateLabel.setText("No steady state found");
+//            return;
+//        }
 
-        steadyStateLabel.setText("at run " + getSteadyStateRun().getID() + " | time: " + getSteadyStateRun().getStartTime());
+        //steadyStateLabel.setText("at run " + getSteadyStateRun().getID() + " | time: " + getSteadyStateRun().getStartTime());
     }
 
     @Override

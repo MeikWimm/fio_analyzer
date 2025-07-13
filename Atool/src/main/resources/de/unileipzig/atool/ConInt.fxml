@@ -17,13 +17,13 @@
          <children>
             <TableView fx:id="conIntTable" prefHeight="600.0" prefWidth="600.0">
               <columns>
-                <TableColumn id="runsColumn" fx:id="runsColumn" prefWidth="52.0" text="Run" />
-                  <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="105.0" text="Average Speed" />
-                <TableColumn id="intervalFromColumn" fx:id="intervalFromColumn" prefWidth="116.0" text="Interval (From)" />
-                  <TableColumn id="intervalToColumn" fx:id="intervalToColumn" prefWidth="110.0" text="Interval (To)" />
-                  <TableColumn id="plusMinusValue" fx:id="plusMinusValueColumn" prefWidth="98.0" text="±" />
-                  <TableColumn id="standardDeviationColumn" fx:id="standardDeviationColumn" prefWidth="150.0" text="Standard Deviation" />
-                  <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="176.0" text="Nullhypothesis" />
+                <TableColumn id="runsColumn" fx:id="runsColumn" prefWidth="76.0" text="Section" />
+                  <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="117.0" text="Average Speed" />
+                <TableColumn id="intervalFromColumn" fx:id="intervalFromColumn" prefWidth="117.0" text="Interval (From)" />
+                  <TableColumn id="intervalToColumn" fx:id="intervalToColumn" prefWidth="108.0" text="Interval (To)" />
+                  <TableColumn id="plusMinusValue" fx:id="plusMinusValueColumn" prefWidth="89.0" text="±" />
+                  <TableColumn id="standardDeviationColumn" fx:id="standardDeviationColumn" prefWidth="276.0" text="Standard Deviation" />
+                  <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="129.0" text="Nullhypothesis" />
               </columns>
             </TableView>
          </children>
@@ -35,7 +35,7 @@
             <Button id="drawConIntDiffButton" fx:id="drawConIntDiffButton" disable="true" layoutX="709.0" layoutY="20.0" mnemonicParsing="false" text="Draw RCIW Run over Job" visible="false" />
             <Button id="drawWindowedRCIWButton" fx:id="drawWindowedRCIWButton" disable="true" layoutX="624.0" layoutY="11.0" mnemonicParsing="false" text="Draw windowed RCIW" visible="false" />
             <Label layoutX="14.0" layoutY="15.0" prefHeight="17.0" prefWidth="84.0" text="Steady state at:" />
-            <Label id="steadyStateLabel" fx:id="steadyStateLabel" layoutX="105.0" layoutY="15.0" prefHeight="17.0" prefWidth="163.0" text="_" />
+            <Label layoutX="105.0" layoutY="15.0" prefHeight="17.0" prefWidth="163.0" text="_" />
          </children>
       </Pane>
    </bottom>
