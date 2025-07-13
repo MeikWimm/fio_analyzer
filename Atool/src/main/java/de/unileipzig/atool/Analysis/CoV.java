@@ -20,7 +20,7 @@ public class CoV extends GenericTest implements Initializable {
     private final double STEADY_STATE_COV_THRESHOLD;
 
     @FXML private Label labelHeader;
-
+    @FXML private Button showCoVGraphButton;
     @FXML private TableView<Run> covTable;
     @FXML private TableColumn<Run, Integer> runIDColumn;
     @FXML private TableColumn<Run, Double> averageSpeedColumn;
@@ -54,7 +54,7 @@ public class CoV extends GenericTest implements Initializable {
 
         labelHeader.setText(this.job.toString());
         covTable.setItems(this.job.getRuns());
-
+        showCoVGraphButton.setOnAction(e -> drawCoV());
         Utils.CustomRunTableRowFactory menuItems = new Utils.CustomRunTableRowFactory();
         menuItems.addMenuItem("Show Run calculation", this::showCoVSections);
 
@@ -64,6 +64,7 @@ public class CoV extends GenericTest implements Initializable {
     public void showCoVSections(TableRow<Run> row, TableView<Run> table) {
         SectionWindow sectionWindow = new SectionWindow(row.getItem());
         sectionWindow.setShowCVColumn(true);
+        sectionWindow.setShowGroup(false);
         sectionWindow.openWindow();
     }
 
@@ -110,6 +111,8 @@ public class CoV extends GenericTest implements Initializable {
             if(cov < minPossibleCV){
                 minPossibleCV = cov;
             }
+
+            covData.add(new XYChart.Data<>(section.getID(), cov));
         }
 
         run.setCoV(minPossibleCV);

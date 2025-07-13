@@ -87,6 +87,7 @@ public abstract class GenericTest {
         for (Section section : resultSections) {
             section.setNullhypothesis(isWithinThreshold(extractValue(section)));
         }
+
     }
 
     protected abstract double extractValue(Section section);
@@ -109,7 +110,7 @@ public abstract class GenericTest {
             if(isDataApplicable(run)){
                 this.calculateTest(run, resultSections);
                 this.calculateSectionHypothesis(run, resultSections);
-                this.calculateRunHypothesis(run);
+                this.calculateRunHypothesis(run, resultSections);
                 this.calculatePostHoc(run);
                 this.calculateSteadyState();
             } else {
@@ -120,15 +121,17 @@ public abstract class GenericTest {
         Logging.log(Level.INFO, className, "Done calculating.");
     }
 
-    private void calculateRunHypothesis(Run run) {
+    private void calculateRunHypothesis(Run run, List<Section> resultSections) {
 //        if (run.getAcceptedSectionsRate() >= acceptedSectionsThreshold) {
 //            run.setNullhypothesis(true);
 //        }
+        run.setResultSections(resultSections);
+
         int sectionsSize = run.getSections().size();
-        int sectionCountToBeAccepted = (int) Math.floor(sectionsSize * acceptedSectionsThreshold);
+        int sectionCountToBeAccepted = (int) Math.ceil(sectionsSize * acceptedSectionsThreshold);
         int acceptedSections = 0;
 
-        for(Section section: run.getSections()){
+        for(Section section: (resultSections)){
 
             if(section.getNullhypothesis()){
                 acceptedSections++;

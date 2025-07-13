@@ -98,13 +98,13 @@ public class Anova extends GenericTest implements Initializable {
 
     private void updateLabeling(Run run) {
         String averageSpeedLabelText = String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getAverageSpeed());
-        averageSpeedLabel.setText(String.format(Locale.ENGLISH, "%s %s", averageSpeedLabelText, Settings.getConversion()));
-        sseLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSSE()));
-        ssaLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSSA()));
-        sstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSST()));
-        ssaSstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, (run.getSSA() / run.getSST())));
-        sseSstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, (run.getSSE() / run.getSST())));
-        fCalculatedLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getF()));
+//        averageSpeedLabel.setText(String.format(Locale.ENGLISH, "%s %s", averageSpeedLabelText, Settings.getConversion()));
+//        sseLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSSE()));
+//        ssaLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSSA()));
+//        sstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSST()));
+//        ssaSstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, (run.getSSA() / run.getSST())));
+//        sseSstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, (run.getSSE() / run.getSST())));
+//        fCalculatedLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getF()));
         if(this.getSteadyStateRun() == null){
             steadyStateLabel.setText("No steady state run found.");
         } else {

@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
  */
 public class Job {
     public final static Integer MAX_RUN_COUNT = 100;
-    public final static Integer MIN_RUN_COUNT = 4;
-    public final static Integer DEFAULT_RUN_COUNT = 4;
+    public final static Integer MIN_RUN_COUNT = 1;
+    public final static Integer DEFAULT_RUN_COUNT = 1;
 
     public final static Double DEFAULT_ALPHA = 0.05;
     public final static Double MAX_ALPHA = 0.99999;
@@ -389,6 +389,16 @@ public class Job {
 
     public int getSkippedRunsDataSize() {
         return this.skipSize;
+    }
+
+    public List<Section> getAllSections(){
+        List<Section> sections = new ArrayList<>();
+        for (Run run : runs) {
+            for (List<Section> section : run.getGroups()) {
+                section.add(section.getFirst());
+            }
+        }
+        return sections;
     }
 
     @Override

@@ -31,6 +31,12 @@ public class Settings implements Initializable {
     public static final int MIN_REQUIRED_RUNS_FOR_STEADY_STATE = 2;
     public static final int DEFAULT_REQUIRED_RUNS_FOR_STEADY_STATE = 5;
 
+    public static final int MAX_REQUIRED_RUNS_FOR_STEADY_STATE = 10;
+    public static final int MIN_REQUIRED_RUNS_FOR_STEADY_STATE = 2;
+    public static final int DEFAULT_REQUIRED_RUNS_FOR_STEADY_STATE = 5;
+
+
+
     private int requiredRunsForSteadyState = DEFAULT_REQUIRED_RUNS_FOR_STEADY_STATE;
     private int groupSize = 2;
 
@@ -81,6 +87,8 @@ public class Settings implements Initializable {
     @FXML public Spinner<Integer> requiredRunsForSteadyStateSpinner;
 
     @FXML public Slider runCompareCounterSlider;
+    @FXML public Slider windowSlider;
+    @FXML public Slider windowStepSlider;
     @FXML public Button buttonSaveSettings;
     @FXML public RadioButton radioButtonMebibyte;
     @FXML public RadioButton radioButtonKibiByte;

@@ -138,6 +138,10 @@
             <Slider id="runCompareCounterSlider" fx:id="runCompareCounterSlider" blockIncrement="1.0" layoutX="293.0" layoutY="472.0" majorTickUnit="1.0" max="5.0" min="2.0" minorTickCount="0" prefHeight="24.0" prefWidth="190.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" />
             <Label layoutX="19.0" layoutY="440.0" prefHeight="17.0" prefWidth="249.0" text="Required runs for steady state" />
             <Spinner id="requiredRunsForSteadyStateSpinner" fx:id="requiredRunsForSteadyStateSpinner" layoutX="19.0" layoutY="466.0" prefHeight="25.0" prefWidth="61.0" />
+            <Slider fx:id="windowSlider" blockIncrement="5.0" layoutX="215.0" layoutY="68.0" majorTickUnit="5.0" max="30.0" min="10.0" minorTickCount="0" showTickLabels="true" showTickMarks="true" value="10.0" />
+            <Label layoutX="214.0" layoutY="38.0" prefHeight="17.0" prefWidth="142.0" text="Window size:" />
+            <Slider blockIncrement="1.0" layoutX="403.0" layoutY="68.0" majorTickUnit="1.0" max="5.0" min="1.0" showTickLabels="true" showTickMarks="true" value="1.0" />
+            <Label layoutX="402.0" layoutY="38.0" prefHeight="17.0" prefWidth="142.0" text="Window step size:" />
          </children>
       </Pane>
    </center>

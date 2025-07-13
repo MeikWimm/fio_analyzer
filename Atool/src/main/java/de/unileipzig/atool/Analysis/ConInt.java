@@ -8,10 +8,7 @@ import de.unileipzig.atool.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.apache.commons.math3.distribution.NormalDistribution;
@@ -52,14 +49,14 @@ public class ConInt extends GenericTest implements Initializable {
         averageSpeedColumn.setText("Average Speed" + Settings.getConversion());
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         averageSpeedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
-        intervalFromColumn.setCellValueFactory(new PropertyValueFactory<>("IntervalFrom"));
-        intervalFromColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
+        //intervalFromColumn.setCellValueFactory(new PropertyValueFactory<>("IntervalFrom"));
+        //intervalFromColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
-        intervalToColumn.setCellValueFactory(new PropertyValueFactory<>("IntervalTo"));
-        intervalToColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
+        //intervalToColumn.setCellValueFactory(new PropertyValueFactory<>("IntervalTo"));
+        //intervalToColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
-        plusMinusValueColumn.setCellValueFactory(new PropertyValueFactory<>("PlusMinusValue"));
-        plusMinusValueColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
+        //plusMinusValueColumn.setCellValueFactory(new PropertyValueFactory<>("PlusMinusValue"));
+        //plusMinusValueColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         standardDeviationColumn.setCellValueFactory(new PropertyValueFactory<>("StandardDeviation"));
         standardDeviationColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
@@ -67,8 +64,20 @@ public class ConInt extends GenericTest implements Initializable {
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
 
+        Utils.CustomRunTableRowFactory menuItems = new Utils.CustomRunTableRowFactory();
+        menuItems.addMenuItem("Show Run calculation", this::showConIntSections);
+        conIntTable.setRowFactory(menuItems);
+
         labelHeader.setText(this.job.toString());
         conIntTable.setItems(this.job.getRuns());
+    }
+
+    public void showConIntSections(TableRow<Run> row, TableView<Run> table) {
+        SectionWindow sectionWindow = new SectionWindow(row.getItem());
+        sectionWindow.setShowPlusMinusValueColumn(true);
+        sectionWindow.setShowIntervalToColumn(true);
+        sectionWindow.setShowIntervalFromColumn(true);
+        sectionWindow.openWindow();
     }
 
     @Override

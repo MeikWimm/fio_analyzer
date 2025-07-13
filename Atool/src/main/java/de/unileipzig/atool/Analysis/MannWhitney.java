@@ -53,7 +53,7 @@ public class MannWhitney extends GenericTest implements Initializable {
         averageSpeedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
+        //compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
         ZColumn.setCellValueFactory(new PropertyValueFactory<>("AcceptedSectionsRate"));
         ZColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 

@@ -40,7 +40,7 @@ public class TestEval{
 
         if(steadyStateRun != null){
             steadyStateRunString = String.format("Run %s", steadyStateRun.getID());
-            time = String.format("%f - %f", steadyStateRun.getStartTime() / 1000.0, steadyStateRun.getEndTime() / 1000.0);
+//            time = String.format("%f - %f", steadyStateRun.getStartTime() / 1000.0, steadyStateRun.getEndTime() / 1000.0);
         } else {
             steadyStateRunString = "No steady state run found";
         }
@@ -68,7 +68,7 @@ public class TestEval{
 
         if(steadyStateRun != null){
             steadyStateRunString = String.format("Run %s", steadyStateRun.getID());
-            time = String.format("%f - %f", steadyStateRun.getStartTime() / 1000.0, steadyStateRun.getEndTime() / 1000.0);
+//            time = String.format("%f - %f", steadyStateRun.getStartTime() / 1000.0, steadyStateRun.getEndTime() / 1000.0);
         } else {
             steadyStateRunString = "No steady state run found";
         }

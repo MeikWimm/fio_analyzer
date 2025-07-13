@@ -38,6 +38,7 @@ public class SectionWindow implements Initializable {
     private boolean showIntervalFromColumn = false;
     private boolean showIntervalToColumn = false;
     private boolean showPlusMinusValueColumn = false;
+    private boolean showGroup = true;
     private boolean showFColumn = false;
     private boolean showCVColumn = false;
     private boolean showTColumn = false;
@@ -49,14 +50,14 @@ public class SectionWindow implements Initializable {
 
     public SectionWindow(Run run) {
         this.run = run;
-        this.run.getSections().removeLast(); // Last Section not necessary
-        this.sections = FXCollections.observableList(this.run.getSections());
+        this.sections = FXCollections.observableList(this.run.getResultSections());
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         sectionsIDColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
         groupColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
+        groupColumn.setVisible(showGroup);
 
         averageSpeedColumn.setText("Average Speed" + Settings.getConversion());
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
@@ -129,6 +130,18 @@ public class SectionWindow implements Initializable {
         this.showQColumn = b;
     }
 
+    public void setShowIntervalFromColumn(boolean showIntervalFromColumn) {
+        this.showIntervalFromColumn = showIntervalFromColumn;
+    }
+
+    public void setShowIntervalToColumn(boolean showIntervalToColumn) {
+        this.showIntervalToColumn = showIntervalToColumn;
+    }
+
+    public void setShowGroup(boolean b) {
+        this.showGroup = b;
+    }
+
     public void openWindow() {
         Scene scene = getScene();
         Stage stage = new Stage();
@@ -136,7 +149,7 @@ public class SectionWindow implements Initializable {
         stage.setMaxHeight(700);
         stage.setMinHeight(700);
         stage.setMinWidth(800);
-        stage.setTitle("Job Evaluation");
+        stage.setTitle("Calculated sections");
         stage.setScene(scene);
         stage.show();
 
@@ -153,6 +166,7 @@ public class SectionWindow implements Initializable {
         }
         return new Scene(root);
     }
+
 
 
 }

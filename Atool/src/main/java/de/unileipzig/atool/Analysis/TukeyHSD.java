@@ -51,7 +51,7 @@ public class TukeyHSD extends PostHocTest implements Initializable {
         unitLabel.setText(Settings.getConversion());
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
-        compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
+        //compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
         QColumn.setCellValueFactory(new PropertyValueFactory<>("Q"));
         QColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));
 
