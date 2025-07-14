@@ -60,13 +60,12 @@ public class MannWhitney extends GenericTest implements Initializable {
     @FXML public TableColumn<Run, Double> ZColumn;
     @FXML public TableColumn<Run, Boolean> hypothesisColumn;
     @FXML public Button drawUTestButton;
-    @FXML public Label zIntervalLabel;
     @FXML public Label steadyStateLabel;
 
     private double zCrit;
 
     public MannWhitney(Job job,Settings settings) {
-        super(job, settings.getUTestSkipRunsCounter(), settings.isUTestUseAdjacentRun(), 2, job.getAlpha(), settings.isBonferroniUTestSelected(), settings.getRequiredRunsForSteadyState());
+        super(job, settings.getUTestSkipRunsCounter(), false, 2, job.getAlpha(), settings.isBonferroniUTestSelected(), settings.getRequiredRunsForSteadyState());
         this.uTestData = new ArrayList<>();
     }
 
@@ -78,7 +77,7 @@ public class MannWhitney extends GenericTest implements Initializable {
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
-        ZColumn.setCellValueFactory(new PropertyValueFactory<>("Z"));
+        ZColumn.setCellValueFactory(new PropertyValueFactory<>("P"));
         ZColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
@@ -110,10 +109,6 @@ public class MannWhitney extends GenericTest implements Initializable {
         return "Calculated U-Test";
     }
 
-    public void draw() {
-        charter.drawGraph("U-Test", "Run", "Z-Value","z-critical", getAlpha(), new Charter.ChartData("calculated Z", uTestData));
-        charter.openWindow();
-    }
 
     @Override
     public String getTestName() {
@@ -155,7 +150,12 @@ public class MannWhitney extends GenericTest implements Initializable {
 
     @Override
     public Scene getCharterScene() {
-        return charter.drawGraph("U-Test", "Run", "Z-Value","z-critical", getAlpha(), new Charter.ChartData("calculated Z", uTestData));
+        return charter.drawGraph("U-Test", "Time in seconds", "P-Value","Alpha level", getAlpha(), new Charter.ChartData("calculated P", uTestData));
+    }
+
+    public void draw() {
+        charter.drawGraph("U-Test", "Time in seconds", "P-Value","Alpha level", getAlpha(), new Charter.ChartData("calculated P", uTestData));
+        charter.openWindow();
     }
 
     @Override

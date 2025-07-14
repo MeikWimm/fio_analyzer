@@ -18,12 +18,9 @@ public class MathUtils {
 
     public static double average(List<Run> group) {
         double sum = 0;
-        double n = 0;
+        double n = group.size();
         for (Run run : group) {
-            for (DataPoint dp : run.getData()) {
-                sum += dp.data;
-                n++;
-            }
+            sum += run.getAverageSpeed();
         }
         return sum / n;
     }

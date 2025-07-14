@@ -35,7 +35,7 @@ public class CoV extends GenericTest implements Initializable {
 
 
     public CoV(Job job, Settings settings) {
-        super(job, settings.getCovSkipRunsCounter(), settings.isCovUseAdjacentRun(), settings.getGroupSize(), job.getAlpha(), false, settings.getRequiredRunsForSteadyState());
+        super(job, settings.getCovSkipRunsCounter(), false, settings.getGroupSize(), job.getAlpha(), false, settings.getRequiredRunsForSteadyState());
         final int dataSizeWithRuns = job.getRuns().size() * 2;
         this.covData = new ArrayList<>(dataSizeWithRuns);
         this.STEADY_STATE_COV_THRESHOLD = this.job.getCvThreshold();
@@ -122,7 +122,7 @@ public class CoV extends GenericTest implements Initializable {
 
     @Override
     protected boolean isWithinThreshold(double value) {
-        return value < STEADY_STATE_COV_THRESHOLD;
+        return value > STEADY_STATE_COV_THRESHOLD;
     }
 
     @Override
@@ -132,11 +132,11 @@ public class CoV extends GenericTest implements Initializable {
 
     @Override
     public Scene getCharterScene() {
-        return charter.drawGraph("Run CoV", "Per run", "F-Value", "Threshold", this.job.getCvThreshold(), new Charter.ChartData("CV over Job", covData));
+        return charter.drawGraph("CoV", "Time in seconds", "CV-Value", "Threshold", this.job.getCvThreshold(), new Charter.ChartData("calculated CV", covData));
     }
 
     public void drawCoV() {
-        charter.drawGraph("Run CoV", "Per run", "F-Value", "Threshold", this.job.getCvThreshold(), new Charter.ChartData("CV over Job", covData));
+        charter.drawGraph("CoV", "Time in seconds", "CV-Value", "Threshold", this.job.getCvThreshold(), new Charter.ChartData("calculated CV", covData));
         charter.openWindow();
     }
 

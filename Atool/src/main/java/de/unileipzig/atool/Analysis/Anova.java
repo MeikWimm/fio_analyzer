@@ -17,7 +17,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import org.apache.commons.math3.stat.inference.OneWayAnova;
+import org.apache.commons.math3.distribution.FDistribution;
 
 import java.net.URL;
 import java.util.*;
@@ -53,7 +53,7 @@ public class Anova extends GenericTest implements Initializable {
     private double fCrit;
 
     public Anova(Job job, Settings settings) {
-        super(job, settings.getAnovaSkipRunsCounter(), settings.isAnovaUseAdjacentRun(), settings.getGroupSize(), job.getAlpha(), settings.isBonferroniANOVASelected() , settings.getRequiredRunsForSteadyState());
+        super(job, settings.getAnovaSkipRunsCounter(), false, 3, job.getAlpha(), settings.isBonferroniANOVASelected() , settings.getRequiredRunsForSteadyState());
         final int dataSize = job.getData().size();
         this.anovaData = new ArrayList<>(dataSize);
     }
@@ -107,89 +107,70 @@ public class Anova extends GenericTest implements Initializable {
     protected void setLabeling() {
         fCriticalLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.fCrit));
         sigmaJobLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, this.job.getStandardDeviation()));
-        if(this.possibleSteadyStateRuns.isEmpty()){
+        if(this.possibleSteadyStateRunsGroup.isEmpty()){
             steadyStateLabel.setText("No steady state run found.");
         } else {
-            steadyStateLabel.setText("at run " + this.possibleSteadyStateRuns.getFirst().getID());
+            steadyStateLabel.setText("at run " + this.possibleSteadyStateRunsGroup.getFirst().getFirst().getID());
         }
     }
 
     @Override
     protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
-        OneWayAnova anova = new OneWayAnova();
-
-//        int num = groups.size() - 1;
-//        int denom = (num + 1) * (this.job.getData().size() - 1);
-//
-//        FDistribution fDistribution = new FDistribution(num, denom);
-//        fCrit = fDistribution.inverseCumulativeProbability(1.0 - alpha);
-//        double sse = 0.0;
-//        double ssa = 0.0;
-//
-//
-//        for (List<Run> group : groups) {
-//            for (Run run : group) {
-//                double averageSpeedOfRun = run.getAverageSpeed();
-//                ssa += Math.pow(averageSpeedOfRun - MathUtils.average(group), 2);
-//                ssa *= run.getData().size();
-//                run.setSSA(ssa);
-//                ssa = 0;
-//            }
-//        }
-//
-//
-//        for (List<Run> group : groups) {
-//            for (Run run : group) {
-//                for (DataPoint dp : run.getData()) {
-//                    sse += (Math.pow((dp.data - MathUtils.average(group)), 2));
-//                }
-//                run.setSSE(sse);
-//                sse = 0;
-//            }
-//        }
-//
-//        double fValue;
-//        for (List<Run> group : groups) {
-//            Run run = group.getFirst();
-//            double s_2_a = run.getSSA() / (groups.size() - 1);
-//            double s_2_e = run.getSSE() / (groups.size() * (run.getData().size() - 1));
-//            fValue = s_2_a / s_2_e;
-//            run.setF(fValue);
-//            run.setP(1.0 - fDistribution.cumulativeProbability(fValue));
-//            resultRuns.add(run);
-//            anovaData.add(new XYChart.Data<>(run.getID(), fValue));
-//        }
-
         for (List<Run> group : groups) {
-            List<double[]> dataGroups = new ArrayList<>();
+            int num = group.size() - 1;
+            int denom = (num + 1) * (group.getFirst().getData().size() - 1);
+            FDistribution fDistribution = new FDistribution(num, denom);
+            fCrit = fDistribution.inverseCumulativeProbability(1.0 - alpha);
+            double sse = 0.0;
+            double ssa = 0.0;
+
+
             for (Run run : group) {
-                double[] data1 = run.getData().stream().mapToDouble(dp -> dp.data).toArray();
-                dataGroups.add(data1);
+                    double averageSpeedOfRun = run.getAverageSpeed();
+                    ssa += Math.pow(averageSpeedOfRun - MathUtils.average(group), 2);
+                    ssa *= run.getData().size();
+                    run.setSSA(ssa);
+                    ssa = 0;
             }
 
-            double pValue = anova.anovaPValue(dataGroups);
-            group.getFirst().setP(pValue);
+            for (Run run : group) {
+                for (DataPoint dp : run.getData()) {
+                    sse += (Math.pow((dp.data - MathUtils.average(group)), 2));
+                }
+                run.setSSE(sse);
+                sse = 0;
+            }
+
+            double fValue;
+
+            double totalSSE = 0;
+            for (Run run : group) {
+                totalSSE += run.getSSE();
+            }
+
+            Run run = group.getFirst();
+            double s_2_a = run.getSSA() / (groups.size() - 1);
+            double s_2_e = run.getSSE() / (groups.size() * (run.getData().size() - 1));
+            fValue = s_2_a / s_2_e;
+            run.setF(fValue);
+            run.setSSE(totalSSE);
+            run.setMSE(totalSSE / denom);
+
+
             resultRuns.add(group.getFirst());
-            anovaData.add(new XYChart.Data<>(group.getFirst().getID(), pValue));
+            anovaData.add(new XYChart.Data<>(group.getFirst().getID(), fValue));
         }
 
-        double totalSSE = 0;
-        for (Run run : resultRuns) {
-            totalSSE += run.getSSE();
-        }
-
-        this.job.setSSE(totalSSE);
-//        this.job.setMSE(totalSSE / denom);
     }
 
     @Override
     protected double extractValue(Run run) {
-        return run.getP();
+        return run.getF();
     }
 
     @Override
     protected boolean isWithinThreshold(double value) {
-        return value < getAlpha();
+        return value > this.fCrit;
     }
 
     public double getCriticalValue() {
@@ -206,13 +187,13 @@ public class Anova extends GenericTest implements Initializable {
     }
 
     private void drawANOVAGraph() {
-        charter.drawGraph("ANOVA", "Run", "F-Value", "Critical value", this.fCrit, new Charter.ChartData("calculated F", anovaData));
+        charter.drawGraph("ANOVA", "Time in seconds", "F-Value", "Critical value", this.fCrit, new Charter.ChartData("calculated F", anovaData));
         charter.openWindow();
     }
 
     @Override
     public Scene getCharterScene() {
-        return charter.drawGraph("ANOVA", "Run", "F-Value", "Critical value", this.fCrit, new Charter.ChartData("calculated F", anovaData));
+        return charter.drawGraph("ANOVA", "Time in seconds", "F-Value", "Critical value", this.fCrit, new Charter.ChartData("calculated F", anovaData));
     }
 
     @Override

@@ -25,7 +25,7 @@ public abstract class GenericTest {
     private final List<List<Run>> groups;
     protected List<List<Run>> resultGroups;
     private final List<Run> resultRuns;
-    protected List<Run> possibleSteadyStateRuns;
+    protected List<List<Run>> possibleSteadyStateRunsGroup;
     protected double alpha;
     protected boolean skipGroup;
     protected int thresholdSectionsForSteadyState;
@@ -36,6 +36,8 @@ public abstract class GenericTest {
     private Scene scene;
     protected final Charter charter;
 
+    public static final int DEFAULT_THRESHOLD_SECONDS_FOR_STEADY_STATE = 30;
+
     public GenericTest(Job job, int skipFirstRun, boolean skipGroup, int groupSize, double alpha, boolean applyBonferroni, int thresholdSectionsForSteadyState) {
         this.job = new Job(job);
         this.job.prepareSkippedData(skipFirstRun);
@@ -43,7 +45,7 @@ public abstract class GenericTest {
         this.groupSize = groupSize;
         this.resultGroups = new ArrayList<>();
         this.resultRuns = new ArrayList<>();
-        this.possibleSteadyStateRuns = new ArrayList<>();
+        this.possibleSteadyStateRunsGroup = new ArrayList<>();
         this.charter = new Charter();
         this.skipGroup = skipGroup;
         this.alpha = alpha;
@@ -88,54 +90,36 @@ public abstract class GenericTest {
         for (Run run : this.resultRuns) {
             run.setNullhypothesis(!isWithinThreshold(extractValue(run)));
         }
-
-
-        for(List<Run> group : this.groups){
-            Run run = group.getFirst();
-            if(run.getNullhypothesis()){
-                this.resultGroups.add(group);
-            }
-        }
     }
 
     protected void calculateSteadyState() {
-        possibleSteadyStateRuns = new ArrayList<>(thresholdSectionsForSteadyState);
-        boolean isSteadyStateFound;
+        int secondCounter = 0;
 
-        if((this.groups.size() < thresholdSectionsForSteadyState)){
-            return;
-        }
-
-        for (int j = 0; j < this.resultRuns.size(); j++) {
-            isSteadyStateFound = true;
-            int counter = 0;
-            for (int i = j; i < j + thresholdSectionsForSteadyState; i++) {
-                if(i < this.resultRuns.size()){
-                    Run run = this.resultRuns.get(i);
-                    double VALUE = extractValue(run);
-                    if (isWithinThreshold(VALUE)) {
-                        possibleSteadyStateRuns.add(run);
-                    } else {
-                        isSteadyStateFound = false;
-                        j = j + counter;
-                        possibleSteadyStateRuns.clear();
-                        break;
-                    }
-                    counter++;
-                }
+        for (List<Run> group : this.groups) {
+            Run run = group.getFirst();
+            if (run.getNullhypothesis()) {
+                possibleSteadyStateRunsGroup.add(group);
+                secondCounter++;
+            } else {
+                possibleSteadyStateRunsGroup.clear();
+                secondCounter = 0;
             }
 
-            if(isSteadyStateFound){
+            if(secondCounter >= DEFAULT_THRESHOLD_SECONDS_FOR_STEADY_STATE){
                 break;
             }
+        }
+
+        if(possibleSteadyStateRunsGroup.size() < secondCounter){
+            possibleSteadyStateRunsGroup.clear();
         }
     }
 
     public Run getSteadyStateRun(){
-        if(this.possibleSteadyStateRuns.isEmpty()){
+        if(this.possibleSteadyStateRunsGroup.isEmpty()){
             return null;
         } else {
-            return this.possibleSteadyStateRuns.getFirst();
+            return this.possibleSteadyStateRunsGroup.getFirst().getFirst();
         }
     }
 
@@ -173,7 +157,7 @@ public abstract class GenericTest {
     }
 
     public List<Run> getPossibleSteadyStateRuns() {
-        return possibleSteadyStateRuns;
+        return possibleSteadyStateRunsGroup.getFirst();
     }
 
     public void calculatePostHoc() {
@@ -181,12 +165,18 @@ public abstract class GenericTest {
             return;
         }
 
-        if (this.resultGroups.size() < 2) {
-            Logging.log(Level.WARNING, className, " group size of test result is smaller than 2!");
+        if(possibleSteadyStateRunsGroup.isEmpty()){
+            Logging.log(Level.INFO, className, "No steady state run found.");
             return;
         }
 
-        postHocTest.setupGroups(this.resultGroups);
+        List<List<Run>> postHocGroups = new ArrayList<>();
+
+        for (int i = 0; i < this.possibleSteadyStateRunsGroup.size(); i += 2) {
+            postHocGroups.add(this.possibleSteadyStateRunsGroup.get(i));
+        }
+
+        postHocTest.setupGroups(postHocGroups);
         postHocTest.calculate();
     }
 

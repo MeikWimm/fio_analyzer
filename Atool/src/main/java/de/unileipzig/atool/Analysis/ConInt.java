@@ -44,7 +44,7 @@ public class ConInt extends GenericTest implements Initializable {
 
 
     public ConInt(Job job,Settings settings) {
-        super(job, settings.getConIntSkipRunsCounter(), settings.isConIntUseAdjacentRun(), 2, job.getAlpha(), settings.isBonferroniConIntSelected(), settings.getRequiredRunsForSteadyState());
+        super(job, settings.getConIntSkipRunsCounter(), false, 2, job.getAlpha(), settings.isBonferroniConIntSelected(), settings.getRequiredRunsForSteadyState());
     }
 
     @Override
@@ -180,7 +180,7 @@ public class ConInt extends GenericTest implements Initializable {
 
     @Override
     protected void setLabeling() {
-        Run run = this.getSteadyStateRun();
+        Run run = getSteadyStateRun();
         if(run == null){
             steadyStateLabel.setText("No steady state found");
             return;
