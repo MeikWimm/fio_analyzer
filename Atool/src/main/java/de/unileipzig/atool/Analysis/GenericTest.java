@@ -27,7 +27,7 @@ public abstract class GenericTest {
     protected boolean applyBonferroni;
     protected int skipCounter;
     protected int groupSize;
-    private PostHocTest postHocTest;
+    //private PostHocTest postHocTest;
     private Scene scene;
     protected final Charter charter;
     private final List<Run> runs;
@@ -56,7 +56,6 @@ public abstract class GenericTest {
         }
     }
 
-
     public int getSkippedRunCount(){
         return skipCounter;
     }
@@ -73,19 +72,9 @@ public abstract class GenericTest {
 
     protected abstract boolean isWithinThreshold(double value);
 
-    public void setPostHocTest(PostHocTest postHocTest) {
-        this.postHocTest = postHocTest;
-        this.postHocTest.setGenericTest(this);
-    }
-
-    public PostHocTest getPostHocTest() {
-        return this.postHocTest;
-    }
-
-
     protected void calculateSectionHypothesis(Run run, List<Section> resultSections){
         for (Section section : resultSections) {
-            section.setNullhypothesis(isWithinThreshold(extractValue(section)));
+            section.setNullhypothesis(!isWithinThreshold(extractValue(section)));
         }
 
     }
@@ -111,7 +100,6 @@ public abstract class GenericTest {
                 this.calculateTest(run, resultSections);
                 this.calculateSectionHypothesis(run, resultSections);
                 this.calculateRunHypothesis(run, resultSections);
-                this.calculatePostHoc(run);
                 this.calculateSteadyState();
             } else {
                 Logging.log(Level.WARNING, className,"Loaded data can't be calculated!");
@@ -175,22 +163,22 @@ public abstract class GenericTest {
         return possibleSteadyStateRuns;
     }
 
-    public void calculatePostHoc(Run run) {
-        List<List<Section>> groups = run.getGroups();
-
-        if (postHocTest == null) {
-            return;
-        }
-
-        if (groups.size() < 2) {
-            Logging.log(Level.WARNING, className, " group size of test result is smaller than 2!");
-            return;
-        }
-
-        postHocTest.setRun(run);
-        postHocTest.setupGroups(groups);
-        postHocTest.calculate();
-    }
+//    public void calculatePostHoc(Run run) {
+//        List<List<Section>> groups = run.getGroups();
+//
+//        if (postHocTest == null) {
+//            return;
+//        }
+//
+//        if (groups.size() < 2) {
+//            Logging.log(Level.WARNING, className, " group size of test result is smaller than 2!");
+//            return;
+//        }
+//
+//        postHocTest.setRun(run);
+//        postHocTest.setupGroups(groups);
+//        postHocTest.calculate();
+//    }
 
     public Job getJob() {
         return this.job;

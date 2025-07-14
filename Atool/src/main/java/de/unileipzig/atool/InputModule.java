@@ -189,7 +189,7 @@ InputModule {
             current_speed_sum += speed;
             freq.put(speed, 1);
 
-
+            double sums = 0;
             while ((line = br.readLine()) != null) {
                 int[] s = parseFirstTwoValues(line);
                 if (s == null) {
@@ -202,6 +202,7 @@ InputModule {
 
                 if (old_time != new_time) {
                     average_speed_per_milli = (double) current_speed_sum / counter;
+                    sums += average_speed_per_milli / 1000.0;
                     data.add(new DataPoint(average_speed_per_milli, new_time));
                     sum_speed += average_speed_per_milli;
                     old_time = new_time;
@@ -215,7 +216,7 @@ InputModule {
             average_speed_per_milli = current_speed_sum / (double) counter;
             sum_speed += average_speed_per_milli;
 
-
+            Logging.log(Level.INFO, className,String.format("SUMS: %f", sums));
             this.time = old_time;
             this.averageSpeed = sum_speed / data.size();
             this.standardDeviation = MathUtils.calculateDeviation(data, this.averageSpeed);

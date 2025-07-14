@@ -39,11 +39,12 @@ public class Settings implements Initializable {
     public static final int MAX_WINDOW_STEP_SIZE = 5000;
     public static final int DEFAULT_WINDOW_STEP_SIZE = 1000;
 
+    public static final int DEFAULT_GROUP_SIZE_ANOVA = 3;
 
     private int requiredRunsForSteadyState = DEFAULT_REQUIRED_RUNS_FOR_STEADY_STATE;
     public static int WINDOW_STEP_SIZE = DEFAULT_WINDOW_STEP_SIZE;
     public static int WINDOW_SIZE = DEFAULT_WINDOW_SIZE;
-    private int groupSize = 2;
+    private int groupSize = DEFAULT_GROUP_SIZE_ANOVA;
 
     private static final int DIGIT = 3;
     public static final String DIGIT_FORMAT = "%,." + DIGIT + "f";

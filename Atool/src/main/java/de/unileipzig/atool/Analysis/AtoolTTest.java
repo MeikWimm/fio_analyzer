@@ -17,6 +17,7 @@ import org.apache.commons.math3.stat.inference.TTest;
 
 import java.net.URL;
 import java.util.*;
+import java.util.logging.Level;
 
 
 /**
@@ -114,7 +115,10 @@ public class AtoolTTest extends GenericTest implements Initializable {
             double[] data2 = section2.getData().stream().mapToDouble(dp -> dp.data).toArray();
             double pVal = ttest.tTest(data1, data2);
 
-            section1.setT(pVal);
+            for (int j = 0; j < data1.length; j++) {
+                Logging.log(Level.INFO, "T-Test", String.format(Locale.ENGLISH, "Run %d, Group %d, Data 1: %f | Data 2 %f", run.getID(), i, data1[j], data2[j]));
+            }
+            section1.setP(pVal);
             tData.add(new XYChart.Data<>(section1.getID(), pVal));
             resultSections.add(section1);
         }
@@ -122,12 +126,12 @@ public class AtoolTTest extends GenericTest implements Initializable {
 
     @Override
     protected boolean isWithinThreshold(double value) {
-        return value < this.tCrit;
+        return value < getAlpha();
     }
 
     @Override
     protected double extractValue(Section section) {
-        return section.getT();
+        return section.getP();
     }
 
     @Override

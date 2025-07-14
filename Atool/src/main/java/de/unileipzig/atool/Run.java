@@ -165,8 +165,10 @@ public class Run /*Section*/ {
         int count = 1;
         int WINDOW_SIZE = Settings.WINDOW_SIZE;
         int WINDOW_STEP_SIZE = Settings.WINDOW_STEP_SIZE;
+
         for (int i = 0; i <= data.size() - WINDOW_SIZE; i += WINDOW_STEP_SIZE) {
-            Section section = new Section(data.subList(i, i + WINDOW_SIZE), count);
+            double timeSection = (WINDOW_STEP_SIZE / 1000.0);
+            Section section = new Section(data.subList(i, i + WINDOW_SIZE), count * timeSection, count);
             sections.add(section);
             count++;
         }

@@ -99,7 +99,7 @@ public class MannWhitney extends GenericTest implements Initializable {
     }
 
     public void draw() {
-        charter.drawGraph("U-Test", "Run", "Z-Value","z-critical", this.zCrit, new Charter.ChartData("calculated Z", uTestData));
+        charter.drawGraph("U-Test", "Run", "Z-Value","z-critical", getAlpha(), new Charter.ChartData("calculated Z", uTestData));
         charter.openWindow();
     }
 
@@ -133,7 +133,7 @@ public class MannWhitney extends GenericTest implements Initializable {
 
     @Override
     public double getCriticalValue() {
-        return this.zCrit;
+        return this.pCrit;
     }
 
     @Override
@@ -162,7 +162,7 @@ public class MannWhitney extends GenericTest implements Initializable {
 
     @Override
     public Scene getCharterScene() {
-        return charter.drawGraph("U-Test", "Run", "calculated p-Value","p-critical", 0.05, new Charter.ChartData("calculated P", uTestData));
+        return charter.drawGraph("U-Test", "Run", "calculated p-Value","p-critical", getAlpha(), new Charter.ChartData("calculated P", uTestData));
     }
 
     @Override

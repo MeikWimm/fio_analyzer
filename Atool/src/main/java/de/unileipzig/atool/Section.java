@@ -5,6 +5,7 @@ import java.util.List;
 
 public class Section{
     private final List<DataPoint> data;
+    private final double timeStep;
     private final int ID;
     private double averageSpeed;
     private double standardDeviation;
@@ -27,8 +28,9 @@ public class Section{
     private String group = "";
     private List<Section> sections;
 
-    public Section(List<DataPoint> data, int ID) {
+    public Section(List<DataPoint> data, double timeStep, int ID){
         this.data = data;
+        this.timeStep = timeStep;
         this.ID = ID;
         calculateSection();
     }
@@ -63,6 +65,14 @@ public class Section{
         this.p = other.p;
         this.groupID = other.groupID;
         this.group = other.group;
+        this.sse = other.sse;
+        this.ssa = other.ssa;
+        this.qVal = other.qVal;
+        this.P = other.P;
+        this.F = other.F;
+        this.tVal = other.tVal;
+        this.cov = other.cov;
+        this.timeStep = other.timeStep;
     }
 
     private void calculateSection(){

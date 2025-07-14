@@ -392,11 +392,9 @@ public class PrimaryController implements Initializable {
      */
     private void onActionCalcTukeyHSD(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        Anova anova = new Anova(job, settings);
-        TukeyHSD tukey = new TukeyHSD();
-        anova.setPostHocTest(tukey);
-        anova.calculate();
-        tukey.openWindow();
+        TukeyHSD tukey = new TukeyHSD(job, settings);
+        //tukey.calculate();
+        //tukey.openWindow();
     }
 
     /**

@@ -1,7 +1,6 @@
 package de.unileipzig.atool;
 
 import de.unileipzig.atool.Analysis.GenericTest;
-import de.unileipzig.atool.Analysis.PostHocTest;
 import de.unileipzig.atool.Analysis.SteadyStateEval;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
@@ -114,12 +113,6 @@ public class OutputModule {
                 test.getScene();
                 saveTestValues(test);
                 saveTable(test.getTestName(), test.getTable());
-                PostHocTest postHocTest = test.getPostHocTest();
-                if(postHocTest != null){
-                    postHocTest.getScene();
-                    savePostHocTestValues(postHocTest);
-                    saveTable(postHocTest.getTestName(), postHocTest.getTable());
-                }
 
                 // Saving graphs of all Tests
                 Scene testCharterScene = test.getCharterScene();
@@ -127,7 +120,6 @@ public class OutputModule {
                     testCharterScene.snapshot(img);
                     File graphFile = new File(Paths.get(path.toString(), "/" + test.getTestName() + "_graph"  + ".png").toString());
                     saveSnapshot(img, graphFile);
-                    savePostHocGraphTests(img, path, test);
                 } else {
                     Logging.log(Level.INFO, className, "No charter scene found for test: " + test.getTestName());
                 }
@@ -139,15 +131,6 @@ public class OutputModule {
         Logging.log(Level.INFO, className,"Done!");
     }
 
-    private void savePostHocTestValues(PostHocTest test) {
-        stringBuilder.append("[").append(test.getTestName()).append("]").append("\n");
-        double criticalValue = test.getCriticalValue();
-        if(criticalValue == Run.UNDEFINED_DOUBLE_VALUE){
-            stringBuilder.append("Critical Value: ").append("UNDEFINED").append("\n").append("\n");
-        } else {
-            stringBuilder.append("Critical Value: ").append(criticalValue).append("\n").append("\n");
-        }
-    }
 
     private void saveTestValues(GenericTest test) {
         stringBuilder.append("[").append(test.getTestName()).append("]").append("\n");
@@ -196,16 +179,6 @@ public class OutputModule {
             return r.getValue().toString();
         }
         return "";
-    }
-
-    private void savePostHocGraphTests(WritableImage img, File path, GenericTest test) {
-        if(test.getPostHocTest() != null) {
-            PostHocTest postHocTest = test.getPostHocTest();
-            Scene scene = postHocTest.getCharterScene();
-            scene.snapshot(img);
-            File postHocGraphFile = new File(Paths.get(path.toString(), "/" + postHocTest.getTestName() + "_graph"  + ".png").toString());
-            saveSnapshot(img, postHocGraphFile);
-        }
     }
 
     private void saveSnapshot(WritableImage img, File file) {

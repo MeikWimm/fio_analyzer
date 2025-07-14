@@ -42,17 +42,17 @@ public class SteadyStateEval implements Initializable {
     public SteadyStateEval(Job job, Settings settings){
         this.job = job;
         this.settings = settings;
-        tests = new  GenericTest[5];
+        tests = new  GenericTest[6];
         outputModule = new OutputModule();
 
         Anova anova = new Anova(job, settings);
-        TukeyHSD tukey = new TukeyHSD();
-        anova.setPostHocTest(tukey);
+        TukeyHSD tukey = new TukeyHSD(job, settings);
         tests[0] = anova;
         tests[1] = new ConInt(job, settings);
         tests[2] = new CoV(job, settings);
         tests[3] = new MannWhitney(job, settings);
         tests[4] = new AtoolTTest(job, settings);
+        tests[5] = new TukeyHSD(job, settings);
         testEvals = new ArrayList<>();
         prepareTests();
     }

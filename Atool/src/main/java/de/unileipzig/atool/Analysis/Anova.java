@@ -138,18 +138,19 @@ public class Anova extends GenericTest implements Initializable {
 
             double pValue = anova.anovaPValue(dataGroups);
             group.getFirst().setP(pValue);
+            resultSections.add(group.getFirst());
             anovaData.add(new XYChart.Data<>(group.getFirst().getID(), pValue));
         }
     }
 
     @Override
     protected boolean isWithinThreshold(double value) {
-        return value < this.fCrit;
+        return value < getAlpha();
     }
 
     @Override
     protected double extractValue(Section section) {
-        return section.getF();
+        return section.getP();
     }
 
     public double getCriticalValue() {
