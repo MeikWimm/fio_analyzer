@@ -27,9 +27,9 @@ public class Settings implements Initializable {
     public static final int MIN_SKIP_COUNT = 0;
     public static final int DEFAULT_SKIP_COUNT = 0;
 
-    public static final int DEFAULT_WINDOW_SIZE = 60000;
+    public static final int DEFAULT_WINDOW_SIZE = 2000;
     public static final int MIN_WINDOW_SIZE = 30000;
-    public static final int MAX_WINDOW_SIZE = 60000;
+    public static final int MAX_WINDOW_SIZE = 1000;
 
     public static final int MAX_REQUIRED_SECONDS_FOR_STEADY_STATE = 60;
     public static final int MIN_REQUIRED_SECONDS_FOR_STEADY_STATE = 30;
@@ -154,7 +154,7 @@ public class Settings implements Initializable {
             Stage stage = new Stage();
             stage.setTitle("Settings");
             stage.setScene(new Scene(root1));
-            stage.setResizable(false);
+            stage.setResizable(true);
             stage.show();
         } catch (IOException e) {
             Logging.log(Level.SEVERE, "Settings", "Coudn't open Settings Window! App state");
