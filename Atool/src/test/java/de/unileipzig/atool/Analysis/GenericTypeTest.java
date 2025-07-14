@@ -38,7 +38,7 @@ class GenericTypeTest {
     void testInitialization() {
         for(Job job: jobs){
             List<GenericTest> tests = Arrays.asList(
-                    new TTest(job, settings),
+                    new AtoolTTest(job, settings),
                     new ConInt(job, settings),
                     new Anova(job, settings),
                     new MannWhitney(job, settings)
@@ -54,7 +54,7 @@ class GenericTypeTest {
     void testCalculate() {
         for(Job job: jobs){
             List<GenericTest> tests = Arrays.asList(
-                    new TTest(job, settings),
+                    new AtoolTTest(job, settings),
                     new ConInt(job, settings),
                     new Anova(job, settings),
                     new MannWhitney(job, settings)

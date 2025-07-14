@@ -43,26 +43,36 @@ public abstract class PostHocTest {
             for (int j = i + 1; j < resultGroups.size(); j++) {
                 List<Run> group1 = resultGroups.get(i);
                 List<Run> group2 = resultGroups.get(j);
-                List<Run> copyGroup1 = new ArrayList<>();
-                List<Run> copyGroup2 = new ArrayList<>();
+//                List<Run> copyGroup1 = new ArrayList<>();
+//                List<Run> copyGroup2 = new ArrayList<>();
+//
+//                for (Run run : group1) {
+//                    copyGroup1.add(new Run(run));
+//                }
+//
+//                for (Run run : group2) {
+//                    copyGroup2.add(new Run(run));
+//                }
 
-                for (Run run : group1) {
-                    copyGroup1.add(new Run(run));
-                }
+//                postHocGroups.add(copyGroup1);
+//                Run run = copyGroup1.getFirst();
+//                run.setGroup(group1.getFirst().getGroup() + " | " + group2.getFirst().getGroup());
+//                run.setGroupID(ID);
+//
+//                postHocGroups.add(copyGroup2);
+//
+//                this.firstGroup.add(copyGroup1);
+//                this.secondGroup.add(copyGroup2);
 
-                for (Run run : group2) {
-                    copyGroup2.add(new Run(run));
-                }
-
-                postHocGroups.add(copyGroup1);
-                Run run = copyGroup1.getFirst();
+                postHocGroups.add(group1);
+                Run run = group1.getFirst();
                 run.setGroup(group1.getFirst().getGroup() + " | " + group2.getFirst().getGroup());
                 run.setGroupID(ID);
 
-                postHocGroups.add(copyGroup2);
+                postHocGroups.add(group2);
 
-                this.firstGroup.add(copyGroup1);
-                this.secondGroup.add(copyGroup2);
+                this.firstGroup.add(group1);
+                this.secondGroup.add(group2);
                 ID++;
             }
         }

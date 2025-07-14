@@ -17,7 +17,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import org.apache.commons.math3.distribution.FDistribution;
+import org.apache.commons.math3.stat.inference.OneWayAnova;
 
 import java.net.URL;
 import java.util.*;
@@ -116,46 +116,61 @@ public class Anova extends GenericTest implements Initializable {
 
     @Override
     protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
-        int num = groups.size() - 1;
-        int denom = (num + 1) * (this.job.getData().size() - 1);
+        OneWayAnova anova = new OneWayAnova();
 
-        FDistribution fDistribution = new FDistribution(num, denom);
-        fCrit = fDistribution.inverseCumulativeProbability(1.0 - alpha);
-        double sse = 0.0;
-        double ssa = 0.0;
-
+//        int num = groups.size() - 1;
+//        int denom = (num + 1) * (this.job.getData().size() - 1);
+//
+//        FDistribution fDistribution = new FDistribution(num, denom);
+//        fCrit = fDistribution.inverseCumulativeProbability(1.0 - alpha);
+//        double sse = 0.0;
+//        double ssa = 0.0;
+//
+//
+//        for (List<Run> group : groups) {
+//            for (Run run : group) {
+//                double averageSpeedOfRun = run.getAverageSpeed();
+//                ssa += Math.pow(averageSpeedOfRun - MathUtils.average(group), 2);
+//                ssa *= run.getData().size();
+//                run.setSSA(ssa);
+//                ssa = 0;
+//            }
+//        }
+//
+//
+//        for (List<Run> group : groups) {
+//            for (Run run : group) {
+//                for (DataPoint dp : run.getData()) {
+//                    sse += (Math.pow((dp.data - MathUtils.average(group)), 2));
+//                }
+//                run.setSSE(sse);
+//                sse = 0;
+//            }
+//        }
+//
+//        double fValue;
+//        for (List<Run> group : groups) {
+//            Run run = group.getFirst();
+//            double s_2_a = run.getSSA() / (groups.size() - 1);
+//            double s_2_e = run.getSSE() / (groups.size() * (run.getData().size() - 1));
+//            fValue = s_2_a / s_2_e;
+//            run.setF(fValue);
+//            run.setP(1.0 - fDistribution.cumulativeProbability(fValue));
+//            resultRuns.add(run);
+//            anovaData.add(new XYChart.Data<>(run.getID(), fValue));
+//        }
 
         for (List<Run> group : groups) {
+            List<double[]> dataGroups = new ArrayList<>();
             for (Run run : group) {
-                double averageSpeedOfRun = run.getAverageSpeed();
-                ssa += Math.pow(averageSpeedOfRun - MathUtils.average(group), 2);
-                ssa *= run.getData().size();
-                run.setSSA(ssa);
-                ssa = 0;
+                double[] data1 = run.getData().stream().mapToDouble(dp -> dp.data).toArray();
+                dataGroups.add(data1);
             }
-        }
 
-
-        for (List<Run> group : groups) {
-            for (Run run : group) {
-                for (DataPoint dp : run.getData()) {
-                    sse += (Math.pow((dp.data - MathUtils.average(group)), 2));
-                }
-                run.setSSE(sse);
-                sse = 0;
-            }
-        }
-
-        double fValue;
-        for (List<Run> group : groups) {
-            Run run = group.getFirst();
-            double s_2_a = run.getSSA() / (groups.size() - 1);
-            double s_2_e = run.getSSE() / (groups.size() * (run.getData().size() - 1));
-            fValue = s_2_a / s_2_e;
-            run.setF(fValue);
-            run.setP(1.0 - fDistribution.cumulativeProbability(fValue));
-            resultRuns.add(run);
-            anovaData.add(new XYChart.Data<>(run.getID(), fValue));
+            double pValue = anova.anovaPValue(dataGroups);
+            group.getFirst().setP(pValue);
+            resultRuns.add(group.getFirst());
+            anovaData.add(new XYChart.Data<>(group.getFirst().getID(), pValue));
         }
 
         double totalSSE = 0;
@@ -164,17 +179,17 @@ public class Anova extends GenericTest implements Initializable {
         }
 
         this.job.setSSE(totalSSE);
-        this.job.setMSE(totalSSE / denom);
+//        this.job.setMSE(totalSSE / denom);
     }
 
     @Override
     protected double extractValue(Run run) {
-        return run.getF();
+        return run.getP();
     }
 
     @Override
     protected boolean isWithinThreshold(double value) {
-        return value < this.fCrit;
+        return value < getAlpha();
     }
 
     public double getCriticalValue() {

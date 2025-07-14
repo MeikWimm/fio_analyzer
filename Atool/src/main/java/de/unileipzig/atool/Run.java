@@ -50,9 +50,7 @@ public class Run /*Section*/ {
     public Run(Run other) {
         this.runID = other.getRunID();
         this.data = new ArrayList<>();
-        for (DataPoint dataPoint: other.getData()){
-            this.data.add(new DataPoint(dataPoint));
-        }
+        this.data = other.getData();
         this.startTime = other.getStartTime();
         this.endTime = other.getEndTime();
         this.duration = other.getDuration();

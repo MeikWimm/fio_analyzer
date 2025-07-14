@@ -34,6 +34,9 @@ public class Job {
     public final static Double MAX_CV_THRESHOLD = .6;
     public final static Double MIN_CV_THRESHOLD = .05;
 
+    public final static int WINDOW_SIZE = 60000;
+    public final static int WINDOW_STEP_SIZE = 1000;
+
     private static int COUNTER = 1;
     private final int ID = COUNTER; // so that each Job has a unique ID
     private final List<XYChart.Data<Number, Number>> speedSeries;
@@ -108,42 +111,45 @@ public class Job {
         List<Run> runs = job.getRuns();
         int runsCounter = runs.size();
 
-        if (skipGroups) {
-            // create Groups like Run 1 - Run 2, Run 3 - Run 4, Run 5 - Run 6,...
-            int groupCount = runsCounter / groupSize;
-            int runIndex = 0;
+//        if (skipGroups) {
+//            // create Groups like Run 1 - Run 2, Run 3 - Run 4, Run 5 - Run 6,...
+//            int groupCount = runsCounter / groupSize;
+//            int runIndex = 0;
+//
+//            for (int i = 0; i < groupCount; i++) {
+//                List<Run> group = new ArrayList<>();
+//                for (int j = 0; j < groupSize; j++) {
+//                    group.add(runs.get(runIndex));
+//                    runIndex++;
+//                }
+//                group.getFirst().setGroup(String.format("Run %d - Run %d", group.getFirst().getRunID(), group.getLast().getRunID()));
+//
+//                groups.add(group);
+//            }
+//        } else {
+//
+//        }
 
-            for (int i = 0; i < groupCount; i++) {
-                List<Run> group = new ArrayList<>();
-                for (int j = 0; j < groupSize; j++) {
-                    group.add(runs.get(runIndex));
-                    runIndex++;
+
+        int groupCount = runsCounter / 2;
+        groupCount = groupCount + (groupCount - 1);
+        int runIndex = 0;
+
+        for (int i = 0; i < groupCount; i++) {
+            List<Run> group = new ArrayList<>();
+            for (int j = 0; j < groupSize; j++) {
+                if (runIndex + j < runs.size()) {
+                    group.add(runs.get(runIndex + j));
                 }
+            }
+            if (group.size() == groupSize) {
                 group.getFirst().setGroup(String.format("Run %d - Run %d", group.getFirst().getRunID(), group.getLast().getRunID()));
 
                 groups.add(group);
             }
-        } else {
-
-            int groupCount = runsCounter / 2;
-            groupCount = groupCount + (groupCount - 1);
-            int runIndex = 0;
-
-            for (int i = 0; i < groupCount; i++) {
-                List<Run> group = new ArrayList<>();
-                for (int j = 0; j < groupSize; j++) {
-                    if (runIndex + j < runs.size()) {
-                        group.add(runs.get(runIndex + j));
-                    }
-                }
-                if (group.size() == groupSize) {
-                    group.getFirst().setGroup(String.format("Run %d - Run %d", group.getFirst().getRunID(), group.getLast().getRunID()));
-
-                    groups.add(group);
-                }
-                runIndex++;
-            }
+            runIndex++;
         }
+
         return groups;
     }
 
@@ -156,21 +162,43 @@ public class Job {
         }
 
         this.conversion = Settings.CONVERSION_VALUE;
-        this.runDataSize = (data.size() / runsCounter);
+        if(data.size() < WINDOW_SIZE){
+            Logging.log(Level.WARNING, "Job", String.format("Data size %d is less than window size %d", data.size(), WINDOW_SIZE));
+            return;
+        }
+        this.runDataSize = (data.size() / WINDOW_SIZE);
 
         /*
         Split job into runs depending on run_size
         */
-        ArrayList<DataPoint> run_data;
-        int i = 0;
-        for (int j = 1; j <= runsCounter; j++) {
-            run_data = new ArrayList<>();
-            for (; i < this.runDataSize * j; i++) {
-                DataPoint dp = new DataPoint(data.get(i).data / Settings.CONVERSION_VALUE, rawData.get(i).time);
+//        ArrayList<DataPoint> run_data;
+//        int i = 0;
+//        for (int j = 1; j <= runsCounter; j++) {
+//            run_data = new ArrayList<>();
+//            for (; i < this.runDataSize * j; i++) {
+//                DataPoint dp = new DataPoint(data.get(i).data / Settings.CONVERSION_VALUE, rawData.get(i).time);
+//                run_data.add(dp);
+//                convertedData.add(dp);
+//            }
+//
+//            Run run = new Run(j, run_data);
+//            runs.add(run);
+//        }
+
+        int windowSize = WINDOW_SIZE;
+        int stepSize = WINDOW_STEP_SIZE; // Sliding Step
+        int runId = 1;
+
+        for (int i = 0; i + windowSize <= data.size(); i += stepSize) {
+            List<DataPoint> run_data = new ArrayList<>();
+
+            for (int j = i; j < i + windowSize; j++) {
+                DataPoint dp = new DataPoint(data.get(j).data / Settings.CONVERSION_VALUE, rawData.get(j).time);
                 run_data.add(dp);
                 convertedData.add(dp);
             }
-            Run run = new Run(j, run_data);
+
+            Run run = new Run(runId++, run_data);
             runs.add(run);
         }
     }

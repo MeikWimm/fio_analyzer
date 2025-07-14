@@ -86,8 +86,9 @@ public abstract class GenericTest {
 
     protected void checkForHypothesis(){
         for (Run run : this.resultRuns) {
-            run.setNullhypothesis(isWithinThreshold(extractValue(run)));
+            run.setNullhypothesis(!isWithinThreshold(extractValue(run)));
         }
+
 
         for(List<Run> group : this.groups){
             Run run = group.getFirst();

@@ -359,9 +359,9 @@ public class PrimaryController implements Initializable {
      */
     private void onActionCalcTTest(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        TTest tTest = new TTest(job, settings);
-        tTest.calculate();
-        tTest.openWindow();
+        AtoolTTest atoolTTest = new AtoolTTest(job, settings);
+        atoolTTest.calculate();
+        atoolTTest.openWindow();
     }
 
     /**
