@@ -40,10 +40,12 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     @FXML private TableView<Section> TukeyTable;
     @FXML private TableColumn<Section, Integer> runIDColumn;
     @FXML private TableColumn<Section, Integer> compareToRunColumn;
+    @FXML private TableColumn<Section, Double> overallMeanColumn;
     @FXML private TableColumn<Section, Double> QColumn;
     @FXML private TableColumn<Section, Boolean> hypothesisColumn;
     private double qHSD;
     private final List<XYChart.Data<Number, Number>> meanData;
+    private final List<XYChart.Data<Number, Number>> qData;
     private Job job;
 
     // group size = 3
@@ -53,6 +55,7 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     public TukeyHSD(){
         super();
         this.meanData = new ArrayList<>();
+        this.qData = new ArrayList<>();
     }
 
     @Override
@@ -61,6 +64,9 @@ public class TukeyHSD extends PostHocTest implements Initializable {
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("GroupID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
+        overallMeanColumn.setCellValueFactory(new PropertyValueFactory<>("overallMean"));
+        overallMeanColumn.setCellFactory(TextFieldTableCell.<Section, Double>forTableColumn(new Utils.CustomStringConverter()));
+
         QColumn.setCellValueFactory(new PropertyValueFactory<>("Q"));
         QColumn.setCellFactory(TextFieldTableCell.<Section, Double>forTableColumn(new Utils.CustomStringConverter()));
 
@@ -74,10 +80,7 @@ public class TukeyHSD extends PostHocTest implements Initializable {
         labelHeader.setText(getTest().getJob().toString());
     }
 
-    public void draw(){
-        charter.drawGraph("U-Test","Group","Mean/Difference","Q-HSD", qHSD,new Charter.ChartData("Run mean", meanData));
-        charter.openWindow();
-    }
+
 
     @Override
     public String getTestName() {
@@ -88,9 +91,7 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     protected void calculateTest(List<List<Section>> postHocGroup, List<Section> resultSections){
         List<Section> group = postHocGroup.getFirst();
         Section section = group.getFirst();
-        double standardError = Math.sqrt(section.getMSE() / section.getData().size());
-        double qCrit = 0;
-
+        double qCrit;
         if(getTest().getAlpha() >= 0.10){
             qCrit = Q_CRITICAL_0_05_ALPHA;
         } else if(getTest().getAlpha() >= 0.05){
@@ -99,29 +100,31 @@ public class TukeyHSD extends PostHocTest implements Initializable {
             qCrit = Q_CRITICAL_0_01_ALPHA;
         }
 
-        this.qHSD = Q_CRITICAL_0_05_ALPHA * standardError;
 
         for (List<Section> g : postHocGroup) {
-            Section r1 = g.getFirst();
-            Section r2 = g.getLast();
+            Section s1 = g.getFirst();
+            Section s2 = g.getLast();
+            double standardError = Math.sqrt(s1.getMSE() / s1.getData().size());
+            double overallMean = Math.abs(s1.getAverageSpeed() - s2.getAverageSpeed());
+            this.qHSD = qCrit * standardError;
 
-            double overallMean = Math.abs(r1.getAverageSpeed() - r2.getAverageSpeed());
-
-            r1.setQ(overallMean);
-            resultSections.add(r1);
-            meanData.add(new XYChart.Data<>(r1.getGroupID(), overallMean));
+            s1.setQ(qHSD);
+            s1.setOverallMean(overallMean);
+            resultSections.add(s1);
+            meanData.add(new XYChart.Data<>(s1.getGroupID(), overallMean));
+            qData.add(new XYChart.Data<>(s1.getGroupID(), qHSD));
         }
 
     }
 
     @Override
     protected double extractValue(Section section) {
-        return section.getQ();
+        return section.getOverallMean();
     }
 
     @Override
-    protected boolean isWithinThreshold(double value) {
-        return value < qHSD;
+    protected boolean isWithinThreshold(double value, Section section) {
+        return value < section.getQ();
     }
 
     protected void setLabeling() {
@@ -160,7 +163,12 @@ public class TukeyHSD extends PostHocTest implements Initializable {
 
     @Override
     public Scene getCharterScene() {
-        return charter.drawGraph("U-Test","Group","Mean/Difference","Q-HSD", qHSD,new Charter.ChartData("Run mean", meanData));
+        return charter.drawGraph("U-Test","Group","Mean/Difference", new Charter.ChartData("Q-HSD", qData), new Charter.ChartData("Run mean", meanData));
+    }
+
+    public void draw(){
+        charter.drawGraph("U-Test","Group","Mean/Difference", new Charter.ChartData("Q-HSD", qData), new Charter.ChartData("Run mean", meanData));
+        charter.openWindow();
     }
 
     @Override

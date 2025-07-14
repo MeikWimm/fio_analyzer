@@ -94,11 +94,11 @@ public abstract class PostHocTest {
 
     protected abstract double extractValue(Section section);
 
-    protected abstract boolean isWithinThreshold(double value);
+    protected abstract boolean isWithinThreshold(double value, Section section);
 
     private void checkForHypothesis() {
         for(Section section : resultSections){
-            section.setNullhypothesis(isWithinThreshold(extractValue(section)));
+            section.setNullhypothesis(isWithinThreshold(extractValue(section), section));
         }
     }
 

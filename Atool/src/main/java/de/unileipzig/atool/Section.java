@@ -36,6 +36,7 @@ public class Section /*Section*/ {
     private double p = UNDEFINED_DOUBLE_VALUE;
     private double mse = UNDEFINED_DOUBLE_VALUE;
     private int groupID = UNDEFINED_INTEGER;
+    private double overallMean = UNDEFINED_DOUBLE_VALUE;
     private String group = "UNDEFINED";
 
 
@@ -69,6 +70,7 @@ public class Section /*Section*/ {
         this.p = other.getP();
         this.group = other.group;
         this.mse = other.getMSE();
+        this.overallMean = other.getOverallMean();
         this.isOverlapping = other.getOverlap();
     }
 
@@ -258,5 +260,13 @@ public class Section /*Section*/ {
 
     public double getMSE() {
         return mse;
+    }
+
+    public void setOverallMean(double overallMean) {
+        this.overallMean = overallMean;
+    }
+
+    public double getOverallMean() {
+        return overallMean;
     }
 }
