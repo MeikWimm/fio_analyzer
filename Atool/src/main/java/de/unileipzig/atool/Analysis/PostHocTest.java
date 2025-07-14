@@ -1,6 +1,6 @@
 package de.unileipzig.atool.Analysis;
 
-import de.unileipzig.atool.Run;
+import de.unileipzig.atool.Section;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -18,14 +18,14 @@ import java.util.logging.Logger;
 
 public abstract class PostHocTest {
     private GenericTest test;
-    protected Run steadyStateRun;
+    protected Section steadyStateSection;
     private boolean isFirst = true;
     private Scene scene;
     protected final Charter charter;
-    protected final List<List<Run>> firstGroup;
-    protected final List<List<Run>> secondGroup;
-    private final List<List<Run>> postHocGroups;
-    private final List<Run> resultRuns;
+    protected final List<List<Section>> firstGroup;
+    protected final List<List<Section>> secondGroup;
+    private final List<List<Section>> postHocGroups;
+    private final List<Section> resultSections;
 
     public PostHocTest(){
         super();
@@ -33,25 +33,25 @@ public abstract class PostHocTest {
         this.firstGroup = new ArrayList<>();
         this.secondGroup = new ArrayList<>();
         this.postHocGroups = new ArrayList<>();
-        this.resultRuns = new ArrayList<>();
+        this.resultSections = new ArrayList<>();
     }
 
-    public void setupGroups(List<List<Run>> resultGroups) {
+    public void setupGroups(List<List<Section>> resultGroups) {
         int ID = 1;
-        for (List<Run> group : resultGroups) {
+        for (List<Section> group : resultGroups) {
             for (int i = 0; i < group.size(); i++) {
                 for (int j = i + 1; j < group.size(); j++) {
-                    Run r1 = group.get(i);
-                    Run r2 = group.get(j);
-                    Run copyRun1 = new Run(r1);
-                    Run copyRun2 = new Run(r2);
+                    Section r1 = group.get(i);
+                    Section r2 = group.get(j);
+                    Section copySection1 = new Section(r1);
+                    Section copySection2 = new Section(r2);
 
 
-                    List<Run> pair = new ArrayList<>();
-                    pair.add(copyRun1);
-                    pair.add(copyRun2);
-                    copyRun1.setGroup("Run: " + copyRun1.getID() + " - " + "Run "+ copyRun2.getID() );
-                    copyRun1.setGroupID(ID);
+                    List<Section> pair = new ArrayList<>();
+                    pair.add(copySection1);
+                    pair.add(copySection2);
+                    copySection1.setGroup("Section: " + copySection1.getID() + " - " + "Section "+ copySection2.getID() );
+                    copySection1.setGroupID(ID);
                     postHocGroups.add(pair);
                     ID++;
                 }
@@ -61,25 +61,25 @@ public abstract class PostHocTest {
 
     private void checkSteadyStateRun(){
         boolean isSteadyState = true;
-        for(List<Run> group: postHocGroups){
-            Run run = group.getFirst();
-            if(!run.getNullhypothesis()){
+        for(List<Section> group: postHocGroups){
+            Section section = group.getFirst();
+            if(!section.getNullhypothesis()){
                 isSteadyState = false;
                 break;
             }
         }
         if(isSteadyState){
-            steadyStateRun = postHocGroups.getFirst().getFirst();
+            steadyStateSection = postHocGroups.getFirst().getFirst();
         }
     }
 
-    public Run getSteadyStateRun() {
-        return steadyStateRun;
+    public Section getSteadyStateRun() {
+        return steadyStateSection;
     }
 
     public abstract String getTestName();
 
-    protected abstract void calculateTest(List<List<Run>> postHocGroup, List<Run> resultRuns);
+    protected abstract void calculateTest(List<List<Section>> postHocGroup, List<Section> resultSections);
 
     public void calculate(){
         if(this.firstGroup.size() != this.secondGroup.size()){
@@ -87,23 +87,23 @@ public abstract class PostHocTest {
             return;
         }
 
-        calculateTest(this.postHocGroups, this.resultRuns);
+        calculateTest(this.postHocGroups, this.resultSections);
         checkForHypothesis();
         checkSteadyStateRun();
     }
 
-    protected abstract double extractValue(Run run);
+    protected abstract double extractValue(Section section);
 
     protected abstract boolean isWithinThreshold(double value);
 
     private void checkForHypothesis() {
-        for(Run run: resultRuns){
-            run.setNullhypothesis(isWithinThreshold(extractValue(run)));
+        for(Section section : resultSections){
+            section.setNullhypothesis(isWithinThreshold(extractValue(section)));
         }
     }
 
-    public ObservableList<Run> getPostHocRuns() {
-        return FXCollections.observableList(resultRuns);
+    public ObservableList<Section> getPostHocRuns() {
+        return FXCollections.observableList(resultSections);
     }
 
     // Optional method for setting labels, can be overridden
@@ -143,7 +143,7 @@ public abstract class PostHocTest {
 
     public abstract Scene getCharterScene();
 
-    public abstract TableView<Run> getTable();
+    public abstract TableView<Section> getTable();
 
     public abstract double getCriticalValue();
 

@@ -17,7 +17,7 @@
          <children>
             <TableView id="covTable" fx:id="covTable" prefHeight="480.0" prefWidth="1000.0">
               <columns>
-                <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="63.0" text="Run" />
+                <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="63.0" text="Section" />
                   <TableColumn id="startTimeColumn" fx:id="startTimeColumn" prefWidth="85.0" text="Start time" />
                   <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="173.0" text="Average Speed" />
                   <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="190.0" text="Group" />

@@ -22,10 +22,10 @@ public abstract class GenericTest {
 
     private final String className = this.getClass().getSimpleName();
     protected Job job;
-    private final List<List<Run>> groups;
-    protected List<List<Run>> resultGroups;
-    private final List<Run> resultRuns;
-    protected List<List<Run>> possibleSteadyStateRunsGroup;
+    private final List<List<Section>> groups;
+    protected List<List<Section>> resultGroups;
+    private final List<Section> resultSections;
+    protected List<List<Section>> possibleSteadyStateRunsGroup;
     protected double alpha;
     protected boolean skipGroup;
     protected int thresholdSectionsForSteadyState;
@@ -42,7 +42,7 @@ public abstract class GenericTest {
         this.groups = Job.setupGroups(this.job, skipGroup, groupSize);
         this.groupSize = groupSize;
         this.resultGroups = new ArrayList<>();
-        this.resultRuns = new ArrayList<>();
+        this.resultSections = new ArrayList<>();
         this.possibleSteadyStateRunsGroup = new ArrayList<>();
         this.charter = new Charter();
         this.skipGroup = skipGroup;
@@ -68,9 +68,9 @@ public abstract class GenericTest {
         this.alpha = this.alpha / this.groups.size();
     }
 
-    protected abstract void calculateTest(List<List<Run>> groups, List<Run> resultRuns);
+    protected abstract void calculateTest(List<List<Section>> groups, List<Section> resultSections);
 
-    protected abstract double extractValue(Run run);
+    protected abstract double extractValue(Section section);
 
     protected abstract boolean isWithinThreshold(double value);
 
@@ -85,17 +85,17 @@ public abstract class GenericTest {
 
 
     protected void checkForHypothesis(){
-        for (Run run : this.resultRuns) {
-            run.setNullhypothesis(!isWithinThreshold(extractValue(run)));
+        for (Section section : this.resultSections) {
+            section.setNullhypothesis(!isWithinThreshold(extractValue(section)));
         }
     }
 
     protected void calculateSteadyState() {
         int secondCounter = 0;
 
-        for (List<Run> group : this.groups) {
-            Run run = group.getFirst();
-            if (run.getNullhypothesis()) {
+        for (List<Section> group : this.groups) {
+            Section section = group.getFirst();
+            if (section.getNullhypothesis()) {
                 possibleSteadyStateRunsGroup.add(group);
                 secondCounter++;
             } else {
@@ -113,7 +113,7 @@ public abstract class GenericTest {
         }
     }
 
-    public Run getSteadyStateRun(){
+    public Section getSteadyStateRun(){
         if(this.possibleSteadyStateRunsGroup.isEmpty()){
             return null;
         } else {
@@ -124,7 +124,7 @@ public abstract class GenericTest {
     public void calculate(){
         if(isDataApplicable()){
             Logging.log(Level.INFO, className, "Calculating Job " + this.job.getFileName());
-            this.calculateTest(this.groups,this.resultRuns);
+            this.calculateTest(this.groups,this.resultSections);
             this.checkForHypothesis();
             this.calculateSteadyState();
             this.calculatePostHoc();
@@ -154,7 +154,7 @@ public abstract class GenericTest {
         return true;
     }
 
-    public List<Run> getPossibleSteadyStateRuns() {
+    public List<Section> getPossibleSteadyStateRuns() {
         return possibleSteadyStateRunsGroup.getFirst();
     }
 
@@ -168,7 +168,7 @@ public abstract class GenericTest {
             return;
         }
 
-        List<List<Run>> postHocGroups = new ArrayList<>();
+        List<List<Section>> postHocGroups = new ArrayList<>();
 
         for (int i = 0; i < this.possibleSteadyStateRunsGroup.size(); i += 2) {
             postHocGroups.add(this.possibleSteadyStateRunsGroup.get(i));
@@ -192,15 +192,15 @@ public abstract class GenericTest {
 
     public abstract double getCriticalValue();
 
-    public List<List<Run>> getGroups() {
+    public List<List<Section>> getGroups() {
         return groups;
     }
 
-    public ObservableList<Run> getResultRuns() {
-        return FXCollections.observableArrayList(resultRuns);
+    public ObservableList<Section> getResultRuns() {
+        return FXCollections.observableArrayList(resultSections);
     }
 
-    public List<List<Run>> getResultGroups() {
+    public List<List<Section>> getResultGroups() {
         return resultGroups;
     }
 
@@ -251,7 +251,7 @@ public abstract class GenericTest {
 
     public abstract String getTestName();
 
-    public abstract TableView<Run> getTable();
+    public abstract TableView<Section> getTable();
 
 
 }

@@ -12,11 +12,11 @@
       <Label id="labelHeader" fx:id="labelHeader" prefHeight="17.0" prefWidth="1000.0" text="T-Test" />
       <TableView id="TTable" fx:id="TTable" prefHeight="500.0" prefWidth="1000.0">
          <columns>
-            <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="31.0" text="Run" />
-            <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="119.0" text="Average Speed" />
-            <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="119.0" text="Compare to Run" />
-            <TableColumn id="TColumn" fx:id="TColumn" prefWidth="123.0" text="P (calculated)" />
-            <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="123.0" text="Nullhypothesis" />
+            <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="70.0" text="Section" />
+            <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="111.0" text="Average Speed" />
+            <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="145.0" text="Compare to Section" />
+            <TableColumn id="TColumn" fx:id="TColumn" prefWidth="103.0" text="P (calculated)" />
+            <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="184.0" text="Nullhypothesis" />
          </columns>
       </TableView>
       <Pane prefHeight="100.0" prefWidth="1000.0">

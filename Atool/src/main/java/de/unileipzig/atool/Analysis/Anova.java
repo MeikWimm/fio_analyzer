@@ -43,13 +43,13 @@ public class Anova extends GenericTest implements Initializable {
     @FXML private Label sigmaJobLabel;
     @FXML private Label steadyStateLabel;
 
-    @FXML private TableView<Run> anovaTable;
-    @FXML private TableColumn<Run, Double> averageSpeedColumn;
-    @FXML private TableColumn<Run, Integer> runIDColumn;
-    @FXML private TableColumn<Run, Double> startTimeColumn;
-    @FXML private TableColumn<Run, String> compareToRunColumn;
-    @FXML private TableColumn<Run, Double> FColumn;
-    @FXML private TableColumn<Run, Boolean> hypothesisColumn;
+    @FXML private TableView<Section> anovaTable;
+    @FXML private TableColumn<Section, Double> averageSpeedColumn;
+    @FXML private TableColumn<Section, Integer> runIDColumn;
+    @FXML private TableColumn<Section, Double> startTimeColumn;
+    @FXML private TableColumn<Section, String> compareToRunColumn;
+    @FXML private TableColumn<Section, Double> FColumn;
+    @FXML private TableColumn<Section, Boolean> hypothesisColumn;
     private double fCrit;
 
     public Anova(Job job, Settings settings) {
@@ -63,7 +63,7 @@ public class Anova extends GenericTest implements Initializable {
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         averageSpeedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
-        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
+        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
         startTimeColumn.setCellValueFactory(new PropertyValueFactory<>("StartTime"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
 
@@ -75,9 +75,9 @@ public class Anova extends GenericTest implements Initializable {
 
         anovaTable.setOnMouseClicked((MouseEvent event) -> {
             if (event.getButton().equals(MouseButton.PRIMARY)) {
-                Run run = anovaTable.getSelectionModel().getSelectedItem();
-                if (run != null) {
-                    updateLabeling(run);
+                Section section = anovaTable.getSelectionModel().getSelectedItem();
+                if (section != null) {
+                    updateLabeling(section);
                 }
             }
         });
@@ -87,15 +87,15 @@ public class Anova extends GenericTest implements Initializable {
         anovaTable.setItems(getResultRuns());
     }
 
-    private void updateLabeling(Run run) {
-        String averageSpeedLabelText = String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getAverageSpeed());
+    private void updateLabeling(Section section) {
+        String averageSpeedLabelText = String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, section.getAverageSpeed());
         averageSpeedLabel.setText(String.format(Locale.ENGLISH, "%s %s", averageSpeedLabelText, Settings.getConversion()));
-        sseLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSSE()));
-        ssaLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSSA()));
-        sstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getSST()));
-        ssaSstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, (run.getSSA() / run.getSST())));
-        sseSstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, (run.getSSE() / run.getSST())));
-        fCalculatedLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, run.getF()));
+        sseLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, section.getSSE()));
+        ssaLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, section.getSSA()));
+        sstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, section.getSST()));
+        ssaSstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, (section.getSSA() / section.getSST())));
+        sseSstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, (section.getSSE() / section.getSST())));
+        fCalculatedLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, section.getF()));
         if(this.getSteadyStateRun() == null){
             steadyStateLabel.setText("No steady state run found.");
         } else {
@@ -115,8 +115,8 @@ public class Anova extends GenericTest implements Initializable {
     }
 
     @Override
-    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
-        for (List<Run> group : groups) {
+    protected void calculateTest(List<List<Section>> groups, List<Section> resultSections) {
+        for (List<Section> group : groups) {
             int num = group.size() - 1;
             int denom = (num + 1) * (group.getFirst().getData().size() - 1);
             FDistribution fDistribution = new FDistribution(num, denom);
@@ -125,47 +125,47 @@ public class Anova extends GenericTest implements Initializable {
             double ssa = 0.0;
 
 
-            for (Run run : group) {
-                    double averageSpeedOfRun = run.getAverageSpeed();
+            for (Section section : group) {
+                    double averageSpeedOfRun = section.getAverageSpeed();
                     ssa += Math.pow(averageSpeedOfRun - MathUtils.average(group), 2);
-                    ssa *= run.getData().size();
-                    run.setSSA(ssa);
+                    ssa *= section.getData().size();
+                    section.setSSA(ssa);
                     ssa = 0;
             }
 
-            for (Run run : group) {
-                for (DataPoint dp : run.getData()) {
+            for (Section section : group) {
+                for (DataPoint dp : section.getData()) {
                     sse += (Math.pow((dp.data - MathUtils.average(group)), 2));
                 }
-                run.setSSE(sse);
+                section.setSSE(sse);
                 sse = 0;
             }
 
             double fValue;
 
             double totalSSE = 0;
-            for (Run run : group) {
-                totalSSE += run.getSSE();
+            for (Section section : group) {
+                totalSSE += section.getSSE();
             }
 
-            Run run = group.getFirst();
-            double s_2_a = run.getSSA() / (groups.size() - 1);
-            double s_2_e = run.getSSE() / (groups.size() * (run.getData().size() - 1));
+            Section section = group.getFirst();
+            double s_2_a = section.getSSA() / (groups.size() - 1);
+            double s_2_e = section.getSSE() / (groups.size() * (section.getData().size() - 1));
             fValue = s_2_a / s_2_e;
-            run.setF(fValue);
-            run.setSSE(totalSSE);
-            run.setMSE(totalSSE / denom);
+            section.setF(fValue);
+            section.setSSE(totalSSE);
+            section.setMSE(totalSSE / denom);
 
 
-            resultRuns.add(group.getFirst());
+            resultSections.add(group.getFirst());
             anovaData.add(new XYChart.Data<>(group.getFirst().getID(), fValue));
         }
 
     }
 
     @Override
-    protected double extractValue(Run run) {
-        return run.getF();
+    protected double extractValue(Section section) {
+        return section.getF();
     }
 
     @Override
@@ -182,18 +182,18 @@ public class Anova extends GenericTest implements Initializable {
         return "ANOVA";
     }
 
-    public TableView<Run> getTable() {
+    public TableView<Section> getTable() {
         return anovaTable;
     }
 
     private void drawANOVAGraph() {
-        charter.drawGraph("ANOVA", "Time in seconds", "F-Value", "Critical value", this.fCrit, new Charter.ChartData("calculated F", anovaData));
+        charter.drawGraph("ANOVA", "Section ID", "F-Value", "Critical value", this.fCrit, new Charter.ChartData("calculated F", anovaData));
         charter.openWindow();
     }
 
     @Override
     public Scene getCharterScene() {
-        return charter.drawGraph("ANOVA", "Time in seconds", "F-Value", "Critical value", this.fCrit, new Charter.ChartData("calculated F", anovaData));
+        return charter.drawGraph("ANOVA", "Section ID", "F-Value", "Critical value", this.fCrit, new Charter.ChartData("calculated F", anovaData));
     }
 
     @Override

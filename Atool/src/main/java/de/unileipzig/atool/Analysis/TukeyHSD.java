@@ -5,7 +5,7 @@
 package de.unileipzig.atool.Analysis;
 
 import de.unileipzig.atool.Job;
-import de.unileipzig.atool.Run;
+import de.unileipzig.atool.Section;
 import de.unileipzig.atool.Settings;
 import de.unileipzig.atool.Utils;
 
@@ -37,17 +37,19 @@ public class TukeyHSD extends PostHocTest implements Initializable {
 
     @FXML private Button drawTukey;
     
-    @FXML private TableView<Run> TukeyTable;
-    @FXML private TableColumn<Run, Integer> runIDColumn;
-    @FXML private TableColumn<Run, Integer> compareToRunColumn;
-    @FXML private TableColumn<Run, Double> QColumn;
-    @FXML private TableColumn<Run, Boolean> hypothesisColumn;
+    @FXML private TableView<Section> TukeyTable;
+    @FXML private TableColumn<Section, Integer> runIDColumn;
+    @FXML private TableColumn<Section, Integer> compareToRunColumn;
+    @FXML private TableColumn<Section, Double> QColumn;
+    @FXML private TableColumn<Section, Boolean> hypothesisColumn;
     private double qHSD;
     private final List<XYChart.Data<Number, Number>> meanData;
     private Job job;
 
     // group size = 3
     private static final double Q_CRITICAL_0_05_ALPHA = 5.081;
+    private static final double Q_CRITICAL_0_10_ALPHA = 2.902;
+    private static final double Q_CRITICAL_0_01_ALPHA = 4.120;
     public TukeyHSD(){
         super();
         this.meanData = new ArrayList<>();
@@ -60,7 +62,7 @@ public class TukeyHSD extends PostHocTest implements Initializable {
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("GroupID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
         QColumn.setCellValueFactory(new PropertyValueFactory<>("Q"));
-        QColumn.setCellFactory(TextFieldTableCell.<Run, Double>forTableColumn(new Utils.CustomStringConverter()));
+        QColumn.setCellFactory(TextFieldTableCell.<Section, Double>forTableColumn(new Utils.CustomStringConverter()));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
         hypothesisColumn.setCellFactory(Utils.getHypothesisCellFactory());
@@ -83,28 +85,38 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     }
 
     @Override
-    protected void calculateTest(List<List<Run>> postHocGroup, List<Run> resultRuns){
-        List<Run> group = postHocGroup.getFirst();
-        Run run = group.getFirst();
-        double standardError = Math.sqrt(run.getMSE() / run.getData().size());
+    protected void calculateTest(List<List<Section>> postHocGroup, List<Section> resultSections){
+        List<Section> group = postHocGroup.getFirst();
+        Section section = group.getFirst();
+        double standardError = Math.sqrt(section.getMSE() / section.getData().size());
+        double qCrit = 0;
+
+        if(getTest().getAlpha() >= 0.10){
+            qCrit = Q_CRITICAL_0_05_ALPHA;
+        } else if(getTest().getAlpha() >= 0.05){
+            qCrit = Q_CRITICAL_0_10_ALPHA;
+        } else{
+            qCrit = Q_CRITICAL_0_01_ALPHA;
+        }
+
         this.qHSD = Q_CRITICAL_0_05_ALPHA * standardError;
 
-        for (List<Run> g : postHocGroup) {
-            Run r1 = g.getFirst();
-            Run r2 = g.getLast();
+        for (List<Section> g : postHocGroup) {
+            Section r1 = g.getFirst();
+            Section r2 = g.getLast();
 
             double overallMean = Math.abs(r1.getAverageSpeed() - r2.getAverageSpeed());
 
             r1.setQ(overallMean);
-            resultRuns.add(r1);
+            resultSections.add(r1);
             meanData.add(new XYChart.Data<>(r1.getGroupID(), overallMean));
         }
 
     }
 
     @Override
-    protected double extractValue(Run run) {
-        return run.getQ();
+    protected double extractValue(Section section) {
+        return section.getQ();
     }
 
     @Override
@@ -114,24 +126,24 @@ public class TukeyHSD extends PostHocTest implements Initializable {
 
     protected void setLabeling() {
         GenericTest test = getTest();
-        Run genericTestSteadyStateRun = test.getSteadyStateRun();
-        if(genericTestSteadyStateRun == null){
+        Section genericTestSteadyStateSection = test.getSteadyStateRun();
+        if(genericTestSteadyStateSection == null){
             anovaSteadyStateLabel.setText("No steady state test can be calculated. No Anova Result");
             return;
         }
-        anovaSteadyStateLabel.setText("Run " + test.getSteadyStateRun().getID());
+        anovaSteadyStateLabel.setText("Section " + test.getSteadyStateRun().getID());
 
-        if(steadyStateRun == null){
-            evalLabel.setText("Run " + genericTestSteadyStateRun.getID() + " most likely in transient state.");
+        if(steadyStateSection == null){
+            evalLabel.setText("Section " + genericTestSteadyStateSection.getID() + " most likely in transient state.");
         }
 
-        if(steadyStateRun != null){
-            if(steadyStateRun.getID() != genericTestSteadyStateRun.getID()){
-                tukeySteadyStateLabel.setText("Run " + steadyStateRun.getID());
-                evalLabel.setText("Run " + steadyStateRun.getID() + " more likely in steady state than Run " + genericTestSteadyStateRun.getID() + ".");
+        if(steadyStateSection != null){
+            if(steadyStateSection.getID() != genericTestSteadyStateSection.getID()){
+                tukeySteadyStateLabel.setText("Section " + steadyStateSection.getID());
+                evalLabel.setText("Section " + steadyStateSection.getID() + " more likely in steady state than Section " + genericTestSteadyStateSection.getID() + ".");
             } else {
-                tukeySteadyStateLabel.setText("Run " + steadyStateRun.getID());
-                evalLabel.setText("Run " + steadyStateRun.getID() + " is in steady state.");
+                tukeySteadyStateLabel.setText("Section " + steadyStateSection.getID());
+                evalLabel.setText("Section " + steadyStateSection.getID() + " is in steady state.");
             }
         }
     }
@@ -157,7 +169,7 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     }
 
     @Override
-    public TableView<Run> getTable() {
+    public TableView<Section> getTable() {
         return TukeyTable;
     }
 

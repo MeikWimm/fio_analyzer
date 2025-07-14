@@ -52,12 +52,12 @@ class JobTest {
             for (int vals: testValsAverageSpeedPerMilli){
                // job.setAverageTimePerMilliSec(vals);
                 job.updateRunsData();
-                List<List<Run>> groups = Job.setupGroups(job, false, groupSize);
-                List<Run> runs = job.getRuns();
+                List<List<Section>> groups = Job.setupGroups(job, false, groupSize);
+                List<Section> sections = job.getRuns();
 
                 // Assert
-                assertEquals(4, runs.size(), "Job should have the expected number of runs after update.");
-                assertFalse(runs.isEmpty(), "Runs should not be empty after updating runs data.");
+                assertEquals(4, sections.size(), "Job should have the expected number of runs after update.");
+                assertFalse(sections.isEmpty(), "Runs should not be empty after updating runs data.");
                 assertFalse(groups.isEmpty(), "Runs should not be empty after updating runs data.");
                 assertEquals(groupSize, groups.getFirst().size(), "Job should have the expected number of 2 after update.");
 

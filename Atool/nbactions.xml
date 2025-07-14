@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
     <actions>
         <action>
-            <actionName>run</actionName>
+            <actionName>section</actionName>
             <packagings>
                 <packaging>jar</packaging>
             </packagings>
             <goals>
                 <goal>clean</goal>
-                <goal>javafx:run</goal>
+                <goal>javafx:section</goal>
             </goals>
         </action>
         <action>
             <actionName>debug</actionName>
             <goals>
                 <goal>clean</goal>
-                <goal>javafx:run@ide-debug</goal>
+                <goal>javafx:section@ide-debug</goal>
             </goals>
             <properties>
                 <jpda.listen>true</jpda.listen>
@@ -24,7 +24,7 @@
             <actionName>profile</actionName>
             <goals>
                 <goal>clean</goal>
-                <goal>javafx:run@ide-profile</goal>
+                <goal>javafx:section@ide-profile</goal>
             </goals>
         </action>
         <action>

@@ -62,27 +62,27 @@ class GenericTypeTest {
 
             for (GenericTest test: tests){
                 test.calculate();
-                List<Run> result = test.getResultRuns();
+                List<Section> result = test.getResultRuns();
                 assertNotNull(result, "result list should not be null.");
                 assertNotNull(test.getGroups(), "Runs should not be empty after calculation.");
-                for(List<Run> group: test.getGroups()){
+                for(List<Section> group: test.getGroups()){
                     assertNotNull(group, "Group should not be null.");
-                    for(Run run: group){
-                        assertNotNull(run, "Run should not be null.");
+                    for(Section section : group){
+                        assertNotNull(section, "Run should not be null.");
                     }
                 }
                 assertNotNull(test.getResultGroups(), "Result groups should not be null.");
-                for(List<Run> group: test.getResultGroups()){
+                for(List<Section> group: test.getResultGroups()){
                     assertNotNull(group, "Result group should not be null.");
-                    for(Run run: group){
-                        assertNotNull(run, "Result run should not be null.");
+                    for(Section section : group){
+                        assertNotNull(section, "Result run should not be null.");
                     }
                 }
 
                 //Assert result list of runs
                 assertNotNull(test.getResultRuns(), "Result runs should not be null.");
-                for(Run run: test.getResultRuns()){
-                    assertNotNull(run, "Result run should not be null.");
+                for(Section section : test.getResultRuns()){
+                    assertNotNull(section, "Result run should not be null.");
                 }
             }
         }

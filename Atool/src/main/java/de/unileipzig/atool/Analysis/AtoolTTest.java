@@ -15,7 +15,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.inference.TTest;
 
 import java.net.URL;
@@ -32,12 +31,12 @@ public class AtoolTTest extends GenericTest implements Initializable {
 
     @FXML private Button drawTTest;
 
-    @FXML private TableView<Run> TTable;
-    @FXML private TableColumn<Run, Double> averageSpeedColumn;
-    @FXML private TableColumn<Run, Integer> runIDColumn;
-    @FXML private TableColumn<Run, Integer> compareToRunColumn;
-    @FXML private TableColumn<Run, Double> TColumn;
-    @FXML private TableColumn<Run, Boolean> hypothesisColumn;
+    @FXML private TableView<Section> TTable;
+    @FXML private TableColumn<Section, Double> averageSpeedColumn;
+    @FXML private TableColumn<Section, Integer> runIDColumn;
+    @FXML private TableColumn<Section, Integer> compareToRunColumn;
+    @FXML private TableColumn<Section, Double> TColumn;
+    @FXML private TableColumn<Section, Boolean> hypothesisColumn;
 
     private double tCrit;
     private final List<XYChart.Data<Number, Number>> tData;
@@ -53,7 +52,7 @@ public class AtoolTTest extends GenericTest implements Initializable {
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         averageSpeedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
-        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
+        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
         TColumn.setCellValueFactory(new PropertyValueFactory<>("P"));
         TColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
@@ -88,26 +87,26 @@ public class AtoolTTest extends GenericTest implements Initializable {
     }
 
     @Override
-    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
+    protected void calculateTest(List<List<Section>> groups, List<Section> resultSections) {
         TTest tTest = new TTest();
 
-        for (List<Run> group : groups) {
-            Run run1 = group.getFirst();
-            Run run2 = group.get(1);
-            double[] data1 = run1.getData().stream().mapToDouble(dp -> dp.data).toArray();
-            double[] data2 = run2.getData().stream().mapToDouble(dp -> dp.data).toArray();
+        for (List<Section> group : groups) {
+            Section section1 = group.getFirst();
+            Section section2 = group.get(1);
+            double[] data1 = section1.getData().stream().mapToDouble(dp -> dp.data).toArray();
+            double[] data2 = section2.getData().stream().mapToDouble(dp -> dp.data).toArray();
 
 
             double pValue = tTest.tTest(data1, data2);
-            run1.setP(pValue);
+            section1.setP(pValue);
             tData.add(new XYChart.Data<>(group.getFirst().getID(), pValue));
-            resultRuns.add(group.getFirst());
+            resultSections.add(group.getFirst());
         }
     }
 
     @Override
-    protected double extractValue(Run run) {
-        return run.getP();
+    protected double extractValue(Section section) {
+        return section.getP();
     }
 
     @Override
@@ -117,7 +116,7 @@ public class AtoolTTest extends GenericTest implements Initializable {
 
     @Override
     public Scene getCharterScene() {
-        return charter.drawGraph("T-Test", "Time in seconds", "p-Value", "Alpha level", getAlpha(), new Charter.ChartData("calculated P", tData));
+        return charter.drawGraph("T-Test", "Section ID", "p-Value", "Alpha level", getAlpha(), new Charter.ChartData("calculated P", tData));
     }
 
     @Override
@@ -131,12 +130,12 @@ public class AtoolTTest extends GenericTest implements Initializable {
     }
 
     private void drawTGraph() {
-        charter.drawGraph("T-Test", "Time in seconds", "p-Value", "Alpha level", getAlpha(), new Charter.ChartData("calculated P", tData));
+        charter.drawGraph("T-Test", "Section ID", "p-Value", "Alpha level", getAlpha(), new Charter.ChartData("calculated P", tData));
         charter.openWindow();
     }
 
     @Override
-    public TableView<Run> getTable() {
+    public TableView<Section> getTable() {
         return TTable;
     }
 }

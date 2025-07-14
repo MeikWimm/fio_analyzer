@@ -102,7 +102,7 @@ public class SteadyStateEval implements Initializable {
     }
 
     private void setLabeling() {
-        labelHeader.setText("Job Evaluation | Job alpha: " + this.job.getAlpha() + " | Required accepted runs for steady state: " + settings.getRequiredRunsForSteadyState() + " seconds");
+        labelHeader.setText("Job Evaluation | Job alpha: " + this.job.getAlpha() + " | Required accepted sections for steady state: " + settings.getRequiredRunsForSteadyState() + " seconds");
     }
 
     private void onActionSaveEval(){

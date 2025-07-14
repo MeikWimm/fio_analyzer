@@ -4,8 +4,6 @@
  */
 package de.unileipzig.atool;
 
-import de.unileipzig.atool.Analysis.GenericTest;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,11 +11,11 @@ import java.util.List;
  *
  * @author meni1999
  */
-public class Run /*Section*/ {
+public class Section /*Section*/ {
     public static Double UNDEFINED_DOUBLE_VALUE = Double.MIN_VALUE;
     public static Integer UNDEFINED_INTEGER = Integer.MIN_VALUE;
     private List<DataPoint> data = new ArrayList<>();
-    private final int runID;
+    private final int sectionID;
     private double intervalFrom = UNDEFINED_DOUBLE_VALUE;
     private double intervalTo  = UNDEFINED_DOUBLE_VALUE;
     private double averageSpeed = UNDEFINED_DOUBLE_VALUE;
@@ -41,15 +39,15 @@ public class Run /*Section*/ {
     private String group = "UNDEFINED";
 
 
-    public Run(final int runNumber, List<DataPoint> runData){
-        this.runID = runNumber;
+    public Section(final int runNumber, List<DataPoint> runData){
+        this.sectionID = runNumber;
         this.data = runData;
         calculateRun();
     }
 
     // Copy constructor
-    public Run(Run other) {
-        this.runID = other.getRunID();
+    public Section(Section other) {
+        this.sectionID = other.getID();
         this.data = other.getData();
         this.startTime = other.getStartTime();
         this.endTime = other.getEndTime();
@@ -97,11 +95,7 @@ public class Run /*Section*/ {
     public List<DataPoint> getData(){      
         return data;
     }
-    
-    public int getRunID(){
-        return runID;
-    }
-    
+
     public double getStandardDeviation(){
         return this.standardDeviation;
     }
@@ -203,7 +197,7 @@ public class Run /*Section*/ {
     }
     
     public int getID(){
-        return runID;
+        return sectionID;
     }
     
     public void setNullhypothesis(boolean isNullhypothesis){

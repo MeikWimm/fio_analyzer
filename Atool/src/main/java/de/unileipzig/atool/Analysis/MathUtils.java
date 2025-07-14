@@ -1,26 +1,26 @@
 package de.unileipzig.atool.Analysis;
 
 import de.unileipzig.atool.DataPoint;
-import de.unileipzig.atool.Run;
+import de.unileipzig.atool.Section;
 
 import java.util.List;
 
 public class MathUtils {
 
-    public static double average(Run run) {
+    public static double average(Section section) {
         double sum = 0;
-        double n = run.getData().size();
-        for (DataPoint dp : run.getData()) {
+        double n = section.getData().size();
+        for (DataPoint dp : section.getData()) {
             sum += dp.data;
         }
         return sum / n;
     }
 
-    public static double average(List<Run> group) {
+    public static double average(List<Section> group) {
         double sum = 0;
         double n = group.size();
-        for (Run run : group) {
-            sum += run.getAverageSpeed();
+        for (Section section : group) {
+            sum += section.getAverageSpeed();
         }
         return sum / n;
     }

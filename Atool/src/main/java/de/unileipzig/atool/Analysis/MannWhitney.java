@@ -15,7 +15,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
 import java.net.URL;
@@ -53,12 +52,12 @@ public class MannWhitney extends GenericTest implements Initializable {
 
     @FXML public Label labelHeader;
 
-    @FXML public TableView<Run> uTestTable;
-    @FXML public TableColumn<Run, Double> averageSpeedColumn;
-    @FXML public TableColumn<Run, Integer> runIDColumn;
-    @FXML public TableColumn<Run, Integer> compareToRunColumn;
-    @FXML public TableColumn<Run, Double> ZColumn;
-    @FXML public TableColumn<Run, Boolean> hypothesisColumn;
+    @FXML public TableView<Section> uTestTable;
+    @FXML public TableColumn<Section, Double> averageSpeedColumn;
+    @FXML public TableColumn<Section, Integer> runIDColumn;
+    @FXML public TableColumn<Section, Integer> compareToRunColumn;
+    @FXML public TableColumn<Section, Double> ZColumn;
+    @FXML public TableColumn<Section, Boolean> hypothesisColumn;
     @FXML public Button drawUTestButton;
     @FXML public Label steadyStateLabel;
 
@@ -75,7 +74,7 @@ public class MannWhitney extends GenericTest implements Initializable {
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         averageSpeedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
-        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
+        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
         ZColumn.setCellValueFactory(new PropertyValueFactory<>("P"));
         ZColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
@@ -120,26 +119,26 @@ public class MannWhitney extends GenericTest implements Initializable {
     }
 
     @Override
-    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
+    protected void calculateTest(List<List<Section>> groups, List<Section> resultSections) {
         if (this.job.getRuns().size() <= 1) return;
         MannWhitneyUTest uTest = new MannWhitneyUTest();
-        for (List<Run> group : groups) {
-            Run run1 = group.getFirst();
-            Run run2 = group.get(1);
-            double[] data1 = run1.getData().stream().mapToDouble(dp -> dp.data).toArray();
-            double[] data2 = run2.getData().stream().mapToDouble(dp -> dp.data).toArray();
+        for (List<Section> group : groups) {
+            Section section1 = group.getFirst();
+            Section section2 = group.get(1);
+            double[] data1 = section1.getData().stream().mapToDouble(dp -> dp.data).toArray();
+            double[] data2 = section2.getData().stream().mapToDouble(dp -> dp.data).toArray();
 
 
             double pValue = uTest.mannWhitneyUTest(data1, data2);
             group.getFirst().setP(pValue);
             uTestData.add(new XYChart.Data<>(group.getFirst().getID(), pValue));
-            resultRuns.add(group.getFirst());
+            resultSections.add(group.getFirst());
         }
     }
 
     @Override
-    protected double extractValue(Run run) {
-        return run.getP();
+    protected double extractValue(Section section) {
+        return section.getP();
     }
 
     @Override
@@ -149,16 +148,16 @@ public class MannWhitney extends GenericTest implements Initializable {
 
     @Override
     public Scene getCharterScene() {
-        return charter.drawGraph("U-Test", "Time in seconds", "P-Value","Alpha level", getAlpha(), new Charter.ChartData("calculated P", uTestData));
+        return charter.drawGraph("U-Test", "Section ID", "P-Value","Alpha level", getAlpha(), new Charter.ChartData("calculated P", uTestData));
     }
 
     public void draw() {
-        charter.drawGraph("U-Test", "Time in seconds", "P-Value","Alpha level", getAlpha(), new Charter.ChartData("calculated P", uTestData));
+        charter.drawGraph("U-Test", "Section ID", "P-Value","Alpha level", getAlpha(), new Charter.ChartData("calculated P", uTestData));
         charter.openWindow();
     }
 
     @Override
-    public TableView<Run> getTable() {
+    public TableView<Section> getTable() {
         return uTestTable;
     }
 }

@@ -12,9 +12,9 @@
       <Label id="labelHeader" fx:id="labelHeader" prefHeight="17.0" prefWidth="1000.0" text="U-Test" />
       <TableView id="anovaTable" fx:id="uTestTable" prefHeight="500.0" prefWidth="1000.0">
          <columns>
-            <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="62.0" text="Run" />
+            <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="62.0" text="Section" />
             <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="134.0" text="Average Speed" />
-            <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="141.0" text="Compare to Run" />
+            <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="141.0" text="Compare to Section" />
             <TableColumn id="FColumn" fx:id="ZColumn" prefWidth="127.0" text="P (calculated)" />
             <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="152.0" text="Nullhypothesis" />
          </columns>

@@ -1,7 +1,7 @@
 package de.unileipzig.atool;
 
-import de.unileipzig.atool.Analysis.GenericTest;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.DoubleProperty;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.control.*;
@@ -22,8 +22,8 @@ import java.util.logging.*;
 public abstract class Utils {
 
 
-    public static Callback<TableColumn<Run, Boolean>, TableCell<Run, Boolean>> getHypothesisCellFactory() {
-        return (TableColumn<Run, Boolean> col) -> new TableCell<>() {
+    public static Callback<TableColumn<Section, Boolean>, TableCell<Section, Boolean>> getHypothesisCellFactory() {
+        return (TableColumn<Section, Boolean> col) -> new TableCell<>() {
             @Override
             public void updateItem(Boolean item, boolean empty) {
                 super.updateItem(item, empty);
@@ -41,8 +41,8 @@ public abstract class Utils {
         };
     }
 
-    public static Callback<TableColumn<Run, Double>, TableCell<Run, Double>> getStatusCellFactory(double threshold) {
-        return (TableColumn<Run, Double> col) -> new TableCell<>() {
+    public static Callback<TableColumn<Section, Double>, TableCell<Section, Double>> getStatusCellFactory(double threshold) {
+        return (TableColumn<Section, Double> col) -> new TableCell<>() {
             @Override
             public void updateItem(Double item, boolean empty) {
                 super.updateItem(item, empty);
@@ -60,8 +60,8 @@ public abstract class Utils {
         };
     }
 
-    public static Callback<TableColumn<Run, Boolean>, TableCell<Run, Boolean>> getBooleanCellFactory() {
-        return (TableColumn<Run, Boolean> col) -> new TableCell<>() {
+    public static Callback<TableColumn<Section, Boolean>, TableCell<Section, Boolean>> getBooleanCellFactory() {
+        return (TableColumn<Section, Boolean> col) -> new TableCell<>() {
             @Override
             public void updateItem(Boolean item, boolean empty) {
                 super.updateItem(item, empty);
@@ -88,7 +88,7 @@ public abstract class Utils {
 
         @Override
         public String toString(final Double value) {
-            if(value.equals(Run.UNDEFINED_DOUBLE_VALUE)){
+            if(value.equals(Section.UNDEFINED_DOUBLE_VALUE)){
                 return "";
             }
             return nf.format(value);
@@ -117,7 +117,7 @@ public abstract class Utils {
     public static class SafeDoubleStringConverter extends DoubleStringConverter {
         @Override
         public Double fromString(String value) {
-            Double val = Run.UNDEFINED_DOUBLE_VALUE;
+            Double val = Section.UNDEFINED_DOUBLE_VALUE;
             try {
                 val = Double.valueOf(value);
             } catch (NumberFormatException e) {

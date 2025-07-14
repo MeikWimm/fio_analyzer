@@ -144,7 +144,7 @@ public class OutputModule {
     private void savePostHocTestValues(PostHocTest test) {
         stringBuilder.append("[").append(test.getTestName()).append("]").append("\n");
         double criticalValue = test.getCriticalValue();
-        if(criticalValue == Run.UNDEFINED_DOUBLE_VALUE){
+        if(criticalValue == Section.UNDEFINED_DOUBLE_VALUE){
             stringBuilder.append("Critical Value: ").append("UNDEFINED").append("\n").append("\n");
         } else {
             stringBuilder.append("Critical Value: ").append(criticalValue).append("\n").append("\n");
@@ -154,7 +154,7 @@ public class OutputModule {
     private void saveTestValues(GenericTest test) {
         stringBuilder.append("[").append(test.getTestName()).append("]").append("\n");
         double criticalValue = test.getCriticalValue();
-        if(criticalValue == Run.UNDEFINED_DOUBLE_VALUE){
+        if(criticalValue == Section.UNDEFINED_DOUBLE_VALUE){
             stringBuilder.append("Critical Value: ").append("UNDEFINED").append("\n").append("\n");
         } else {
             stringBuilder.append("Critical Value: ").append(criticalValue).append("\n").append("\n");
