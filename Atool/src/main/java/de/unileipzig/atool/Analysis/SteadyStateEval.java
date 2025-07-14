@@ -28,7 +28,6 @@ public class SteadyStateEval implements Initializable {
     @FXML private TableColumn<TestEval, String> testColumn;
     @FXML private TableColumn<TestEval, String> runColumn;
     @FXML private TableColumn<TestEval, String> timeColumn;
-    @FXML private TableColumn<TestEval, String> typeOfComparedRunsColumn;
     @FXML private TableColumn<TestEval, Integer> skippedRunColumn;
     @FXML private TableColumn<TestEval, Boolean> bonferroniColumn;
     @FXML Button saveEvalButton;
@@ -79,7 +78,6 @@ public class SteadyStateEval implements Initializable {
         runColumn.setCellValueFactory(new PropertyValueFactory<>("SteadyStateRun"));
         testColumn.setCellValueFactory(new PropertyValueFactory<>("TestName"));
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("Time"));
-        typeOfComparedRunsColumn.setCellValueFactory(new PropertyValueFactory<>("TypeOfComparedRuns"));
         skippedRunColumn.setCellValueFactory(new PropertyValueFactory<>("SkippedRunVal"));
         bonferroniColumn.setCellValueFactory(new PropertyValueFactory<>("BonferroniVal"));
 
@@ -104,7 +102,7 @@ public class SteadyStateEval implements Initializable {
     }
 
     private void setLabeling() {
-        labelHeader.setText("Job Evaluation | Job alpha: " + this.job.getAlpha() + " | Required accepted runs for steady state: " + settings.getRequiredRunsForSteadyState());
+        labelHeader.setText("Job Evaluation | Job alpha: " + this.job.getAlpha() + " | Required accepted runs for steady state: " + settings.getRequiredRunsForSteadyState() + " seconds");
     }
 
     private void onActionSaveEval(){

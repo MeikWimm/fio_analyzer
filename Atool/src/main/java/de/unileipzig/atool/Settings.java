@@ -23,15 +23,19 @@ import java.util.logging.Level;
  * @author meni1999
  */
 public class Settings implements Initializable {
-    public static final int MAX_SKIP_COUNT = 5;
+    public static final int MAX_SKIP_COUNT = 60;
     public static final int MIN_SKIP_COUNT = 0;
     public static final int DEFAULT_SKIP_COUNT = 0;
 
-    public static final int MAX_REQUIRED_RUNS_FOR_STEADY_STATE = 10;
-    public static final int MIN_REQUIRED_RUNS_FOR_STEADY_STATE = 2;
-    public static final int DEFAULT_REQUIRED_RUNS_FOR_STEADY_STATE = 5;
+    public static final int DEFAULT_WINDOW_SIZE = 60000;
+    public static final int MIN_WINDOW_SIZE = 30000;
+    public static final int MAX_WINDOW_SIZE = 60000;
 
-    private int requiredRunsForSteadyState = DEFAULT_REQUIRED_RUNS_FOR_STEADY_STATE;
+    public static final int MAX_REQUIRED_SECONDS_FOR_STEADY_STATE = 60;
+    public static final int MIN_REQUIRED_SECONDS_FOR_STEADY_STATE = 30;
+    public static final int DEFAULT_REQUIRED_SECONDS_FOR_STEADY_STATE = 30;
+
+    private int requiredRunsForSteadyState = DEFAULT_REQUIRED_SECONDS_FOR_STEADY_STATE;
     private int groupSize = 2;
 
     private static final int DIGIT = 3;
@@ -65,15 +69,18 @@ public class Settings implements Initializable {
     @FXML public Spinner<Integer> skipRunConIntSpinner;
     @FXML public Spinner<Integer> skipRunTTestSpinner;
     @FXML public Spinner<Integer> skipRunUTestSpinner;
-    @FXML public Spinner<Integer> requiredRunsForSteadyStateSpinner;
+    @FXML public Spinner<Integer> requiredSecondsForSteadyStateSpinner;
 
     @FXML public Slider runCompareCounterSlider;
+    @FXML public Slider windowSizeSlider;
     @FXML public Button buttonSaveSettings;
     @FXML public RadioButton radioButtonMebibyte;
     @FXML public RadioButton radioButtonKibiByte;
     @FXML public RadioButton radioButtonKiloByte;
     private final ToggleGroup toggleGorup = new ToggleGroup();
     private final PrimaryController primaryController;
+    public static int WINDOW_SIZE = DEFAULT_WINDOW_SIZE;
+    public final static int WINDOW_STEP_SIZE = 1000;
 
     public Settings(PrimaryController primaryController) {
         this.primaryController = primaryController;
@@ -104,7 +111,7 @@ public class Settings implements Initializable {
         skipRunTTestSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
         skipRunUTestSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
 
-        requiredRunsForSteadyStateSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_REQUIRED_RUNS_FOR_STEADY_STATE, MAX_REQUIRED_RUNS_FOR_STEADY_STATE, DEFAULT_REQUIRED_RUNS_FOR_STEADY_STATE));
+        requiredSecondsForSteadyStateSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_REQUIRED_SECONDS_FOR_STEADY_STATE, MAX_REQUIRED_SECONDS_FOR_STEADY_STATE, DEFAULT_REQUIRED_SECONDS_FOR_STEADY_STATE));
 
         buttonSaveSettings.setOnAction(this::onActionSaveSettings);
 
@@ -126,6 +133,7 @@ public class Settings implements Initializable {
         bonferroniUTestcheckbox.setSelected(isBonferroniUTestSelected);
 
         runCompareCounterSlider.setValue(groupSize);
+        windowSizeSlider.setValue(WINDOW_SIZE / 1000.0);
 
 
         skipRunAnovaSpinner.getValueFactory().setValue(anovaSkipRunsCounter);
@@ -134,7 +142,7 @@ public class Settings implements Initializable {
         skipRunTTestSpinner.getValueFactory().setValue(tTestSkipRunsCounter);
         skipRunUTestSpinner.getValueFactory().setValue(uTestSkipRunsCounter);
 
-        requiredRunsForSteadyStateSpinner.getValueFactory().setValue(requiredRunsForSteadyState);
+        requiredSecondsForSteadyStateSpinner.getValueFactory().setValue(requiredRunsForSteadyState);
     }
 
     public void openWindow() {
@@ -150,6 +158,7 @@ public class Settings implements Initializable {
             stage.show();
         } catch (IOException e) {
             Logging.log(Level.SEVERE, "Settings", "Coudn't open Settings Window! App state");
+            e.printStackTrace();
         }
     }
 
@@ -157,6 +166,7 @@ public class Settings implements Initializable {
         CONVERSION = (MathUtils.CONVERT) toggleGorup.getSelectedToggle().getUserData();
         CONVERSION_VALUE = MathUtils.CONVERT.getConvertValue(CONVERSION);
         groupSize = (int) runCompareCounterSlider.getValue();
+        WINDOW_SIZE = (int) windowSizeSlider.getValue() * 1000;
 
         anovaSkipRunsCounter = skipRunAnovaSpinner.getValue();
         covSkipRunsCounter = skipRunCoVSpinner.getValue();
@@ -164,7 +174,7 @@ public class Settings implements Initializable {
         tTestSkipRunsCounter = skipRunTTestSpinner.getValue();
         uTestSkipRunsCounter = skipRunUTestSpinner.getValue();
 
-        requiredRunsForSteadyState = requiredRunsForSteadyStateSpinner.getValue();
+        requiredRunsForSteadyState = requiredSecondsForSteadyStateSpinner.getValue();
 
         isBonferroniANOVASelected = bonferroniANOVAcheckbox.isSelected();
         isBonferroniConIntSelected = bonferroniConIntcheckbox.isSelected();

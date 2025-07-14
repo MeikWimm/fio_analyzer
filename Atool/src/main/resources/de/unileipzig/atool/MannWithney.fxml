@@ -15,7 +15,7 @@
             <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="62.0" text="Run" />
             <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="134.0" text="Average Speed" />
             <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="141.0" text="Compare to Run" />
-            <TableColumn id="FColumn" fx:id="ZColumn" prefWidth="127.0" text="Z (calculated)" />
+            <TableColumn id="FColumn" fx:id="ZColumn" prefWidth="127.0" text="P (calculated)" />
             <TableColumn id="hypothesisColumn" fx:id="hypothesisColumn" prefWidth="152.0" text="Nullhypothesis" />
          </columns>
       </TableView>

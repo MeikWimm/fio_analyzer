@@ -34,9 +34,6 @@ public class Job {
     public final static Double MAX_CV_THRESHOLD = .6;
     public final static Double MIN_CV_THRESHOLD = .05;
 
-    private final static int WINDOW_SIZE = 60000;
-    private final static int WINDOW_STEP_SIZE = 1000;
-
     private static int COUNTER = 1;
     private final int ID = COUNTER; // so that each Job has a unique ID
     private final List<XYChart.Data<Number, Number>> speedSeries;
@@ -160,15 +157,15 @@ public class Job {
             runsCounter = DEFAULT_RUN_COUNT;
         }
 
-        int windowSize = WINDOW_SIZE;
-        int stepSize = WINDOW_STEP_SIZE; // Sliding Step
+        int windowSize = Settings.WINDOW_SIZE;
+        int stepSize = Settings.WINDOW_STEP_SIZE; // Sliding Step
 
         this.conversion = Settings.CONVERSION_VALUE;
         if(data.size() < windowSize){
-            Logging.log(Level.WARNING, "Job", String.format("Data size %d is less than window size %d", data.size(), WINDOW_SIZE));
+            Logging.log(Level.WARNING, "Job", String.format("Data size %d is less than window size %d", data.size(), windowSize));
             return;
         }
-        this.runDataSize = (data.size() / WINDOW_SIZE);
+        this.runDataSize = (data.size() / windowSize);
 
 
         int runId = 1;

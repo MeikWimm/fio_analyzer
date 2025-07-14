@@ -8,7 +8,6 @@ public class TestEval{
     private String testName;
     private String steadyStateRunString;
     private String time;
-    private String typeOfComparedRuns;
     private String skippedRunVal;
     private String bonferroniVal;
     private String comparedRunsVal;
@@ -40,15 +39,9 @@ public class TestEval{
 
         if(steadyStateRun != null){
             steadyStateRunString = String.format("Run %s", steadyStateRun.getID());
-            time = String.format("%f - %f", steadyStateRun.getStartTime() / 1000.0, steadyStateRun.getEndTime() / 1000.0);
+            time = String.format("%f", steadyStateRun.getStartTime() / 1000.0);
         } else {
             steadyStateRunString = "No steady state run found";
-        }
-
-        if(test.isSkipGroup()){
-            typeOfComparedRuns = "sequential";
-        } else {
-            typeOfComparedRuns = "adjacent";
         }
 
         if(test.isApplyBonferroni()){
@@ -66,15 +59,9 @@ public class TestEval{
 
         if(steadyStateRun != null){
             steadyStateRunString = String.format("Run %s", steadyStateRun.getID());
-            time = String.format("%f - %f", steadyStateRun.getStartTime() / 1000.0, steadyStateRun.getEndTime() / 1000.0);
+            time = String.format("%f", steadyStateRun.getStartTime() / 1000.0);
         } else {
             steadyStateRunString = "No steady state run found";
-        }
-
-        if(test.isSkipGroup()){
-            typeOfComparedRuns = "sequential";
-        } else {
-            typeOfComparedRuns = "adjacent";
         }
 
         if(test.isApplyBonferroni()){
@@ -104,10 +91,6 @@ public class TestEval{
 
     public String getTime() {
         return time;
-    }
-
-    public String getTypeOfComparedRuns() {
-        return typeOfComparedRuns;
     }
 
     public String getSkippedRunVal() {

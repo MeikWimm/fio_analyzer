@@ -115,6 +115,10 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     protected void setLabeling() {
         GenericTest test = getTest();
         Run genericTestSteadyStateRun = test.getSteadyStateRun();
+        if(genericTestSteadyStateRun == null){
+            anovaSteadyStateLabel.setText("No steady state test can be calculated. No Anova Result");
+            return;
+        }
         anovaSteadyStateLabel.setText("Run " + test.getSteadyStateRun().getID());
 
         if(steadyStateRun == null){

@@ -55,7 +55,7 @@ public class AtoolTTest extends GenericTest implements Initializable {
 
         runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
-        TColumn.setCellValueFactory(new PropertyValueFactory<>("T"));
+        TColumn.setCellValueFactory(new PropertyValueFactory<>("P"));
         TColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
@@ -99,7 +99,7 @@ public class AtoolTTest extends GenericTest implements Initializable {
 
 
             double pValue = tTest.tTest(data1, data2);
-            group.getFirst().setP(pValue);
+            run1.setP(pValue);
             tData.add(new XYChart.Data<>(group.getFirst().getID(), pValue));
             resultRuns.add(group.getFirst());
         }

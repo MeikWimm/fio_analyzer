@@ -217,7 +217,7 @@ InputModule {
 
 
             this.time = old_time;
-            this.averageSpeed = sum_speed / data.size() / 1000.0; // milli sec to sec
+            this.averageSpeed = sum_speed / data.size(); // milli sec to sec
             this.standardDeviation = MathUtils.calculateDeviation(data, this.averageSpeed);
             this.freq = freq;
             this.data = data;

@@ -36,8 +36,6 @@ public abstract class GenericTest {
     private Scene scene;
     protected final Charter charter;
 
-    public static final int DEFAULT_THRESHOLD_SECONDS_FOR_STEADY_STATE = 30;
-
     public GenericTest(Job job, int skipFirstRun, boolean skipGroup, int groupSize, double alpha, boolean applyBonferroni, int thresholdSectionsForSteadyState) {
         this.job = new Job(job);
         this.job.prepareSkippedData(skipFirstRun);
@@ -105,12 +103,12 @@ public abstract class GenericTest {
                 secondCounter = 0;
             }
 
-            if(secondCounter >= DEFAULT_THRESHOLD_SECONDS_FOR_STEADY_STATE){
+            if(secondCounter == this.thresholdSectionsForSteadyState){
                 break;
             }
         }
 
-        if(possibleSteadyStateRunsGroup.size() < secondCounter){
+        if(possibleSteadyStateRunsGroup.size() < this.thresholdSectionsForSteadyState){
             possibleSteadyStateRunsGroup.clear();
         }
     }
