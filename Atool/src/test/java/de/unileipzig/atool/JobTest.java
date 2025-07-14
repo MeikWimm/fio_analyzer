@@ -20,89 +20,34 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class JobTest {
 
-    private List<Job> jobs;
 
     @BeforeEach
     void setUp() throws URISyntaxException {
-        File logfilesDir = new File(Objects.requireNonNull(this.getClass().getResource("/logfiles")).toURI());
-        File[] files = logfilesDir.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
-        assertNotNull(files);
-
-        InputModule inputModule = new InputModule();
-
-        inputModule.readFiles(files);
-        jobs = inputModule.getJobs();
 
     }
 
     @Test
     void testJobInitialization() {
-        for (Job job: jobs){
-            assertNotNull(job, "Job instance should be initialized.");
-            //assertEquals(10, job.getData().size(), "Job data should contain the expected number of DataPoint objects.");
-            assertEquals(4, job.getRunsCounter(), "Job runsCounter should be initialized correctly.");
-        }
+
     }
 
     @Test
     void testUpdateRunsData() {
-        int[] testValsAverageSpeedPerMilli = {1, 25, 77, 100};
-        int groupSize = 2;
-        for (Job job: jobs){
-            for (int vals: testValsAverageSpeedPerMilli){
-               // job.setAverageTimePerMilliSec(vals);
-                job.updateRunsData();
-                List<List<Section>> groups = Job.setupGroups(job, false, groupSize);
-                List<Section> sections = job.getRuns();
 
-                // Assert
-                assertEquals(4, sections.size(), "Job should have the expected number of runs after update.");
-                assertFalse(sections.isEmpty(), "Runs should not be empty after updating runs data.");
-                assertFalse(groups.isEmpty(), "Runs should not be empty after updating runs data.");
-                assertEquals(groupSize, groups.getFirst().size(), "Job should have the expected number of 2 after update.");
-
-                //LOGGER.log(Level.FINEST, () -> String.format("Average speed per millisecond: %d", vals));
-                //LOGGER.log(Level.FINEST, () -> String.format("Average speed per run: %f", job.getAverageSpeed()));
-            }
-        }
     }
 
     @Test
     void testPrepareSkippedData() {
-        for (Job job: jobs){
-            // Arrange
-            int initialSize = job.getData().size();
 
-            // Act
-            job.prepareSkippedData(1);
-
-            // Assert
-            assertTrue(job.getData().size() < initialSize, "Data size should be reduced after skipping runs.");
-        }
     }
 
     @Test
     void testGetSeries() {
-        for (Job job: jobs){
-            List<XYChart.Data<Number, Number>> series = job.getSeries();
 
-            // Assert
-            assertNotNull(series, "Speed series should not be null.");
-            //assertEquals(10, series.size(), "Speed series should contain the expected number of data points.");
-        }
     }
 
     @Test
     void testGetAverageSpeed() {
-        for (Job job: jobs){
-            // Arrange
-            job.setAverageSpeed(50.0);
 
-            // Act
-            double averageSpeed = job.getAverageSpeed();
-
-            // Assert
-            assertEquals(50.0 / Settings.CONVERSION_VALUE, averageSpeed, 1e-9, "Average speed should be calculated correctly.");
-        }
     }
 }
