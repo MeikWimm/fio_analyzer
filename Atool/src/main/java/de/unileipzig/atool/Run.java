@@ -36,6 +36,7 @@ public class Run /*Section*/ {
     private double endTime = UNDEFINED_DOUBLE_VALUE;
     private double duration = UNDEFINED_DOUBLE_VALUE;
     private double p = UNDEFINED_DOUBLE_VALUE;
+    private double mse = UNDEFINED_DOUBLE_VALUE;
     private int groupID = UNDEFINED_INTEGER;
     private String group = "UNDEFINED";
 
@@ -49,7 +50,6 @@ public class Run /*Section*/ {
     // Copy constructor
     public Run(Run other) {
         this.runID = other.getRunID();
-        this.data = new ArrayList<>();
         this.data = other.getData();
         this.startTime = other.getStartTime();
         this.endTime = other.getEndTime();
@@ -70,6 +70,7 @@ public class Run /*Section*/ {
         this.qHSD = other.getQHSD();
         this.p = other.getP();
         this.group = other.group;
+        this.mse = other.getMSE();
         this.isOverlapping = other.getOverlap();
     }
 
@@ -255,5 +256,13 @@ public class Run /*Section*/ {
 
     public double getQHSD() {
         return qHSD;
+    }
+
+    public void setMSE(double mse) {
+        this.mse = mse;
+    }
+
+    public double getMSE() {
+        return mse;
     }
 }

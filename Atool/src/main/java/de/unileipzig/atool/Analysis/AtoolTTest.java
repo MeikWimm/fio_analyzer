@@ -43,7 +43,7 @@ public class AtoolTTest extends GenericTest implements Initializable {
     private final List<XYChart.Data<Number, Number>> tData;
 
     public AtoolTTest(Job job, Settings settings) {
-        super(job, settings.getTTestSkipRunsCounter(), settings.isTTestUseAdjacentRun(), 2, job.getAlpha() ,settings.isBonferroniTTestSelected(), settings.getRequiredRunsForSteadyState());
+        super(job, settings.getTTestSkipRunsCounter(), false, 2, job.getAlpha() ,settings.isBonferroniTTestSelected(), settings.getRequiredRunsForSteadyState());
         this.tData = new ArrayList<>();
     }
 
@@ -117,7 +117,7 @@ public class AtoolTTest extends GenericTest implements Initializable {
 
     @Override
     public Scene getCharterScene() {
-        return charter.drawGraph("T-Test", "Run", "T-Value", "critical T", getAlpha(), new Charter.ChartData("calculated T", tData));
+        return charter.drawGraph("T-Test", "Time in seconds", "p-Value", "Alpha level", getAlpha(), new Charter.ChartData("calculated P", tData));
     }
 
     @Override
@@ -131,7 +131,7 @@ public class AtoolTTest extends GenericTest implements Initializable {
     }
 
     private void drawTGraph() {
-        charter.drawGraph("T-Test", "Run", "T-Value", "critical T", getAlpha(), new Charter.ChartData("calculated T", tData));
+        charter.drawGraph("T-Test", "Time in seconds", "p-Value", "Alpha level", getAlpha(), new Charter.ChartData("calculated P", tData));
         charter.openWindow();
     }
 

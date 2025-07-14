@@ -22,8 +22,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import net.sourceforge.jdistlib.Tukey;
-
 
 /**
  *
@@ -47,6 +45,9 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     private double qHSD;
     private final List<XYChart.Data<Number, Number>> meanData;
     private Job job;
+
+    // group size = 3
+    private static final double Q_CRITICAL_0_05_ALPHA = 5.081;
     public TukeyHSD(){
         super();
         this.meanData = new ArrayList<>();
@@ -82,45 +83,23 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     }
 
     @Override
-    protected void initPostHocTest(GenericTest test, List<List<Run>> postHocGroups) {
-        this.job = test.getJob();
-        int totalObservations = job.getData().size();
-        double n = job.getData().size();
-        int numberOfGroups = postHocGroups.size();
-        int dfError = totalObservations - numberOfGroups;
-        Tukey tukey = new Tukey(postHocGroups.getFirst().size(), numberOfGroups, dfError);
-        double standardError = Math.sqrt(job.getMSE() / n);
-        double qCritical = tukey.inverse_survival(test.getAlpha(), false);
-        qHSD = qCritical * standardError;
-    }
+    protected void calculateTest(List<List<Run>> postHocGroup, List<Run> resultRuns){
+        List<Run> group = postHocGroup.getFirst();
+        Run run = group.getFirst();
+        double standardError = Math.sqrt(run.getMSE() / run.getData().size());
+        this.qHSD = Q_CRITICAL_0_05_ALPHA * standardError;
 
-    @Override
-    protected void calculateTest(List<Run> firstGroup, List<Run> secondGroup, List<Run> postHocRuns){
-        Run run = firstGroup.getFirst();
-        double overallMean = getOverallMean(firstGroup, secondGroup);
+        for (List<Run> g : postHocGroup) {
+            Run r1 = g.getFirst();
+            Run r2 = g.getLast();
 
-        run.setQ(overallMean);
-        postHocRuns.add(run);
+            double overallMean = Math.abs(r1.getAverageSpeed() - r2.getAverageSpeed());
 
-        meanData.add(new XYChart.Data<>(run.getGroupID(), overallMean));
-    }
-
-    private double getOverallMean(List<Run> group1, List<Run> group2) {
-        double speedSumGroup1 = 0;
-        double speedSumGroup2 = 0;
-
-        for (Run r : group1) {
-            speedSumGroup1 += r.getAverageSpeed();
+            r1.setQ(overallMean);
+            resultRuns.add(r1);
+            meanData.add(new XYChart.Data<>(r1.getGroupID(), overallMean));
         }
 
-        for (Run r : group2) {
-            speedSumGroup2 += r.getAverageSpeed();
-        }
-
-        double averageSpeedGroup1 = speedSumGroup1 / group1.size();
-        double averageSpeedGroup2 = speedSumGroup2 / group2.size();
-
-        return Math.abs(averageSpeedGroup1 - averageSpeedGroup2);
     }
 
     @Override
@@ -134,21 +113,18 @@ public class TukeyHSD extends PostHocTest implements Initializable {
     }
 
     protected void setLabeling() {
-        if(steadyStateRun == null && anovaSteadyStateRun == null){
-            evalLabel.setText("No steady state run found.");
-            return;
-        }
+        GenericTest test = getTest();
+        Run genericTestSteadyStateRun = test.getSteadyStateRun();
+        anovaSteadyStateLabel.setText("Run " + test.getSteadyStateRun().getID());
 
-        anovaSteadyStateLabel.setText("Run " + anovaSteadyStateRun.getID());
-
-        if(steadyStateRun == null && anovaSteadyStateRun != null){
-            evalLabel.setText("Run " + anovaSteadyStateRun.getID() + " most likely in transient state.");
+        if(steadyStateRun == null){
+            evalLabel.setText("Run " + genericTestSteadyStateRun.getID() + " most likely in transient state.");
         }
 
         if(steadyStateRun != null){
-            if(steadyStateRun.getID() != anovaSteadyStateRun.getID()){
+            if(steadyStateRun.getID() != genericTestSteadyStateRun.getID()){
                 tukeySteadyStateLabel.setText("Run " + steadyStateRun.getID());
-                evalLabel.setText("Run " + steadyStateRun.getID() + " more likely in steady state than Run " + anovaSteadyStateRun.getID() + ".");
+                evalLabel.setText("Run " + steadyStateRun.getID() + " more likely in steady state than Run " + genericTestSteadyStateRun.getID() + ".");
             } else {
                 tukeySteadyStateLabel.setText("Run " + steadyStateRun.getID());
                 evalLabel.setText("Run " + steadyStateRun.getID() + " is in steady state.");
