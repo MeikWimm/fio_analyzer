@@ -42,7 +42,7 @@ public class AtoolTTest extends GenericTest implements Initializable {
     private final List<XYChart.Data<Number, Number>> tData;
 
     public AtoolTTest(Job job, Settings settings) {
-        super(job, settings.getTTestSkipRunsCounter(), false, 2, job.getAlpha() ,settings.isBonferroniTTestSelected(), settings.getRequiredRunsForSteadyState());
+        super(job, job.getSkipSeconds(), false, 2, job.getAlpha() ,settings.isBonferroniTTestSelected(), settings.getRequiredRunsForSteadyState());
         this.tData = new ArrayList<>();
     }
 

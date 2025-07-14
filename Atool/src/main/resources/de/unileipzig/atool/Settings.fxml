@@ -11,34 +11,27 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Pane?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="517.0" prefWidth="714.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="375.0" prefWidth="496.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <center>
-      <Pane prefHeight="200.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+      <Pane prefHeight="200.0" prefWidth="714.0" BorderPane.alignment="CENTER">
          <children>
-            <Label layoutX="19.0" layoutY="38.0" prefHeight="17.0" prefWidth="142.0" text="Use conversion for data:" />
-            <RadioButton fx:id="radioButtonMebibyte" layoutX="38.0" layoutY="70.0" mnemonicParsing="false" text="MebiByte" />
-            <RadioButton fx:id="radioButtonKibiByte" layoutX="38.0" layoutY="95.0" mnemonicParsing="false" text="KibiByte" />
-            <RadioButton fx:id="radioButtonKiloByte" layoutX="38.0" layoutY="119.0" mnemonicParsing="false" text="KiloByte" />
-            <Button id="buttonSaveSettings" fx:id="buttonSaveSettings" layoutX="620.0" layoutY="478.0" mnemonicParsing="false" text="Save &amp; Exit" />
+            <Label layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="142.0" text="Use conversion for data:" />
+            <RadioButton fx:id="radioButtonMebibyte" layoutX="38.0" layoutY="46.0" mnemonicParsing="false" text="MebiByte" />
+            <RadioButton fx:id="radioButtonKibiByte" layoutX="38.0" layoutY="76.0" mnemonicParsing="false" text="KibiByte" />
+            <RadioButton fx:id="radioButtonKiloByte" layoutX="38.0" layoutY="105.0" mnemonicParsing="false" text="KiloByte" />
             <Label layoutX="215.0" layoutY="470.0" text="2 (Default)" visible="false" />
             <Label layoutX="215.0" layoutY="440.0" prefHeight="17.0" prefWidth="226.0" text="Number of Runs to compare for ANOVA" visible="false" />
-            <Pane layoutX="33.0" layoutY="172.0" prefHeight="253.0" prefWidth="630.0">
+            <Pane layoutX="-270.0" layoutY="160.0" prefHeight="253.0" prefWidth="438.0">
                <children>
-                  <Pane prefHeight="34.0" prefWidth="132.0">
+                  <Pane prefHeight="34.0" prefWidth="132.0" />
+                  <Pane layoutY="31.0" prefHeight="34.0" prefWidth="595.0">
                      <children>
-                        <Label layoutX="71.0" layoutY="6.0" prefHeight="17.0" prefWidth="122.0" text="Skip seconds" />
-                     </children>
-                  </Pane>
-                  <Pane layoutY="31.0" prefHeight="34.0" prefWidth="630.0">
-                     <children>
-                        <CheckBox id="skipRunANOVAcheckbox" fx:id="skipRunANOVAcheckbox" disable="true" layoutX="132.0" layoutY="2.0" mnemonicParsing="false" opacity="0.0" prefHeight="30.0" prefWidth="132.0" />
-                        <Pane layoutX="484.0" prefHeight="34.0" prefWidth="132.0">
+                        <Pane layoutX="489.0" prefHeight="34.0" prefWidth="113.0">
                            <children>
                               <Label layoutY="6.0" prefHeight="17.0" prefWidth="45.0" text="ANOVA" />
                            </children>
                         </Pane>
-                        <Spinner id="skipRunAnovaSpinner" fx:id="skipRunAnovaSpinner" layoutX="71.0" layoutY="8.0" prefHeight="25.0" prefWidth="61.0" />
-                        <CheckBox id="bonferroniANOVAcheckbox" fx:id="bonferroniANOVAcheckbox" layoutX="264.0" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <CheckBox id="bonferroniANOVAcheckbox" fx:id="bonferroniANOVAcheckbox" layoutX="315.0" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
                      </children>
                      <effect>
                         <Blend />
@@ -47,7 +40,7 @@
                   <Pane layoutX="167.0" prefHeight="34.0" prefWidth="95.0" />
                   <Pane layoutX="484.0" layoutY="-3.0" prefHeight="34.0" prefWidth="132.0">
                      <children>
-                        <Label prefHeight="17.0" prefWidth="122.0" text="Statistical Test" />
+                        <Label layoutX="5.0" layoutY="6.0" prefHeight="17.0" prefWidth="122.0" text="Statistical Test" />
                      </children>
                   </Pane>
                   <Pane layoutY="103.0" prefHeight="34.0" prefWidth="630.0">
@@ -55,35 +48,30 @@
                         <CheckBox id="skipRunConIntcheckbox" fx:id="skipRunConIntcheckbox" disable="true" layoutX="132.0" layoutY="2.0" mnemonicParsing="false" opacity="0.0" prefHeight="30.0" prefWidth="132.0" />
                         <Pane layoutX="484.0" layoutY="1.0" prefHeight="34.0" prefWidth="132.0">
                            <children>
-                              <Label layoutY="6.0" prefHeight="17.0" prefWidth="123.0" text="Confidence Interval" />
+                              <Pane layoutX="7.0" layoutY="5.0" prefHeight="34.0" prefWidth="132.0">
+                                 <children>
+                                    <Label layoutY="6.0" prefHeight="17.0" prefWidth="45.0" text="T-Test" />
+                                 </children>
+                              </Pane>
                            </children>
                         </Pane>
-                        <Spinner id="skipRunConIntSpinner" fx:id="skipRunConIntSpinner" layoutX="71.0" layoutY="5.0" prefHeight="25.0" prefWidth="61.0" />
-                        <CheckBox id="bonferroniConIntcheckbox" fx:id="bonferroniConIntcheckbox" layoutX="264.0" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <CheckBox id="bonferroniTTestcheckbox" fx:id="bonferroniTTestcheckbox" layoutX="315.0" layoutY="3.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
                      </children>
                   </Pane>
                   <Pane layoutY="137.0" prefHeight="34.0" prefWidth="630.0">
                      <children>
                         <CheckBox id="skipRunTTestcheckbox" fx:id="skipRunTTestcheckbox" disable="true" layoutX="132.0" layoutY="2.0" mnemonicParsing="false" opacity="0.0" prefHeight="30.0" prefWidth="132.0" />
-                        <Pane layoutX="484.0" layoutY="3.0" prefHeight="34.0" prefWidth="132.0">
+                        <CheckBox id="bonferroniUTestcheckbox" fx:id="bonferroniUTestcheckbox" layoutX="315.0" layoutY="5.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
+                        <Pane layoutX="490.0" layoutY="3.0" prefHeight="34.0" prefWidth="98.0">
                            <children>
-                              <Label layoutY="6.0" prefHeight="17.0" prefWidth="45.0" text="T-Test" />
+                              <Label layoutY="6.0" prefHeight="17.0" prefWidth="45.0" text="U-Test" />
                            </children>
                         </Pane>
-                        <Spinner id="skipRunTTestheckbox" fx:id="skipRunTTestSpinner" layoutX="71.0" layoutY="5.0" prefHeight="25.0" prefWidth="61.0" />
-                        <CheckBox id="bonferroniTTestcheckbox" fx:id="bonferroniTTestcheckbox" layoutX="264.0" layoutY="2.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
                      </children>
                   </Pane>
                   <Pane layoutY="171.0" prefHeight="34.0" prefWidth="630.0">
                      <children>
                         <CheckBox id="skipRunUTestcheckbox" fx:id="skipRunUTestcheckbox" disable="true" layoutX="132.0" layoutY="2.0" mnemonicParsing="false" opacity="0.0" prefHeight="30.0" prefWidth="132.0" />
-                        <Pane layoutX="484.0" layoutY="3.0" prefHeight="34.0" prefWidth="132.0">
-                           <children>
-                              <Label layoutY="6.0" prefHeight="17.0" prefWidth="45.0" text="U-Test" />
-                           </children>
-                        </Pane>
-                        <Spinner id="skipRunUTestcheckbox" fx:id="skipRunUTestSpinner" layoutX="71.0" layoutY="6.0" prefHeight="25.0" prefWidth="61.0" />
-                        <CheckBox id="bonferroniUTestcheckbox" fx:id="bonferroniUTestcheckbox" layoutX="264.0" layoutY="3.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
                      </children>
                   </Pane>
                   <Pane disable="true" layoutY="205.0" prefHeight="34.0" prefWidth="630.0" visible="false">
@@ -98,25 +86,22 @@
                         <Spinner id="skipRunCUSUMcheckbox" fx:id="skipRunCUSUMSpinner" layoutX="168.0" layoutY="5.0" prefHeight="25.0" prefWidth="61.0" />
                      </children>
                   </Pane>
-                  <Pane layoutX="262.0" prefHeight="34.0" prefWidth="95.0">
-                     <children>
-                        <Label prefHeight="17.0" prefWidth="140.0" text="Use Bonferroni correction" />
-                     </children>
-                  </Pane>
+                  <Pane layoutX="262.0" prefHeight="34.0" prefWidth="95.0" />
                   <Pane layoutY="65.0" prefHeight="34.0" prefWidth="630.0">
                      <children>
-                        <CheckBox id="skipRunANOVAcheckbox" fx:id="skipRunANOVAcheckbox1" disable="true" layoutX="132.0" layoutY="2.0" mnemonicParsing="false" opacity="0.0" prefHeight="30.0" prefWidth="132.0" />
+                        <CheckBox id="skipRunANOVAcheckbox" fx:id="skipRunANOVAcheckbox1" disable="true" layoutX="150.0" layoutY="2.0" mnemonicParsing="false" opacity="0.0" prefHeight="30.0" prefWidth="132.0" />
                         <Pane layoutX="484.0" prefHeight="34.0" prefWidth="132.0">
                            <children>
-                              <Label layoutY="6.0" prefHeight="17.0" prefWidth="45.0" text="CV" />
+                              <Label layoutX="5.0" layoutY="6.0" prefHeight="17.0" prefWidth="123.0" text="Confidence Interval" />
                            </children>
                         </Pane>
-                        <Spinner id="skipRunCoVSpinner" fx:id="skipRunCoVSpinner" layoutX="71.0" layoutY="8.0" prefHeight="25.0" prefWidth="61.0" />
+                        <CheckBox id="bonferroniConIntcheckbox" fx:id="bonferroniConIntcheckbox" layoutX="315.0" layoutY="5.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
                      </children>
                      <effect>
                         <Blend />
                      </effect>
                   </Pane>
+                  <Label layoutX="316.0" layoutY="-1.0" prefHeight="17.0" prefWidth="140.0" text="Use Bonferroni correction" />
                </children>
                <effect>
                   <Blend />
@@ -126,11 +111,12 @@
                </padding>
             </Pane>
             <Slider id="runCompareCounterSlider" fx:id="runCompareCounterSlider" blockIncrement="1.0" disable="true" layoutX="293.0" layoutY="472.0" majorTickUnit="1.0" max="5.0" min="2.0" minorTickCount="0" prefHeight="24.0" prefWidth="190.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" visible="false" />
-            <Label layoutX="19.0" layoutY="440.0" prefHeight="17.0" prefWidth="249.0" text="How many seconds until steady state:" />
-            <Spinner id="requiredSecondsForSteadyStateSpinner" fx:id="requiredSecondsForSteadyStateSpinner" layoutX="19.0" layoutY="466.0" prefHeight="25.0" prefWidth="61.0" />
-            <Slider id="windowSizeSlider" fx:id="windowSizeSlider" layoutX="243.0" layoutY="471.0" majorTickUnit="10.0" max="60.0" min="30.0" minorTickCount="0" showTickLabels="true" showTickMarks="true" value="30.0" />
-            <Label layoutX="250.0" layoutY="440.0" prefHeight="17.0" prefWidth="130.0" text="Window size in second:" />
-            <Label layoutX="396.0" layoutY="482.0" prefHeight="17.0" prefWidth="174.0" text="Info: Window step size 1 second" />
+            <Label layoutX="215.0" layoutY="23.0" prefHeight="17.0" prefWidth="249.0" text="How many seconds until steady state:" />
+            <Spinner id="requiredSecondsForSteadyStateSpinner" fx:id="requiredSecondsForSteadyStateSpinner" layoutX="218.0" layoutY="51.0" prefHeight="25.0" prefWidth="61.0" />
+            <Slider id="windowSizeSlider" fx:id="windowSizeSlider" disable="true" layoutX="243.0" layoutY="471.0" majorTickUnit="10.0" max="60.0" min="30.0" minorTickCount="0" showTickLabels="true" showTickMarks="true" value="30.0" visible="false" />
+            <Label layoutX="250.0" layoutY="440.0" prefHeight="17.0" prefWidth="130.0" text="Window size in second:" visible="false" />
+            <Label layoutX="396.0" layoutY="482.0" prefHeight="17.0" prefWidth="174.0" text="Info: Window step size 1 second" visible="false" />
+            <Button id="buttonSaveSettings" fx:id="buttonSaveSettings" layoutX="396.0" layoutY="336.0" mnemonicParsing="false" text="Save &amp; Exit" />
          </children>
       </Pane>
    </center>

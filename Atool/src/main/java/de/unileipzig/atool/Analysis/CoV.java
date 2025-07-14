@@ -35,7 +35,7 @@ public class CoV extends GenericTest implements Initializable {
 
 
     public CoV(Job job, Settings settings) {
-        super(job, settings.getCovSkipRunsCounter(), false, settings.getGroupSize(), job.getAlpha(), false, settings.getRequiredRunsForSteadyState());
+        super(job, job.getSkipSeconds(), false, settings.getGroupSize(), job.getAlpha(), false, settings.getRequiredRunsForSteadyState());
         final int dataSizeWithRuns = job.getRuns().size() * 2;
         this.covData = new ArrayList<>(dataSizeWithRuns);
         this.STEADY_STATE_COV_THRESHOLD = this.job.getCvThreshold();

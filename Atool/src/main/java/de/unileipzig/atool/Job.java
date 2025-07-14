@@ -34,6 +34,9 @@ public class Job {
     public final static Double DEFAULT_CV_THRESHOLD = .2;
     public final static Double MAX_CV_THRESHOLD = .6;
     public final static Double MIN_CV_THRESHOLD = .05;
+    public static final int MIN_TIME_SKIP = 30;
+    public final static int MAX_TIME_SKIP = 60;
+    public final static int DEFAULT_TIME_SKIP = 30;
 
     private static int COUNTER = 1;
     private final int ID = COUNTER; // so that each Job has a unique ID
@@ -56,6 +59,7 @@ public class Job {
     private double standardDeviation;
     private double SSE;
     private double MSE;
+    private int skipSeconds;
     private int skipSize;
 
     private final DoubleProperty alphaProperty = new SimpleDoubleProperty();
@@ -230,22 +234,22 @@ public class Job {
     public String getFileLastModifiedDate() {
         return attr.lastModifiedTime().toString();
     }
-
-    public int getRunsCounter() {
-        return this.runsCounter;
-    }
-
-    public void setRunsCounter(int runsCounter) {
-        if(runsCounter < MIN_RUN_COUNT || runsCounter > MAX_RUN_COUNT){
-            Logging.log(Level.WARNING, "Job", String.format("In Job: %s", getFileName()));
-            Logging.log(Level.WARNING, "Job", String.format("Runs counter must be between %d and %d", MIN_RUN_COUNT, MAX_RUN_COUNT));
-            Logging.log(Level.WARNING, "Job", String.format("Runs counter set to default value %d", DEFAULT_RUN_COUNT));
-            this.runsCounter = DEFAULT_RUN_COUNT;
-            return;
-        }
-
-        this.runsCounter = runsCounter;
-    }
+//
+//    public int getRunsCounter() {
+//        return this.runsCounter;
+//    }
+//
+//    public void setRunsCounter(int runsCounter) {
+//        if(runsCounter < MIN_RUN_COUNT || runsCounter > MAX_RUN_COUNT){
+//            Logging.log(Level.WARNING, "Job", String.format("In Job: %s", getFileName()));
+//            Logging.log(Level.WARNING, "Job", String.format("Runs counter must be between %d and %d", MIN_RUN_COUNT, MAX_RUN_COUNT));
+//            Logging.log(Level.WARNING, "Job", String.format("Runs counter set to default value %d", DEFAULT_RUN_COUNT));
+//            this.runsCounter = DEFAULT_RUN_COUNT;
+//            return;
+//        }
+//
+//        this.runsCounter = runsCounter;
+//    }
 
     public double getAlpha() {
         return this.alphaProperty.get();
@@ -315,6 +319,14 @@ public class Job {
 
     public void setMSE(double MSE) {
         this.MSE = MSE;
+    }
+
+    public int getSkipSeconds() {
+        return skipSeconds;
+    }
+
+    public void setSkipSeconds(int skipSeconds) {
+        this.skipSeconds = skipSeconds;
     }
 
     public void setFrequency(Map<Integer, Integer> freq) {

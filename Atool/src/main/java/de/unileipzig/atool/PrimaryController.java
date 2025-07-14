@@ -164,7 +164,7 @@ public class PrimaryController implements Initializable {
     private void setupCellValueFactory() {
         IDColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
         fileNameColumn.setCellValueFactory(new PropertyValueFactory<>("File"));
-        runsCounterColumn.setCellValueFactory(new PropertyValueFactory<>("RunsCounter"));
+        runsCounterColumn.setCellValueFactory(new PropertyValueFactory<>("SkipSeconds"));
         speedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         speedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
         speedColumn.setText("Average Speed " + Settings.getConversion());
@@ -194,8 +194,8 @@ public class PrimaryController implements Initializable {
     // Code block setup for editing on a table row
     private void setupColumnTextField() {
         runsCounterColumn.setCellFactory(tc -> new Utils.ValidatedIntegerTableCell<>(
-                labelLoadInfo, Job.MIN_RUN_COUNT, Job.MAX_RUN_COUNT, Job.DEFAULT_RUN_COUNT,
-                String.format("Run count must be a value between %d and %d", Job.MIN_RUN_COUNT, Job.MAX_RUN_COUNT)
+                labelLoadInfo, Job.MIN_TIME_SKIP, Job.MAX_TIME_SKIP, Job.DEFAULT_TIME_SKIP,
+                String.format("Must be a value between %d and %d", Job.MIN_TIME_SKIP, Job.MAX_TIME_SKIP)
         ));
 
         alphaColumn.setCellFactory(ComboBoxTableCell.forTableColumn(
@@ -266,7 +266,7 @@ public class PrimaryController implements Initializable {
      */
     private void setupTableCellCommit() {
         runsCounterColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Integer> t) -> {
-            t.getRowValue().setRunsCounter(t.getNewValue());
+            t.getRowValue().setSkipSeconds(t.getNewValue());
         });
 
         cvColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {

@@ -38,10 +38,10 @@
               <columns>
                   <TableColumn id="IDColumn" fx:id="IDColumn" prefWidth="35.00000190734863" text="ID" />
                 <TableColumn id="fileNameColumn" fx:id="fileNameColumn" prefWidth="181.99996185302734" sortable="false" text="File" />
-                <TableColumn id="runsCounterColumn" fx:id="runsCounterColumn" editable="false" prefWidth="61.0" text="Runs" visible="false" />
-                  <TableColumn id="speedColumn" fx:id="speedColumn" prefWidth="120.0" text="Average Speed" />
-                  <TableColumn id="timeColumn" fx:id="timeColumn" prefWidth="112.0" text="Time (in sec)" />
-                  <TableColumn id="lastModifiedColumn" fx:id="lastModifiedColumn" prefWidth="142.00003051757812" text="Last Modified" />
+                <TableColumn id="runsCounterColumn" fx:id="runsCounterColumn" prefWidth="114.0" text="Skip time (sec)" />
+                  <TableColumn id="speedColumn" fx:id="speedColumn" prefWidth="94.0" text="Average Speed" />
+                  <TableColumn id="timeColumn" fx:id="timeColumn" prefWidth="95.0" text="Time (in sec)" />
+                  <TableColumn id="lastModifiedColumn" fx:id="lastModifiedColumn" prefWidth="133.0" text="Last Modified" />
                   <TableColumn id="fileCreatedColumn" fx:id="fileCreatedColumn" prefWidth="168.0" text="File Created" />
                   <TableColumn id="alphaColumn" fx:id="alphaColumn" prefWidth="124.0" text="Alpha" />
                   <TableColumn id="cvColumn" fx:id="cvColumn" prefWidth="112.0" text="CV Threshold" />

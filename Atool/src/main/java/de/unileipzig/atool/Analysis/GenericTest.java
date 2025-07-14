@@ -65,7 +65,7 @@ public abstract class GenericTest {
     }
 
     private void recalculateAlpha() {
-        this.alpha = this.alpha / this.groups.size();
+        this.alpha = this.alpha / this.groups.getFirst().size();
     }
 
     protected abstract void calculateTest(List<List<Section>> groups, List<Section> resultSections);

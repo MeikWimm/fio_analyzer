@@ -44,7 +44,7 @@ public class ConInt extends GenericTest implements Initializable {
 
 
     public ConInt(Job job,Settings settings) {
-        super(job, settings.getConIntSkipRunsCounter(), false, 2, job.getAlpha(), settings.isBonferroniConIntSelected(), settings.getRequiredRunsForSteadyState());
+        super(job, job.getSkipSeconds(), false, 2, job.getAlpha(), settings.isBonferroniConIntSelected(), settings.getRequiredRunsForSteadyState());
     }
 
     @Override

@@ -64,7 +64,7 @@ public class MannWhitney extends GenericTest implements Initializable {
     private double zCrit;
 
     public MannWhitney(Job job,Settings settings) {
-        super(job, settings.getUTestSkipRunsCounter(), false, 2, job.getAlpha(), settings.isBonferroniUTestSelected(), settings.getRequiredRunsForSteadyState());
+        super(job, job.getSkipSeconds(), false, 2, job.getAlpha(), settings.isBonferroniUTestSelected(), settings.getRequiredRunsForSteadyState());
         this.uTestData = new ArrayList<>();
     }
 
