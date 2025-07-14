@@ -27,11 +27,9 @@ public class Settings implements Initializable {
     public static final int MIN_SKIP_COUNT = 0;
     public static final int DEFAULT_SKIP_COUNT = 0;
 
-    public static final int DEFAULT_WINDOW_SIZE = 30000;
+    public static final int DEFAULT_WINDOW_SIZE = 2000;
     public static final int MIN_WINDOW_SIZE = 30000;
     public static final int MAX_WINDOW_SIZE = 1000;
-
-    public final static int WINDOW_STEP_SIZE = 1000;
 
     public static final int MAX_REQUIRED_SECONDS_FOR_STEADY_STATE = 60;
     public static final int MIN_REQUIRED_SECONDS_FOR_STEADY_STATE = 30;
@@ -47,6 +45,12 @@ public class Settings implements Initializable {
     public static double CONVERSION_VALUE = MathUtils.CONVERT.getConvertValue(MathUtils.CONVERT.DEFAULT);
     public static MathUtils.CONVERT CONVERSION = MathUtils.CONVERT.DEFAULT;
 
+    private int anovaSkipRunsCounter = 0;
+    private int covSkipRunsCounter = 0;
+    private int conIntSkipRunsCounter = 0;
+    private int tTestSkipRunsCounter = 0;
+    private int uTestSkipRunsCounter = 0;
+
     private boolean isBonferroniANOVASelected = false;
     private boolean isBonferroniConIntSelected = false;
     private boolean isBonferroniTTestSelected = false;
@@ -60,6 +64,11 @@ public class Settings implements Initializable {
     @FXML public CheckBox bonferroniTTestcheckbox;
     @FXML public CheckBox bonferroniUTestcheckbox;
 
+    @FXML public Spinner<Integer> skipRunAnovaSpinner;
+    @FXML public Spinner<Integer> skipRunCoVSpinner;
+    @FXML public Spinner<Integer> skipRunConIntSpinner;
+    @FXML public Spinner<Integer> skipRunTTestSpinner;
+    @FXML public Spinner<Integer> skipRunUTestSpinner;
     @FXML public Spinner<Integer> requiredSecondsForSteadyStateSpinner;
 
     @FXML public Slider runCompareCounterSlider;
@@ -71,6 +80,7 @@ public class Settings implements Initializable {
     private final ToggleGroup toggleGorup = new ToggleGroup();
     private final PrimaryController primaryController;
     public static int WINDOW_SIZE = DEFAULT_WINDOW_SIZE;
+    public final static int WINDOW_STEP_SIZE = 1000;
 
     public Settings(PrimaryController primaryController) {
         this.primaryController = primaryController;
@@ -94,6 +104,12 @@ public class Settings implements Initializable {
         radioButtonKibiByte.setToggleGroup(toggleGorup);
         radioButtonKiloByte.setToggleGroup(toggleGorup);
         radioButtonMebibyte.setToggleGroup(toggleGorup);
+
+        skipRunAnovaSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
+        skipRunCoVSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
+        skipRunConIntSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
+        skipRunTTestSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
+        skipRunUTestSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_COUNT, MAX_SKIP_COUNT, DEFAULT_SKIP_COUNT));
 
         requiredSecondsForSteadyStateSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_REQUIRED_SECONDS_FOR_STEADY_STATE, MAX_REQUIRED_SECONDS_FOR_STEADY_STATE, DEFAULT_REQUIRED_SECONDS_FOR_STEADY_STATE));
 
@@ -119,6 +135,13 @@ public class Settings implements Initializable {
         runCompareCounterSlider.setValue(groupSize);
         windowSizeSlider.setValue(WINDOW_SIZE / 1000.0);
 
+
+        skipRunAnovaSpinner.getValueFactory().setValue(anovaSkipRunsCounter);
+        skipRunCoVSpinner.getValueFactory().setValue(covSkipRunsCounter);
+        skipRunConIntSpinner.getValueFactory().setValue(conIntSkipRunsCounter);
+        skipRunTTestSpinner.getValueFactory().setValue(tTestSkipRunsCounter);
+        skipRunUTestSpinner.getValueFactory().setValue(uTestSkipRunsCounter);
+
         requiredSecondsForSteadyStateSpinner.getValueFactory().setValue(requiredRunsForSteadyState);
     }
 
@@ -131,7 +154,7 @@ public class Settings implements Initializable {
             Stage stage = new Stage();
             stage.setTitle("Settings");
             stage.setScene(new Scene(root1));
-            stage.setResizable(true);
+            stage.setResizable(false);
             stage.show();
         } catch (IOException e) {
             Logging.log(Level.SEVERE, "Settings", "Coudn't open Settings Window! App state");
@@ -144,6 +167,12 @@ public class Settings implements Initializable {
         CONVERSION_VALUE = MathUtils.CONVERT.getConvertValue(CONVERSION);
         groupSize = (int) runCompareCounterSlider.getValue();
         WINDOW_SIZE = (int) windowSizeSlider.getValue() * 1000;
+
+        anovaSkipRunsCounter = skipRunAnovaSpinner.getValue();
+        covSkipRunsCounter = skipRunCoVSpinner.getValue();
+        conIntSkipRunsCounter = skipRunConIntSpinner.getValue();
+        tTestSkipRunsCounter = skipRunTTestSpinner.getValue();
+        uTestSkipRunsCounter = skipRunUTestSpinner.getValue();
 
         requiredRunsForSteadyState = requiredSecondsForSteadyStateSpinner.getValue();
 
@@ -188,12 +217,44 @@ public class Settings implements Initializable {
         return groupSize;
     }
 
+    public int getAnovaSkipRunsCounter() {
+        return anovaSkipRunsCounter;
+    }
+
+    public int getCovSkipRunsCounter() {
+        return covSkipRunsCounter;
+    }
+
+    public int getConIntSkipRunsCounter() {
+        return conIntSkipRunsCounter;
+    }
+
+    public int getTTestSkipRunsCounter() {
+        return tTestSkipRunsCounter;
+    }
+
+    public int getUTestSkipRunsCounter() {
+        return uTestSkipRunsCounter;
+    }
+
     public int getRequiredRunsForSteadyState() {
         return requiredRunsForSteadyState;
     }
 
     public void updatedSettings() {
         hasChanged = false;
+    }
+
+    public void setAnovaSkipRunsCounter(int anovaSkipRunsCounter) {
+        this.anovaSkipRunsCounter = anovaSkipRunsCounter;
+    }
+
+    public void setTTestSkipRunsCounter(int tTestSkipRunsCounter) {
+        this.tTestSkipRunsCounter = tTestSkipRunsCounter;
+    }
+
+    public void setUTestSkipRunsCounter(int uTestSkipRunsCounter) {
+        this.uTestSkipRunsCounter = uTestSkipRunsCounter;
     }
 
     public void setGroupSize(int groupSize) {
