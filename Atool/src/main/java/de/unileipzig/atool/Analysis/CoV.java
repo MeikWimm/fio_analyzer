@@ -23,19 +23,19 @@ public class CoV extends GenericTest implements Initializable {
 
     @FXML private Label labelHeader;
 
-    @FXML private TableView<Run> covTable;
-    @FXML private TableColumn<Run, Integer> runIDColumn;
-    @FXML private TableColumn<Run, Double> averageSpeedColumn;
-    @FXML private TableColumn<Run, Double> covColumn;
-    @FXML private TableColumn<Run, Double> startTimeColumn;
-    @FXML private TableColumn<Run, String> compareToRunColumn;
+    @FXML private TableView<Section> covTable;
+    @FXML private TableColumn<Section, Integer> runIDColumn;
+    @FXML private TableColumn<Section, Double> averageSpeedColumn;
+    @FXML private TableColumn<Section, Double> covColumn;
+    @FXML private TableColumn<Section, Double> startTimeColumn;
+    @FXML private TableColumn<Section, String> compareToRunColumn;
     @FXML private Label steadyStateLabelWindowed;
     @FXML private Label steadyStateLabel;
     @FXML private Button showCoVWindowedGraphButton;
 
 
     public CoV(Job job, Settings settings) {
-        super(job, settings.getCovSkipRunsCounter(), settings.isCovUseAdjacentRun(), settings.getGroupSize(), job.getAlpha(), false, settings.getRequiredRunsForSteadyState());
+        super(job, settings.getCovSkipRunsCounter(), false, settings.getGroupSize(), job.getAlpha(), false, settings.getRequiredRunsForSteadyState());
         final int dataSizeWithRuns = job.getRuns().size() * 2;
         this.covData = new ArrayList<>(dataSizeWithRuns);
         this.STEADY_STATE_COV_THRESHOLD = this.job.getCvThreshold();
@@ -50,7 +50,7 @@ public class CoV extends GenericTest implements Initializable {
         covColumn.setCellValueFactory(new PropertyValueFactory<>("CoV"));
         covColumn.setCellFactory(Utils.getStatusCellFactory(STEADY_STATE_COV_THRESHOLD));
 
-        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
+        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
         startTimeColumn.setCellValueFactory(new PropertyValueFactory<>("StartTime"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
 
@@ -80,8 +80,8 @@ public class CoV extends GenericTest implements Initializable {
     }
 
     @Override
-    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
-        calculateCoV(groups, resultRuns);
+    protected void calculateTest(List<List<Section>> groups, List<Section> resultSections) {
+        calculateCoV(groups, resultSections);
     }
 
     @Override
@@ -89,23 +89,23 @@ public class CoV extends GenericTest implements Initializable {
         return "Coefficient of Variation";
     }
 
-    private void calculateCoV(List<List<Run>> groups, List<Run> resultRuns){
-        for (List<Run> group : groups) {
-            Run run = group.getFirst();
+    private void calculateCoV(List<List<Section>> groups, List<Section> resultSections){
+        for (List<Section> group : groups) {
+            Section section = group.getFirst();
             double cov = calculateCoVGroup(group);
-            run.setCoV(cov);
-            covData.add(new XYChart.Data<>(run.getRunID(), cov));
-            resultRuns.add(run);
+            section.setCoV(cov);
+            covData.add(new XYChart.Data<>(section.getID(), cov));
+            resultSections.add(section);
         }
     }
 
-    private double calculateCoVGroup(List<Run> group) {
+    private double calculateCoVGroup(List<Section> group) {
         double average = MathUtils.average(group);
         double n = 0;
         double sum = 0;
 
-        for (Run run : group) {
-            for (DataPoint dp : run.getData()) {
+        for (Section section : group) {
+            for (DataPoint dp : section.getData()) {
                 sum += Math.pow(dp.data - average, 2);
                 n++;
             }
@@ -116,13 +116,13 @@ public class CoV extends GenericTest implements Initializable {
     }
 
     @Override
-    protected double extractValue(Run run) {
-        return run.getCoV();
+    protected double extractValue(Section section) {
+        return section.getCoV();
     }
 
     @Override
     protected boolean isWithinThreshold(double value) {
-        return value < STEADY_STATE_COV_THRESHOLD;
+        return value > STEADY_STATE_COV_THRESHOLD;
     }
 
     @Override
@@ -132,16 +132,16 @@ public class CoV extends GenericTest implements Initializable {
 
     @Override
     public Scene getCharterScene() {
-        return charter.drawGraph("Run CoV", "Per run", "F-Value", "Threshold", this.job.getCvThreshold(), new Charter.ChartData("CV over Job", covData));
+        return charter.drawGraph("CoV", "Section ID", "CV-Value", "Threshold", this.job.getCvThreshold(), new Charter.ChartData("calculated CV", covData));
     }
 
     public void drawCoV() {
-        charter.drawGraph("Run CoV", "Per run", "F-Value", "Threshold", this.job.getCvThreshold(), new Charter.ChartData("CV over Job", covData));
+        charter.drawGraph("CoV", "Section ID", "CV-Value", "Threshold", this.job.getCvThreshold(), new Charter.ChartData("calculated CV", covData));
         charter.openWindow();
     }
 
     @Override
-    public TableView<Run> getTable() {
+    public TableView<Section> getTable() {
         return covTable;
     }
 }

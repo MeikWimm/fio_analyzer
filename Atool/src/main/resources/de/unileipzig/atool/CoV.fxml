@@ -17,7 +17,7 @@
          <children>
             <TableView id="covTable" fx:id="covTable" prefHeight="480.0" prefWidth="1000.0">
               <columns>
-                <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="63.0" text="Run" />
+                <TableColumn id="runIDColumn" fx:id="runIDColumn" prefWidth="63.0" text="Section" />
                   <TableColumn id="startTimeColumn" fx:id="startTimeColumn" prefWidth="85.0" text="Start time" />
                   <TableColumn id="averageSpeedColumn" fx:id="averageSpeedColumn" prefWidth="173.0" text="Average Speed" />
                   <TableColumn id="compareToRunColumn" fx:id="compareToRunColumn" prefWidth="190.0" text="Group" />
@@ -36,8 +36,6 @@
             <Label id="steadyStateLabel" fx:id="steadyStateLabel" layoutX="171.0" layoutY="15.0" prefHeight="17.0" prefWidth="163.0" text="_" />
             <Button id="showCoVGraphButton" fx:id="showCoVGraphButton" disable="true" layoutX="219.0" layoutY="69.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="167.0" text="Show windowed CV" visible="false" />
             <Button id="showCoVWindowedGraphButton" fx:id="showCoVWindowedGraphButton" layoutX="14.0" layoutY="69.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="167.0" text="Show CV Graph" />
-            <Label layoutX="14.0" layoutY="37.0" prefHeight="17.0" prefWidth="146.0" text="Steady state Windowed CV:" />
-            <Label id="steadyStateLabelWindowed" fx:id="steadyStateLabelWindowed" layoutX="171.0" layoutY="37.0" prefHeight="17.0" prefWidth="163.0" text="_" />
          </children>
       </Pane>
    </bottom>

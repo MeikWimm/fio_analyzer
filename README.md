@@ -22,7 +22,7 @@ Ein Analysewerkzeug für `fio`-Benchmark-Logs mit grafischer Oberfläche und sta
 - mvn package
 
 # Anwendung starten
-- mvn exec:exec@run-javafx (alternativ:)
+- mvn exec:exec@section-javafx (alternativ:)
 - java --module-path ./lib --add-modules javafx.controls,javafx.fxml -jar ./Atool-1.0-SNAPSHOT.jar
     - diesen Command im /target Verzeichnis ausführen
 
@@ -68,11 +68,11 @@ Diese Dokumentation beschreibt die verfügbaren Einstellungen und deren Bedeutun
 ## Run-Einstellungen
 
 ### Use sequential Run (otherwise adjacent)
-- **HINWEIS**: für Atool v0.2.1 (sowie die vorherigen Versionen) ist das Labeling vertauscht! ->  "Use adjacent run (otherwise sequential)"
+- **HINWEIS**: für Atool v0.2.1 (sowie die vorherigen Versionen) ist das Labeling vertauscht! ->  "Use adjacent section (otherwise sequential)"
 - **Beschreibung**: Aktiviert die Verwendung von benachbarten Durchläufen, anstelle einer sequenziellen Verarbeitung.
 - **Standardwert**: Deaktiviert.
 
-### Skip runs
+### Skip sections
 - **Beschreibung**: Anzahl der Durchläufe, die übersprungen werden sollen.
 - **Standardwert**: 0.
 
@@ -80,7 +80,7 @@ Diese Dokumentation beschreibt die verfügbaren Einstellungen und deren Bedeutun
 - **Beschreibung**: Aktiviert die Bonferroni-Korrektur zur statistischen Analyse.
 - **Standardwert**: Deaktiviert.
 
-### Required runs for steady state
+### Required sections for steady state
 - **Beschreibung**: Mindestanzahl aufeinanderfolgender Runs, die erforderlich sind, um einen stabilen Zustand festzulegen.
 - **Standardwert**: 5.
 - **Maximal Wert**: 10.

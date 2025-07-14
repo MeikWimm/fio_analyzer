@@ -30,26 +30,26 @@ public class ConInt extends GenericTest implements Initializable {
     @FXML private Label labelHeader;
     @FXML private Button drawConIntDiffButton;
     @FXML private Button drawWindowedRCIWButton;
-    @FXML private TableView<Run> conIntTable;
-    @FXML private TableColumn<Run, Integer> runsColumn;
-    @FXML private TableColumn<Run, Double> averageSpeedColumn;
-    @FXML private TableColumn<Run, Double> intervalFromColumn;
-    @FXML private TableColumn<Run, Double> intervalToColumn;
-    @FXML private TableColumn<Run, Double> plusMinusValueColumn;
-    @FXML private TableColumn<Run, Double> standardDeviationColumn;
-    @FXML private TableColumn<Run, String> compareToRunColumn;
-    @FXML private TableColumn<Run, Boolean> overlappingColumn;
-    @FXML private TableColumn<Run, Boolean> hypothesisColumn;
+    @FXML private TableView<Section> conIntTable;
+    @FXML private TableColumn<Section, Integer> runsColumn;
+    @FXML private TableColumn<Section, Double> averageSpeedColumn;
+    @FXML private TableColumn<Section, Double> intervalFromColumn;
+    @FXML private TableColumn<Section, Double> intervalToColumn;
+    @FXML private TableColumn<Section, Double> plusMinusValueColumn;
+    @FXML private TableColumn<Section, Double> standardDeviationColumn;
+    @FXML private TableColumn<Section, String> compareToRunColumn;
+    @FXML private TableColumn<Section, Boolean> overlappingColumn;
+    @FXML private TableColumn<Section, Boolean> hypothesisColumn;
     @FXML private Label steadyStateLabel;
 
 
     public ConInt(Job job,Settings settings) {
-        super(job, settings.getConIntSkipRunsCounter(), settings.isConIntUseAdjacentRun(), 2, job.getAlpha(), settings.isBonferroniConIntSelected(), settings.getRequiredRunsForSteadyState());
+        super(job, settings.getConIntSkipRunsCounter(), false, 2, job.getAlpha(), settings.isBonferroniConIntSelected(), settings.getRequiredRunsForSteadyState());
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        runsColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
+        runsColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
         averageSpeedColumn.setText("Average Speed" + Settings.getConversion());
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         averageSpeedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
@@ -76,44 +76,44 @@ public class ConInt extends GenericTest implements Initializable {
     }
 
     @Override
-    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
+    protected void calculateTest(List<List<Section>> groups, List<Section> resultSections) {
         NormalDistribution normDis = new NormalDistribution();
         double dataSize = this.job.getRunDataSize();
 
         /*
         Calculate first the intervals
          */
-        for (Run run : this.job.getRuns()) {
-            double averageSpeed = run.getAverageSpeed();
+        for (Section section : this.job.getRuns()) {
+            double averageSpeed = section.getAverageSpeed();
             double alpha = job.getAlpha();
-            double std = run.getStandardDeviation();
+            double std = section.getStandardDeviation();
 
             double c1 = averageSpeed - (normDis.inverseCumulativeProbability(1.0 - alpha / 2.0) * (std / Math.sqrt(dataSize)));
-            run.setIntervalFrom(c1);
+            section.setIntervalFrom(c1);
 
             double c2 = averageSpeed + (normDis.inverseCumulativeProbability(1.0 - alpha / 2.0) * (std / Math.sqrt(dataSize)));
-            run.setIntervalTo(c2);
+            section.setIntervalTo(c2);
         }
 
         /*
         Look for overlapping intervals
          */
-        for (List<Run> runs : groups) {
-            Run run1 = runs.get(0);
-            Run run2 = runs.get(1);
-            double a1 = run1.getIntervalFrom();
-            double a2 = run2.getIntervalFrom();
-            double b1 = run1.getIntervalTo();
-            double b2 = run2.getIntervalTo();
-            run1.setOverlap(doConfidenceIntervalsOverlap(a1, b1, a2, b2));
+        for (List<Section> sections : groups) {
+            Section section1 = sections.get(0);
+            Section section2 = sections.get(1);
+            double a1 = section1.getIntervalFrom();
+            double a2 = section2.getIntervalFrom();
+            double b1 = section1.getIntervalTo();
+            double b2 = section2.getIntervalTo();
+            section1.setOverlap(doConfidenceIntervalsOverlap(a1, b1, a2, b2));
 
-            double averageSpeed1 = run1.getAverageSpeed();
-            double averageSpeed2 = run2.getAverageSpeed();
+            double averageSpeed1 = section1.getAverageSpeed();
+            double averageSpeed2 = section2.getAverageSpeed();
             double alpha = job.getAlpha();
-            double std1 = run1.getStandardDeviation();
-            double dataSize1 = run1.getData().size();
-            double std2 = run2.getStandardDeviation();
-            double dataSize2 = run1.getData().size();
+            double std1 = section1.getStandardDeviation();
+            double dataSize1 = section1.getData().size();
+            double std2 = section2.getStandardDeviation();
+            double dataSize2 = section1.getData().size();
             /*
             Calculate new interval
              */
@@ -123,8 +123,8 @@ public class ConInt extends GenericTest implements Initializable {
             double c1 = x - y;
             double c2 = x + y;
 
-            run1.setNullhypothesis(doesIntervalContainZero(c1, c2));
-            resultRuns.add(run1);
+            section1.setNullhypothesis(doesIntervalContainZero(c1, c2));
+            resultSections.add(section1);
         }
     }
 
@@ -147,7 +147,7 @@ public class ConInt extends GenericTest implements Initializable {
     }
 
     @Override
-    protected double extractValue(Run run) {
+    protected double extractValue(Section section) {
         //NO-OP
         return 0;
     }
@@ -180,8 +180,8 @@ public class ConInt extends GenericTest implements Initializable {
 
     @Override
     protected void setLabeling() {
-        Run run = this.getSteadyStateRun();
-        if(run == null){
+        Section section = getSteadyStateRun();
+        if(section == null){
             steadyStateLabel.setText("No steady state found");
             return;
         }
@@ -191,11 +191,11 @@ public class ConInt extends GenericTest implements Initializable {
 
     @Override
     public double getCriticalValue() {
-        return Run.UNDEFINED_DOUBLE_VALUE;
+        return Section.UNDEFINED_DOUBLE_VALUE;
     }
 
     @Override
-    public TableView<Run> getTable() {
+    public TableView<Section> getTable() {
         return conIntTable;
     }
 }

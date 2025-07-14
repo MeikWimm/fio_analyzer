@@ -4,6 +4,8 @@
  */
 package de.unileipzig.atool;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.XYChart;
@@ -13,7 +15,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -42,7 +43,7 @@ public class Job {
     private final List<DataPoint> rawData;
     private List<DataPoint> data;
     private List<DataPoint> convertedData;
-    private List<Run> runs;
+    private List<Section> sections;
     private File file;
     private BasicFileAttributes attr;
     private int runsCounter = DEFAULT_RUN_COUNT;
@@ -50,7 +51,6 @@ public class Job {
     private int runDataSize;
     private double conversion;
     private double averageSpeed;
-    private double alpha = DEFAULT_ALPHA;
     private double cvThreshold = DEFAULT_CV_THRESHOLD;
     private double calculatedF;
     private double standardDeviation;
@@ -58,6 +58,7 @@ public class Job {
     private double MSE;
     private int skipSize;
 
+    private final DoubleProperty alphaProperty = new SimpleDoubleProperty();
 
     public Job(List<DataPoint> data) {
         this.freq = new TreeMap<>();
@@ -66,16 +67,18 @@ public class Job {
         this.rawData = new ArrayList<>(data);
         this.convertedData = new ArrayList<>();
         this.chartData = new ArrayList<>();
+        this.alphaProperty.set(DEFAULT_ALPHA);
         updateRunsData();
         COUNTER++;
     }
 
     public Job(Job other) {
         this.file = other.file;
-        this.runs = new ArrayList<>();
-        for (Run run : other.runs) {
-            this.runs.add(new Run(run));
+        this.sections = new ArrayList<>();
+        for (Section section : other.sections) {
+            this.sections.add(new Section(section));
         }
+        this.alphaProperty.set(other.alphaProperty.get());
         this.data = other.data;
         this.rawData = other.rawData;
         this.speedSeries = other.speedSeries;
@@ -87,7 +90,6 @@ public class Job {
         this.time = other.time;
         this.averageSpeed = other.averageSpeed;
         this.attr = other.attr;
-        this.alpha = other.alpha;
         this.calculatedF = other.calculatedF;
         this.standardDeviation = other.standardDeviation;
         this.MSE = other.MSE;
@@ -96,82 +98,70 @@ public class Job {
         this.chartData = other.chartData;
         this.skipSize = other.skipSize;
         this.runDataSize = other.runDataSize;
-        this.updateRunsData();
     }
 
-    public static List<List<Run>> setupGroups(Job job, boolean skipGroups, int groupSize) {
+    public static List<List<Section>> setupGroups(Job job, boolean skipGroups, int groupSize) {
         if (groupSize < 2) {
             return new ArrayList<>();
         }
 
-        List<List<Run>> groups = new ArrayList<>();
-        List<Run> runs = job.getRuns();
-        int runsCounter = runs.size();
+        List<List<Section>> groups = new ArrayList<>();
+        List<Section> sections = job.getRuns();
+        int runsCounter = sections.size();
+        int groupCount = runsCounter / 2;
+        groupCount = groupCount + (groupCount - 1);
+        int runIndex = 0;
 
-        if (skipGroups) {
-            // create Groups like Run 1 - Run 2, Run 3 - Run 4, Run 5 - Run 6,...
-            int groupCount = runsCounter / groupSize;
-            int runIndex = 0;
-
-            for (int i = 0; i < groupCount; i++) {
-                List<Run> group = new ArrayList<>();
-                for (int j = 0; j < groupSize; j++) {
-                    group.add(runs.get(runIndex));
-                    runIndex++;
+        for (int i = 0; i < groupCount; i++) {
+            List<Section> group = new ArrayList<>();
+            for (int j = 0; j < groupSize; j++) {
+                if (runIndex + j < sections.size()) {
+                    group.add(sections.get(runIndex + j));
                 }
-                group.getFirst().setGroup(String.format("Run %d - Run %d", group.getFirst().getRunID(), group.getLast().getRunID()));
+            }
+            if (group.size() == groupSize) {
+                group.getFirst().setGroup(String.format("Section %d - Section %d", group.getFirst().getID(), group.getLast().getID()));
 
                 groups.add(group);
             }
-        } else {
-
-            int groupCount = runsCounter / 2;
-            groupCount = groupCount + (groupCount - 1);
-            int runIndex = 0;
-
-            for (int i = 0; i < groupCount; i++) {
-                List<Run> group = new ArrayList<>();
-                for (int j = 0; j < groupSize; j++) {
-                    if (runIndex + j < runs.size()) {
-                        group.add(runs.get(runIndex + j));
-                    }
-                }
-                if (group.size() == groupSize) {
-                    group.getFirst().setGroup(String.format("Run %d - Run %d", group.getFirst().getRunID(), group.getLast().getRunID()));
-
-                    groups.add(group);
-                }
-                runIndex++;
-            }
+            runIndex++;
         }
+
         return groups;
     }
 
     public void updateRunsData() {
         List<DataPoint> data = rawData;
-        runs = new ArrayList<>();
+        sections = new ArrayList<>();
         convertedData = new ArrayList<>();
         if (runsCounter <= 0 || runsCounter > 1000) {
             runsCounter = DEFAULT_RUN_COUNT;
         }
 
-        this.conversion = Settings.CONVERSION_VALUE;
-        this.runDataSize = (data.size() / runsCounter);
+        int windowSize = Settings.WINDOW_SIZE;
+        int stepSize = Settings.WINDOW_STEP_SIZE; // Sliding Step
 
-        /*
-        Split job into runs depending on run_size
-        */
-        ArrayList<DataPoint> run_data;
-        int i = 0;
-        for (int j = 1; j <= runsCounter; j++) {
-            run_data = new ArrayList<>();
-            for (; i < this.runDataSize * j; i++) {
-                DataPoint dp = new DataPoint(data.get(i).data / Settings.CONVERSION_VALUE, rawData.get(i).time);
+        this.conversion = Settings.CONVERSION_VALUE;
+        if(data.size() < windowSize){
+            Logging.log(Level.WARNING, "Job", String.format("Data size %d is less than window size %d", data.size(), windowSize));
+            return;
+        }
+        this.runDataSize = (data.size() / windowSize);
+
+
+        int runId = 1;
+
+        for (int i = 0; i + windowSize <= data.size(); i += stepSize) {
+            List<DataPoint> run_data = new ArrayList<>();
+
+            for (int j = i; j < i + windowSize; j++) {
+                DataPoint dp = new DataPoint(data.get(j).data / Settings.CONVERSION_VALUE, rawData.get(j).time);
                 run_data.add(dp);
                 convertedData.add(dp);
             }
-            Run run = new Run(j, run_data);
-            runs.add(run);
+
+            Section section = new Section(runId++, run_data);
+            sections.add(section);
         }
     }
 
@@ -188,7 +178,7 @@ public class Job {
         }
 
         this.data.subList(0, skipSize).clear();
-        this.runs.subList(0, skipRuns).clear();
+        this.sections.subList(0, skipRuns).clear();
         runsCounter = runsCounter - skipRuns;
     }
 
@@ -258,17 +248,7 @@ public class Job {
     }
 
     public double getAlpha() {
-        return this.alpha;
-    }
-
-    void setAlpha(Double alpha) {
-        if(alpha < MIN_ALPHA || alpha > MAX_ALPHA){
-            Logging.log(Level.WARNING, "Job", String.format("Alpha must be between %f and %f", MIN_ALPHA, MAX_ALPHA));
-            Logging.log(Level.WARNING, "Job", String.format("Alpha set to default value %f", DEFAULT_ALPHA));
-            this.alpha = DEFAULT_ALPHA;
-            return;
-        }
-        this.alpha = alpha;
+        return this.alphaProperty.get();
     }
 
     public double getCvThreshold() {
@@ -309,8 +289,8 @@ public class Job {
         this.averageSpeed = average_speed;
     }
 
-    public ObservableList<Run> getRuns() {
-        return FXCollections.observableArrayList(this.runs);
+    public ObservableList<Section> getRuns() {
+        return FXCollections.observableArrayList(this.sections);
     }
 
     public double getStandardDeviation() {
@@ -355,6 +335,7 @@ public class Job {
 
     @Override
     public String toString() {
-        return String.format("Job ID: %d | Average Speed %s | Runs: %d | Alpha: %f | File: %s", this.ID, new DecimalFormat("#.##").format(this.averageSpeed), this.runsCounter, this.alpha, this.file);
+        return String.format("Job ID: %d | Average Speed %s | Time in sec.: %f | Alpha: %f | File: %s", this.ID, new DecimalFormat("#.##").format(this.averageSpeed), this.getTimeInSec(), getAlpha(), this.file);
     }
+    public DoubleProperty alphaProperty() { return alphaProperty; }
 }

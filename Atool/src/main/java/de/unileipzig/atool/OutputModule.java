@@ -97,7 +97,9 @@ public class OutputModule {
         stringBuilder.append("Averaged Speed: ").append(job.getAverageSpeed()).append('\n');
         stringBuilder.append("Unit used: ").append(Settings.getConversion()).append("\n");
         stringBuilder.append("Standard Deviation: ").append(job.getStandardDeviation()).append('\n');
-        stringBuilder.append("Runs: ").append(job.getRuns().size()).append('\n');
+        stringBuilder.append("Job time (in sec.): ").append(job.getTimeInSec()).append('\n');
+        stringBuilder.append("Window size in millisecond: ").append(Settings.WINDOW_SIZE).append('\n');
+        stringBuilder.append("Window step size in millisecond: ").append(Settings.WINDOW_STEP_SIZE).append('\n');
         stringBuilder.append("Alpha: ").append(job.getAlpha()).append('\n');
         stringBuilder.append("\n");
         boolean isPathCreated = false;
@@ -142,7 +144,7 @@ public class OutputModule {
     private void savePostHocTestValues(PostHocTest test) {
         stringBuilder.append("[").append(test.getTestName()).append("]").append("\n");
         double criticalValue = test.getCriticalValue();
-        if(criticalValue == Run.UNDEFINED_DOUBLE_VALUE){
+        if(criticalValue == Section.UNDEFINED_DOUBLE_VALUE){
             stringBuilder.append("Critical Value: ").append("UNDEFINED").append("\n").append("\n");
         } else {
             stringBuilder.append("Critical Value: ").append(criticalValue).append("\n").append("\n");
@@ -152,7 +154,7 @@ public class OutputModule {
     private void saveTestValues(GenericTest test) {
         stringBuilder.append("[").append(test.getTestName()).append("]").append("\n");
         double criticalValue = test.getCriticalValue();
-        if(criticalValue == Run.UNDEFINED_DOUBLE_VALUE){
+        if(criticalValue == Section.UNDEFINED_DOUBLE_VALUE){
             stringBuilder.append("Critical Value: ").append("UNDEFINED").append("\n").append("\n");
         } else {
             stringBuilder.append("Critical Value: ").append(criticalValue).append("\n").append("\n");

@@ -31,7 +31,7 @@ import java.util.logging.Level;
  */
 public class
 InputModule {
-    public static final int MIN_POSSIBLE_DATA_SIZE = 500;
+    public static final int MIN_POSSIBLE_DATA_SIZE = 60000;
 
 
     public static File SELECTED_DIRECTORY;
@@ -125,6 +125,7 @@ InputModule {
                 } else {
                     if(this.data.size() < MIN_POSSIBLE_DATA_SIZE){
                         Logging.log(Level.WARNING, className,String.format("file -> %s is to small!", file.getAbsolutePath()));
+                        Logging.log(Level.WARNING, className,String.format("Log should be at least be a minute ling!", file.getAbsolutePath()));
                     } else {
                         Logging.log(Level.INFO, "Input Module", "Preparing Job Data: " + file);
                         Job job = new Job(this.data);
@@ -217,7 +218,7 @@ InputModule {
 
 
             this.time = old_time;
-            this.averageSpeed = sum_speed / data.size();
+            this.averageSpeed = sum_speed / data.size(); // milli sec to sec
             this.standardDeviation = MathUtils.calculateDeviation(data, this.averageSpeed);
             this.freq = freq;
             this.data = data;

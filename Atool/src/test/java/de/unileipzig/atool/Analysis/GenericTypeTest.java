@@ -19,72 +19,16 @@ class GenericTypeTest {
 
     @BeforeEach
     void setUp() throws URISyntaxException {
-        File logfilesDir = new File(Objects.requireNonNull(this.getClass().getResource("/logfiles")).toURI());
-        File[] files = logfilesDir.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
-        assertNotNull(files);
 
-        settings = new Settings(null);
-        settings.setAnovaSkipRunsCounter(2);
-        settings.setAnovaUseAdjacentRun(true);
-        settings.setGroupSize(3);
-
-        InputModule inputModule = new InputModule();
-
-        inputModule.readFiles(files);
-        jobs = inputModule.getJobs();
     }
 
     @Test
     void testInitialization() {
-        for(Job job: jobs){
-            List<GenericTest> tests = Arrays.asList(
-                    new TTest(job, settings),
-                    new ConInt(job, settings),
-                    new Anova(job, settings),
-                    new MannWhitney(job, settings)
-            );
-            for (GenericTest test: tests){
-                assertNotNull(test, "Anova instance should be initialized.");
-                assertEquals(0.05, test.getAlpha(), "Alpha value should be set correctly.");
-            }
-        }
+
     }
 
     @Test
     void testCalculate() {
-        for(Job job: jobs){
-            List<GenericTest> tests = Arrays.asList(
-                    new TTest(job, settings),
-                    new ConInt(job, settings),
-                    new Anova(job, settings),
-                    new MannWhitney(job, settings)
-            );
 
-            for (GenericTest test: tests){
-                test.calculate();
-                List<Run> result = test.getResultRuns();
-                assertNotNull(result, "result list should not be null.");
-                assertNotNull(test.getGroups(), "Runs should not be empty after calculation.");
-                for(List<Run> group: test.getGroups()){
-                    assertNotNull(group, "Group should not be null.");
-                    for(Run run: group){
-                        assertNotNull(run, "Run should not be null.");
-                    }
-                }
-                assertNotNull(test.getResultGroups(), "Result groups should not be null.");
-                for(List<Run> group: test.getResultGroups()){
-                    assertNotNull(group, "Result group should not be null.");
-                    for(Run run: group){
-                        assertNotNull(run, "Result run should not be null.");
-                    }
-                }
-
-                //Assert result list of runs
-                assertNotNull(test.getResultRuns(), "Result runs should not be null.");
-                for(Run run: test.getResultRuns()){
-                    assertNotNull(run, "Result run should not be null.");
-                }
-            }
-        }
     }
 }

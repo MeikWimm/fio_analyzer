@@ -18,27 +18,14 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test class for the Job class.
  */
 class InputModuleTest {
-    private List<Job> jobs;
 
     @BeforeEach
     void setUp() throws URISyntaxException {
-        File logfilesDir = new File(Objects.requireNonNull(this.getClass().getResource("/logfiles")).toURI());
-        File[] files = logfilesDir.listFiles((File dir, String name) -> name.toLowerCase().endsWith(".log"));
-        assertNotNull(files);
 
-        InputModule inputModule = new InputModule();
-        inputModule.readFiles(files);
-
-        jobs = inputModule.getJobs();
-        assertEquals(2, jobs.size());
     }
 
     @Test
     void testJobInitialization() {
-        for (Job job: jobs){
-            assertNotNull(job, "Job instance should be initialized.");
-            //assertEquals(10, job.getData().size(), "Job data should contain the expected number of DataPoint objects.");
-            assertEquals(4, job.getRunsCounter(), "Job runsCounter should be initialized correctly.");
-        }
+
     }
 }

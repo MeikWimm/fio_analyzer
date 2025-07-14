@@ -15,7 +15,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import org.apache.commons.math3.distribution.TDistribution;
+import org.apache.commons.math3.stat.inference.TTest;
 
 import java.net.URL;
 import java.util.*;
@@ -24,25 +24,25 @@ import java.util.*;
 /**
  * @author meni1999
  */
-public class TTest extends GenericTest implements Initializable {
+public class AtoolTTest extends GenericTest implements Initializable {
     @FXML private Label labelHeader;
     @FXML private Label zCritLabel;
     @FXML private Label steadyStateLabel;
 
     @FXML private Button drawTTest;
 
-    @FXML private TableView<Run> TTable;
-    @FXML private TableColumn<Run, Double> averageSpeedColumn;
-    @FXML private TableColumn<Run, Integer> runIDColumn;
-    @FXML private TableColumn<Run, Integer> compareToRunColumn;
-    @FXML private TableColumn<Run, Double> TColumn;
-    @FXML private TableColumn<Run, Boolean> hypothesisColumn;
+    @FXML private TableView<Section> TTable;
+    @FXML private TableColumn<Section, Double> averageSpeedColumn;
+    @FXML private TableColumn<Section, Integer> runIDColumn;
+    @FXML private TableColumn<Section, Integer> compareToRunColumn;
+    @FXML private TableColumn<Section, Double> TColumn;
+    @FXML private TableColumn<Section, Boolean> hypothesisColumn;
 
     private double tCrit;
     private final List<XYChart.Data<Number, Number>> tData;
 
-    public TTest(Job job, Settings settings) {
-        super(job, settings.getTTestSkipRunsCounter(), settings.isTTestUseAdjacentRun(), 2, job.getAlpha() ,settings.isBonferroniTTestSelected(), settings.getRequiredRunsForSteadyState());
+    public AtoolTTest(Job job, Settings settings) {
+        super(job, settings.getTTestSkipRunsCounter(), false, 2, job.getAlpha() ,settings.isBonferroniTTestSelected(), settings.getRequiredRunsForSteadyState());
         this.tData = new ArrayList<>();
     }
 
@@ -52,9 +52,9 @@ public class TTest extends GenericTest implements Initializable {
         averageSpeedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
         averageSpeedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
-        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("RunID"));
+        runIDColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
         compareToRunColumn.setCellValueFactory(new PropertyValueFactory<>("Group"));
-        TColumn.setCellValueFactory(new PropertyValueFactory<>("T"));
+        TColumn.setCellValueFactory(new PropertyValueFactory<>("P"));
         TColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
 
         hypothesisColumn.setCellValueFactory(new PropertyValueFactory<>("Nullhypothesis"));
@@ -87,67 +87,41 @@ public class TTest extends GenericTest implements Initializable {
     }
 
     @Override
-    protected void calculateTest(List<List<Run>> groups, List<Run> resultRuns) {
-        TDistribution t = new TDistribution(job.getData().size() * 2 - 2);
-        this.tCrit = t.inverseCumulativeProbability(1 - this.alpha / 2.0);
+    protected void calculateTest(List<List<Section>> groups, List<Section> resultSections) {
+        TTest tTest = new TTest();
+
+        for (List<Section> group : groups) {
+            Section section1 = group.getFirst();
+            Section section2 = group.get(1);
+            double[] data1 = section1.getData().stream().mapToDouble(dp -> dp.data).toArray();
+            double[] data2 = section2.getData().stream().mapToDouble(dp -> dp.data).toArray();
 
 
-        for (int i = 0; i < job.getRuns().size() - 1; i++) {
-            Run run = job.getRuns().get(i);
-            Run run2 = job.getRuns().get(i + 1);
-
-            double sse = calculateSSE(run, run2);
-            double runVariance1 = calculateVariance(run, sse);
-            double runVariance2 = calculateVariance(run2, sse);
-            double runSize = this.job.getData().size();
-
-            double nominator = (run.getAverageSpeed() - run2.getAverageSpeed());
-            double denominator = Math.sqrt((runVariance1 / runSize) + (runVariance2 / runSize));
-            double tVal = Math.abs(nominator / denominator);
-            run.setT(tVal);
-
-            tData.add(new XYChart.Data<>(run.getID(), tVal));
-            resultRuns.add(run);
+            double pValue = tTest.tTest(data1, data2);
+            section1.setP(pValue);
+            tData.add(new XYChart.Data<>(group.getFirst().getID(), pValue));
+            resultSections.add(group.getFirst());
         }
     }
 
     @Override
-    protected double extractValue(Run run) {
-        return run.getT();
+    protected double extractValue(Section section) {
+        return section.getP();
     }
 
     @Override
     protected boolean isWithinThreshold(double value) {
-        return value < this.tCrit;
+        return value < getAlpha();
     }
 
     @Override
     public Scene getCharterScene() {
-        return charter.drawGraph("T-Test", "Run", "T-Value", "critical T", tCrit, new Charter.ChartData("calculated T", tData));
+        return charter.drawGraph("T-Test", "Section ID", "p-Value", "Alpha level", getAlpha(), new Charter.ChartData("calculated P", tData));
     }
 
     @Override
     public double getCriticalValue() {
         return this.tCrit;
-    }
-
-    private double calculateVariance(Run run, double sse) {
-        return (1.0 / (run.getData().size() - 1.0)) * sse;
-    }
-
-    private double calculateSSE(Run run1, Run run2) {
-        double sse = 0;
-        double averageSpeed = (run1.getAverageSpeed() + run2.getAverageSpeed()) / 2.0;
-
-        for (DataPoint dp : run1.getData()) {
-            sse += (Math.pow((dp.data - averageSpeed), 2));
-        }
-
-        for (DataPoint dp : run2.getData()) {
-            sse += (Math.pow((dp.data - averageSpeed), 2));
-        }
-
-        return sse;
     }
 
     @Override
@@ -156,12 +130,12 @@ public class TTest extends GenericTest implements Initializable {
     }
 
     private void drawTGraph() {
-        charter.drawGraph("T-Test", "Run", "T-Value", "critical T", tCrit, new Charter.ChartData("calculated T", tData));
+        charter.drawGraph("T-Test", "Section ID", "p-Value", "Alpha level", getAlpha(), new Charter.ChartData("calculated P", tData));
         charter.openWindow();
     }
 
     @Override
-    public TableView<Run> getTable() {
+    public TableView<Section> getTable() {
         return TTable;
     }
 }

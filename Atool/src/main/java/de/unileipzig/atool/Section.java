@@ -4,8 +4,6 @@
  */
 package de.unileipzig.atool;
 
-import de.unileipzig.atool.Analysis.GenericTest;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,11 +11,11 @@ import java.util.List;
  *
  * @author meni1999
  */
-public class Run /*Section*/ {
+public class Section /*Section*/ {
     public static Double UNDEFINED_DOUBLE_VALUE = Double.MIN_VALUE;
     public static Integer UNDEFINED_INTEGER = Integer.MIN_VALUE;
     private List<DataPoint> data = new ArrayList<>();
-    private final int runID;
+    private final int sectionID;
     private double intervalFrom = UNDEFINED_DOUBLE_VALUE;
     private double intervalTo  = UNDEFINED_DOUBLE_VALUE;
     private double averageSpeed = UNDEFINED_DOUBLE_VALUE;
@@ -36,23 +34,22 @@ public class Run /*Section*/ {
     private double endTime = UNDEFINED_DOUBLE_VALUE;
     private double duration = UNDEFINED_DOUBLE_VALUE;
     private double p = UNDEFINED_DOUBLE_VALUE;
+    private double mse = UNDEFINED_DOUBLE_VALUE;
     private int groupID = UNDEFINED_INTEGER;
+    private double overallMean = UNDEFINED_DOUBLE_VALUE;
     private String group = "UNDEFINED";
 
 
-    public Run(final int runNumber, List<DataPoint> runData){
-        this.runID = runNumber;
+    public Section(final int runNumber, List<DataPoint> runData){
+        this.sectionID = runNumber;
         this.data = runData;
         calculateRun();
     }
 
     // Copy constructor
-    public Run(Run other) {
-        this.runID = other.getRunID();
-        this.data = new ArrayList<>();
-        for (DataPoint dataPoint: other.getData()){
-            this.data.add(new DataPoint(dataPoint));
-        }
+    public Section(Section other) {
+        this.sectionID = other.getID();
+        this.data = other.getData();
         this.startTime = other.getStartTime();
         this.endTime = other.getEndTime();
         this.duration = other.getDuration();
@@ -72,6 +69,8 @@ public class Run /*Section*/ {
         this.qHSD = other.getQHSD();
         this.p = other.getP();
         this.group = other.group;
+        this.mse = other.getMSE();
+        this.overallMean = other.getOverallMean();
         this.isOverlapping = other.getOverlap();
     }
 
@@ -98,11 +97,7 @@ public class Run /*Section*/ {
     public List<DataPoint> getData(){      
         return data;
     }
-    
-    public int getRunID(){
-        return runID;
-    }
-    
+
     public double getStandardDeviation(){
         return this.standardDeviation;
     }
@@ -204,7 +199,7 @@ public class Run /*Section*/ {
     }
     
     public int getID(){
-        return runID;
+        return sectionID;
     }
     
     public void setNullhypothesis(boolean isNullhypothesis){
@@ -257,5 +252,21 @@ public class Run /*Section*/ {
 
     public double getQHSD() {
         return qHSD;
+    }
+
+    public void setMSE(double mse) {
+        this.mse = mse;
+    }
+
+    public double getMSE() {
+        return mse;
+    }
+
+    public void setOverallMean(double overallMean) {
+        this.overallMean = overallMean;
+    }
+
+    public double getOverallMean() {
+        return overallMean;
     }
 }

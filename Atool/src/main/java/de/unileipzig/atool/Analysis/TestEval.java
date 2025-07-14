@@ -1,6 +1,6 @@
 package de.unileipzig.atool.Analysis;
 
-import de.unileipzig.atool.Run;
+import de.unileipzig.atool.Section;
 
 public class TestEval{
     private final GenericTest test;
@@ -8,7 +8,6 @@ public class TestEval{
     private String testName;
     private String steadyStateRunString;
     private String time;
-    private String typeOfComparedRuns;
     private String skippedRunVal;
     private String bonferroniVal;
     private String comparedRunsVal;
@@ -35,20 +34,14 @@ public class TestEval{
     }
 
     private void preparePostHocItem() {
-        Run steadyStateRun = postHoctest.getSteadyStateRun();
+        Section steadyStateSection = postHoctest.getSteadyStateRun();
         testName = postHoctest.getTestName();
 
-        if(steadyStateRun != null){
-            steadyStateRunString = String.format("Run %s", steadyStateRun.getID());
-            time = String.format("%f - %f", steadyStateRun.getStartTime() / 1000.0, steadyStateRun.getEndTime() / 1000.0);
+        if(steadyStateSection != null){
+            steadyStateRunString = String.format("Section %s", steadyStateSection.getID());
+            time = String.format("%f", steadyStateSection.getStartTime() / 1000.0);
         } else {
-            steadyStateRunString = "No steady state run found";
-        }
-
-        if(test.isSkipGroup()){
-            typeOfComparedRuns = "sequential";
-        } else {
-            typeOfComparedRuns = "adjacent";
+            steadyStateRunString = "No steady state found";
         }
 
         if(test.isApplyBonferroni()){
@@ -61,20 +54,14 @@ public class TestEval{
     }
 
     private void prepareItem() {
-        Run steadyStateRun = test.getSteadyStateRun();
+        Section steadyStateSection = test.getSteadyStateRun();
         testName = test.getTestName();
 
-        if(steadyStateRun != null){
-            steadyStateRunString = String.format("Run %s", steadyStateRun.getID());
-            time = String.format("%f - %f", steadyStateRun.getStartTime() / 1000.0, steadyStateRun.getEndTime() / 1000.0);
+        if(steadyStateSection != null){
+            steadyStateRunString = String.format("Section %s", steadyStateSection.getID());
+            time = String.format("%f", steadyStateSection.getStartTime() / 1000.0);
         } else {
-            steadyStateRunString = "No steady state run found";
-        }
-
-        if(test.isSkipGroup()){
-            typeOfComparedRuns = "sequential";
-        } else {
-            typeOfComparedRuns = "adjacent";
+            steadyStateRunString = "No steady state found";
         }
 
         if(test.isApplyBonferroni()){
@@ -104,10 +91,6 @@ public class TestEval{
 
     public String getTime() {
         return time;
-    }
-
-    public String getTypeOfComparedRuns() {
-        return typeOfComparedRuns;
     }
 
     public String getSkippedRunVal() {

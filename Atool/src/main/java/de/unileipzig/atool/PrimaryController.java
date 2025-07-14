@@ -2,9 +2,12 @@ package de.unileipzig.atool;
 
 
 import de.unileipzig.atool.Analysis.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
@@ -169,8 +172,8 @@ public class PrimaryController implements Initializable {
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("TimeInSec"));
         lastModifiedColumn.setCellValueFactory(new PropertyValueFactory<>("FileLastModifiedDate"));
         fileCreatedColumn.setCellValueFactory(new PropertyValueFactory<>("FileCreationDate"));
-        alphaColumn.setCellValueFactory(new PropertyValueFactory<>("Alpha"));
         cvColumn.setCellValueFactory(new PropertyValueFactory<>("cvThreshold"));
+        alphaColumn.setCellValueFactory(cell -> cell.getValue().alphaProperty().asObject());
     }
 
     /**
@@ -195,9 +198,8 @@ public class PrimaryController implements Initializable {
                 String.format("Run count must be a value between %d and %d", Job.MIN_RUN_COUNT, Job.MAX_RUN_COUNT)
         ));
 
-        alphaColumn.setCellFactory(tc -> new Utils.ValidatedDoubleTableCell<>(
-                labelLoadInfo, Job.MIN_ALPHA, Job.MAX_ALPHA, Job.DEFAULT_ALPHA,
-                String.format("Alpha must be a value between %f and %f", Job.MIN_ALPHA, Job.MAX_ALPHA)
+        alphaColumn.setCellFactory(ComboBoxTableCell.forTableColumn(
+                FXCollections.observableArrayList(0.01, 0.05, 0.1)
         ));
 
         cvColumn.setCellFactory(tc -> new Utils.ValidatedDoubleTableCell<>(
@@ -265,10 +267,6 @@ public class PrimaryController implements Initializable {
     private void setupTableCellCommit() {
         runsCounterColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Integer> t) -> {
             t.getRowValue().setRunsCounter(t.getNewValue());
-        });
-
-        alphaColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {
-            t.getRowValue().setAlpha(t.getNewValue());
         });
 
         cvColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {
@@ -359,9 +357,9 @@ public class PrimaryController implements Initializable {
      */
     private void onActionCalcTTest(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        TTest tTest = new TTest(job, settings);
-        tTest.calculate();
-        tTest.openWindow();
+        AtoolTTest atoolTTest = new AtoolTTest(job, settings);
+        atoolTTest.calculate();
+        atoolTTest.openWindow();
     }
 
     /**
