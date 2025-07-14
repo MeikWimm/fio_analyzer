@@ -22,29 +22,35 @@ Ein Analysewerkzeug für `fio`-Benchmark-Logs mit grafischer Oberfläche und sta
 - mvn package
 
 # Anwendung starten
-- mvn exec:exec@section-javafx (alternativ:)
-- java --module-path ./lib --add-modules javafx.controls,javafx.fxml -jar ./Atool-1.0-SNAPSHOT.jar
+- `java --module-path ./lib --add-modules javafx.controls,javafx.fxml -jar ./Atool-1.0-SNAPSHOT.jar`
     - diesen Command im /target Verzeichnis ausführen
 
 ## Verwendung
 - Um mit dem fio-Tool Logs zu erzeugen, wird der Parameter `--write_bw_log=[logname]` verwendet.
+  - **DABEI SOLLTE EIN FIO RUN MINDESTENS EINE MINUTE LAUFEN.**
 - Wähle das Verzeichnis aus, in dem sich die `fio`-Logdateien befinden.
 - In der Tabelle können folgende Werte angepasst werden:
-  - **Runs** (zwischen `1` und `1000`)
-  - **Alpha** (zwischen `0.0001` und `0.9999`)
-  - **CV Threshold** (zwischen `0.1` und `0.3`)
+  - **Alpha** (Auswählbar zwischen `0.1`, `0.05` und `0.01`)
+  - **CV Threshold** (zwischen `0.05` und `0.5`)
     → Einfach auf die jeweilige Zahl klicken und bearbeiten und mit [Enter] bestätigen.
 - Sobald das Verzeichnis gesetzt ist, ist es möglich mit dem **Refresh-MenuItem** in der Menüleiste unter `File` neue Logs zu laden, wenn neue Dateien im Verzeichnis auftauchen.
 - Mit **Rechtsklick** auf die Items in der Tabelle können statistische Tests ausgewählt werden.
 ---
 
 # Anwendungsbeispiel für das Tool
-1. **Job mit fio ausführen:**`./fio --rw=write --loop=10 --write_bw_log=mytest --name=test --size=1024m`
+1. **Job mit fio ausführen mittels loop:**  
+   `./fio --rw=write --loop=10 --write_bw_log=mytest --name=test --size=1024m`  
+   **Alternativ (via runtime):**  
+   `./fio --rw=write --runtime=300 --loop=1000 --write_bw_log=mytest --name=test --size=1024m`
+
 2. **Analysetool starten** und den Pfad auswählen, wo sich die Logs befinden.
-3. **Run-Anzahl anpassen**, je nachdem wie oft geloopt wurde (im Beispiel: 10).
-4. **Optionale Anpassungen**: Alpha-Wert und weitere Einstellungen nach Bedarf ändern.
-5. **Evaluate steady state klicken**: Mit diesem Button werden alle Tests ausgeführt und in einer Tabelle dargestellt.
-6. **Test auswählen**: Mit **Rechtsklick** einen Test auswählen, um mehr zu erfahren.
+
+3. **Optionale Anpassungen**: Alpha-Wert und weitere Einstellungen nach Bedarf ändern.
+
+4. **Evaluate steady state klicken**: Mit diesem Button werden alle Tests ausgeführt und in einer Tabelle dargestellt.
+
+5. **Speichern**: Die Evaluierung aller Tests speichern mit **Save evaluation**.
+
 
 - Das Beispiel wird genauer unter dem Verzeichnis /ExampleLog erklärt
 
@@ -67,24 +73,19 @@ Diese Dokumentation beschreibt die verfügbaren Einstellungen und deren Bedeutun
 
 ## Run-Einstellungen
 
-### Use sequential Run (otherwise adjacent)
-- **HINWEIS**: für Atool v0.2.1 (sowie die vorherigen Versionen) ist das Labeling vertauscht! ->  "Use adjacent section (otherwise sequential)"
-- **Beschreibung**: Aktiviert die Verwendung von benachbarten Durchläufen, anstelle einer sequenziellen Verarbeitung.
-- **Standardwert**: Deaktiviert.
-
-### Skip sections
-- **Beschreibung**: Anzahl der Durchläufe, die übersprungen werden sollen.
-- **Standardwert**: 0.
+### Skip seconds sections
+- **Beschreibung**: Wie viele Sekunden des start sollen ignoriert werden. Eine Sektion entspricht einer Sekunde der Daten.
+- **Standardwert**: 0 Sekunden.
 
 ### Use Bonferroni correction
 - **Beschreibung**: Aktiviert die Bonferroni-Korrektur zur statistischen Analyse.
 - **Standardwert**: Deaktiviert.
-
-### Required sections for steady state
-- **Beschreibung**: Mindestanzahl aufeinanderfolgender Runs, die erforderlich sind, um einen stabilen Zustand festzulegen.
-- **Standardwert**: 5.
-- **Maximal Wert**: 10.
-- **Minimal Wert**: 2.
+---
+### Required time for steady state
+- **Beschreibung**: Mindestanzahl aufeinanderfolgender Sektionen/Sekunden, die erforderlich sind, um einen stabilen Zustand festzulegen.
+- **Standardwert**: 60 Sekunden.
+- **Maximal Wert**: 60 Sekunden.
+- **Minimal Wert**: 30 Sekunden.
 
 ---
 
@@ -96,15 +97,6 @@ Diese Dokumentation beschreibt die verfügbaren Einstellungen und deren Bedeutun
   - T-Test
   - U-Test
   - Tukey HSD
-
----
-
-## ANOVA-Einstellungen
-
-### Number of Runs to compare for ANOVA
-- **Beschreibung**: Anzahl der Durchläufe, die für den ANOVA-Test verglichen werden.
-- **Standardwert**: 2.
-- **Schieberegler**: Werte von 2 bis 5.
 
 ---
 
