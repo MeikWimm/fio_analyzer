@@ -11,18 +11,17 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Pane?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="517.0" prefWidth="714.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="375.0" prefWidth="615.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <center>
-      <Pane prefHeight="200.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+      <Pane prefHeight="200.0" prefWidth="714.0" BorderPane.alignment="CENTER">
          <children>
-            <Label layoutX="19.0" layoutY="38.0" prefHeight="17.0" prefWidth="142.0" text="Use conversion for data:" />
-            <RadioButton fx:id="radioButtonMebibyte" layoutX="38.0" layoutY="70.0" mnemonicParsing="false" text="MebiByte" />
-            <RadioButton fx:id="radioButtonKibiByte" layoutX="38.0" layoutY="95.0" mnemonicParsing="false" text="KibiByte" />
-            <RadioButton fx:id="radioButtonKiloByte" layoutX="38.0" layoutY="119.0" mnemonicParsing="false" text="KiloByte" />
-            <Button id="buttonSaveSettings" fx:id="buttonSaveSettings" layoutX="620.0" layoutY="478.0" mnemonicParsing="false" text="Save &amp; Exit" />
+            <Label layoutX="19.0" layoutY="14.0" prefHeight="17.0" prefWidth="142.0" text="Use conversion for data:" />
+            <RadioButton fx:id="radioButtonMebibyte" layoutX="38.0" layoutY="46.0" mnemonicParsing="false" text="MebiByte" />
+            <RadioButton fx:id="radioButtonKibiByte" layoutX="144.0" layoutY="46.0" mnemonicParsing="false" text="KibiByte" />
+            <RadioButton fx:id="radioButtonKiloByte" layoutX="243.0" layoutY="46.0" mnemonicParsing="false" text="KiloByte" />
             <Label layoutX="215.0" layoutY="470.0" text="2 (Default)" visible="false" />
             <Label layoutX="215.0" layoutY="440.0" prefHeight="17.0" prefWidth="226.0" text="Number of Runs to compare for ANOVA" visible="false" />
-            <Pane layoutX="33.0" layoutY="172.0" prefHeight="253.0" prefWidth="630.0">
+            <Pane layoutX="6.0" layoutY="122.0" prefHeight="253.0" prefWidth="603.0">
                <children>
                   <Pane prefHeight="34.0" prefWidth="132.0">
                      <children>
@@ -117,6 +116,7 @@
                         <Blend />
                      </effect>
                   </Pane>
+                  <Button id="buttonSaveSettings" fx:id="buttonSaveSettings" layoutX="494.0" layoutY="216.0" mnemonicParsing="false" text="Save &amp; Exit" />
                </children>
                <effect>
                   <Blend />
@@ -126,11 +126,11 @@
                </padding>
             </Pane>
             <Slider id="runCompareCounterSlider" fx:id="runCompareCounterSlider" blockIncrement="1.0" disable="true" layoutX="293.0" layoutY="472.0" majorTickUnit="1.0" max="5.0" min="2.0" minorTickCount="0" prefHeight="24.0" prefWidth="190.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" visible="false" />
-            <Label layoutX="19.0" layoutY="440.0" prefHeight="17.0" prefWidth="249.0" text="How many seconds until steady state:" />
-            <Spinner id="requiredSecondsForSteadyStateSpinner" fx:id="requiredSecondsForSteadyStateSpinner" layoutX="19.0" layoutY="466.0" prefHeight="25.0" prefWidth="61.0" />
-            <Slider id="windowSizeSlider" fx:id="windowSizeSlider" layoutX="243.0" layoutY="471.0" majorTickUnit="10.0" max="60.0" min="30.0" minorTickCount="0" showTickLabels="true" showTickMarks="true" value="30.0" />
-            <Label layoutX="250.0" layoutY="440.0" prefHeight="17.0" prefWidth="130.0" text="Window size in second:" />
-            <Label layoutX="396.0" layoutY="482.0" prefHeight="17.0" prefWidth="174.0" text="Info: Window step size 1 second" />
+            <Label layoutX="19.0" layoutY="440.0" prefHeight="17.0" prefWidth="249.0" text="How many seconds until steady state:" visible="false" />
+            <Spinner id="requiredSecondsForSteadyStateSpinner" fx:id="requiredSecondsForSteadyStateSpinner" layoutX="19.0" layoutY="466.0" prefHeight="25.0" prefWidth="61.0" visible="false" />
+            <Slider id="windowSizeSlider" fx:id="windowSizeSlider" disable="true" layoutX="243.0" layoutY="471.0" majorTickUnit="10.0" max="60.0" min="30.0" minorTickCount="0" showTickLabels="true" showTickMarks="true" value="30.0" visible="false" />
+            <Label layoutX="250.0" layoutY="440.0" prefHeight="17.0" prefWidth="130.0" text="Window size in second:" visible="false" />
+            <Label layoutX="396.0" layoutY="482.0" prefHeight="17.0" prefWidth="174.0" text="Info: Window step size 1 second" visible="false" />
          </children>
       </Pane>
    </center>
