@@ -76,7 +76,6 @@
                     <execution>
                         <id>default-cli</id>
                         <goals>
-                            <goal>section</goal>
                         </goals>
                     </execution>
                 </executions>
