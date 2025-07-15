@@ -27,12 +27,12 @@ public class Settings implements Initializable {
     public static final int MIN_SKIP_COUNT = 0;
     public static final int DEFAULT_SKIP_COUNT = 0;
 
-    public static final int DEFAULT_WINDOW_SIZE = 2000;
+    public static final int DEFAULT_WINDOW_SIZE = 30000;
     public static final int MIN_WINDOW_SIZE = 30000;
     public static final int MAX_WINDOW_SIZE = 1000;
 
     public static final int MAX_REQUIRED_SECONDS_FOR_STEADY_STATE = 60;
-    public static final int MIN_REQUIRED_SECONDS_FOR_STEADY_STATE = 30;
+    public static final int MIN_REQUIRED_SECONDS_FOR_STEADY_STATE = 10;
     public static final int DEFAULT_REQUIRED_SECONDS_FOR_STEADY_STATE = 30;
 
     private int requiredRunsForSteadyState = DEFAULT_REQUIRED_SECONDS_FOR_STEADY_STATE;

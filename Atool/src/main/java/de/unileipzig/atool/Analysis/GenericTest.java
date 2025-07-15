@@ -98,20 +98,19 @@ public abstract class GenericTest {
             if (section.getNullhypothesis()) {
                 possibleSteadyStateRunsGroup.add(group);
                 secondCounter++;
-                break;
             } else {
                 possibleSteadyStateRunsGroup.clear();
                 secondCounter = 0;
             }
-//
-//            if(secondCounter == this.thresholdSectionsForSteadyState){
-//                break;
-//            }
+
+            if(secondCounter == this.thresholdSectionsForSteadyState){
+                break;
+            }
         }
 
-//        if(possibleSteadyStateRunsGroup.size() < this.thresholdSectionsForSteadyState){
-//            possibleSteadyStateRunsGroup.clear();
-//        }
+        if(possibleSteadyStateRunsGroup.size() < this.thresholdSectionsForSteadyState){
+            possibleSteadyStateRunsGroup.clear();
+        }
     }
 
     public Section getSteadyStateRun(){
