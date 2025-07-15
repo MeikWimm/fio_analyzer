@@ -172,9 +172,14 @@ public class Job {
         if (skipRuns < 1) {
             return;
         }
+
+        if(this.sections.size() < skipRuns){
+            return;
+        }
+
         int skipSize = this.runDataSize * skipRuns;
 
-        if(skipSize * Settings.WINDOW_STEP_SIZE > this.data.size()){
+        if(skipSize > this.data.size()){
             Logging.log(Level.WARNING, "Job", "Skipped data size " + skipSize + " exceeds job data size " + this.data.size());
             return;
         }
