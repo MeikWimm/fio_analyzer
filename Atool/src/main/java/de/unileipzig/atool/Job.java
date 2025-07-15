@@ -143,8 +143,10 @@ public class Job {
 
         this.conversion = Settings.CONVERSION_VALUE;
         if(data.size() < windowSize){
-            Logging.log(Level.WARNING, "Job", String.format("Data size %d is less than window size %d", data.size(), windowSize));
-            return;
+            windowSize = data.size() / 2;
+
+            Logging.log(Level.WARNING, "Job", String.format("Data size %d is less than window size %d", data.size(), Settings.WINDOW_SIZE));
+            Logging.log(Level.WARNING, "Job", String.format("Window size set to %d milli sec", windowSize));
         }
         this.runDataSize = (data.size() / windowSize);
 
@@ -172,7 +174,7 @@ public class Job {
         }
         int skipSize = this.runDataSize * skipRuns;
 
-        if(skipSize > this.data.size()){
+        if(skipSize * Settings.WINDOW_STEP_SIZE > this.data.size()){
             Logging.log(Level.WARNING, "Job", "Skipped data size " + skipSize + " exceeds job data size " + this.data.size());
             return;
         }
