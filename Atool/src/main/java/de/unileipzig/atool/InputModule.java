@@ -31,7 +31,7 @@ import java.util.logging.Level;
  */
 public class
 InputModule {
-    public static final int MIN_POSSIBLE_DATA_SIZE = 20000;
+    public static final int MIN_POSSIBLE_DATA_SIZE = 10000;
 
 
     public static File SELECTED_DIRECTORY;

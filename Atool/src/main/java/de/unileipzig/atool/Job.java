@@ -65,7 +65,6 @@ public class Job {
         this.speedSeries = new ArrayList<>();
         this.data = new ArrayList<>(data);
         this.rawData = new ArrayList<>(data);
-        this.convertedData = new ArrayList<>();
         this.chartData = new ArrayList<>();
         this.alphaProperty.set(DEFAULT_ALPHA);
         updateRunsData();
@@ -83,7 +82,6 @@ public class Job {
         this.rawData = other.rawData;
         this.speedSeries = other.speedSeries;
         this.file = other.file;
-        this.convertedData = new ArrayList<>(other.convertedData);
         this.freq = new HashMap<>(other.freq);
         this.runsCounter = other.runsCounter;
         this.conversion = other.conversion;
@@ -157,9 +155,7 @@ public class Job {
             List<DataPoint> run_data = new ArrayList<>();
 
             for (int j = i; j < i + windowSize; j++) {
-                DataPoint dp = new DataPoint(data.get(j).data / Settings.CONVERSION_VALUE, rawData.get(j).time);
-                run_data.add(dp);
-                convertedData.add(dp);
+                run_data.add(data.get(j));
             }
 
             Section section = new Section(runId++, run_data);

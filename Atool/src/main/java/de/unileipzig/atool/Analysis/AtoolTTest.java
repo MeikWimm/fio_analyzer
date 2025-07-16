@@ -97,7 +97,7 @@ public class AtoolTTest extends GenericTest implements Initializable {
             double[] data2 = section2.getData().stream().mapToDouble(dp -> dp.data).toArray();
 
 
-            double pValue = tTest.tTest(data1, data2);
+            double pValue = tTest.pairedTTest(data1, data2);
             section1.setP(pValue);
             tData.add(new XYChart.Data<>(group.getFirst().getID(), pValue));
             resultSections.add(group.getFirst());
