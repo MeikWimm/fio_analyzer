@@ -48,9 +48,6 @@ public class Settings implements Initializable {
 
     private boolean isBonferroniSelected = true;
 
-    private boolean hasChanged = false;
-
-
     @FXML public CheckBox bonferroniCheckbox;
 
     @FXML public Spinner<Integer> skipCountSpinner;
@@ -130,16 +127,15 @@ public class Settings implements Initializable {
         WINDOW_SIZE = (int) windowSizeSlider.getValue() * 1000;
 
         requiredRunsForSteadyState = requiredSecondsForSteadyStateSpinner.getValue();
-
+        skipCounter = skipCountSpinner.getValue();
         isBonferroniSelected = bonferroniCheckbox.isSelected();
-
-        hasChanged = true;
 
         if(primaryController != null){
             primaryController.update();
         } else {
             Logging.log(Level.SEVERE, "Settings", "No PrimaryController set!");
         }
+
         Logging.log(Level.INFO, "Settings", "Settings saved");
         Stage stage = (Stage) buttonSaveSettings.getScene().getWindow();
         stage.close();
@@ -166,10 +162,6 @@ public class Settings implements Initializable {
         return isBonferroniSelected;
     }
 
-    public boolean hasChanged() {
-        return hasChanged;
-    }
-
     public int getSkipCounter() {
         return skipCounter;
     }
@@ -180,10 +172,6 @@ public class Settings implements Initializable {
 
     public void setSkipCounter(int skipCounter) {
         this.skipCounter = skipCounter;
-    }
-
-    public void updatedSettings() {
-        hasChanged = false;
     }
 
 }
