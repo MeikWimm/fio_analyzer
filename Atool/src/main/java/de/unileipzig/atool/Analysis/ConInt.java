@@ -41,10 +41,10 @@ public class ConInt extends GenericTest implements Initializable {
     @FXML private TableColumn<Section, Boolean> overlappingColumn;
     @FXML private TableColumn<Section, Boolean> hypothesisColumn;
     @FXML private Label steadyStateLabel;
-
+    private static final int GROUP_SIZE = 2;
 
     public ConInt(Job job,Settings settings) {
-        super(job, job.getSkipSeconds(), false, 2, job.getAlpha(), settings.isBonferroniConIntSelected(), settings.getRequiredRunsForSteadyState());
+        super(job, job.getSkipSeconds(), false, GROUP_SIZE, job.getAlpha() ,settings.isBonferroniSelected(), settings.getRequiredRunsForSteadyState());
     }
 
     @Override

@@ -15,6 +15,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -31,18 +32,19 @@ public class SteadyStateEval implements Initializable {
     @FXML private TableColumn<TestEval, Integer> skippedRunColumn;
     @FXML private TableColumn<TestEval, Boolean> bonferroniColumn;
     @FXML Button saveEvalButton;
-    private Window owner;
     private final Job job;
+    private File path;
     private final List<TestEval> testEvals;
     private final Settings settings;
     private final GenericTest[] tests;
     private final OutputModule outputModule;
+    private Window owner;
 
     public SteadyStateEval(Job job, Settings settings){
         this.job = job;
         this.settings = settings;
         tests = new  GenericTest[5];
-        outputModule = new OutputModule();
+        outputModule = new OutputModule(path);
 
         Anova anova = new Anova(job, settings);
         TukeyHSD tukey = new TukeyHSD();
@@ -56,6 +58,10 @@ public class SteadyStateEval implements Initializable {
         prepareTests();
     }
 
+    public void setPath(File path){
+        this.path = path;
+    }
+
     private void prepareTests() {
         for (GenericTest genericTest : tests) {
             TestEval testEval = new TestEval(genericTest);
@@ -67,10 +73,6 @@ public class SteadyStateEval implements Initializable {
 
             testEvals.add(testEval);
         }
-    }
-
-    public void setOwner(Window owner) {
-        this.owner = owner;
     }
 
     @Override
@@ -105,8 +107,17 @@ public class SteadyStateEval implements Initializable {
         labelHeader.setText("Job Evaluation | Job alpha: " + this.job.getAlpha() + " | Required accepted sections for steady state: " + settings.getRequiredRunsForSteadyState() + " seconds");
     }
 
+    public void setOwner(Window owner){
+        this.owner = owner;
+    }
+
     private void onActionSaveEval(){
-        outputModule.openDirectoryChooser(owner);
+        outputModule.openDirectoryChooser(this.owner);
+        saveEval();
+    }
+
+    public void saveEval(){
+        outputModule.setPath(this.path);
         OutputModule.STATUS status = outputModule.saveEval(this);
         Logging.log(Level.INFO, "SteadyStateEval", status.toString());
     }

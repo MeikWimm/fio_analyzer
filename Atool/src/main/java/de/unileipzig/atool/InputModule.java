@@ -125,7 +125,7 @@ InputModule {
                 } else {
                     if(this.data.size() < MIN_POSSIBLE_DATA_SIZE){
                         Logging.log(Level.WARNING, className,String.format("file -> %s is to small!", file.getAbsolutePath()));
-                        Logging.log(Level.WARNING, className,String.format("Log should be at least be a minute ling!", file.getAbsolutePath()));
+                        Logging.log(Level.WARNING, className,String.format("Log should be at least be a minute ling! - %s", file.getAbsolutePath()));
                     } else {
                         Logging.log(Level.INFO, "Input Module", "Preparing Job Data: " + file);
                         Job job = new Job(this.data);

@@ -23,22 +23,19 @@ import java.util.logging.Level;
  * @author meni1999
  */
 public class Settings implements Initializable {
-    public static final int MAX_SKIP_COUNT = 60;
-    public static final int MIN_SKIP_COUNT = 0;
-    public static final int DEFAULT_SKIP_COUNT = 0;
+    public static final int MAX_SKIP_SECOND_COUNT = 60;
+    public static final int MIN_SKIP_SECOND_COUNT = 0;
+    public static final int DEFAULT_SKIP_SECOND_COUNT = 0;
 
-    public static final int DEFAULT_WINDOW_SIZE = 60000;
-    public final static int WINDOW_STEP_SIZE = 1000;
-
-    public static final int MIN_WINDOW_SIZE = 30000;
-    public static final int MAX_WINDOW_SIZE = 1000;
+    public static final int DEFAULT_WINDOW_SIZE = 30000;
+    public static final int MIN_WINDOW_SIZE = 10000;
+    public static final int MAX_WINDOW_SIZE = 60000;
 
     public static final int MAX_REQUIRED_SECONDS_FOR_STEADY_STATE = 60;
-    public static final int MIN_REQUIRED_SECONDS_FOR_STEADY_STATE = 30;
+    public static final int MIN_REQUIRED_SECONDS_FOR_STEADY_STATE = 1;
     public static final int DEFAULT_REQUIRED_SECONDS_FOR_STEADY_STATE = 30;
 
     private int requiredRunsForSteadyState = DEFAULT_REQUIRED_SECONDS_FOR_STEADY_STATE;
-    private int groupSize = 2;
 
     private static final int DIGIT = 3;
     public static final String DIGIT_FORMAT = "%,." + DIGIT + "f";
@@ -47,30 +44,29 @@ public class Settings implements Initializable {
     public static double CONVERSION_VALUE = MathUtils.CONVERT.getConvertValue(MathUtils.CONVERT.DEFAULT);
     public static MathUtils.CONVERT CONVERSION = MathUtils.CONVERT.DEFAULT;
 
-    private boolean isBonferroniANOVASelected = false;
-    private boolean isBonferroniConIntSelected = false;
-    private boolean isBonferroniTTestSelected = false;
-    private boolean isBonferroniUTestSelected = false;
+    private int skipCounter = 0;
+
+    private boolean isBonferroniSelected = true;
 
     private boolean hasChanged = false;
 
 
-    @FXML public CheckBox bonferroniANOVAcheckbox;
-    @FXML public CheckBox bonferroniConIntcheckbox;
-    @FXML public CheckBox bonferroniTTestcheckbox;
-    @FXML public CheckBox bonferroniUTestcheckbox;
+    @FXML public CheckBox bonferroniCheckbox;
 
+    @FXML public Spinner<Integer> skipCountSpinner;
     @FXML public Spinner<Integer> requiredSecondsForSteadyStateSpinner;
 
-    @FXML public Slider runCompareCounterSlider;
     @FXML public Slider windowSizeSlider;
     @FXML public Button buttonSaveSettings;
     @FXML public RadioButton radioButtonMebibyte;
     @FXML public RadioButton radioButtonKibiByte;
     @FXML public RadioButton radioButtonKiloByte;
+
     private final ToggleGroup toggleGorup = new ToggleGroup();
     private final PrimaryController primaryController;
+
     public static int WINDOW_SIZE = DEFAULT_WINDOW_SIZE;
+    public final static int WINDOW_STEP_SIZE = 1000;
 
     public Settings(PrimaryController primaryController) {
         this.primaryController = primaryController;
@@ -95,10 +91,15 @@ public class Settings implements Initializable {
         radioButtonKiloByte.setToggleGroup(toggleGorup);
         radioButtonMebibyte.setToggleGroup(toggleGorup);
 
-        requiredSecondsForSteadyStateSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_REQUIRED_SECONDS_FOR_STEADY_STATE, MAX_REQUIRED_SECONDS_FOR_STEADY_STATE, DEFAULT_REQUIRED_SECONDS_FOR_STEADY_STATE));
+        skipCountSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_SKIP_SECOND_COUNT,
+                MAX_SKIP_SECOND_COUNT, DEFAULT_SKIP_SECOND_COUNT));
+
+        requiredSecondsForSteadyStateSpinner.setValueFactory(
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(MIN_REQUIRED_SECONDS_FOR_STEADY_STATE,
+                        MAX_REQUIRED_SECONDS_FOR_STEADY_STATE, DEFAULT_REQUIRED_SECONDS_FOR_STEADY_STATE
+                ));
 
         buttonSaveSettings.setOnAction(this::onActionSaveSettings);
-
         initSettings();
     }
 
@@ -111,46 +112,26 @@ public class Settings implements Initializable {
             }
         }
 
-        bonferroniANOVAcheckbox.setSelected(isBonferroniANOVASelected);
-        bonferroniConIntcheckbox.setSelected(isBonferroniConIntSelected);
-        bonferroniTTestcheckbox.setSelected(isBonferroniTTestSelected);
-        bonferroniUTestcheckbox.setSelected(isBonferroniUTestSelected);
+        bonferroniCheckbox.setSelected(isBonferroniSelected);
 
-        runCompareCounterSlider.setValue(groupSize);
         windowSizeSlider.setValue(WINDOW_SIZE / 1000.0);
+        windowSizeSlider.setMin(MIN_WINDOW_SIZE / 1000.0);
+        windowSizeSlider.setMax(MAX_WINDOW_SIZE / 1000.0);
 
+        skipCountSpinner.getValueFactory().setValue(skipCounter);
         requiredSecondsForSteadyStateSpinner.getValueFactory().setValue(requiredRunsForSteadyState);
     }
 
-    public void openWindow() {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/Settings.fxml"));
-            fxmlLoader.setController(this);
-            Parent root1 = fxmlLoader.load();
 
-            Stage stage = new Stage();
-            stage.setTitle("Settings");
-            stage.setScene(new Scene(root1));
-            stage.setResizable(false);
-            stage.show();
-        } catch (IOException e) {
-            Logging.log(Level.SEVERE, "Settings", "Coudn't open Settings Window! App state");
-            e.printStackTrace();
-        }
-    }
 
     private void onActionSaveSettings(ActionEvent actionEvent) {
         CONVERSION = (MathUtils.CONVERT) toggleGorup.getSelectedToggle().getUserData();
         CONVERSION_VALUE = MathUtils.CONVERT.getConvertValue(CONVERSION);
-        groupSize = (int) runCompareCounterSlider.getValue();
         WINDOW_SIZE = (int) windowSizeSlider.getValue() * 1000;
 
         requiredRunsForSteadyState = requiredSecondsForSteadyStateSpinner.getValue();
 
-        isBonferroniANOVASelected = bonferroniANOVAcheckbox.isSelected();
-        isBonferroniConIntSelected = bonferroniConIntcheckbox.isSelected();
-        isBonferroniTTestSelected = bonferroniTTestcheckbox.isSelected();
-        isBonferroniUTestSelected = bonferroniUTestcheckbox.isSelected();
+        isBonferroniSelected = bonferroniCheckbox.isSelected();
 
         hasChanged = true;
 
@@ -164,39 +145,45 @@ public class Settings implements Initializable {
         stage.close();
     }
 
-    public boolean isBonferroniANOVASelected() {
-        return isBonferroniANOVASelected;
+    public void openWindow() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/de/unileipzig/atool/Settings.fxml"));
+            fxmlLoader.setController(this);
+            Parent root1 = fxmlLoader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Settings");
+            stage.setScene(new Scene(root1));
+            stage.setResizable(true);
+            stage.show();
+        } catch (IOException e) {
+            Logging.log(Level.SEVERE, "Settings", "Coudn't open Settings Window! App state");
+            e.printStackTrace();
+        }
     }
 
-    public boolean isBonferroniConIntSelected() {
-        return isBonferroniConIntSelected;
-    }
-
-    public boolean isBonferroniTTestSelected() {
-        return isBonferroniTTestSelected;
-    }
-
-    public boolean isBonferroniUTestSelected() {
-        return isBonferroniUTestSelected;
+    public boolean isBonferroniSelected() {
+        return isBonferroniSelected;
     }
 
     public boolean hasChanged() {
         return hasChanged;
     }
 
-    public int getGroupSize() {
-        return groupSize;
+    public int getSkipCounter() {
+        return skipCounter;
     }
 
     public int getRequiredRunsForSteadyState() {
         return requiredRunsForSteadyState;
     }
 
+    public void setSkipCounter(int skipCounter) {
+        this.skipCounter = skipCounter;
+    }
+
     public void updatedSettings() {
         hasChanged = false;
     }
 
-    public void setGroupSize(int groupSize) {
-        this.groupSize = groupSize;
-    }
 }

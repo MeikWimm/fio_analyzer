@@ -50,6 +50,7 @@
             <Pane prefHeight="100.0" prefWidth="1080.0">
                <children>
                   <Button id="steadyStateEvalButton" fx:id="steadyStateEvalButton" layoutX="14.0" layoutY="13.0" mnemonicParsing="false" onAction="#onActionCalcualteSteadyState" prefHeight="25.0" prefWidth="129.0" text="Evaluate steady state" />
+                  <Button id="saveAllEvalButton" fx:id="saveAllEvalButton" layoutX="166.0" layoutY="13.0" mnemonicParsing="false" onAction="#onActionSaveAllEval" prefHeight="25.0" prefWidth="142.0" text="Save All Evaluation" />
                </children>
             </Pane>
          </children></VBox>

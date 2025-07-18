@@ -62,9 +62,10 @@ public class MannWhitney extends GenericTest implements Initializable {
     @FXML public Label steadyStateLabel;
 
     private double zCrit;
+    private static final int GROUP_SIZE = 2;
 
     public MannWhitney(Job job,Settings settings) {
-        super(job, job.getSkipSeconds(), false, 2, job.getAlpha(), settings.isBonferroniUTestSelected(), settings.getRequiredRunsForSteadyState());
+        super(job, job.getSkipSeconds(), false, GROUP_SIZE, job.getAlpha() ,settings.isBonferroniSelected(), settings.getRequiredRunsForSteadyState());
         this.uTestData = new ArrayList<>();
     }
 

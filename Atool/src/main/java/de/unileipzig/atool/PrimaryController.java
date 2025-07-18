@@ -1,9 +1,7 @@
 package de.unileipzig.atool;
 
-
 import de.unileipzig.atool.Analysis.*;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -14,11 +12,14 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
+
 
 
 /**
@@ -67,6 +68,7 @@ public class PrimaryController implements Initializable {
     @FXML private MenuItem refreshTableMenuItem;
     @FXML private MenuBar menuBar;
     @FXML private Button steadyStateEvalButton;
+    @FXML private Button saveAllEvalButton;
     @FXML private Label labelLoadInfo;
     @FXML private TableView<Job> table;
     @FXML private TableColumn<Job, String> IDColumn;
@@ -82,6 +84,7 @@ public class PrimaryController implements Initializable {
     private InputModule inputModule;
     private Settings settings;
     private Job job;
+    private File path;
 
 
     /**
@@ -137,6 +140,8 @@ public class PrimaryController implements Initializable {
     public void update() {
         if (settings.hasChanged()) {
             for (Job job : table.getItems()) {
+                job.setAverageSpeed(job.getAverageSpeed() / Settings.CONVERSION_VALUE);
+                job.setSecondsUntilSteadyState(settings.getRequiredRunsForSteadyState());
                 job.updateRunsData();
             }
         }
@@ -163,10 +168,10 @@ public class PrimaryController implements Initializable {
      */
     private void setupCellValueFactory() {
         IDColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
-        fileNameColumn.setCellValueFactory(new PropertyValueFactory<>("File"));
-        runsCounterColumn.setCellValueFactory(new PropertyValueFactory<>("SkipSeconds"));
+        fileNameColumn.setCellValueFactory(new PropertyValueFactory<>("FileName"));
+        runsCounterColumn.setCellValueFactory(new PropertyValueFactory<>("RunsCounter"));
+
         speedColumn.setCellValueFactory(new PropertyValueFactory<>("AverageSpeed"));
-        speedColumn.setCellFactory(TextFieldTableCell.forTableColumn(new Utils.CustomStringConverter()));
         speedColumn.setText("Average Speed " + Settings.getConversion());
 
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("TimeInSec"));
@@ -194,8 +199,8 @@ public class PrimaryController implements Initializable {
     // Code block setup for editing on a table row
     private void setupColumnTextField() {
         runsCounterColumn.setCellFactory(tc -> new Utils.ValidatedIntegerTableCell<>(
-                labelLoadInfo, Job.MIN_TIME_SKIP, Job.MAX_TIME_SKIP, Job.DEFAULT_TIME_SKIP,
-                String.format("Must be a value between %d and %d", Job.MIN_TIME_SKIP, Job.MAX_TIME_SKIP)
+                labelLoadInfo, Job.MIN_RUN_COUNT, Job.MAX_RUN_COUNT, Job.DEFAULT_RUN_COUNT,
+                String.format("Run count must be a value between %d and %d", Job.MIN_RUN_COUNT, Job.MAX_RUN_COUNT)
         ));
 
         alphaColumn.setCellFactory(ComboBoxTableCell.forTableColumn(
@@ -266,7 +271,7 @@ public class PrimaryController implements Initializable {
      */
     private void setupTableCellCommit() {
         runsCounterColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Integer> t) -> {
-            t.getRowValue().setSkipSeconds(t.getNewValue());
+            t.getRowValue().setRunsCounter(t.getNewValue());
         });
 
         cvColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {
@@ -449,10 +454,21 @@ public class PrimaryController implements Initializable {
      * - Logs a warning if there is an issue in invoking the steady state evaluation window.
      */
     @FXML
+    private void onActionSaveAllEval() {
+        File path = openDirectoryChooser();
+
+        for (Job job : table.getItems()) {
+            SteadyStateEval eval = new SteadyStateEval(job, this.settings);
+            eval.setPath(path);
+            eval.saveEval();
+        }
+    }
+
+    @FXML
     private void onActionCalcualteSteadyState() {
         if(this.job != null && this.settings != null) {
             SteadyStateEval eval = new SteadyStateEval(this.job, this.settings);
-            eval.setOwner(this.steadyStateEvalButton.getScene().getWindow());
+            eval.setOwner(getOwner());
             eval.openWindow();
         } else {
             labelLoadInfo.setText("Please select a Job!");
@@ -509,6 +525,19 @@ public class PrimaryController implements Initializable {
      */
     public Window getOwner(){
         return steadyStateEvalButton.getScene().getWindow();
+    }
+
+    public File openDirectoryChooser(){
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Choose a directory");
+
+        if(path == null){
+            path = new File(System.getProperty("user.home"));
+        } else {
+            directoryChooser.setInitialDirectory(path);
+        }
+
+        return directoryChooser.showDialog(getOwner());
     }
 }
 

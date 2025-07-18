@@ -51,9 +51,11 @@ public class Anova extends GenericTest implements Initializable {
     @FXML private TableColumn<Section, Double> FColumn;
     @FXML private TableColumn<Section, Boolean> hypothesisColumn;
     private double fCrit;
+    private static final int GROUP_SIZE = 3;
+
 
     public Anova(Job job, Settings settings) {
-        super(job, job.getSkipSeconds(), false, 3, job.getAlpha(), settings.isBonferroniANOVASelected() , settings.getRequiredRunsForSteadyState());
+        super(job, job.getSkipSeconds(), false, GROUP_SIZE, job.getAlpha() ,settings.isBonferroniSelected(), settings.getRequiredRunsForSteadyState());
         final int dataSize = job.getData().size();
         this.anovaData = new ArrayList<>(dataSize);
     }

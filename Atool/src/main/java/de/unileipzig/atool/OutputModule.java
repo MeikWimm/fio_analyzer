@@ -1,5 +1,6 @@
 package de.unileipzig.atool;
 
+import de.unileipzig.atool.Analysis.Charter;
 import de.unileipzig.atool.Analysis.GenericTest;
 import de.unileipzig.atool.Analysis.PostHocTest;
 import de.unileipzig.atool.Analysis.SteadyStateEval;
@@ -17,77 +18,61 @@ import java.util.logging.Level;
 
 public class OutputModule {
     private SteadyStateEval eval;
-    private final DirectoryChooser directoryChooser;
-    private boolean isAlreadyOpen;
-    private File selectedDirectory;
     private final StringBuilder stringBuilder;
     private File path;
     private final String className = "OutputModule";
 
-    public OutputModule() {
-        directoryChooser = new DirectoryChooser();
+    public OutputModule(File path) {
         stringBuilder = new StringBuilder();
-    }
-
-    public void openDirectoryChooser(Window ownerWindow) {
-        isAlreadyOpen = false;
-        if(ownerWindow != null) {
-            selectedDirectory = directoryChooser.showDialog(ownerWindow);
-        } else {
-            selectedDirectory = directoryChooser.showDialog(null);
-        }
+        this.path = path;
     }
 
     public STATUS saveEval(SteadyStateEval eval) {
         this.eval = eval;
 
-        if(selectedDirectory == null) {
+        if(path == null) {
             Logging.log(Level.WARNING, className, "Cannot save eval to null directory");
             return STATUS.NO_DIR_SET;
         } else {
-            Logging.log(Level.INFO,  className,"Saving eval to "+selectedDirectory.getAbsolutePath());
+            Logging.log(Level.INFO,  className,"Saving eval to "+ path.getAbsolutePath());
         }
 
-        if(!selectedDirectory.canWrite()) {
-            Logging.log(Level.WARNING, className, "Is selected directory writable: " + selectedDirectory.canWrite());
+        if(!path.canWrite()) {
+            Logging.log(Level.WARNING, className, "Is selected directory writable: " + path.canWrite());
             return STATUS.DIR_NOT_WRITEABLE;
         } else {
-            Logging.log(Level.INFO, className, "Is selected directory writable: " + selectedDirectory.canWrite());
+            Logging.log(Level.INFO, className, "Is selected directory writable: " + path.canWrite());
         }
 
-        if(!isOpen()) {
-            isAlreadyOpen = true;
-            path = new File(selectedDirectory + "/Job_" + eval.getJob().getID());
-            Logging.log(Level.INFO, className, "created new directory: " + "\\Job_" + eval.getJob().getID());
-            writeEval();
-            saveEvalToFile();
-        } else {
-            Logging.log(Level.WARNING, className, "Directory Chooser already open!");
-            return STATUS.DIR_CHOOSER_ALREADY_OPEN;
-        }
+
+        path = new File(path + "/" + eval.getJob().getFileName() + "/");
+        Logging.log(Level.INFO, className, "created new directory: " + "\\" + eval.getJob().getFileName());
+        writeEval();
+        saveEvalToFile();
 
         return STATUS.SUCCESS;
     }
 
+    public void openDirectoryChooser(Window owner) {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        File selectedDirectory = directoryChooser.showDialog(owner);
+        if (selectedDirectory != null) {
+            path = selectedDirectory;
+        } else {
+            Logging.log(Level.WARNING, className, "No directory selected!");
+        }
+    }
+
     private void saveEvalToFile() {
         try {
-            FileWriter fileWriter = new FileWriter(path + "/evaluation.txt");
-            // Creates a BufferedWriter
-            BufferedWriter output = new BufferedWriter(fileWriter);
-
-            // Writes the string to the file
-            output.append(stringBuilder);
-
-            // Closes the writer
-            output.close();
+            FileWriter fileWriter = new FileWriter(path.toString() + "/" +"evaluation.txt");
+            BufferedWriter writer = new BufferedWriter(fileWriter);
+            writer.append(stringBuilder);
+            writer.close();
         } catch (IOException e) {
             Logging.log(Level.SEVERE, className, e.getMessage());
             throw new RuntimeException(e);
         }
-    }
-
-    private boolean isOpen() {
-        return isAlreadyOpen;
     }
 
     private void writeEval() {
@@ -100,12 +85,25 @@ public class OutputModule {
         stringBuilder.append("Job time (in sec.): ").append(job.getTimeInSec()).append('\n');
         stringBuilder.append("Window size in millisecond: ").append(Settings.WINDOW_SIZE).append('\n');
         stringBuilder.append("Window step size in millisecond: ").append(Settings.WINDOW_STEP_SIZE).append('\n');
+        stringBuilder.append("Sections/Seconds until considering steady state: ").append(eval.getJob().getSeondsUntilSteadyState()).append('\n');
         stringBuilder.append("Alpha: ").append(job.getAlpha()).append('\n');
         stringBuilder.append("\n");
+
         boolean isPathCreated = false;
         if (!path.exists()){
             isPathCreated = path.mkdirs();
         }
+
+        Charter charter = new Charter();
+        Scene scene = charter.drawGraph("Job Speed", "Time in (ms)", "KibiByte/s", new Charter.ChartData("Job speed",job.getSeries()));
+        scene.snapshot(img);
+        File graphFile = new File(Paths.get(path.toString(), job.getFileName() + "_job"  + ".png").toString());
+        saveSnapshot(img, graphFile);
+
+        scene = charter.drawGraph("Speed Frequency", "Speed", "Frequency", new Charter.ChartData("Speed frequency",job.getFrequencySeries()));
+        scene.snapshot(img);
+        graphFile = new File(Paths.get(path.toString(), job.getFileName() + "_speed_frequency"  + ".png").toString());
+        saveSnapshot(img, graphFile);
 
         if(isPathCreated){
             eval.getScene();
@@ -127,7 +125,7 @@ public class OutputModule {
                 Scene testCharterScene = test.getCharterScene();
                 if(testCharterScene != null) {
                     testCharterScene.snapshot(img);
-                    File graphFile = new File(Paths.get(path.toString(), "/" + test.getTestName() + "_graph"  + ".png").toString());
+                    graphFile = new File(Paths.get(path.toString(), test.getTestName() + "_graph"  + ".png").toString());
                     saveSnapshot(img, graphFile);
                     savePostHocGraphTests(img, path, test);
                 } else {
@@ -200,22 +198,12 @@ public class OutputModule {
         return "";
     }
 
-    private void savePostHocTests(WritableImage img, File path, GenericTest test) {
-        if(test.getPostHocTest() != null) {
-            PostHocTest postHocTest = test.getPostHocTest();
-            Scene scene = postHocTest.getScene();
-            scene.snapshot(img);
-            File postHocGraphFile = new File(Paths.get(path.toString(), "/" + postHocTest.getTestName()  + ".png").toString());
-            saveSnapshot(img, postHocGraphFile);
-        }
-    }
-
     private void savePostHocGraphTests(WritableImage img, File path, GenericTest test) {
         if(test.getPostHocTest() != null) {
             PostHocTest postHocTest = test.getPostHocTest();
             Scene scene = postHocTest.getCharterScene();
             scene.snapshot(img);
-            File postHocGraphFile = new File(Paths.get(path.toString(), "/" + postHocTest.getTestName() + "_graph"  + ".png").toString());
+            File postHocGraphFile = new File(Paths.get(path.toString(), postHocTest.getTestName() + "_graph"  + ".png").toString());
             saveSnapshot(img, postHocGraphFile);
         }
     }
@@ -237,6 +225,10 @@ public class OutputModule {
             case SUCCESS -> "All files loaded!";
             default -> "Unknown state!";
         };
+    }
+
+    public void setPath(File path) {
+        this.path = path;
     }
 
     public enum STATUS {

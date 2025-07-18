@@ -27,16 +27,13 @@ public class Job {
     public final static Integer MIN_RUN_COUNT = 4;
     public final static Integer DEFAULT_RUN_COUNT = 4;
 
-    public final static Double DEFAULT_ALPHA = 0.05;
+    public final static Double DEFAULT_ALPHA = 0.01;
     public final static Double MAX_ALPHA = 0.99999;
     public final static Double MIN_ALPHA = 0.00001;
 
-    public final static Double DEFAULT_CV_THRESHOLD = .2;
+    public final static Double DEFAULT_CV_THRESHOLD = .33;
     public final static Double MAX_CV_THRESHOLD = .6;
-    public final static Double MIN_CV_THRESHOLD = .05;
-    public static final int MIN_TIME_SKIP = 30;
-    public final static int MAX_TIME_SKIP = 60;
-    public final static int DEFAULT_TIME_SKIP = 30;
+    public final static Double MIN_CV_THRESHOLD = .02;
 
     private static int COUNTER = 1;
     private final int ID = COUNTER; // so that each Job has a unique ID
@@ -59,8 +56,9 @@ public class Job {
     private double standardDeviation;
     private double SSE;
     private double MSE;
-    private int skipSeconds;
+    private int requiredSecondsForSteadyState = Settings.DEFAULT_REQUIRED_SECONDS_FOR_STEADY_STATE;
     private int skipSize;
+    private int skipSeconds;
 
     private final DoubleProperty alphaProperty = new SimpleDoubleProperty();
 
@@ -69,11 +67,14 @@ public class Job {
         this.speedSeries = new ArrayList<>();
         this.data = new ArrayList<>(data);
         this.rawData = new ArrayList<>(data);
-        this.convertedData = new ArrayList<>();
         this.chartData = new ArrayList<>();
         this.alphaProperty.set(DEFAULT_ALPHA);
         updateRunsData();
         COUNTER++;
+    }
+
+    public int getSeondsUntilSteadyState(){
+        return requiredSecondsForSteadyState;
     }
 
     public Job(Job other) {
@@ -87,7 +88,6 @@ public class Job {
         this.rawData = other.rawData;
         this.speedSeries = other.speedSeries;
         this.file = other.file;
-        this.convertedData = new ArrayList<>(other.convertedData);
         this.freq = new HashMap<>(other.freq);
         this.runsCounter = other.runsCounter;
         this.conversion = other.conversion;
@@ -136,8 +136,9 @@ public class Job {
 
     public void updateRunsData() {
         List<DataPoint> data = rawData;
-        sections = new ArrayList<>();
-        convertedData = new ArrayList<>();
+
+        this.sections = new ArrayList<>();
+
         if (runsCounter <= 0 || runsCounter > 1000) {
             runsCounter = DEFAULT_RUN_COUNT;
         }
@@ -147,8 +148,10 @@ public class Job {
 
         this.conversion = Settings.CONVERSION_VALUE;
         if(data.size() < windowSize){
-            Logging.log(Level.WARNING, "Job", String.format("Data size %d is less than window size %d", data.size(), windowSize));
-            return;
+            windowSize = data.size() / 2;
+
+            Logging.log(Level.WARNING, "Job", String.format("Data size %d is less than window size %d", data.size(), Settings.WINDOW_SIZE));
+            Logging.log(Level.WARNING, "Job", String.format("Window size set to %d milli sec", windowSize));
         }
         this.runDataSize = (data.size() / windowSize);
 
@@ -159,9 +162,7 @@ public class Job {
             List<DataPoint> run_data = new ArrayList<>();
 
             for (int j = i; j < i + windowSize; j++) {
-                DataPoint dp = new DataPoint(data.get(j).data / Settings.CONVERSION_VALUE, rawData.get(j).time);
-                run_data.add(dp);
-                convertedData.add(dp);
+                run_data.add(data.get(j));
             }
 
             Section section = new Section(runId++, run_data);
@@ -174,6 +175,11 @@ public class Job {
         if (skipRuns < 1) {
             return;
         }
+
+        if(this.sections.size() < skipRuns){
+            return;
+        }
+
         int skipSize = this.runDataSize * skipRuns;
 
         if(skipSize > this.data.size()){
@@ -220,7 +226,8 @@ public class Job {
         if(this.file == null){
             return "";
         }
-        return this.file.getName();
+        String str = this.file.getName();
+        return str.substring(0, str.lastIndexOf('.'));
     }
 
     public void setFile(File file) {
@@ -234,22 +241,22 @@ public class Job {
     public String getFileLastModifiedDate() {
         return attr.lastModifiedTime().toString();
     }
-//
-//    public int getRunsCounter() {
-//        return this.runsCounter;
-//    }
-//
-//    public void setRunsCounter(int runsCounter) {
-//        if(runsCounter < MIN_RUN_COUNT || runsCounter > MAX_RUN_COUNT){
-//            Logging.log(Level.WARNING, "Job", String.format("In Job: %s", getFileName()));
-//            Logging.log(Level.WARNING, "Job", String.format("Runs counter must be between %d and %d", MIN_RUN_COUNT, MAX_RUN_COUNT));
-//            Logging.log(Level.WARNING, "Job", String.format("Runs counter set to default value %d", DEFAULT_RUN_COUNT));
-//            this.runsCounter = DEFAULT_RUN_COUNT;
-//            return;
-//        }
-//
-//        this.runsCounter = runsCounter;
-//    }
+
+    public int getRunsCounter() {
+        return this.runsCounter;
+    }
+
+    public void setRunsCounter(int runsCounter) {
+        if(runsCounter < MIN_RUN_COUNT || runsCounter > MAX_RUN_COUNT){
+            Logging.log(Level.WARNING, "Job", String.format("In Job: %s", getFileName()));
+            Logging.log(Level.WARNING, "Job", String.format("Runs counter must be between %d and %d", MIN_RUN_COUNT, MAX_RUN_COUNT));
+            Logging.log(Level.WARNING, "Job", String.format("Runs counter set to default value %d", DEFAULT_RUN_COUNT));
+            this.runsCounter = DEFAULT_RUN_COUNT;
+            return;
+        }
+
+        this.runsCounter = runsCounter;
+    }
 
     public double getAlpha() {
         return this.alphaProperty.get();
@@ -321,14 +328,6 @@ public class Job {
         this.MSE = MSE;
     }
 
-    public int getSkipSeconds() {
-        return skipSeconds;
-    }
-
-    public void setSkipSeconds(int skipSeconds) {
-        this.skipSeconds = skipSeconds;
-    }
-
     public void setFrequency(Map<Integer, Integer> freq) {
         this.freq = freq;
         this.chartData = freq.entrySet()
@@ -350,4 +349,21 @@ public class Job {
         return String.format("Job ID: %d | Average Speed %s | Time in sec.: %f | Alpha: %f | File: %s", this.ID, new DecimalFormat("#.##").format(this.averageSpeed), this.getTimeInSec(), getAlpha(), this.file);
     }
     public DoubleProperty alphaProperty() { return alphaProperty; }
+
+    public void setSecondsUntilSteadyState(int requiredSecondsForSteadyState) {
+        this.requiredSecondsForSteadyState = requiredSecondsForSteadyState;
+    }
+
+    public void skipSeconds(int seconds){
+        if(seconds < 0){
+            Logging.log(Level.WARNING, "Job", String.format("In Job: %s | Skip seconds is %d", getFileName(), seconds));
+            seconds = 1;
+        }
+
+        this.skipSeconds = seconds;
+    }
+
+    public int getSkipSeconds() {
+        return skipSeconds;
+    }
 }

@@ -32,10 +32,11 @@ public class CoV extends GenericTest implements Initializable {
     @FXML private Label steadyStateLabelWindowed;
     @FXML private Label steadyStateLabel;
     @FXML private Button showCoVWindowedGraphButton;
+    private static final int GROUP_SIZE = 2;
 
 
     public CoV(Job job, Settings settings) {
-        super(job, job.getSkipSeconds(), false, settings.getGroupSize(), job.getAlpha(), false, settings.getRequiredRunsForSteadyState());
+        super(job, job.getSkipSeconds(), false, GROUP_SIZE, job.getAlpha() ,settings.isBonferroniSelected(), settings.getRequiredRunsForSteadyState());
         final int dataSizeWithRuns = job.getRuns().size() * 2;
         this.covData = new ArrayList<>(dataSizeWithRuns);
         this.STEADY_STATE_COV_THRESHOLD = this.job.getCvThreshold();
