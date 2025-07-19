@@ -46,7 +46,7 @@ public class Job {
     private List<Section> sections;
     private File file;
     private BasicFileAttributes attr;
-    private int runsCounter = DEFAULT_RUN_COUNT;
+    private int sectionCounter = DEFAULT_RUN_COUNT;
     private int time;
     private int runDataSize;
     private double conversion;
@@ -89,7 +89,7 @@ public class Job {
         this.speedSeries = other.speedSeries;
         this.file = other.file;
         this.freq = new HashMap<>(other.freq);
-        this.runsCounter = other.runsCounter;
+        this.sectionCounter = other.sectionCounter;
         this.conversion = other.conversion;
         this.time = other.time;
         this.averageSpeed = other.averageSpeed;
@@ -139,8 +139,8 @@ public class Job {
 
         this.sections = new ArrayList<>();
 
-        if (runsCounter <= 0 || runsCounter > 1000) {
-            runsCounter = DEFAULT_RUN_COUNT;
+        if (sectionCounter <= 0 || sectionCounter > 1000) {
+            sectionCounter = DEFAULT_RUN_COUNT;
         }
 
         int windowSize = Settings.WINDOW_SIZE;
@@ -170,17 +170,17 @@ public class Job {
         }
     }
 
-    public void prepareSkippedData(int skipRuns) {
-        this.skipSize = skipRuns;
-        if (skipRuns < 1) {
+    public void prepareSkippedData(int skipCounter) {
+        this.skipSize = skipCounter;
+        if (skipCounter < 1) {
             return;
         }
 
-        if(this.sections.size() < skipRuns){
+        if(this.sections.size() < skipCounter){
             return;
         }
 
-        int skipSize = this.runDataSize * skipRuns;
+        int skipSize = this.runDataSize * skipCounter;
 
         if(skipSize > this.data.size()){
             Logging.log(Level.WARNING, "Job", "Skipped data size " + skipSize + " exceeds job data size " + this.data.size());
@@ -188,8 +188,8 @@ public class Job {
         }
 
         this.data.subList(0, skipSize).clear();
-        this.sections.subList(0, skipRuns).clear();
-        runsCounter = runsCounter - skipRuns;
+        this.sections.subList(0, skipCounter).clear();
+        sectionCounter = sectionCounter - skipCounter;
     }
 
     public List<XYChart.Data<Number, Number>> getFrequencySeries() {
@@ -242,20 +242,8 @@ public class Job {
         return attr.lastModifiedTime().toString();
     }
 
-    public int getRunsCounter() {
-        return this.runsCounter;
-    }
-
-    public void setRunsCounter(int runsCounter) {
-        if(runsCounter < MIN_RUN_COUNT || runsCounter > MAX_RUN_COUNT){
-            Logging.log(Level.WARNING, "Job", String.format("In Job: %s", getFileName()));
-            Logging.log(Level.WARNING, "Job", String.format("Runs counter must be between %d and %d", MIN_RUN_COUNT, MAX_RUN_COUNT));
-            Logging.log(Level.WARNING, "Job", String.format("Runs counter set to default value %d", DEFAULT_RUN_COUNT));
-            this.runsCounter = DEFAULT_RUN_COUNT;
-            return;
-        }
-
-        this.runsCounter = runsCounter;
+    public int getSectionCounter() {
+        return this.sectionCounter;
     }
 
     public double getAlpha() {
@@ -312,22 +300,6 @@ public class Job {
         this.standardDeviation = standardDeviation;
     }
 
-    public void setSSE(double SSE) {
-        this.SSE = SSE;
-    }
-
-    public double getSSE() {
-        return SSE;
-    }
-
-    public double getMSE() {
-        return MSE;
-    }
-
-    public void setMSE(double MSE) {
-        this.MSE = MSE;
-    }
-
     public void setFrequency(Map<Integer, Integer> freq) {
         this.freq = freq;
         this.chartData = freq.entrySet()
@@ -338,10 +310,6 @@ public class Job {
 
     public int getRunDataSize() {
         return this.runDataSize;
-    }
-
-    public int getSkippedRunsDataSize() {
-        return this.skipSize;
     }
 
     @Override
