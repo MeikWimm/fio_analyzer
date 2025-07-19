@@ -43,7 +43,7 @@ public class AtoolTTest extends GenericTest implements Initializable {
     private static final int GROUP_SIZE = 2;
 
     public AtoolTTest(Job job, Settings settings) {
-        super(job, job.getSkipSeconds(), false, GROUP_SIZE, job.getAlpha() ,settings.isBonferroniSelected(), settings.getRequiredRunsForSteadyState());
+        super(job, job.getSkipSeconds(), false, GROUP_SIZE, job.getAlpha(), settings.getRequiredRunsForSteadyState());
         this.tData = new ArrayList<>();
     }
 

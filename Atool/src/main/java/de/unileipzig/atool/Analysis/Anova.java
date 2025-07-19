@@ -55,7 +55,7 @@ public class Anova extends GenericTest implements Initializable {
 
 
     public Anova(Job job, Settings settings) {
-        super(job, job.getSkipSeconds(), false, GROUP_SIZE, job.getAlpha() ,settings.isBonferroniSelected(), settings.getRequiredRunsForSteadyState());
+        super(job, job.getSkipSeconds(), false, GROUP_SIZE, job.getAlpha() , settings.getRequiredRunsForSteadyState());
         final int dataSize = job.getData().size();
         this.anovaData = new ArrayList<>(dataSize);
     }

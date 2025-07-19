@@ -35,11 +35,15 @@ public abstract class GenericTest {
     private PostHocTest postHocTest;
     private Scene scene;
     protected final Charter charter;
+    private double averageSpeedBeforeSkip;
+    private double averageSpeedAfterSkip;
 
-    public GenericTest(Job job, int skipFirstRun, boolean skipGroup, int groupSize, double alpha, boolean applyBonferroni, int thresholdSectionsForSteadyState) {
+    public GenericTest(Job job, int skipFirstRun, boolean skipGroup, int groupSize, double alpha, int thresholdSectionsForSteadyState) {
         this.job = new Job(job);
+        this.averageSpeedBeforeSkip = this.job.getAverageSpeed();
         this.job.prepareSkippedData(skipFirstRun);
         this.groups = Job.setupGroups(this.job, skipGroup, groupSize);
+        this.averageSpeedAfterSkip = this.job.getAverageSpeed();
         this.groupSize = groupSize;
         this.resultGroups = new ArrayList<>();
         this.resultSections = new ArrayList<>();
@@ -253,5 +257,11 @@ public abstract class GenericTest {
 
     public abstract TableView<Section> getTable();
 
+    public double getAverageSpeedAfterSkip() {
+        return averageSpeedAfterSkip;
+    }
 
+    public double getAverageSpeedBeforeSkip() {
+        return averageSpeedBeforeSkip;
+    }
 }

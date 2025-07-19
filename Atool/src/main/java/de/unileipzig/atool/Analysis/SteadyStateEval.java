@@ -27,10 +27,10 @@ public class SteadyStateEval implements Initializable {
     @FXML private Label labelHeader;
     @FXML private TableView<TestEval> evalTable;
     @FXML private TableColumn<TestEval, String> testColumn;
-    @FXML private TableColumn<TestEval, String> runColumn;
     @FXML private TableColumn<TestEval, String> timeColumn;
     @FXML private TableColumn<TestEval, Integer> skippedRunColumn;
-    @FXML private TableColumn<TestEval, Boolean> bonferroniColumn;
+    @FXML private TableColumn<TestEval, Integer> aveSpeedBeforeSkip;
+    @FXML private TableColumn<TestEval, Integer> aveSpeedAfterSkip;
     @FXML Button saveEvalButton;
     private final Job job;
     private File path;
@@ -43,7 +43,7 @@ public class SteadyStateEval implements Initializable {
     public SteadyStateEval(Job job, Settings settings){
         this.job = job;
         this.settings = settings;
-        tests = new  GenericTest[5];
+        tests = new  GenericTest[4];
         outputModule = new OutputModule(path);
 
         Anova anova = new Anova(job, settings);
@@ -51,9 +51,8 @@ public class SteadyStateEval implements Initializable {
         anova.setPostHocTest(tukey);
         tests[0] = anova;
         tests[1] = new ConInt(job, settings);
-        tests[2] = new CoV(job, settings);
-        tests[3] = new MannWhitney(job, settings);
-        tests[4] = new AtoolTTest(job, settings);
+        tests[2] = new MannWhitney(job, settings);
+        tests[3] = new AtoolTTest(job, settings);
         testEvals = new ArrayList<>();
         prepareTests();
     }
@@ -77,11 +76,11 @@ public class SteadyStateEval implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        runColumn.setCellValueFactory(new PropertyValueFactory<>("SteadyStateRun"));
         testColumn.setCellValueFactory(new PropertyValueFactory<>("TestName"));
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("Time"));
         skippedRunColumn.setCellValueFactory(new PropertyValueFactory<>("SkippedRunVal"));
-        bonferroniColumn.setCellValueFactory(new PropertyValueFactory<>("BonferroniVal"));
+        aveSpeedBeforeSkip.setCellValueFactory(new PropertyValueFactory<>("AverageSpeedBeforeSkip"));
+        aveSpeedAfterSkip.setCellValueFactory(new PropertyValueFactory<>("AverageSpeedAfterSkip"));
 
         saveEvalButton.setOnAction(e -> onActionSaveEval());
 

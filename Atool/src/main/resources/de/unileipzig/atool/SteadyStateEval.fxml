@@ -18,10 +18,10 @@
             <TableView id="evalTable" fx:id="evalTable" prefHeight="500.0" prefWidth="1000.0">
               <columns>
                 <TableColumn id="testColumn" fx:id="testColumn" prefWidth="58.0" text="Test" />
-                  <TableColumn id="runColumn" fx:id="runColumn" prefWidth="169.0" text="Section" />
                 <TableColumn id="timeColumn" fx:id="timeColumn" prefWidth="200.0" text="Steady state at time (sec)" />
                   <TableColumn id="skippedRunColumn" fx:id="skippedRunColumn" minWidth="9.0" prefWidth="165.0" text="Time skipped in seconds" />
-                  <TableColumn id="bonferroniColumn" fx:id="bonferroniColumn" minWidth="0.0" prefWidth="179.0" text="Bonferroni" />
+                  <TableColumn id="aveSpeedBeforeSkip" fx:id="aveSpeedBeforeSkip" minWidth="9.0" prefWidth="165.0" text="Average speed before skip" />
+                  <TableColumn id="aveSpeedAfterSkip" fx:id="aveSpeedAfterSkip" minWidth="9.0" prefWidth="165.0" text="Average speed before skip" />
               </columns>
             </TableView>
             <Pane prefHeight="100.0" prefWidth="1000.0">

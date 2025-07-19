@@ -44,7 +44,7 @@ public class ConInt extends GenericTest implements Initializable {
     private static final int GROUP_SIZE = 2;
 
     public ConInt(Job job,Settings settings) {
-        super(job, job.getSkipSeconds(), false, GROUP_SIZE, job.getAlpha() ,settings.isBonferroniSelected(), settings.getRequiredRunsForSteadyState());
+        super(job, job.getSkipSeconds(), false, GROUP_SIZE, job.getAlpha(), settings.getRequiredRunsForSteadyState());
     }
 
     @Override

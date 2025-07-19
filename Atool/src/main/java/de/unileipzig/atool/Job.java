@@ -32,8 +32,8 @@ public class Job {
     public final static Double MIN_ALPHA = 0.00001;
 
     public final static Double DEFAULT_CV_THRESHOLD = .33;
-    public final static Double MAX_CV_THRESHOLD = .6;
-    public final static Double MIN_CV_THRESHOLD = .02;
+    public final static Double MAX_CV_THRESHOLD = 3.0;
+    public final static Double MIN_CV_THRESHOLD = .001;
 
     private static int COUNTER = 1;
     private final int ID = COUNTER; // so that each Job has a unique ID
@@ -190,6 +190,15 @@ public class Job {
         this.data.subList(0, skipSize).clear();
         this.sections.subList(0, skipCounter).clear();
         sectionCounter = sectionCounter - skipCounter;
+
+        double sum = 0;
+
+        for (DataPoint dp : data) {
+            sum += dp.data;
+        }
+
+        this.averageSpeed = sum / data.size();
+
     }
 
     public List<XYChart.Data<Number, Number>> getFrequencySeries() {

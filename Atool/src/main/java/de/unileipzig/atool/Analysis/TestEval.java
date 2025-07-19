@@ -12,6 +12,8 @@ public class TestEval{
     private String bonferroniVal;
     private String comparedRunsVal;
     private TestEval postHocEval;
+    private double averageSpeedBeforeSkip;
+    private double averageSpeedAfterSkip;
 
     public TestEval(GenericTest test){
         this.test = test;
@@ -51,6 +53,8 @@ public class TestEval{
         }
         skippedRunVal = Integer.toString(test.getSkippedRunCount());
         comparedRunsVal = Integer.toString(test.getGroupSize());
+        averageSpeedBeforeSkip = test.getAverageSpeedBeforeSkip();
+        averageSpeedAfterSkip = test.getAverageSpeedAfterSkip();
     }
 
     private void prepareItem() {
@@ -71,6 +75,8 @@ public class TestEval{
         }
         skippedRunVal = Integer.toString(test.getSkippedRunCount());
         comparedRunsVal = Integer.toString(test.getGroupSize());
+        averageSpeedBeforeSkip = test.getAverageSpeedBeforeSkip();
+        averageSpeedAfterSkip = test.getAverageSpeedAfterSkip();
     }
 
     public String getBonferroniVal() {
@@ -96,4 +102,15 @@ public class TestEval{
     public String getSkippedRunVal() {
         return skippedRunVal;
     }
+
+    public double getAverageSpeedBeforeSkip() {
+        return averageSpeedBeforeSkip;
+    }
+
+    public double getAverageSpeedAfterSkip() {
+        return averageSpeedAfterSkip;
+    }
+
+
+
 }

@@ -23,7 +23,7 @@ import java.util.logging.Level;
  * @author meni1999
  */
 public class Settings implements Initializable {
-    public static final int MAX_SKIP_SECOND_COUNT = 60;
+    public static final int MAX_SKIP_SECOND_COUNT = 100;
     public static final int MIN_SKIP_SECOND_COUNT = 0;
     public static final int DEFAULT_SKIP_SECOND_COUNT = 0;
 
@@ -46,9 +46,7 @@ public class Settings implements Initializable {
 
     private int skipCounter = 0;
 
-    private boolean isBonferroniSelected = true;
 
-    @FXML public CheckBox bonferroniCheckbox;
 
     @FXML public Spinner<Integer> skipCountSpinner;
     @FXML public Spinner<Integer> requiredSecondsForSteadyStateSpinner;
@@ -109,7 +107,6 @@ public class Settings implements Initializable {
             }
         }
 
-        bonferroniCheckbox.setSelected(isBonferroniSelected);
 
         windowSizeSlider.setValue(WINDOW_SIZE / 1000.0);
         windowSizeSlider.setMin(MIN_WINDOW_SIZE / 1000.0);
@@ -128,7 +125,6 @@ public class Settings implements Initializable {
 
         requiredRunsForSteadyState = requiredSecondsForSteadyStateSpinner.getValue();
         skipCounter = skipCountSpinner.getValue();
-        isBonferroniSelected = bonferroniCheckbox.isSelected();
 
         if(primaryController != null){
             primaryController.update();
@@ -156,10 +152,6 @@ public class Settings implements Initializable {
             Logging.log(Level.SEVERE, "Settings", "Coudn't open Settings Window! App state");
             e.printStackTrace();
         }
-    }
-
-    public boolean isBonferroniSelected() {
-        return isBonferroniSelected;
     }
 
     public int getSkipCounter() {

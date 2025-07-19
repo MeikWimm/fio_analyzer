@@ -31,10 +31,8 @@
                      </children>
                   </Pane>
                   <Spinner id="skipCountSpinner" fx:id="skipCountSpinner" layoutX="24.0" layoutY="131.0" prefHeight="25.0" prefWidth="61.0" />
-                  <CheckBox id="bonferroniCheckbox" fx:id="bonferroniCheckbox" layoutX="147.0" layoutY="130.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="132.0" />
                   <Slider id="windowSizeSlider" fx:id="windowSizeSlider" layoutX="282.0" layoutY="223.0" majorTickUnit="10.0" max="60.0" min="10.0" minorTickCount="0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="30.0" />
                   <Label layoutX="24.0" layoutY="96.0" prefHeight="17.0" prefWidth="122.0" text="Skip seconds" />
-                  <Label layoutX="168.0" layoutY="137.0" prefHeight="17.0" prefWidth="140.0" text="Use Bonferroni correction" />
                   <Label layoutX="26.0" layoutY="14.0" prefHeight="17.0" prefWidth="142.0" text="Use conversion for data:" />
                   <RadioButton fx:id="radioButtonMebibyte" layoutX="24.0" layoutY="47.0" mnemonicParsing="false" text="MebiByte" />
                   <RadioButton fx:id="radioButtonKibiByte" layoutX="130.0" layoutY="47.0" mnemonicParsing="false" text="KibiByte" />
