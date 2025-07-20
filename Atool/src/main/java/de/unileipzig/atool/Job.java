@@ -4,6 +4,7 @@
  */
 package de.unileipzig.atool;
 
+import de.unileipzig.atool.Analysis.MathUtils;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
@@ -27,7 +28,7 @@ public class Job {
     public final static Integer MIN_RUN_COUNT = 4;
     public final static Integer DEFAULT_RUN_COUNT = 4;
 
-    public final static Double DEFAULT_ALPHA = 0.01;
+    public final static Double DEFAULT_ALPHA = 0.05;
     public final static Double MAX_ALPHA = 0.99999;
     public final static Double MIN_ALPHA = 0.00001;
 
@@ -88,13 +89,16 @@ public class Job {
         this.rawData = other.rawData;
         this.speedSeries = other.speedSeries;
         this.file = other.file;
+        this.calculatedF = other.calculatedF;
+        this.skipSeconds = other.skipSeconds;
+        this.requiredSecondsForSteadyState = other.requiredSecondsForSteadyState;
+        this.convertedData = other.convertedData;
         this.freq = new HashMap<>(other.freq);
         this.sectionCounter = other.sectionCounter;
         this.conversion = other.conversion;
         this.time = other.time;
         this.averageSpeed = other.averageSpeed;
         this.attr = other.attr;
-        this.calculatedF = other.calculatedF;
         this.standardDeviation = other.standardDeviation;
         this.MSE = other.MSE;
         this.SSE = other.SSE;
@@ -335,13 +339,39 @@ public class Job {
         return skipSeconds;
     }
 
-    public double getAverageSpeedSkippedSeconds() {
+    public double getCVBeforeSkip(){
+        return this.standardDeviation / this.getAverageSpeed();
+    }
+
+    private List<DataPoint> getSkippedData(){
         List<DataPoint> data = new ArrayList<>(this.rawData);
         int skipSize = Settings.WINDOW_STEP_SIZE* skipSeconds;
 
-        if(skipSize > data.size() || skipSeconds <= 0) return getAverageSpeed();
+        if(skipSize > data.size() || skipSeconds <= 0) return this.data;
 
         data.subList(0, skipSize).clear();
+
+        return data;
+    }
+
+
+    public double getCVAfterSkip(){
+        List<DataPoint> data = getSkippedData();
+        if(data.size() == this.rawData.size()) return getCVBeforeSkip();
+
+        double sum = 0;
+
+        for (DataPoint dp : data) {
+            sum += dp.data;
+        }
+        double averageSpeed = sum / data.size();
+        double standardDeviation = MathUtils.calculateDeviation(data, averageSpeed);
+        return standardDeviation / averageSpeed;
+    }
+
+    public double getAverageSpeedSkippedSeconds() {
+        List<DataPoint> data = getSkippedData();
+        if(data.size() == this.rawData.size()) return getAverageSpeed();
 
         double sum = 0;
 

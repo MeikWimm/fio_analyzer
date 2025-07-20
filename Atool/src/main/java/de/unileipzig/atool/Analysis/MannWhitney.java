@@ -131,7 +131,7 @@ public class MannWhitney extends GenericTest implements Initializable {
             double[] data2 = section2.getData().stream().mapToDouble(dp -> dp.data).toArray();
 
 
-            double pValue = wTest.wilcoxonSignedRank(data1, data2);
+            double pValue = wTest.wilcoxonSignedRankTest(data1, data2, false);
             group.getFirst().setP(pValue);
             uTestData.add(new XYChart.Data<>(group.getFirst().getID(), pValue));
             resultSections.add(group.getFirst());
