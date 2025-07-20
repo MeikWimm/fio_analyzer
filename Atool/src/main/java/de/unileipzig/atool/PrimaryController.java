@@ -217,12 +217,14 @@ public class PrimaryController implements Initializable {
 
     @FXML
     private void onActionSaveAllEval() {
-        File path = openDirectoryChooser();
+       File path = openDirectoryChooser();
 
-        for (Job job : table.getItems()) {
-            SteadyStateEval eval = new SteadyStateEval(job, this.settings);
-            eval.setPath(path);
-            eval.saveEval();
+        if(path != null) {
+            for (Job job : table.getItems()) {
+                SteadyStateEval eval = new SteadyStateEval(job, this.settings);
+                eval.setPath(path);
+                eval.saveEval();
+            }
         }
     }
 
@@ -233,8 +235,13 @@ public class PrimaryController implements Initializable {
             eval.setOwner(getOwner());
             eval.openWindow();
         } else {
-            labelLoadInfo.setText("Please select a Job!");
-            Logging.log(Level.WARNING, "Primary Controller","Error in opening SteadyStateEvalButton");
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Please select a Job");
+            alert.setHeaderText("Please select a Job outlined in the table");
+
+            alert.showAndWait();
+            labelLoadInfo.setText("Please select a Job.");
+            Logging.log(Level.WARNING, "Primary Controller","No Job selected.");
         }
     }
 
@@ -259,12 +266,6 @@ public class PrimaryController implements Initializable {
     public File openDirectoryChooser(){
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Choose a directory");
-
-        if(path == null){
-            path = new File(System.getProperty("user.home"));
-        } else {
-            directoryChooser.setInitialDirectory(path);
-        }
 
         return directoryChooser.showDialog(getOwner());
     }

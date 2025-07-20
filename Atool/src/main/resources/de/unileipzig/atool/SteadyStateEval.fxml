@@ -8,25 +8,25 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="435.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <top>
       <Label id="labelHeader" fx:id="labelHeader" text="Evaluation" BorderPane.alignment="CENTER" />
    </top>
    <center>
-      <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+      <VBox prefHeight="200.0" prefWidth="435.0" BorderPane.alignment="CENTER">
          <children>
-            <TableView id="evalTable" fx:id="evalTable" prefHeight="500.0" prefWidth="1000.0">
+            <TableView id="evalTable" fx:id="evalTable" prefHeight="297.0" prefWidth="1000.0">
               <columns>
                 <TableColumn id="testColumn" fx:id="testColumn" prefWidth="58.0" text="Test" />
                 <TableColumn id="timeColumn" fx:id="timeColumn" prefWidth="200.0" text="Steady state at time (sec)" />
                   <TableColumn id="skippedRunColumn" fx:id="skippedRunColumn" minWidth="9.0" prefWidth="165.0" text="Time skipped in seconds" />
-                  <TableColumn id="aveSpeedBeforeSkip" fx:id="aveSpeedBeforeSkip" minWidth="9.0" prefWidth="165.0" text="Average speed before skip" />
-                  <TableColumn id="aveSpeedAfterSkip" fx:id="aveSpeedAfterSkip" minWidth="9.0" prefWidth="165.0" text="Average speed before skip" />
               </columns>
             </TableView>
             <Pane prefHeight="100.0" prefWidth="1000.0">
                <children>
                   <Button id="saveEvalButton" fx:id="saveEvalButton" layoutX="14.0" layoutY="12.0" mnemonicParsing="false" text="Save evaluation" />
+                  <Label layoutX="120.0" layoutY="16.0" prefHeight="17.0" prefWidth="121.0" text="Speed after warm-up:" />
+                  <Label layoutX="120.0" layoutY="37.0" prefHeight="17.0" prefWidth="159.0" text="Speed after warm-up:" />
                </children>
             </Pane>
          </children>

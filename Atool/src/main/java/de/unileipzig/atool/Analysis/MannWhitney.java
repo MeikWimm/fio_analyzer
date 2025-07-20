@@ -116,7 +116,7 @@ public class MannWhitney extends GenericTest implements Initializable {
 
     @Override
     public double getCriticalValue() {
-        return this.zCrit;
+        return getAlpha();
     }
 
     @Override

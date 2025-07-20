@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
@@ -29,8 +30,6 @@ public class SteadyStateEval implements Initializable {
     @FXML private TableColumn<TestEval, String> testColumn;
     @FXML private TableColumn<TestEval, String> timeColumn;
     @FXML private TableColumn<TestEval, Integer> skippedRunColumn;
-    @FXML private TableColumn<TestEval, Integer> aveSpeedBeforeSkip;
-    @FXML private TableColumn<TestEval, Integer> aveSpeedAfterSkip;
     @FXML Button saveEvalButton;
     private final Job job;
     private File path;
@@ -38,13 +37,15 @@ public class SteadyStateEval implements Initializable {
     private final Settings settings;
     private final GenericTest[] tests;
     private final OutputModule outputModule;
+    private final DirectoryChooser directoryChooser;
     private Window owner;
 
     public SteadyStateEval(Job job, Settings settings){
         this.job = job;
         this.settings = settings;
-        tests = new  GenericTest[4];
-        outputModule = new OutputModule(path);
+        tests = new  GenericTest[5];
+        outputModule = new OutputModule();
+        directoryChooser = new DirectoryChooser();
 
         Anova anova = new Anova(job, settings);
         TukeyHSD tukey = new TukeyHSD();
@@ -53,6 +54,7 @@ public class SteadyStateEval implements Initializable {
         tests[1] = new ConInt(job, settings);
         tests[2] = new MannWhitney(job, settings);
         tests[3] = new AtoolTTest(job, settings);
+        tests[4] = new CoV(job, settings);
         testEvals = new ArrayList<>();
         prepareTests();
     }
@@ -79,8 +81,6 @@ public class SteadyStateEval implements Initializable {
         testColumn.setCellValueFactory(new PropertyValueFactory<>("TestName"));
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("Time"));
         skippedRunColumn.setCellValueFactory(new PropertyValueFactory<>("SkippedRunVal"));
-        aveSpeedBeforeSkip.setCellValueFactory(new PropertyValueFactory<>("AverageSpeedBeforeSkip"));
-        aveSpeedAfterSkip.setCellValueFactory(new PropertyValueFactory<>("AverageSpeedAfterSkip"));
 
         saveEvalButton.setOnAction(e -> onActionSaveEval());
 
@@ -91,10 +91,6 @@ public class SteadyStateEval implements Initializable {
     public void openWindow() {
         Scene scene = getScene();
         Stage stage = new Stage();
-        stage.setMaxWidth(1200);
-        stage.setMaxHeight(700);
-        stage.setMinHeight(700);
-        stage.setMinWidth(800);
         stage.setTitle("Job Evaluation");
         stage.setScene(scene);
         setLabeling();
@@ -111,12 +107,15 @@ public class SteadyStateEval implements Initializable {
     }
 
     private void onActionSaveEval(){
-        outputModule.openDirectoryChooser(this.owner);
         saveEval();
     }
 
     public void saveEval(){
-        outputModule.setPath(this.path);
+        if(path == null){
+            path = directoryChooser.showDialog(owner);
+        }
+
+        outputModule.setPath(path);
         OutputModule.STATUS status = outputModule.saveEval(this);
         Logging.log(Level.INFO, "SteadyStateEval", status.toString());
     }

@@ -22,9 +22,8 @@ public class OutputModule {
     private File path;
     private final String className = "OutputModule";
 
-    public OutputModule(File path) {
+    public OutputModule() {
         stringBuilder = new StringBuilder();
-        this.path = path;
     }
 
     public STATUS saveEval(SteadyStateEval eval) {
@@ -85,6 +84,8 @@ public class OutputModule {
         stringBuilder.append("Job time (in sec.): ").append(job.getTimeInSec()).append('\n');
         stringBuilder.append("Window size in millisecond: ").append(Settings.WINDOW_SIZE).append('\n');
         stringBuilder.append("Window step size in millisecond: ").append(Settings.WINDOW_STEP_SIZE).append('\n');
+        stringBuilder.append("Averaged Speed (Before): ").append(job.getAverageSpeed()).append('\n');
+        stringBuilder.append("Averaged Speed (After): ").append(job.getAverageSpeedSkippedSeconds()).append('\n');
         stringBuilder.append("Sections/Seconds until considering steady state: ").append(eval.getJob().getSeondsUntilSteadyState()).append('\n');
         stringBuilder.append("Alpha: ").append(job.getAlpha()).append('\n');
         stringBuilder.append("\n");

@@ -190,15 +190,6 @@ public class Job {
         this.data.subList(0, skipSize).clear();
         this.sections.subList(0, skipCounter).clear();
         sectionCounter = sectionCounter - skipCounter;
-
-        double sum = 0;
-
-        for (DataPoint dp : data) {
-            sum += dp.data;
-        }
-
-        this.averageSpeed = sum / data.size();
-
     }
 
     public List<XYChart.Data<Number, Number>> getFrequencySeries() {
@@ -342,5 +333,22 @@ public class Job {
 
     public int getSkipSeconds() {
         return skipSeconds;
+    }
+
+    public double getAverageSpeedSkippedSeconds() {
+        List<DataPoint> data = new ArrayList<>(this.rawData);
+        int skipSize = Settings.WINDOW_STEP_SIZE* skipSeconds;
+
+        if(skipSize > data.size() || skipSeconds <= 0) return getAverageSpeed();
+
+        data.subList(0, skipSize).clear();
+
+        double sum = 0;
+
+        for (DataPoint dp : data) {
+            sum += dp.data;
+        }
+
+        return (sum / data.size());
     }
 }

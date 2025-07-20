@@ -122,7 +122,7 @@ public class AtoolTTest extends GenericTest implements Initializable {
 
     @Override
     public double getCriticalValue() {
-        return this.tCrit;
+        return getAlpha();
     }
 
     @Override
