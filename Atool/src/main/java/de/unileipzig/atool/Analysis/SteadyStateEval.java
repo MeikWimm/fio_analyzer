@@ -29,7 +29,7 @@ public class SteadyStateEval implements Initializable {
     @FXML private TableView<TestEval> evalTable;
     @FXML private TableColumn<TestEval, String> testColumn;
     @FXML private TableColumn<TestEval, String> timeColumn;
-    @FXML private TableColumn<TestEval, Integer> skippedRunColumn;
+    //@FXML private TableColumn<TestEval, Integer> skippedRunColumn;
     @FXML Button saveEvalButton;
     private final Job job;
     private File path;
@@ -80,7 +80,7 @@ public class SteadyStateEval implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         testColumn.setCellValueFactory(new PropertyValueFactory<>("TestName"));
         timeColumn.setCellValueFactory(new PropertyValueFactory<>("Time"));
-        skippedRunColumn.setCellValueFactory(new PropertyValueFactory<>("SkippedRunVal"));
+        //skippedRunColumn.setCellValueFactory(new PropertyValueFactory<>("SkippedRunVal"));
 
         saveEvalButton.setOnAction(e -> onActionSaveEval());
 

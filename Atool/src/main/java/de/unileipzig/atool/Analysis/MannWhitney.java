@@ -16,6 +16,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
+import org.apache.commons.math3.stat.inference.WilcoxonSignedRankTest;
 
 import java.net.URL;
 import java.util.*;
@@ -122,7 +123,7 @@ public class MannWhitney extends GenericTest implements Initializable {
     @Override
     protected void calculateTest(List<List<Section>> groups, List<Section> resultSections) {
         if (this.job.getRuns().size() <= 1) return;
-        MannWhitneyUTest uTest = new MannWhitneyUTest();
+        WilcoxonSignedRankTest wTest = new WilcoxonSignedRankTest();
         for (List<Section> group : groups) {
             Section section1 = group.getFirst();
             Section section2 = group.get(1);
@@ -130,7 +131,7 @@ public class MannWhitney extends GenericTest implements Initializable {
             double[] data2 = section2.getData().stream().mapToDouble(dp -> dp.data).toArray();
 
 
-            double pValue = uTest.mannWhitneyUTest(data1, data2);
+            double pValue = wTest.wilcoxonSignedRank(data1, data2);
             group.getFirst().setP(pValue);
             uTestData.add(new XYChart.Data<>(group.getFirst().getID(), pValue));
             resultSections.add(group.getFirst());

@@ -87,7 +87,9 @@ public class OutputModule {
         stringBuilder.append("Averaged Speed (Before): ").append(job.getAverageSpeed()).append('\n');
         stringBuilder.append("Averaged Speed (After): ").append(job.getAverageSpeedSkippedSeconds()).append('\n');
         stringBuilder.append("Sections/Seconds until considering steady state: ").append(eval.getJob().getSeondsUntilSteadyState()).append('\n');
-        stringBuilder.append("Alpha: ").append(job.getAlpha()).append('\n');
+        stringBuilder.append("Alpha: ").append(job.getAlpha()).append('\n').append('\n');
+        stringBuilder.append("Time skipped (in sec.): ").append(job.getSkipSeconds()).append('\n');
+
         stringBuilder.append("\n");
 
         boolean isPathCreated = false;

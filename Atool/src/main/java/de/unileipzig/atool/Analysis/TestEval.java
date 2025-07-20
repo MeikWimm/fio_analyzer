@@ -8,7 +8,6 @@ public class TestEval{
     private String testName;
     private String steadyStateRunString;
     private String time;
-    private String skippedRunVal;
     private String bonferroniVal;
     private String comparedRunsVal;
     private TestEval postHocEval;
@@ -49,7 +48,7 @@ public class TestEval{
         } else {
             bonferroniVal = "No";
         }
-        skippedRunVal = Integer.toString(test.getSkippedRunCount());
+
         comparedRunsVal = Integer.toString(test.getGroupSize());
     }
 
@@ -69,7 +68,7 @@ public class TestEval{
         } else {
             bonferroniVal = "No";
         }
-        skippedRunVal = Integer.toString(test.getSkippedRunCount());
+
         comparedRunsVal = Integer.toString(test.getGroupSize());
     }
 
@@ -91,9 +90,5 @@ public class TestEval{
 
     public String getTime() {
         return time;
-    }
-
-    public String getSkippedRunVal() {
-        return skippedRunVal;
     }
 }
