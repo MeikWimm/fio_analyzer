@@ -27,11 +27,10 @@ Ein Analysewerkzeug für `fio`-Benchmark-Logs mit grafischer Oberfläche und sta
 
 ## Verwendung
 - Um mit dem fio-Tool Logs zu erzeugen, wird der Parameter `--write_bw_log=[logname]` verwendet.
-  - **DABEI SOLLTE EIN FIO RUN MINDESTENS EINE MINUTE LAUFEN.**
 - Wähle das Verzeichnis aus, in dem sich die `fio`-Logdateien befinden.
 - In der Tabelle können folgende Werte angepasst werden:
   - **Alpha** (Auswählbar zwischen `0.1`, `0.05` und `0.01`)
-  - **CV Threshold** (zwischen `0.05` und `0.5`)
+  - **CV Threshold** (zwischen `0.01` und `3.0`)
     → Einfach auf die jeweilige Zahl klicken und bearbeiten und mit [Enter] bestätigen.
 - Sobald das Verzeichnis gesetzt ist, ist es möglich mit dem **Refresh-MenuItem** in der Menüleiste unter `File` neue Logs zu laden, wenn neue Dateien im Verzeichnis auftauchen.
 - Mit **Rechtsklick** auf die Items in der Tabelle können statistische Tests ausgewählt werden.
@@ -67,25 +66,22 @@ Diese Dokumentation beschreibt die verfügbaren Einstellungen und deren Bedeutun
   - **KibiByte**
   - **KiloByte**
 - **Standardwert**: KibiByte.
-- **Schieberegler**: Werte von 1 bis 500 für die Fenstergröße (Window size) für CoV und CUSUM.
+- **Schieberegler Window Size**: Werte von 10 bis 30 Sekunden für die Fenstergröße.
 
 ---
 
 ## Run-Einstellungen
 
-### Skip seconds sections
+### Skip Sections sections
 - **Beschreibung**: Wie viele Sekunden des start sollen ignoriert werden. Eine Sektion entspricht einer Sekunde der Daten.
 - **Standardwert**: 0 Sekunden.
 
-### Use Bonferroni correction
-- **Beschreibung**: Aktiviert die Bonferroni-Korrektur zur statistischen Analyse.
-- **Standardwert**: Deaktiviert.
 ---
 ### Required time for steady state
-- **Beschreibung**: Mindestanzahl aufeinanderfolgender Sektionen/Sekunden, die erforderlich sind, um einen stabilen Zustand festzulegen.
-- **Standardwert**: 60 Sekunden.
-- **Maximal Wert**: 60 Sekunden.
-- **Minimal Wert**: 30 Sekunden.
+- **Beschreibung**: Mindestanzahl aufeinanderfolgender Sektionen, die erforderlich sind, um einen stabilen Zustand festzulegen.
+- **Standardwert**: 1 Sektion.
+- **Maximal Wert**: 60 Sektionen.
+- **Minimal Wert**: 1 Sektion.
 
 ---
 
