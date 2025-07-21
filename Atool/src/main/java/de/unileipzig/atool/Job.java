@@ -50,7 +50,6 @@ public class Job {
     private int sectionCounter = DEFAULT_RUN_COUNT;
     private int time;
     private int runDataSize;
-    private double conversion;
     private double averageSpeed;
     private double cvThreshold = DEFAULT_CV_THRESHOLD;
     private double calculatedF;
@@ -95,7 +94,6 @@ public class Job {
         this.convertedData = other.convertedData;
         this.freq = new HashMap<>(other.freq);
         this.sectionCounter = other.sectionCounter;
-        this.conversion = other.conversion;
         this.time = other.time;
         this.averageSpeed = other.averageSpeed;
         this.attr = other.attr;
@@ -150,7 +148,6 @@ public class Job {
         int windowSize = Settings.WINDOW_SIZE;
         int stepSize = Settings.WINDOW_STEP_SIZE; // Sliding Step
 
-        this.conversion = Settings.CONVERSION_VALUE;
         if(data.size() < windowSize){
             windowSize = data.size() / 2;
 
@@ -177,6 +174,7 @@ public class Job {
     public void prepareSkippedData(int skipCounter) {
         this.skipSize = skipCounter;
         if (skipCounter < 1) {
+            this.data = new ArrayList<>(this.rawData);
             return;
         }
 
@@ -202,7 +200,7 @@ public class Job {
 
     public List<XYChart.Data<Number, Number>> getSeries() {
         if (this.speedSeries.isEmpty()) {
-            for (DataPoint dp : data) {
+            for (DataPoint dp : rawData) {
                 speedSeries.add(new XYChart.Data<>(dp.time, dp.data));
             }
         }
@@ -281,7 +279,7 @@ public class Job {
     }
 
     public double getTimeInSec() {
-        return (double) this.time / 1000;
+        return this.time / 1000.0;
     }
 
     public double getAverageSpeed() {
@@ -369,7 +367,7 @@ public class Job {
         return standardDeviation / averageSpeed;
     }
 
-    public double getAverageSpeedSkippedSeconds() {
+    public double getAverageSpeedAfterSkip() {
         List<DataPoint> data = getSkippedData();
         if(data.size() == this.rawData.size()) return getAverageSpeed();
 
@@ -379,6 +377,6 @@ public class Job {
             sum += dp.data;
         }
 
-        return (sum / data.size());
+        return (sum / data.size()) / Settings.CONVERSION_VALUE;
     }
 }

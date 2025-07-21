@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="800.0" maxWidth="1200.0" minHeight="400.0" minWidth="600.0" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox maxHeight="800.0" maxWidth="1200.0" minHeight="400.0" minWidth="600.0" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <Label id="jobLabel" fx:id="jobLabel" prefHeight="20.0" prefWidth="1000.0" text="ANOVA" />
       <TableView id="anovaTable" fx:id="anovaTable" prefHeight="450.0" prefWidth="1000.0">
@@ -23,26 +23,16 @@
       <Pane id="anovaPane" fx:id="anovaPane" prefHeight="150.0" prefWidth="1000.0">
          <children>
             <Label layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="108.0" text="Average Speed =" />
-            <Label layoutX="14.0" layoutY="31.0" prefHeight="17.0" prefWidth="108.0" text="SSE =" />
-            <Label layoutX="14.0" layoutY="48.0" prefHeight="17.0" prefWidth="108.0" text="SSA =" />
-            <Label layoutX="14.0" layoutY="65.0" prefHeight="17.0" prefWidth="108.0" text="SST =" />
             <Label id="averageSpeedLabel" fx:id="averageSpeedLabel" layoutX="122.0" layoutY="14.0" prefHeight="17.0" prefWidth="200.0" text="_" />
-            <Label id="sseLabel" fx:id="sseLabel" layoutX="122.0" layoutY="31.0" prefHeight="17.0" prefWidth="200.0" text="_" />
-            <Label id="ssaLabel" fx:id="ssaLabel" layoutX="122.0" layoutY="48.0" prefHeight="17.0" prefWidth="200.0" text="_" />
-            <Label id="sstLabel" fx:id="sstLabel" layoutX="122.0" layoutY="65.0" prefHeight="17.0" prefWidth="200.0" text="_" />
-            <Label layoutX="478.0" layoutY="14.0" prefHeight="17.0" prefWidth="108.0" text="SSA / SST = " />
-            <Label layoutX="478.0" layoutY="31.0" prefHeight="17.0" prefWidth="108.0" text="SSE / SST = " />
-            <Label layoutX="478.0" layoutY="48.0" prefHeight="17.0" prefWidth="108.0" text="F (critical) =" />
-            <Label id="ssaSstLabel" fx:id="ssaSstLabel" layoutX="593.0" layoutY="14.0" prefHeight="17.0" prefWidth="187.0" text="_" />
-            <Label id="sseSstLabel" fx:id="sseSstLabel" layoutX="593.0" layoutY="31.0" prefHeight="17.0" prefWidth="187.0" text="_" />
-            <Label id="fCriticalLabel" fx:id="fCriticalLabel" layoutX="593.0" layoutY="48.0" prefHeight="17.0" prefWidth="187.0" text="_" />
-            <Label layoutX="478.0" layoutY="65.0" prefHeight="17.0" prefWidth="108.0" text="F (calculated) = " />
-            <Label id="fCalculatedLabel" fx:id="fCalculatedLabel" layoutX="593.0" layoutY="65.0" prefHeight="17.0" prefWidth="187.0" text="_" />
+            <Label layoutX="14.0" layoutY="31.0" prefHeight="17.0" prefWidth="108.0" text="F (critical) =" />
+            <Label id="fCriticalLabel" fx:id="fCriticalLabel" layoutX="122.0" layoutY="31.0" prefHeight="17.0" prefWidth="187.0" text="_" />
+            <Label layoutX="14.0" layoutY="48.0" prefHeight="17.0" prefWidth="108.0" text="F (calculated) = " />
+            <Label id="fCalculatedLabel" fx:id="fCalculatedLabel" layoutX="122.0" layoutY="48.0" prefHeight="17.0" prefWidth="187.0" text="_" />
             <Button id="showFGraphButton" fx:id="showFGraphButton" layoutX="14.0" layoutY="111.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="132.0" text="Show F-Graph" />
             <Label layoutX="14.0" layoutY="82.0" prefHeight="17.0" prefWidth="108.0" text="Job σ =" />
             <Label id="sigmaJobLabel" fx:id="sigmaJobLabel" layoutX="122.0" layoutY="82.0" prefHeight="17.0" prefWidth="200.0" text="_" />
-            <Label layoutX="478.0" layoutY="82.0" prefHeight="17.0" prefWidth="108.0" text="Steady state:" />
-            <Label id="steadyStateLabel" fx:id="steadyStateLabel" layoutX="593.0" layoutY="82.0" prefHeight="17.0" prefWidth="187.0" text="_" />
+            <Label layoutX="14.0" layoutY="65.0" prefHeight="17.0" prefWidth="108.0" text="Steady state:" />
+            <Label id="steadyStateLabel" fx:id="steadyStateLabel" layoutX="122.0" layoutY="65.0" prefHeight="17.0" prefWidth="187.0" text="_" />
          </children>
       </Pane>
    </children>

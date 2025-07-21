@@ -15,7 +15,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.apache.commons.math3.stat.inference.WilcoxonSignedRankTest;
 
 import java.net.URL;
@@ -25,7 +24,7 @@ import java.util.*;
 /**
  * @author meni1999
  */
-public class MannWhitney extends GenericTest implements Initializable {
+public class WilcoxonSignTest extends GenericTest implements Initializable {
     private static class RankedDataPoint extends DataPoint {
         int flag;
         double rank;
@@ -65,7 +64,7 @@ public class MannWhitney extends GenericTest implements Initializable {
     private double zCrit;
     private static final int GROUP_SIZE = 2;
 
-    public MannWhitney(Job job,Settings settings) {
+    public WilcoxonSignTest(Job job, Settings settings) {
         super(job, job.getSkipSeconds(), false, GROUP_SIZE, job.getAlpha(), settings.getRequiredRunsForSteadyState());
         this.uTestData = new ArrayList<>();
     }
@@ -101,7 +100,7 @@ public class MannWhitney extends GenericTest implements Initializable {
 
     @Override
     protected URL getFXMLPath() {
-        return getClass().getResource("/de/unileipzig/atool/MannWithney.fxml");
+        return getClass().getResource("/de/unileipzig/atool/Wilcoxon.fxml");
     }
 
     @Override

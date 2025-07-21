@@ -85,13 +85,13 @@ public class OutputModule {
         stringBuilder.append("Window size in millisecond: ").append(Settings.WINDOW_SIZE).append('\n');
         stringBuilder.append("Window step size in millisecond: ").append(Settings.WINDOW_STEP_SIZE).append('\n');
         stringBuilder.append("Averaged Speed (Before): ").append(job.getAverageSpeed()).append('\n');
-        stringBuilder.append("Averaged Speed (After): ").append(job.getAverageSpeedSkippedSeconds()).append('\n');
+        stringBuilder.append("Averaged Speed (After): ").append(job.getAverageSpeedAfterSkip()).append('\n');
         stringBuilder.append("CV (Before): ").append(job.getCVBeforeSkip()).append('\n');
         stringBuilder.append("CV (After): ").append(job.getCVAfterSkip()).append('\n');
         stringBuilder.append("Sections/Seconds until considering steady state: ").append(eval.getJob().getSeondsUntilSteadyState()).append('\n');
         stringBuilder.append("Alpha: ").append(job.getAlpha()).append('\n').append('\n');
         stringBuilder.append("Time skipped (in sec.): ").append(job.getSkipSeconds()).append('\n');
-        stringBuilder.append("Meaning for Before/After: (After) transient state | (Before transient state)").append(job.getSkipSeconds()).append('\n');
+        stringBuilder.append("Meaning for Before/After: (After) transient state | (Before transient state)").append('\n');
 
 
 

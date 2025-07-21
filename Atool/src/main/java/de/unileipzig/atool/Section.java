@@ -8,9 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
- * @author meni1999
+ * Eine Sektion repräsentiert ein Job, definiert als eine Sammlung von Datenpunkten, die verschiedene
+ * statistische Analysen und Attribute wie Geschwindigkeit, Standardabweichung, Zeitintervalle
+ * und Gruppenidentität kapseln. Eine Section kann mit einer ID und einem Datensatz instanziiert
+ * oder von einer bestehenden Section-Instanz kopiert werden. Sie bietet Funktionen zur
+ * Berechnung relevanter Statistiken sowie zum Abrufen oder Ändern ihrer Attribute.
  */
+
 public class Section /*Section*/ {
     public static Double UNDEFINED_DOUBLE_VALUE = Double.MIN_VALUE;
     public static Integer UNDEFINED_INTEGER = Integer.MIN_VALUE;
@@ -46,7 +50,6 @@ public class Section /*Section*/ {
         calculateRun();
     }
 
-    // Copy constructor
     public Section(Section other) {
         this.sectionID = other.getID();
         this.data = other.getData();
@@ -73,6 +76,18 @@ public class Section /*Section*/ {
         this.overallMean = other.getOverallMean();
         this.isOverlapping = other.getOverlap();
     }
+
+    /**
+     * Berechnet verschiedene statistische Eigenschaften einer Sammlung von Datenpunkten
+     * innerhalb der aktuellen Section-Instanz.
+     * <br/>
+     * Die Methode berechnet Folgendes:
+     * - Die durchschnittliche Geschwindigkeit aller Datenpunkte in der Sammlung.
+     * - Die Standardabweichung der Datenpunkte bezogen auf die durchschnittliche Geschwindigkeit.
+     * - Die Startzeit und Endzeit der Datenpunkte.
+     * - Die Gesamtdauer basierend auf den Start- und Endzeitwerten.
+     **
+     */
 
     private void calculateRun() {
         double ioSpeed = 0;

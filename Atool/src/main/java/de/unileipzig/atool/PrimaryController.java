@@ -20,6 +20,18 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 
 
+/**
+ * Die Klasse PrimaryController ist verantwortlich für die Verwaltung der Hauptbenutzeroberfläche
+ * und der Interaktionen einer JavaFX-Anwendung. Sie implementiert das Interface Initializable,
+ * um verschiedene Komponenten und Konfigurationen zu initialisieren, die für die Funktionalität
+ * der Anwendung erforderlich sind.
+ *
+ * Dieser Controller bindet Benutzeroberflächenkomponenten, behandelt Benutzerinteraktionen
+ * und aktualisiert die angezeigten Daten in der zugehörigen TableView. Weitere Funktionen
+ * umfassen das Durchführen von Berechnungen, das Aktualisieren von Job-Parametern sowie das
+ * Öffnen von Hilfsdialogen oder Fenstern für Analysen und Einstellungen.
+ */
+
 public class PrimaryController implements Initializable {
     @FXML private MenuItem menuItem_generalSettings;
     @FXML private MenuItem menuItem_open;
@@ -41,9 +53,6 @@ public class PrimaryController implements Initializable {
     private InputModule inputModule;
     private Settings settings;
     private Job job;
-    private File path;
-
-
 
     @Override
     public void initialize(URL arg0, ResourceBundle arg1) {
@@ -57,6 +66,15 @@ public class PrimaryController implements Initializable {
     }
 
 
+    /**
+     * Konfiguriert und lädt Job-Einträge in die zugehörige Tabelle, wenn eine Datei erfolgreich geladen wurde.
+     *
+     * Diese Methode arbeitet mit dem inputModule zusammen, um dem Benutzer die Auswahl eines Verzeichnisses
+     * über einen Verzeichnis-Dialog zu ermöglichen. Anschließend wird versucht, eine Datei aus dem ausgewählten
+     * Verzeichnis zu laden. Wenn die Datei erfolgreich geladen wurde, werden die Job-Einträge in die Tabelle
+     * übernommen. Zusätzlich wird ein Label aktualisiert, um den Status des Datei-Ladevorgangs anzuzeigen.
+     */
+
     private void setupJobItems() {
         inputModule.openDirectoryChooser(getOwner());
         InputModule.STATUS state = inputModule.loadFile();
@@ -69,20 +87,35 @@ public class PrimaryController implements Initializable {
     }
 
 
+    /**
+     * Aktualisiert die Daten und visuellen Elemente der Job-Tabelle basierend auf den aktuellen
+     * Anwendungseinstellungen.
+     *
+     * Diese Methode durchläuft alle Jobs in der Tabelle, um jobbezogene Eigenschaften wie
+     * Durchschnittsgeschwindigkeit, Anforderungen an den stationären Zustand und Überspring-Sekunden
+     * anhand der aktuellen Einstellungen neu zu berechnen und zu aktualisieren. Nach der Aktualisierung
+     * der Job-Daten wird die Benutzeroberfläche der Tabelle durch Umschalten der Sichtbarkeit der
+     * ersten Spalte aktualisiert. Zusätzlich wird das Label der Geschwindigkeits-Spalte angepasst,
+     * um die aktuelle Umrechnungseinstellung widerzuspiegeln.
+     */
+
     public void update() {
         for (Job job : table.getItems()) {
-            job.setAverageSpeed(job.getAverageSpeed() * Settings.CONVERSION_VALUE);
             job.setSecondsUntilSteadyState(settings.getRequiredRunsForSteadyState());
             job.skipSeconds(settings.getSkipCounter());
             job.updateRunsData();
         }
 
         speedColumn.setText("Average Speed " + Settings.getConversion());
-        
+
         table.getColumns().getFirst().setVisible(false);
         table.getColumns().getFirst().setVisible(true);
     }
 
+    /**
+     * Configures the cell value factories for various table columns in the application.
+     * Each column's cell value factory is set to retrieve a specific property from the associated data model.
+     */
     private void setupCellValueFactory() {
         IDColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
         fileNameColumn.setCellValueFactory(new PropertyValueFactory<>("FileName"));
@@ -97,6 +130,9 @@ public class PrimaryController implements Initializable {
         alphaColumn.setCellValueFactory(cell -> cell.getValue().alphaProperty().asObject());
     }
 
+    /**
+     *
+     */
     private void setupColumnTextField() {
         alphaColumn.setCellFactory(ComboBoxTableCell.forTableColumn(
                 FXCollections.observableArrayList(0.01, 0.05, 0.1)
@@ -117,6 +153,24 @@ public class PrimaryController implements Initializable {
         });
     }
 
+    /**
+     * Sets up the context menu items for each table row in the table.
+     * This method initializes a custom row factory and attaches various
+     * menu items to it, each linked to a specific row action.
+     *
+     * Menu items include:
+     * - "Draw Job Speed" to invoke the corresponding action for drawing job speed.
+     * - "Draw Job Frequency" to invoke the action for drawing job frequency.
+     * - "Confidence Interval" to calculate a confidence interval.
+     * - "Anova" to perform analysis of variance.
+     * - "CV" to calculate the coefficient of variation.
+     * - "T-Test" to perform a T-test comparison.
+     * - "U-Test" to execute a Mann-Whitney U-test.
+     * - "Tukey-HSD" to calculate Tukey's HSD (Honest Significant Difference).
+     *
+     * The custom row factory, after configuration, is assigned to the
+     * table's row factory to enable context menu functionality for each row.
+     */
     private void setupTableMenuItems() {
         Utils.CustomTableRowFactory menuItems = new Utils.CustomTableRowFactory();
         menuItems.addMenuItem("Draw Job Speed", this::onActionDrawJobSpeed);
@@ -125,26 +179,38 @@ public class PrimaryController implements Initializable {
         menuItems.addMenuItem("Anova", this::onActionCalcAnova);
         menuItems.addMenuItem("CV", this::onActionCalcCV);
         menuItems.addMenuItem("T-Test", this::onActionCalcTTest);
-        menuItems.addMenuItem("U-Test", this::onActionCalcMannWhitneyTest);
+        menuItems.addMenuItem("Wilcoxon-Sign-Test", this::onActionCalcMannWhitneyTest);
         menuItems.addMenuItem("Tukey-HSD", this::onActionCalcTukeyHSD);
 
         table.setRowFactory(menuItems);
     }
 
 
+    /**
+     *
+     */
     private void setupTableCellCommit() {
         cvColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {
             t.getRowValue().setCvThreshold(t.getNewValue());
         });
     }
 
+    /**
+     * Handles the action to draw a speed graph for a given job in a table row.
+     * This method retrieves the job object from the specified row, initializes
+     * a graph with the job's speed data, and displays it in a separate window.
+     *
+     * @param row   The TableRow corresponding to the selected job.
+     * @param table The TableView containing job entries.
+     */
     private void onActionDrawJobSpeed(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
         Charter charter = new Charter();
-        String yAxisLabel = "Speed " + Settings.getConversion();
+        String yAxisLabel = "Speed " + "(Kibibytes per second)";
         charter.drawGraph("Job Speed", "Time in (ms)", yAxisLabel, new Charter.ChartData("Job speed",job.getSeries()));
         charter.openWindow();
     }
+
 
     private void onActionDrawJobFreq(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
@@ -167,14 +233,12 @@ public class PrimaryController implements Initializable {
         anova.openWindow();
     }
 
-
     private void onActionCalcCV(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
         CoV cov = new CoV(job, settings);
         cov.calculate();
         cov.openWindow();
     }
-
 
     private void onActionCalcTTest(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
@@ -185,11 +249,10 @@ public class PrimaryController implements Initializable {
 
     private void onActionCalcMannWhitneyTest(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
-        MannWhitney uTest = new MannWhitney(job, settings);
+        WilcoxonSignTest uTest = new WilcoxonSignTest(job, settings);
         uTest.calculate();
         uTest.openWindow();
     }
-
 
     private void onActionCalcTukeyHSD(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
@@ -201,12 +264,14 @@ public class PrimaryController implements Initializable {
     }
 
 
+    /**
+     * Opens a log file and sets up job items in the application's data structure.
+     */
     @FXML
     private void openLogfile() {
         labelLoadInfo.setText("trying to open files...");
         setupJobItems();
     }
-
 
     @FXML
     private void onActionRefreshTable() {
@@ -215,6 +280,24 @@ public class PrimaryController implements Initializable {
     }
 
 
+    /**
+     * Handles the save-all action for evaluations in the application.
+     *
+     * This method triggers when the user initiates a "Save All Evaluations" action.
+     * It opens a directory chooser to allow the user to select a target directory,
+     * then iterates through all jobs listed in the table. For each job, it creates
+     * a new instance of SteadyStateEval, configures it with the selected directory,
+     * and saves the evaluation data.
+     *
+     * The method performs the following:
+     * 1. Opens a directory chooser to select a directory for saving evaluations.
+     * 2. If a valid directory is selected:
+     *    - Iterates through all items in the table.
+     *    - Creates a SteadyStateEval object for each job with the current settings.
+     *    - Sets the save path for the SteadyStateEval object.
+     *    - Saves the evaluation data to the specified directory.
+     *
+     */
     @FXML
     private void onActionSaveAllEval() {
        File path = openDirectoryChooser();
@@ -228,6 +311,9 @@ public class PrimaryController implements Initializable {
         }
     }
 
+    /**
+     *  Öffnet ein Fenster
+     */
     @FXML
     private void onActionCalcualteSteadyState() {
         if(this.job != null && this.settings != null) {
@@ -250,19 +336,20 @@ public class PrimaryController implements Initializable {
         settings.openWindow();
     }
 
-    @FXML
-    private void onActionKey(KeyEvent e) {
-        if (e.getCode() == KeyCode.DELETE) {
-            int pos = table.getSelectionModel().getSelectedIndex();
-            Job removedJob = table.getItems().remove(pos);
-            Logging.log(Level.INFO, "Primary Controller",String.format("Removed Job -> %s", removedJob.toString()));
-        }
-    }
-
+    /**
+     * Retrieves the owner window associated with the steady-state evaluation button.
+     *
+     * @return the owner window of the steady-state evaluation button's scene
+     */
     public Window getOwner(){
         return steadyStateEvalButton.getScene().getWindow();
     }
 
+    /**
+     * Opens a directory chooser dialog that allows the user to select a directory.
+     *
+     * @return the selected directory as a File object, or null if no directory was selected.
+     */
     public File openDirectoryChooser(){
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Choose a directory");

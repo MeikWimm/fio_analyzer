@@ -29,7 +29,16 @@ public class SteadyStateEval implements Initializable {
     @FXML private TableView<TestEval> evalTable;
     @FXML private TableColumn<TestEval, String> testColumn;
     @FXML private TableColumn<TestEval, String> timeColumn;
-    //@FXML private TableColumn<TestEval, Integer> skippedRunColumn;
+
+    @FXML private Label averageSpeedBeforeSkipLabel;
+    @FXML private Label averageSpeedAfterSkipLabel;
+
+    @FXML private Label CVBeforeSkipLabel;
+    @FXML private Label CVAfterSkipLabel;
+
+    @FXML private Label sectionsSkippedLabel;
+
+
     @FXML Button saveEvalButton;
     private final Job job;
     private File path;
@@ -52,7 +61,7 @@ public class SteadyStateEval implements Initializable {
         anova.setPostHocTest(tukey);
         tests[0] = anova;
         tests[1] = new ConInt(job, settings);
-        tests[2] = new MannWhitney(job, settings);
+        tests[2] = new WilcoxonSignTest(job, settings);
         tests[3] = new AtoolTTest(job, settings);
         tests[4] = new CoV(job, settings);
         testEvals = new ArrayList<>();
@@ -100,6 +109,13 @@ public class SteadyStateEval implements Initializable {
 
     private void setLabeling() {
         labelHeader.setText("Job Evaluation | Job alpha: " + this.job.getAlpha() + " | Required accepted sections for steady state: " + settings.getRequiredRunsForSteadyState() + " seconds");
+        averageSpeedBeforeSkipLabel.setText(String.format("%.2f %s", (this.job.getAverageSpeed()), Settings.getConversion()));
+        averageSpeedAfterSkipLabel.setText(String.format("%.2f %s", (this.job.getAverageSpeedAfterSkip()), Settings.getConversion()));
+
+        CVBeforeSkipLabel.setText(String.format("%.2f", (this.job.getCVBeforeSkip() * 100.0)));
+        CVAfterSkipLabel.setText(String.format("%.2f", (this.job.getCVAfterSkip() * 100.0)));
+
+        sectionsSkippedLabel.setText(this.job.getSkipSeconds() + "");
     }
 
     public void setOwner(Window owner){

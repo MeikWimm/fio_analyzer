@@ -30,11 +30,6 @@ public class Anova extends GenericTest implements Initializable {
     private final List<XYChart.Data<Number, Number>> anovaData;
     @FXML private Label jobLabel;
     @FXML private Label averageSpeedLabel;
-    @FXML private Label sseLabel;
-    @FXML private Label ssaLabel;
-    @FXML private Label sstLabel;
-    @FXML private Label ssaSstLabel;
-    @FXML private Label sseSstLabel;
     @FXML private Label fCriticalLabel;
     @FXML private Label fCalculatedLabel;
     @FXML private Button showFGraphButton;
@@ -92,11 +87,6 @@ public class Anova extends GenericTest implements Initializable {
     private void updateLabeling(Section section) {
         String averageSpeedLabelText = String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, section.getAverageSpeed());
         averageSpeedLabel.setText(String.format(Locale.ENGLISH, "%s %s", averageSpeedLabelText, Settings.getConversion()));
-        sseLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, section.getSSE()));
-        ssaLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, section.getSSA()));
-        sstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, section.getSST()));
-        ssaSstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, (section.getSSA() / section.getSST())));
-        sseSstLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, (section.getSSE() / section.getSST())));
         fCalculatedLabel.setText(String.format(Locale.ENGLISH, Settings.DIGIT_FORMAT, section.getF()));
         if(this.getSteadyStateRun() == null){
             steadyStateLabel.setText("No steady state run found.");
@@ -151,9 +141,9 @@ public class Anova extends GenericTest implements Initializable {
             }
 
             Section section = group.getFirst();
-            double s_2_a = section.getSSA() / (groups.size() - 1);
-            double s_2_e = section.getSSE() / (groups.size() * (section.getData().size() - 1));
-            fValue = s_2_a / s_2_e;
+            double MST = section.getSSA() / (groups.size() - 1);
+            double MSR = section.getSSE() / (groups.size() * (section.getData().size() - 1));
+            fValue = MST / MSR;
             section.setF(fValue);
             section.setSSE(totalSSE);
             section.setMSE(totalSSE / denom);
