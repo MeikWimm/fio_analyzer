@@ -6,6 +6,7 @@ package de.unileipzig.atool;
 
 
 /**
+ * Ein DatenPoint repräsentiert eine/n Messwert/Zeile aus einem Log
  * @author meni1999
  */
 public class DataPoint {

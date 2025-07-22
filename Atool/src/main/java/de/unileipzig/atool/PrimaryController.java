@@ -66,15 +66,6 @@ public class PrimaryController implements Initializable {
     }
 
 
-    /**
-     * Konfiguriert und lädt Job-Einträge in die zugehörige Tabelle, wenn eine Datei erfolgreich geladen wurde.
-     *
-     * Diese Methode arbeitet mit dem inputModule zusammen, um dem Benutzer die Auswahl eines Verzeichnisses
-     * über einen Verzeichnis-Dialog zu ermöglichen. Anschließend wird versucht, eine Datei aus dem ausgewählten
-     * Verzeichnis zu laden. Wenn die Datei erfolgreich geladen wurde, werden die Job-Einträge in die Tabelle
-     * übernommen. Zusätzlich wird ein Label aktualisiert, um den Status des Datei-Ladevorgangs anzuzeigen.
-     */
-
     private void setupJobItems() {
         inputModule.openDirectoryChooser(getOwner());
         InputModule.STATUS state = inputModule.loadFile();
@@ -85,19 +76,6 @@ public class PrimaryController implements Initializable {
 
         labelLoadInfo.setText(inputModule.getInfo(state));
     }
-
-
-    /**
-     * Aktualisiert die Daten und visuellen Elemente der Job-Tabelle basierend auf den aktuellen
-     * Anwendungseinstellungen.
-     *
-     * Diese Methode durchläuft alle Jobs in der Tabelle, um jobbezogene Eigenschaften wie
-     * Durchschnittsgeschwindigkeit, Anforderungen an den stationären Zustand und Überspring-Sekunden
-     * anhand der aktuellen Einstellungen neu zu berechnen und zu aktualisieren. Nach der Aktualisierung
-     * der Job-Daten wird die Benutzeroberfläche der Tabelle durch Umschalten der Sichtbarkeit der
-     * ersten Spalte aktualisiert. Zusätzlich wird das Label der Geschwindigkeits-Spalte angepasst,
-     * um die aktuelle Umrechnungseinstellung widerzuspiegeln.
-     */
 
     public void update() {
         for (Job job : table.getItems()) {
@@ -112,10 +90,6 @@ public class PrimaryController implements Initializable {
         table.getColumns().getFirst().setVisible(true);
     }
 
-    /**
-     * Configures the cell value factories for various table columns in the application.
-     * Each column's cell value factory is set to retrieve a specific property from the associated data model.
-     */
     private void setupCellValueFactory() {
         IDColumn.setCellValueFactory(new PropertyValueFactory<>("ID"));
         fileNameColumn.setCellValueFactory(new PropertyValueFactory<>("FileName"));
@@ -130,9 +104,6 @@ public class PrimaryController implements Initializable {
         alphaColumn.setCellValueFactory(cell -> cell.getValue().alphaProperty().asObject());
     }
 
-    /**
-     *
-     */
     private void setupColumnTextField() {
         alphaColumn.setCellFactory(ComboBoxTableCell.forTableColumn(
                 FXCollections.observableArrayList(0.01, 0.05, 0.1)
@@ -153,24 +124,6 @@ public class PrimaryController implements Initializable {
         });
     }
 
-    /**
-     * Sets up the context menu items for each table row in the table.
-     * This method initializes a custom row factory and attaches various
-     * menu items to it, each linked to a specific row action.
-     *
-     * Menu items include:
-     * - "Draw Job Speed" to invoke the corresponding action for drawing job speed.
-     * - "Draw Job Frequency" to invoke the action for drawing job frequency.
-     * - "Confidence Interval" to calculate a confidence interval.
-     * - "Anova" to perform analysis of variance.
-     * - "CV" to calculate the coefficient of variation.
-     * - "T-Test" to perform a T-test comparison.
-     * - "U-Test" to execute a Mann-Whitney U-test.
-     * - "Tukey-HSD" to calculate Tukey's HSD (Honest Significant Difference).
-     *
-     * The custom row factory, after configuration, is assigned to the
-     * table's row factory to enable context menu functionality for each row.
-     */
     private void setupTableMenuItems() {
         Utils.CustomTableRowFactory menuItems = new Utils.CustomTableRowFactory();
         menuItems.addMenuItem("Draw Job Speed", this::onActionDrawJobSpeed);
@@ -186,23 +139,12 @@ public class PrimaryController implements Initializable {
     }
 
 
-    /**
-     *
-     */
     private void setupTableCellCommit() {
         cvColumn.setOnEditCommit((TableColumn.CellEditEvent<Job, Double> t) -> {
             t.getRowValue().setCvThreshold(t.getNewValue());
         });
     }
 
-    /**
-     * Handles the action to draw a speed graph for a given job in a table row.
-     * This method retrieves the job object from the specified row, initializes
-     * a graph with the job's speed data, and displays it in a separate window.
-     *
-     * @param row   The TableRow corresponding to the selected job.
-     * @param table The TableView containing job entries.
-     */
     private void onActionDrawJobSpeed(TableRow<Job> row, TableView<Job> table) {
         Job job = row.getItem();
         Charter charter = new Charter();
@@ -264,9 +206,6 @@ public class PrimaryController implements Initializable {
     }
 
 
-    /**
-     * Opens a log file and sets up job items in the application's data structure.
-     */
     @FXML
     private void openLogfile() {
         labelLoadInfo.setText("trying to open files...");
@@ -280,26 +219,12 @@ public class PrimaryController implements Initializable {
     }
 
 
-    /**
-     * Handles the save-all action for evaluations in the application.
-     *
-     * This method triggers when the user initiates a "Save All Evaluations" action.
-     * It opens a directory chooser to allow the user to select a target directory,
-     * then iterates through all jobs listed in the table. For each job, it creates
-     * a new instance of SteadyStateEval, configures it with the selected directory,
-     * and saves the evaluation data.
-     *
-     * The method performs the following:
-     * 1. Opens a directory chooser to select a directory for saving evaluations.
-     * 2. If a valid directory is selected:
-     *    - Iterates through all items in the table.
-     *    - Creates a SteadyStateEval object for each job with the current settings.
-     *    - Sets the save path for the SteadyStateEval object.
-     *    - Saves the evaluation data to the specified directory.
-     *
-     */
     @FXML
     private void onActionSaveAllEval() {
+        if(table.getItems().isEmpty()) {
+            labelLoadInfo.setText("No jobs in table.");
+            return;
+        }
        File path = openDirectoryChooser();
 
         if(path != null) {
@@ -310,10 +235,6 @@ public class PrimaryController implements Initializable {
             }
         }
     }
-
-    /**
-     *  Öffnet ein Fenster
-     */
     @FXML
     private void onActionCalcualteSteadyState() {
         if(this.job != null && this.settings != null) {
@@ -336,20 +257,24 @@ public class PrimaryController implements Initializable {
         settings.openWindow();
     }
 
-    /**
-     * Retrieves the owner window associated with the steady-state evaluation button.
-     *
-     * @return the owner window of the steady-state evaluation button's scene
-     */
+    @FXML
+    private void onActionKey(KeyEvent e) {
+        if (e.getCode() == KeyCode.DELETE) {
+            int pos = table.getSelectionModel().getSelectedIndex();
+            Job removedJob = table.getItems().remove(pos);
+            Logging.log(Level.INFO, "Primary Controller",String.format("Removed Job -> %s", removedJob.toString()));
+        }
+
+        // Wird genutzt, damit der vorherige selektierte Job noch im Primary Controller ist, obwohl er schon gelöscht wurde
+        if(!table.getItems().isEmpty()){
+            this.job = table.getItems().getFirst();
+        }
+    }
+
     public Window getOwner(){
         return steadyStateEvalButton.getScene().getWindow();
     }
 
-    /**
-     * Opens a directory chooser dialog that allows the user to select a directory.
-     *
-     * @return the selected directory as a File object, or null if no directory was selected.
-     */
     public File openDirectoryChooser(){
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Choose a directory");

@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1080.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.unileipzig.atool.PrimaryController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1080.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.unileipzig.atool.PrimaryController">
    <top>
       <MenuBar fx:id="menuBar" prefHeight="22.0" prefWidth="751.0" BorderPane.alignment="CENTER">
         <menus>
@@ -34,7 +34,7 @@
       <VBox prefHeight="200.0" prefWidth="744.0" BorderPane.alignment="CENTER">
          <children>
             <Label id="labelLoadInfo" fx:id="labelLoadInfo" text="Choose a Dirctory to load the logs." />
-            <TableView id="table" fx:id="table" editable="true" prefHeight="550.0" prefWidth="1080.0">
+            <TableView id="table" fx:id="table" editable="true" onKeyReleased="#onActionKey" prefHeight="550.0" prefWidth="1080.0">
               <columns>
                   <TableColumn id="IDColumn" fx:id="IDColumn" prefWidth="35.00000190734863" text="ID" />
                 <TableColumn id="fileNameColumn" fx:id="fileNameColumn" prefWidth="181.99996185302734" sortable="false" text="File" />

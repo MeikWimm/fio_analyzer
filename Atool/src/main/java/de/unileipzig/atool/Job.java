@@ -19,7 +19,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 /**
- * Log files of fio are here represented as Jobs.
+ * Job-Klasse repräsentiert ein fio-Job
  *
  * @author meni1999
  */

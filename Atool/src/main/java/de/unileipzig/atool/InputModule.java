@@ -24,11 +24,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 
-/**
- * A Class for loading a reading the log file of fio Jobs
- *
- * @author meni1999
- */
+
 public class
 InputModule {
     public static final int MIN_POSSIBLE_DATA_SIZE = 2000;
@@ -53,10 +49,7 @@ InputModule {
         SELECTED_DIRECTORY = directoryChooser.showDialog(ownerWindow);
     }
 
-    /**
-     * DirectoryChooser gets all log files from a choosen directory.
-     *
-     */
+
     public STATUS loadFile() {
         Logging.log(Level.INFO, className, "Loading input module...");
         STATUS state;
@@ -101,12 +94,6 @@ InputModule {
         return state;
     }
 
-    /**
-     * Reads all files listed in directoryChooser with the extension type ".log".
-     * If a specific file is already loaded, it'll be ignored.
-     *
-     * @return NO_DIR_SET, if directory of this object is not set. BUFFER On success it return SUCCESS.
-     */
     public STATUS readFiles(File[] files) {
         boolean foundNewFile = false;
         for (File file : files) {

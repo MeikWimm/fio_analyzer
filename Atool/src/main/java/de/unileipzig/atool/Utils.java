@@ -17,6 +17,7 @@ import java.util.function.BiConsumer;
 import java.util.logging.*;
 
 /**
+ * Helferklasse für Tabellen und Charter-Klasse
  * @author meni1999
  */
 public abstract class Utils {

@@ -108,7 +108,7 @@ public class SteadyStateEval implements Initializable {
     }
 
     private void setLabeling() {
-        labelHeader.setText("Job Evaluation | Job alpha: " + this.job.getAlpha() + " | Required accepted sections for steady state: " + settings.getRequiredRunsForSteadyState() + " seconds");
+        labelHeader.setText("Job: " + this.job.getFileName() +  "| Job alpha: " + this.job.getAlpha() + " | Required accepted sections for steady state: " + settings.getRequiredRunsForSteadyState() + " seconds");
         averageSpeedBeforeSkipLabel.setText(String.format("%.2f %s", (this.job.getAverageSpeed()), Settings.getConversion()));
         averageSpeedAfterSkipLabel.setText(String.format("%.2f %s", (this.job.getAverageSpeedAfterSkip()), Settings.getConversion()));
 

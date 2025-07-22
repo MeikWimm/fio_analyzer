@@ -95,6 +95,7 @@ public class Settings implements Initializable {
                 ));
 
         buttonSaveSettings.setOnAction(this::onActionSaveSettings);
+
         initSettings();
     }
 
@@ -146,7 +147,7 @@ public class Settings implements Initializable {
             Stage stage = new Stage();
             stage.setTitle("Settings");
             stage.setScene(new Scene(root1));
-            stage.setResizable(true);
+            stage.setResizable(false);
             stage.show();
         } catch (IOException e) {
             Logging.log(Level.SEVERE, "Settings", "Coudn't open Settings Window! App state");
