@@ -73,7 +73,7 @@ Diese Dokumentation beschreibt die verfügbaren Einstellungen und deren Bedeutun
 ## Run-Einstellungen
 
 ### Skip Sections sections
-- **Beschreibung**: Wie viele Sekunden des Starts sollen ignoriert werden. Ein Skip entspricht sind 1000 Messwerte aus dem Log (geschätzt 1 Sekunde).
+- **Beschreibung**: Wie viele Sekunden des Starts sollen ignoriert werden. Ein Skip entspricht 1000 Messwerte aus dem fio-Log (geschätzt 1 Sekunde).
 - **Standardwert**: 0 Sektionen.
 
 ---
