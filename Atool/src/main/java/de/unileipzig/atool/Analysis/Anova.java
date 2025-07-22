@@ -23,6 +23,7 @@ import java.net.URL;
 import java.util.*;
 
 /**
+ * Anova mit F-Test
  * @author meni1999
  */
 public class Anova extends GenericTest implements Initializable {

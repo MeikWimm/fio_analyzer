@@ -17,6 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
+/**
+ * Coefficient of Variance  (CoV)
+ * oder Variationskoeffizient
+ */
 public class CoV extends GenericTest implements Initializable {
     private final List<XYChart.Data<Number, Number>> covData;
     private final double STEADY_STATE_COV_THRESHOLD;

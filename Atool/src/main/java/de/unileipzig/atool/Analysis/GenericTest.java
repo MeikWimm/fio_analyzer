@@ -15,6 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+/**
+ * Abstrakte Klasse zum Aufbau der Gruppen aus Sektionen und für die
+ * Ermittlung des stationären Zustands.
+ */
 public abstract class GenericTest {
     public static final byte ACCEPTED = 1;
     public static final byte REJECTED = 0;

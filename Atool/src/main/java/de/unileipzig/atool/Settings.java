@@ -33,7 +33,7 @@ public class Settings implements Initializable {
 
     public static final int MAX_REQUIRED_SECONDS_FOR_STEADY_STATE = 60;
     public static final int MIN_REQUIRED_SECONDS_FOR_STEADY_STATE = 1;
-    public static final int DEFAULT_REQUIRED_SECONDS_FOR_STEADY_STATE = 30;
+    public static final int DEFAULT_REQUIRED_SECONDS_FOR_STEADY_STATE = 1;
 
     private int requiredRunsForSteadyState = DEFAULT_REQUIRED_SECONDS_FOR_STEADY_STATE;
 
