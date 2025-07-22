@@ -66,15 +66,15 @@ Diese Dokumentation beschreibt die verfügbaren Einstellungen und deren Bedeutun
   - **KibiByte**
   - **KiloByte**
 - **Standardwert**: KibiByte.
-- **Schieberegler Window Size**: Werte von 10 bis 30 Sekunden für die Fenstergröße.
+- **Schieberegler Window Size**: Werte von 10 (10000 Messwerte) bis 60 Sekunden (60000 Messwerte) für die Fenstergröße.
 
 ---
 
 ## Run-Einstellungen
 
 ### Skip Sections sections
-- **Beschreibung**: Wie viele Sekunden des start sollen ignoriert werden. Eine Sektion entspricht einer Sekunde der Daten.
-- **Standardwert**: 0 Sekunden.
+- **Beschreibung**: Wie viele Sekunden des Starts sollen ignoriert werden. Eine Skip entspricht sind 1000 Messwerte aus dem Log (geschätzt 1 Sekunde).
+- **Standardwert**: 0 Sektionen.
 
 ---
 ### Required time for steady state
